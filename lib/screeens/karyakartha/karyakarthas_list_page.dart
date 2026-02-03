@@ -1,152 +1,158 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
+import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/NoDataFound.dart';
+import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/list_view.dart';
+import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
-class KaryakarthasListPage extends StatelessWidget {
+class KaryakarthasListPage extends StatefulWidget {
   const KaryakarthasListPage({super.key});
 
   @override
+  State<KaryakarthasListPage> createState() => _KaryakarthasListPageState();
+}
+
+class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    context.read<KaryakarthaBloc>().add(FetchKaryakattasEvent());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    // Wrap the whole page in the Layout widget
     return Layout(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            /// ================= HEADER =================
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Karyakarthas",
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Navigate to Add Karyakartha page
-                    // Get.toNamed('/karyakarthas/add');
-                  },
-                  icon: const Icon(Icons.add),
-                  label: const Text("Add Karyakartha"),
-                )
-              ],
-            ),
-            const SizedBox(height: 16),
+        child: BlocBuilder<KaryakarthaBloc, KaryakarthaState?>(
+          builder: (context, state) {
+            switch (state?.status) {
+              case KaryakattaApiStatus.loading:
+                return ScreenLoader();
+              case KaryakattaApiStatus.error:
+                return Center(
+                  child: ErrorCard(message: state?.errorMessage ?? ""),
+                );
+              case KaryakattaApiStatus.loaded:
+                return Row(
+                  children: [
+                    Expanded(
+                      flex: 6,
+                      child: Card(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Column(
+                          children: [
+                            CommonList(
+                              users: state?.karyakarthas ?? [],
+                              onUserTap: (id) {
+                                context.read<KaryakarthaBloc>().add(
+                                  FetchKaryakarthaProfileEvent(id),
+                                );
+                              },
+                              onDelete: (id) {},
+                              onUpdate: (id) {},
+                            ),
+                            const SizedBox(height: 16),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 50),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.skip_previous_outlined),
+                                  ),
+                                  Text("1/10"),
+                                  IconButton(
+                                    onPressed: () {},
+                                    icon: Icon(Icons.skip_next_outlined),
+                                  ),
+                                  SizedBox(height: 16),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (state?.isProfileViewVisible == true &&
+                        state?.profileLoading != null)
+                      Expanded(
+                        flex: 3, // 30%
+                        child: AnimatedSwitcher(
+                          duration: const Duration(seconds: 1),
+                          switchInCurve: Curves.easeOutCubic,
+                          switchOutCurve: Curves.easeInCubic,
 
-            /// ================= TABLE CARD =================
-            SizedBox(
-              height: MediaQuery.of(context).size.height - 220,
-              child: Card(
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: _buildTable(),
-                ),
-              ),
-            ),
-          ],
+                          layoutBuilder: (currentChild, previousChildren) {
+                            return Stack(
+                              alignment: Alignment.center,
+                              children: <Widget>[
+                                ...previousChildren,
+                                if (currentChild != null) currentChild,
+                              ],
+                            );
+                          },
+
+                          transitionBuilder: (child, animation) {
+                            final slideAnimation = Tween<Offset>(
+                              begin: const Offset(
+                                0.05,
+                                0,
+                              ), // slight slide from right
+                              end: Offset.zero,
+                            ).animate(animation);
+
+                            final fadeAnimation = Tween<double>(
+                              begin: 0.0,
+                              end: 1.0,
+                            ).animate(animation);
+
+                            return FadeTransition(
+                              opacity: fadeAnimation,
+                              child: SlideTransition(
+                                position: slideAnimation,
+                                child: child,
+                              ),
+                            );
+                          },
+
+                          child: state?.profileLoading ?? false
+                              ? ScreenLoader(key: ValueKey('loader'))
+                              : state?.profileErrorMsg != null
+                              ? ErrorCard(
+                                  key: ValueKey('error'),
+                                  message: state?.profileErrorMsg ?? "",
+                                )
+                              : ListViewScreen(
+                                  key: ValueKey('profile'),
+                                  user: state?.karyakarthaProfile,
+                                  onClose: () {
+                                    context.read<KaryakarthaBloc>().add(
+                                      CloseProfileView(),
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
+                  ],
+                );
+              default:
+                return ScreenLoader();
+            }
+          },
+          // child:
         ),
       ),
-    );
-  }
-
-  /// ================= DATA TABLE =================
-  Widget _buildTable() {
-    return Scrollbar(
-      thumbVisibility: true,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: DataTable(
-            headingRowHeight: 48,
-            dataRowHeight: 56,
-            headingRowColor: MaterialStateProperty.all(Colors.grey.shade200),
-            columnSpacing: 48,
-            columns: const [
-              DataColumn(label: Text('K.ID')),
-              DataColumn(label: Text('Name')),
-              DataColumn(label: Text('Mobile')),
-              DataColumn(label: Text('Status')),
-              DataColumn(label: Text('Actions')),
-            ],
-            rows: List.generate(10, (index) {
-              return DataRow(
-                cells: [
-                  DataCell(Text('K-${index + 1}')),
-                  const DataCell(Text('Ravi Kumar')),
-                  const DataCell(Text('9876543210')),
-
-                  /// STATUS
-                  DataCell(
-                    Switch(
-                      value: index % 2 == 0,
-                      onChanged: (value) {
-                        // TODO: call status update API
-                      },
-                    ),
-                  ),
-
-                  /// ACTIONS
-                  DataCell(
-                    Row(
-                      children: [
-                        IconButton(
-                          tooltip: 'View',
-                          icon: const Icon(Icons.visibility),
-                          onPressed: () {
-                             Get.toNamed('/karyakarthas/view', arguments: index);
-                          },
-                        ),
-                        IconButton(
-                          tooltip: 'Edit',
-                          icon: const Icon(
-                            Icons.edit,
-                            color: Colors.orange,
-                          ),
-                          onPressed: () {
-                            // Get.toNamed('/karyakarthas/edit', arguments: index);
-                          },
-                        ),
-                        IconButton(
-                          tooltip: 'Delete',
-                          icon: const Icon(
-                            Icons.delete,
-                            color: Colors.red,
-                          ),
-                          onPressed: _confirmDelete,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              );
-            }),
-          ),
-        ),
-      ),
-    );
-  }
-
-  /// ================= DELETE CONFIRM =================
-  void _confirmDelete() {
-    Get.defaultDialog(
-      title: "Delete Karyakartha",
-      middleText: "Are you sure you want to delete this karyakartha?",
-      textConfirm: "Delete",
-      textCancel: "Cancel",
-      confirmTextColor: Colors.white,
-      onConfirm: () {
-        Get.back();
-        // TODO: call delete API
-      },
     );
   }
 }

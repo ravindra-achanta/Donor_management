@@ -4,7 +4,7 @@ import 'package:get/route_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:vikas_app/themes/theme_customizer.dart';
-import 'package:vikas_app/apiServices/url_service.dart';
+import 'package:vikas_app/api_services/url_service.dart';
 import 'package:vikas_app/utils/mixins/ui_mixins.dart';
 import 'package:vikas_app/widgets/custom_pop_menu.dart';
 
@@ -72,28 +72,27 @@ class _LeftBarState extends State<LeftBar>
                     onTap: () {
                       Get.toNamed('/dashboard');
                     },
-                    child:
-                        widget.isCondensed
-                            ? Container(
-                              height: 40,
-                              width: 40,
-                              decoration: BoxDecoration(
-                                color: Colors.white, // dummy color for logo box
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.dashboard, // dummy icon
-                                color: Colors.white,
-                                size: 24,
-                              ),
-                            )
-                            : Image.asset(
-                              // "assets/images/icons/VyavasthaLogo.png",
-                              "images/icons/vidyaaranayam_logo.png", // full logo
-
-                              height: 100,
-                              fit: BoxFit.contain,
+                    child: widget.isCondensed
+                        ? Container(
+                            height: 40,
+                            width: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white, // dummy color for logo box
+                              borderRadius: BorderRadius.circular(8),
                             ),
+                            child: const Icon(
+                              Icons.dashboard, // dummy icon
+                              color: Colors.white,
+                              size: 24,
+                            ),
+                          )
+                        : Image.asset(
+                            // "assets/images/icons/VyavasthaLogo.png",
+                            "assets/vidyaaranayam_logo.png", // full logo
+
+                            height: 100,
+                            fit: BoxFit.contain,
+                          ),
                   ),
                   // InkWell(
                   //   onTap: () {
@@ -257,16 +256,16 @@ class _LeftBarState extends State<LeftBar>
     return isCondensed
         ? FxSpacing.empty()
         : Container(
-          padding: FxSpacing.xy(24, 8),
-          child: FxText.labelSmall(
-            label.toUpperCase(),
-            color: leftBarTheme.labelColor,
-            muted: true,
-            maxLines: 1,
-            overflow: TextOverflow.clip,
-            fontWeight: 700,
-          ),
-        );
+            padding: FxSpacing.xy(24, 8),
+            child: FxText.labelSmall(
+              label.toUpperCase(),
+              color: leftBarTheme.labelColor,
+              muted: true,
+              maxLines: 1,
+              overflow: TextOverflow.clip,
+              fontWeight: 700,
+            ),
+          );
   }
 }
 
@@ -375,33 +374,30 @@ class _MenuWidgetState extends State<MenuWidget>
           },
           child: FxContainer.transparent(
             margin: FxSpacing.fromLTRB(16, 0, 16, 8),
-            color:
-                isActive || isHover
-                    ? leftBarTheme.activeItemBackground
-                    : Colors.transparent,
+            color: isActive || isHover
+                ? leftBarTheme.activeItemBackground
+                : Colors.transparent,
             padding: FxSpacing.xy(8, 8),
             child: Center(
               child: Icon(
                 widget.iconData,
-                color:
-                    (isHover || isActive)
-                        ? leftBarTheme.activeItemColor
-                        : leftBarTheme.onBackground,
+                color: (isHover || isActive)
+                    ? leftBarTheme.activeItemColor
+                    : leftBarTheme.onBackground,
                 size: 20,
               ),
             ),
           ),
         ),
-        menuBuilder:
-            (_) => FxContainer.bordered(
-              paddingAll: 8,
-              width: 190,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                mainAxisSize: MainAxisSize.min,
-                children: widget.children,
-              ),
-            ),
+        menuBuilder: (_) => FxContainer.bordered(
+          paddingAll: 8,
+          width: 190,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: widget.children,
+          ),
+        ),
       );
     } else {
       return MouseRegion(
@@ -453,10 +449,9 @@ class _MenuWidgetState extends State<MenuWidget>
                   Icon(
                     widget.iconData,
                     size: 20,
-                    color:
-                        isHover || isActive
-                            ? leftBarTheme.activeItemColor
-                            : leftBarTheme.onBackground,
+                    color: isHover || isActive
+                        ? leftBarTheme.activeItemColor
+                        : leftBarTheme.onBackground,
                   ),
                   FxSpacing.width(18),
                   Expanded(
@@ -465,10 +460,9 @@ class _MenuWidgetState extends State<MenuWidget>
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       textAlign: TextAlign.start,
-                      color:
-                          isHover || isActive
-                              ? leftBarTheme.activeItemColor
-                              : leftBarTheme.onBackground,
+                      color: isHover || isActive
+                          ? leftBarTheme.activeItemColor
+                          : leftBarTheme.onBackground,
                     ),
                   ),
                 ],
@@ -541,10 +535,9 @@ class _MenuItemState extends State<MenuItem> with UIMixin {
         },
         child: FxContainer.transparent(
           margin: FxSpacing.fromLTRB(4, 0, 8, 4),
-          color:
-              isActive || isHover
-                  ? leftBarTheme.activeItemBackground
-                  : Colors.transparent,
+          color: isActive || isHover
+              ? leftBarTheme.activeItemBackground
+              : Colors.transparent,
           width: MediaQuery.of(context).size.width,
           padding: FxSpacing.xy(18, 7),
           child: FxText.bodySmall(
@@ -553,10 +546,9 @@ class _MenuItemState extends State<MenuItem> with UIMixin {
             maxLines: 1,
             textAlign: TextAlign.left,
             fontSize: 12.5,
-            color:
-                isActive || isHover
-                    ? leftBarTheme.activeItemColor
-                    : leftBarTheme.onBackground,
+            color: isActive || isHover
+                ? leftBarTheme.activeItemColor
+                : leftBarTheme.onBackground,
             fontWeight: isActive || isHover ? 600 : 500,
           ),
         ),
@@ -611,10 +603,9 @@ class _NavigationItemState extends State<NavigationItem> with UIMixin {
         },
         child: FxContainer.transparent(
           margin: FxSpacing.fromLTRB(16, 0, 16, 8),
-          color:
-              isActive || isHover
-                  ? leftBarTheme.activeItemBackground
-                  : Colors.transparent,
+          color: isActive || isHover
+              ? leftBarTheme.activeItemBackground
+              : Colors.transparent,
           padding: FxSpacing.xy(8, 8),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -623,10 +614,9 @@ class _NavigationItemState extends State<NavigationItem> with UIMixin {
                 Center(
                   child: Icon(
                     widget.iconData,
-                    color:
-                        (isHover || isActive)
-                            ? leftBarTheme.activeItemColor
-                            : leftBarTheme.onBackground,
+                    color: (isHover || isActive)
+                        ? leftBarTheme.activeItemColor
+                        : leftBarTheme.onBackground,
                     size: 20,
                   ),
                 ),
@@ -639,10 +629,9 @@ class _NavigationItemState extends State<NavigationItem> with UIMixin {
                     widget.title,
                     overflow: TextOverflow.clip,
                     maxLines: 1,
-                    color:
-                        isActive || isHover
-                            ? leftBarTheme.activeItemColor
-                            : leftBarTheme.onBackground,
+                    color: isActive || isHover
+                        ? leftBarTheme.activeItemColor
+                        : leftBarTheme.onBackground,
                   ),
                 ),
             ],

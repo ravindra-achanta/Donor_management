@@ -21,19 +21,23 @@ class Layout extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FxResponsive(builder: (BuildContext context, _, screenMT) {
-      return FxBuilder(
+    return FxResponsive(
+      builder: (BuildContext context, _, screenMT) {
+        return FxBuilder(
           controller: controller,
           builder: (controller) {
             return screenMT.isMobile ? mobileScreen() : largeScreen();
-          });
-    });
+          },
+        );
+      },
+    );
   }
 
   Widget mobileScreen() {
-    final topBarBackgroundColor = ThemeCustomizer.instance.theme == ThemeMode.dark
-      ? const Color(0xFF333333) 
-      : const Color(0xFFF0F0F0);
+    final topBarBackgroundColor =
+        ThemeCustomizer.instance.theme == ThemeMode.dark
+        ? const Color(0xFF333333)
+        : const Color(0xFFF0F0F0);
     return Scaffold(
       //key: controller.scaffoldKey,
       drawer: const LeftBar(),
@@ -45,15 +49,17 @@ class Layout extends StatelessWidget {
               elevation: 0,
               backgroundColor: topBarBackgroundColor,
               title: Padding(
-                padding:
-                    const EdgeInsets.only(top: 8.0, bottom: 8.0, right: 16.0),
+                padding: const EdgeInsets.only(
+                  top: 8.0,
+                  bottom: 8.0,
+                  right: 16.0,
+                ),
                 child: TextFormField(
                   //maxLines: 1,
                   style: FxTextStyle.bodyMedium(
                     color: ThemeCustomizer.instance.theme == ThemeMode.dark
                         ? const Color.fromARGB(213, 255, 255, 255)
-                        : const Color.fromARGB(
-                            117, 0, 0, 0), 
+                        : const Color.fromARGB(117, 0, 0, 0),
                   ),
                   decoration: InputDecoration(
                     hintText: "Search",
@@ -66,36 +72,37 @@ class Layout extends StatelessWidget {
                     border: OutlineInputBorder(
                       borderRadius: const BorderRadius.all(Radius.circular(4)),
                       borderSide: BorderSide(
-                          width: 1,
-                          strokeAlign: 0,
-                          color: colorScheme.onSurface.withAlpha(80)),
+                        width: 1,
+                        strokeAlign: 0,
+                        color: colorScheme.onSurface.withAlpha(80),
+                      ),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: const BorderRadius.all(Radius.circular(4)),
                       borderSide: BorderSide(
-                          width: 1,
-                          strokeAlign: 0,
-                          color: colorScheme.onSurface.withAlpha(80)),
+                        width: 1,
+                        strokeAlign: 0,
+                        color: colorScheme.onSurface.withAlpha(80),
+                      ),
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: const BorderRadius.all(Radius.circular(4)),
-                      borderSide:
-                          BorderSide(width: 1, color: colorScheme.primary),
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: colorScheme.primary,
+                      ),
                     ),
 
                     // Background color based on the current theme
                     filled: true,
                     fillColor: ThemeCustomizer.instance.theme == ThemeMode.dark
-                        ? const Color(0xFF333333) 
-                        : const Color(0xFFF0F0F0), 
+                        ? const Color(0xFF333333)
+                        : const Color(0xFFF0F0F0),
 
                     // Prefix icon for search field
                     prefixIcon: const Align(
                       alignment: Alignment.center,
-                      child: Icon(
-                        FeatherIcons.search,
-                        size: 12,
-                      ),
+                      child: Icon(FeatherIcons.search, size: 12),
                     ),
                     prefixIconConstraints: const BoxConstraints(
                       minWidth: 36,
@@ -110,9 +117,10 @@ class Layout extends StatelessWidget {
                 ),
               ),
               iconTheme: IconThemeData(
-                  color: ThemeCustomizer.instance.theme == ThemeMode.dark
-                      ? Colors.white
-                      : Colors.black),
+                color: ThemeCustomizer.instance.theme == ThemeMode.dark
+                    ? Colors.white
+                    : Colors.black,
+              ),
             ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -163,9 +171,10 @@ class Layout extends StatelessWidget {
                   InkWell(
                     onTap: () {
                       ThemeCustomizer.setTheme(
-                          ThemeCustomizer.instance.theme == ThemeMode.dark
-                              ? ThemeMode.light
-                              : ThemeMode.dark);
+                        ThemeCustomizer.instance.theme == ThemeMode.dark
+                            ? ThemeMode.light
+                            : ThemeMode.dark,
+                      );
                     },
                     child: Icon(
                       ThemeCustomizer.instance.theme == ThemeMode.dark
@@ -183,10 +192,7 @@ class Layout extends StatelessWidget {
                     menu: Padding(
                       padding: FxSpacing.xy(8, 8),
                       child: const Center(
-                        child: Icon(
-                          FeatherIcons.bell,
-                          size: 18,
-                        ),
+                        child: Icon(FeatherIcons.bell, size: 18),
                       ),
                     ),
                     menuBuilder: (_) => buildNotifications(),
@@ -200,26 +206,27 @@ class Layout extends StatelessWidget {
                     menu: Padding(
                       padding: FxSpacing.xy(8, 8),
                       child: FxContainer.rounded(
-                          paddingAll: 0,
-                          child: Image.asset(
-                            Images.avatars[0],
-                            height: 28,
-                            width: 28,
-                            fit: BoxFit.cover,
-                          )),
+                        paddingAll: 0,
+                        child: Image.asset(
+                          Images.avatars[0],
+                          height: 28,
+                          width: 28,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                     menuBuilder: (_) => buildAccountMenu(),
                   ),
-                  FxSpacing.width(20)
+                  FxSpacing.width(20),
                 ],
               ),
             ),
           ],
         ),
       ), // endDrawer: RightBar(),
+
       // extendBodyBehindAppBar: true,
       // appBar: TopBar(
-
       body: SingleChildScrollView(
         //key: controller.scrollKey,
         child: child,
@@ -235,23 +242,28 @@ class Layout extends StatelessWidget {
         children: [
           LeftBar(isCondensed: ThemeCustomizer.instance.leftBarCondensed),
           Expanded(
-              child: Stack(
-            children: [
-              Positioned(
-                top: 0,
-                right: 0,
-                left: 0,
-                bottom: 0,
-                child: SingleChildScrollView(
-                  padding:
-                      FxSpacing.fromLTRB(0, 58 + flexSpacing, 0, flexSpacing),
-                 // key: controller.scrollKey,
-                  child: child,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 0,
+                  right: 0,
+                  left: 0,
+                  bottom: 0,
+                  child: SingleChildScrollView(
+                    padding: FxSpacing.fromLTRB(
+                      0,
+                      58 + flexSpacing,
+                      0,
+                      flexSpacing,
+                    ),
+                    // key: controller.scrollKey,
+                    child: child,
+                  ),
                 ),
-              ),
-              const Positioned(top: 0, left: 0, right: 0, child: TopBar()),
-            ],
-          )),
+                const Positioned(top: 0, left: 0, right: 0, child: TopBar()),
+              ],
+            ),
+          ),
           // Expanded(
           //     child: Column(
           //   crossAxisAlignment: CrossAxisAlignment.start,
@@ -277,7 +289,7 @@ class Layout extends StatelessWidget {
         children: [
           FxText.labelLarge(title),
           FxSpacing.height(4),
-          FxText.bodySmall(description)
+          FxText.bodySmall(description),
         ],
       );
     }
@@ -293,22 +305,34 @@ class Layout extends StatelessWidget {
             child: FxText.titleMedium("Notification", fontWeight: 600),
           ),
           FxDashedDivider(
-              height: 1, color: theme.dividerColor, dashSpace: 4, dashWidth: 6),
+            height: 1,
+            color: theme.dividerColor,
+            dashSpace: 4,
+            dashWidth: 6,
+          ),
           Padding(
             padding: FxSpacing.xy(16, 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                buildNotification("Your order is received",
-                    "Order #1232 is ready to deliver"),
+                buildNotification(
+                  "Your order is received",
+                  "Order #1232 is ready to deliver",
+                ),
                 FxSpacing.height(12),
-                buildNotification("Account Security ",
-                    "Your account password changed 1 hour ago"),
+                buildNotification(
+                  "Account Security ",
+                  "Your account password changed 1 hour ago",
+                ),
               ],
             ),
           ),
           FxDashedDivider(
-              height: 1, color: theme.dividerColor, dashSpace: 4, dashWidth: 6),
+            height: 1,
+            color: theme.dividerColor,
+            dashSpace: 4,
+            dashWidth: 6,
+          ),
           Padding(
             padding: FxSpacing.xy(16, 0),
             child: Row(
@@ -325,14 +349,11 @@ class Layout extends StatelessWidget {
                 FxButton.text(
                   onPressed: () {},
                   splashColor: contentTheme.danger.withAlpha(28),
-                  child: FxText.labelSmall(
-                    "Clear",
-                    color: contentTheme.danger,
-                  ),
+                  child: FxText.labelSmall("Clear", color: contentTheme.danger),
                 ),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -365,10 +386,7 @@ class Layout extends StatelessWidget {
                         color: contentTheme.onBackground,
                       ),
                       FxSpacing.width(8),
-                      FxText.labelMedium(
-                        "My Account",
-                        fontWeight: 600,
-                      )
+                      FxText.labelMedium("My Account", fontWeight: 600),
                     ],
                   ),
                 ),
@@ -388,20 +406,14 @@ class Layout extends StatelessWidget {
                         color: contentTheme.onBackground,
                       ),
                       FxSpacing.width(8),
-                      FxText.labelMedium(
-                        "Settings",
-                        fontWeight: 600,
-                      )
+                      FxText.labelMedium("Settings", fontWeight: 600),
                     ],
                   ),
                 ),
               ],
             ),
           ),
-          const Divider(
-            height: 1,
-            thickness: 1,
-          ),
+          const Divider(height: 1, thickness: 1),
           Padding(
             padding: FxSpacing.xy(8, 8),
             child: FxButton(
@@ -423,11 +435,11 @@ class Layout extends StatelessWidget {
                     "Log out",
                     fontWeight: 600,
                     color: contentTheme.danger,
-                  )
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );

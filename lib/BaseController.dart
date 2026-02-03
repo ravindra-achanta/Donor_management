@@ -2,8 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:nb_utils/nb_utils.dart';
-import 'package:vikas_app/apiServices/local_storage/VikasDB.dart';
-
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 
 class BaseController {
   void showDialogue(BuildContext context) {
@@ -106,18 +105,10 @@ class BaseController {
     return Column(
       children: [
         //20.height,
-        const SizedBox(
-          height: 20,
-        ),
-        Image.asset(
-          'images/emp1.png',
-          width: 200,
-          height: 200,
-        ),
+        const SizedBox(height: 20),
+        Image.asset('images/emp1.png', width: 200, height: 200),
         //20.height,
-        const SizedBox(
-          height: 20,
-        ),
+        const SizedBox(height: 20),
 
         const Text(
           'No results found',

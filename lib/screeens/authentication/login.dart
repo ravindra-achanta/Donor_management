@@ -3,7 +3,6 @@ import 'package:flutx/flutx.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
-import 'package:vikas_app/apiServices/NetworkHandler.dart';
 import 'package:vikas_app/images.dart';
 import 'package:vikas_app/utils/mixins/ui_mixins.dart';
 import 'package:vikas_app/views/layouts/auth_layout.dart';
@@ -15,8 +14,7 @@ class LoginPage extends StatefulWidget {
   _LoginPageState createState() => _LoginPageState();
 }
 
-class _LoginPageState extends NetworkHandler
-    with SingleTickerProviderStateMixin, UIMixin {
+class _LoginPageState extends State<LoginPage> {
   // late LoginController controller;
 
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -64,17 +62,6 @@ class _LoginPageState extends NetworkHandler
   }
 
   @override
-  @override
-  void onFailure(int responseCode, response, String typeOfRequest) {
-    super.onFailure(responseCode, response, typeOfRequest);
-  }
-
-  @override
-  void onSuccess(response, String typeOfRequest) {
-    super.onSuccess(response, typeOfRequest);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return AuthLayout(
       child: Padding(
@@ -93,18 +80,18 @@ class _LoginPageState extends NetworkHandler
                           height: 500,
                         )
                       : type == FxScreenMediaType.xl
-                          ? Image.asset(
-                              Images.login[3],
-                              fit: BoxFit.cover,
-                              height: 500,
-                            )
-                          : type == FxScreenMediaType.lg
-                              ? Image.asset(
-                                  Images.login[3],
-                                  fit: BoxFit.cover,
-                                  height: 500,
-                                )
-                              : const SizedBox();
+                      ? Image.asset(
+                          Images.login[3],
+                          fit: BoxFit.cover,
+                          height: 500,
+                        )
+                      : type == FxScreenMediaType.lg
+                      ? Image.asset(
+                          Images.login[3],
+                          fit: BoxFit.cover,
+                          height: 500,
+                        )
+                      : const SizedBox();
                 },
               ),
             ),
@@ -132,9 +119,7 @@ class _LoginPageState extends NetworkHandler
                         ),
                       ),
                       FxSpacing.height(40),
-                      FxText.bodyMedium(
-                        "Email Id",
-                      ),
+                      FxText.bodyMedium("Email Id"),
                       FxSpacing.height(8),
                       TextFormField(
                         controller: emailController,
@@ -143,11 +128,8 @@ class _LoginPageState extends NetworkHandler
                         decoration: InputDecoration(
                           labelText: "Email Address",
                           labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                          border: outlineInputBorder,
-                          prefixIcon: const Icon(
-                            LucideIcons.mail,
-                            size: 20,
-                          ),
+                          // border: outlineInputBorder,
+                          prefixIcon: const Icon(LucideIcons.mail, size: 20),
                           contentPadding: FxSpacing.all(16),
                           isCollapsed: true,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
@@ -155,16 +137,13 @@ class _LoginPageState extends NetworkHandler
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
                           FormBuilderValidators.email(
-                              errorText: "Enter correct email format"),
+                            errorText: "Enter correct email format",
+                          ),
                         ]),
-                        onFieldSubmitted: (value) {
-                          
-                        },
+                        onFieldSubmitted: (value) {},
                       ),
                       FxSpacing.height(16),
-                      FxText.labelMedium(
-                        "password",
-                      ),
+                      FxText.labelMedium("password"),
                       FxSpacing.height(8),
                       TextFormField(
                         controller: passwordController,
@@ -179,11 +158,8 @@ class _LoginPageState extends NetworkHandler
                         decoration: InputDecoration(
                           labelText: "Password",
                           labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                          border: outlineInputBorder,
-                          prefixIcon: const Icon(
-                            LucideIcons.lock,
-                            size: 20,
-                          ),
+                          // border: outlineInputBorder,
+                          prefixIcon: const Icon(LucideIcons.lock, size: 20),
                           suffixIcon: InkWell(
                             onTap: () {
                               setState(() {
@@ -204,9 +180,11 @@ class _LoginPageState extends NetworkHandler
 
                         validator: FormBuilderValidators.compose([
                           FormBuilderValidators.required(),
-                          FormBuilderValidators.minLength(6,
-                              errorText:
-                                  'Password length should be 6 or greater than 6'),
+                          FormBuilderValidators.minLength(
+                            6,
+                            errorText:
+                                'Password length should be 6 or greater than 6',
+                          ),
                         ]),
                       ),
                       FxSpacing.height(12),
@@ -225,11 +203,11 @@ class _LoginPageState extends NetworkHandler
                       Center(
                         child: FxButton.rounded(
                           onPressed: () {
-                          Get.toNamed('/dashboard');
+                            Get.toNamed('/dashboard');
                           },
                           elevation: 0,
                           padding: FxSpacing.xy(20, 16),
-                          backgroundColor: contentTheme.primary,
+                          // backgroundColor: contentTheme.primary,
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -246,7 +224,7 @@ class _LoginPageState extends NetworkHandler
                               if (loading) FxSpacing.width(16),
                               FxText.bodySmall(
                                 'Login',
-                                color: contentTheme.onPrimary,
+                                // color: contentTheme.onPrimary,
                               ),
                             ],
                           ),
