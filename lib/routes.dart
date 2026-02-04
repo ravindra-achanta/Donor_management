@@ -2,7 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
+import 'package:vikas_app/screeens/authentication/registration_page.dart';
+import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
+import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
+import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
 import 'package:vikas_app/screeens/donations/DonationsScreen.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanadilist.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
@@ -67,6 +71,29 @@ GetPage(
   name: '/donations',
   page: () => DonationsScreen(),
 ),
+
+GetPage(
+      name: '/register',
+      page: () => const RegistrationPage(),
+    ),
+
+    GetPage(
+  name: '/profile-analytics',
+  page: () => const ProfileAnalyticsScreen(),
+),
+
+  GetPage(
+  name: '/profile-analytics',
+  page: () => const ActivityScoreScreen(),
+),
+
+GetPage(
+  name: '/profile-analytics',
+  page: () => const DonationsReportScreen(),
+),
+
+
+
 
     
     // GetPage(

@@ -71,25 +71,32 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             FxFlexItem(
               sizes: "lg-6",
-              child: FxResponsive(
+              child:
+               FxResponsive(
                 builder: (_, __, type) {
                   return type == FxScreenMediaType.xxl
                       ? Image.asset(
-                          Images.login[3],
+                          //Images.login[3],
+                          'assets/images/student.png',
+
                           fit: BoxFit.cover,
-                          height: 500,
+                          height: 400,
                         )
                       : type == FxScreenMediaType.xl
                       ? Image.asset(
-                          Images.login[3],
+                          //Images.login[3],
+                          'assets/images/student.png',
+
                           fit: BoxFit.cover,
-                          height: 500,
+                          height: 400,
                         )
                       : type == FxScreenMediaType.lg
                       ? Image.asset(
-                          Images.login[3],
+                          // Images.login[3],
+                          'assets/images/student.png',
+
                           fit: BoxFit.cover,
-                          height: 500,
+                          height: 400,
                         )
                       : const SizedBox();
                 },
@@ -119,29 +126,64 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                       FxSpacing.height(40),
-                      FxText.bodyMedium("Email Id"),
+                      // FxText.bodyMedium("Email Id"),
+                      // FxSpacing.height(8),
+                      // TextFormField(
+                      //   controller: emailController,
+                      //   autovalidateMode: AutovalidateMode.onUserInteraction,
+                      //   keyboardType: TextInputType.emailAddress,
+                      //   decoration: InputDecoration(
+                      //     labelText: "Email Address",
+                      //     labelStyle: FxTextStyle.bodySmall(xMuted: true),
+                      //     // border: outlineInputBorder,
+                      //     prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                      //     contentPadding: FxSpacing.all(16),
+                      //     isCollapsed: true,
+                      //     floatingLabelBehavior: FloatingLabelBehavior.never,
+                      //   ),
+                      //   validator: FormBuilderValidators.compose([
+                      //     FormBuilderValidators.required(),
+                      //     FormBuilderValidators.email(
+                      //       errorText: "Enter correct email format",
+                      //     ),
+                      //   ]),
+                      //   onFieldSubmitted: (value) {},
+                      // ),
+                      FxText.bodyMedium("Mobile Number"),
                       FxSpacing.height(8),
                       TextFormField(
-                        controller: emailController,
+                        controller:
+                            emailController, // you may rename later if you want
                         autovalidateMode: AutovalidateMode.onUserInteraction,
-                        keyboardType: TextInputType.emailAddress,
+                        keyboardType: TextInputType.phone,
+                        maxLength: 10,
                         decoration: InputDecoration(
-                          labelText: "Email Address",
+                          labelText: "Mobile Number",
                           labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                          // border: outlineInputBorder,
-                          prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                          prefixIcon: const Icon(LucideIcons.phone, size: 20),
                           contentPadding: FxSpacing.all(16),
                           isCollapsed: true,
                           floatingLabelBehavior: FloatingLabelBehavior.never,
+                          counterText: "", // hides character counter
                         ),
                         validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                          FormBuilderValidators.email(
-                            errorText: "Enter correct email format",
+                          FormBuilderValidators.required(
+                            errorText: "Mobile number is required",
+                          ),
+                          FormBuilderValidators.numeric(
+                            errorText: "Only numbers allowed",
+                          ),
+                          FormBuilderValidators.minLength(
+                            10,
+                            errorText: "Enter 10 digit mobile number",
+                          ),
+                          FormBuilderValidators.maxLength(
+                            10,
+                            errorText: "Enter 10 digit mobile number",
                           ),
                         ]),
-                        onFieldSubmitted: (value) {},
                       ),
+
                       FxSpacing.height(16),
                       FxText.labelMedium("password"),
                       FxSpacing.height(8),
