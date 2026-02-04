@@ -179,17 +179,20 @@ class _LeftBarState extends State<LeftBar>
                     ),
 
                     // //-----------------Project-----------------//
-                    MenuWidget(
+
+                  MenuWidget(
                       iconData: LucideIcons.shield,
                       isCondensed: isCondensed,
                       title: "Admin",
                       children: [
                         MenuItem(
                           iconData: LucideIcons.userPlus,
-                          title: "karyakatha ADD",
-                          //route: '/timings/all',
+                          title: "REGISTRATION",
+                          route: '/register',
                           isCondensed: widget.isCondensed,
-                          onTap: () {},
+                          onTap: () {
+                            Get.toNamed('/register');
+                          },
                         ),
                         MenuItem(
                           iconData: LucideIcons.briefcase,
@@ -200,6 +203,7 @@ class _LeftBarState extends State<LeftBar>
                         ),
                       ],
                     ),
+
 
                     //-----------------employees-----------------//
 
