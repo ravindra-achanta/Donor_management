@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:vikas_app/apiServices/local_storage/VikasDB.dart';
 import 'package:vikas_app/themes/theme_customizer.dart';
 
 class Language {
@@ -11,11 +10,7 @@ class Language {
     Language(const Locale('en'), "English"),
     Language(const Locale('hi'), "हिंदी"),
     Language(const Locale('es'), "Español"),
-    Language(
-      const Locale('ar'),
-      "عربي",
-      true,
-    ),
+    Language(const Locale('ar'), "عربي", true),
     Language(const Locale('fr'), "Français"),
   ];
 
@@ -38,7 +33,7 @@ class Language {
     Language? language;
     // String? langCode = LocalStorage.getLanguage();
     // language = findFromLocale(Locale(langCode!));
-  
+
     return language ?? languages.first;
   }
 

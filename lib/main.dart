@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:vikas_app/apiServices/local_storage/VikasDB.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:vikas_app/routes.dart';
@@ -11,6 +13,7 @@ import 'navigation_service.dart';
 import 'themes/app_notifier.dart';
 import 'themes/app_style.dart';
 import 'themes/theme_customizer.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
@@ -20,9 +23,28 @@ Future<void> main() async {
   await ThemeCustomizer.init();
 
   runApp(
-    ChangeNotifierProvider<AppNotifier>(
-      create: (_) => AppNotifier(),
-      child: const MyApp(),
+    MultiProvider(
+      providers: [
+        // 🔸 Theme Provider
+        ChangeNotifierProvider<AppNotifier>(create: (_) => AppNotifier()),
+      ],
+      child: MultiBlocProvider(
+        providers: [
+          // 🔹 Auth Bloc
+          BlocProvider<KaryakarthaBloc>(create: (_) => KaryakarthaBloc()),
+
+          // 🔹 User Bloc
+          // BlocProvider<UserBloc>(
+          //   create: (_) => UserBloc(),
+          // ),
+
+          // // 🔹 Dashboard Bloc
+          // BlocProvider<DashboardBloc>(
+          //   create: (_) => DashboardBloc(),
+          // ),
+        ],
+        child: const MyApp(),
+      ),
     ),
   );
 }
@@ -31,7 +53,7 @@ class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
   @override
-   @override
+  @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
       builder: (_, notifier, ___) {
