@@ -4,7 +4,9 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
+import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:vikas_app/routes.dart';
@@ -30,18 +32,14 @@ Future<void> main() async {
       ],
       child: MultiBlocProvider(
         providers: [
-          // 🔹 Auth Bloc
+          // 🔹 Karyakartha Bloc
           BlocProvider<KaryakarthaBloc>(create: (_) => KaryakarthaBloc()),
 
-          // 🔹 User Bloc
-          // BlocProvider<UserBloc>(
-          //   create: (_) => UserBloc(),
-          // ),
+          // 🔹 Jeevanadi Bloc
+          BlocProvider<JeevanaadiBloc>(create: (_) => JeevanaadiBloc()),
 
-          // // 🔹 Dashboard Bloc
-          // BlocProvider<DashboardBloc>(
-          //   create: (_) => DashboardBloc(),
-          // ),
+          // 🔹 profile Bloc
+          BlocProvider<ProfileBloc>(create: (_) => ProfileBloc()),
         ],
         child: const MyApp(),
       ),

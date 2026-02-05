@@ -7,6 +7,9 @@ bool profileLoading = false;
 
 class KaryakarthaState extends Equatable {
   final KaryakattaApiStatus status;
+  final int totalElements;
+  final int totalpages;
+  final int currentPage;
   final String? errorMessage;
   final bool delLoading;
   final List<User>? karyakarthas;
@@ -18,6 +21,9 @@ class KaryakarthaState extends Equatable {
   const KaryakarthaState({
     this.delLoading = false,
     this.karyakarthas,
+    this.totalElements = 0,
+    this.totalpages = 0,
+    this.currentPage = 0,
     this.status = KaryakattaApiStatus.initial,
     this.errorMessage,
     this.isProfileViewVisible = false,
@@ -31,9 +37,12 @@ class KaryakarthaState extends Equatable {
     String? errorMessage,
     bool? delLoading,
     List<User>? users,
+    int? currentPage,
     bool? isProfileViewVisible,
     User? karyakarthaProfile,
     bool? profileLoading,
+    int? totalElements,
+    int? totalpages,
     String? profileErrorMsg,
   }) {
     return KaryakarthaState(
@@ -41,6 +50,9 @@ class KaryakarthaState extends Equatable {
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
       karyakarthas: users ?? this.karyakarthas,
+      currentPage: currentPage ?? this.currentPage,
+      totalElements: totalElements ?? this.totalElements,
+      totalpages: totalpages ?? this.totalpages,
       isProfileViewVisible: isProfileViewVisible ?? this.isProfileViewVisible,
       karyakarthaProfile: karyakarthaProfile ?? this.karyakarthaProfile,
       profileLoading: profileLoading ?? this.profileLoading,
@@ -54,8 +66,11 @@ class KaryakarthaState extends Equatable {
     errorMessage,
     delLoading,
     karyakarthas,
+    currentPage,
     isProfileViewVisible,
     karyakarthaProfile,
+    totalElements,
+    totalpages,
     profileLoading,
     profileErrorMsg,
   ];
