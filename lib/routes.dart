@@ -8,6 +8,8 @@ import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
 import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
+import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
+import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
@@ -15,6 +17,8 @@ import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
 import 'package:vikas_app/screeens/users/users.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
+import 'package:vikas_app/screeens/visits/AddVisit.dart';
+import 'package:vikas_app/screeens/visits/ViewVisit.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override
@@ -52,6 +56,7 @@ getPageRoute() {
     // ),
     GetPage(name: '/login', page: () => const LoginPage()),
     GetPage(name: '/dashboard', page: () => const Dashboard()),
+    
 
     GetPage(
       name: '/karyakarthas',
@@ -75,8 +80,12 @@ getPageRoute() {
 
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DhramSetuScreen()),
+    GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
+    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/visits', page: () => const Visits()),
+    GetPage(name: '/add/visit', page: () => const AddVisit()),
+    GetPage(name: '/view/visit', page: () => const ViewVisit()),
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
