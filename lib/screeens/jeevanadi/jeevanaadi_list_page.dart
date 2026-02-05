@@ -1,46 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:provider/provider.dart';
-import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
-import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
-import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
-import 'package:vikas_app/screeens/common/NoDataFound.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
-class KaryakarthasListPage extends StatefulWidget {
-  const KaryakarthasListPage({super.key});
+class JeevanaadiListPage extends StatefulWidget {
+  const JeevanaadiListPage({super.key});
 
   @override
-  State<KaryakarthasListPage> createState() => _KaryakarthasListPageState();
+  State<JeevanaadiListPage> createState() => _JeevanaadiListPageState();
 }
 
-class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
+class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    context.read<KaryakarthaBloc>().add(FetchKaryakattasEvent(0));
+    context.read<JeevanaadiBloc>().add(FetchJeevanaadisEvent(0));
   }
 
-  @override
   Widget build(BuildContext context) {
     return Layout(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: BlocBuilder<KaryakarthaBloc, KaryakarthaState?>(
+        child: BlocBuilder<JeevanaadiBloc, JeevanaadiState?>(
           builder: (context, state) {
             switch (state?.status) {
-              case KaryakattaApiStatus.loading:
+              case JeevanaadiApiStatus.loading:
                 return ScreenLoader();
-              case KaryakattaApiStatus.error:
+              case JeevanaadiApiStatus.error:
                 return Center(
                   child: ErrorCard(message: state?.errorMessage ?? ""),
                 );
-              case KaryakattaApiStatus.loaded:
+              case JeevanaadiApiStatus.loaded:
                 return Row(
                   children: [
                     Expanded(
@@ -52,10 +50,10 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                         child: Column(
                           children: [
                             CommonList(
-                              users: state?.karyakarthas ?? [],
+                              users: state?.jeevanaadisMems ?? [],
                               onUserTap: (id) {
-                                context.read<KaryakarthaBloc>().add(
-                                  FetchKaryakarthaProfileEvent(id),
+                                context.read<JeevanaadiBloc>().add(
+                                  FetchJeevanaadiProfileEvent(id),
                                 );
                               },
                               onDelete: (id) {},
@@ -70,9 +68,9 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   IconButton(
                                     onPressed: () {
                                       if (state!.currentPage > 0) {
-                                        context.read<KaryakarthaBloc>().add(
-                                          FetchKaryakattasEvent(
-                                            state.currentPage - 1,
+                                        context.read<JeevanaadiBloc>().add(
+                                          FetchJeevanaadisEvent(
+                                            (state?.currentPage ?? 0) - 1,
                                           ),
                                         );
                                       }
@@ -80,15 +78,15 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     icon: Icon(Icons.skip_previous_outlined),
                                   ),
                                   Text(
-                                    "${(state?.currentPage ?? 0) + 1}/${(state?.totalpages ?? 0)}",
+                                    "${(state?.currentPage ?? 0) + 1}/${state?.totalpages}",
                                   ),
                                   IconButton(
                                     onPressed: () {
                                       if (state!.currentPage <
                                           state!.totalpages - 1) {
-                                        context.read<KaryakarthaBloc>().add(
-                                          FetchKaryakattasEvent(
-                                            state.currentPage + 1,
+                                        context.read<JeevanaadiBloc>().add(
+                                          FetchJeevanaadisEvent(
+                                            (state?.currentPage ?? 0) + 1,
                                           ),
                                         );
                                       }
@@ -154,9 +152,9 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                 )
                               : ListViewScreen(
                                   key: ValueKey('profile'),
-                                  user: state?.karyakarthaProfile,
+                                  user: state?.jeevanaadiProfile,
                                   onClose: () {
-                                    context.read<KaryakarthaBloc>().add(
+                                    context.read<JeevanaadiBloc>().add(
                                       CloseProfileView(),
                                     );
                                   },

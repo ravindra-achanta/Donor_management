@@ -1,3 +1,38 @@
+import 'dart:convert';
+
+class PaginatedView {
+  final int? totalElements;
+  final int? totalPages;
+  final List<User>? content;
+  final int? currentPage;
+
+  PaginatedView({
+    this.totalElements,
+    this.totalPages,
+    this.content,
+    this.currentPage,
+  });
+
+  factory PaginatedView.fromJson(Map<String, dynamic> json) {
+    return PaginatedView(
+      totalElements: json['totalElements']?.toInt(),
+      currentPage: json['currentPage']?.toInt(),
+      totalPages: json['totalPages']?.toInt(),
+      content: (json['content'] as List?)
+          ?.map((x) => User.fromJson(x as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'totalElements': totalElements,
+      'totalPages': totalPages,
+      'currentPage': currentPage,
+      'content': content,
+    };
+  }
+}
+
 class User {
   final String id;
   final String name;
@@ -32,7 +67,7 @@ class User {
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id']?.toString() ?? '',
-      uniqueId:json['uniqueId'] ?? "",
+      uniqueId: json['uniqueId'] ?? "",
       name: json['name'],
       email: json['email'],
       mobileNumber: json['mobileNumber'],
@@ -51,7 +86,7 @@ class User {
     return {
       'id': id,
       'name': name,
-      'uniqueId':uniqueId,
+      'uniqueId': uniqueId,
       'email': email,
       'mobileNumber': mobileNumber,
       'password': password,

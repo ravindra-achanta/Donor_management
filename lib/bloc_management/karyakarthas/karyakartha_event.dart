@@ -5,7 +5,10 @@ abstract class KaryakarthaEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class FetchKaryakattasEvent extends KaryakarthaEvent {}
+class FetchKaryakattasEvent extends KaryakarthaEvent {
+  final int page;
+  FetchKaryakattasEvent(this.page);
+}
 
 class CloseProfileView extends KaryakarthaEvent {}
 
