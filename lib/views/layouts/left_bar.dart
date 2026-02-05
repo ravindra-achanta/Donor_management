@@ -146,14 +146,8 @@ class _LeftBarState extends State<LeftBar>
                     ),
                     labelWidget("Apps"),
 
-                    MenuWidget(
-                      iconData: LucideIcons.userCog,
-                      isCondensed: isCondensed,
-                      title: "PROFILE",
-                    ),
-
                     NavigationItem(
-                      iconData: LucideIcons.users,
+                      iconData: LucideIcons.badgeCheck,
                       title: "KARYAKARTHAS",
                       isCondensed: isCondensed,
                       route: '/karyakarthas',
@@ -166,44 +160,43 @@ class _LeftBarState extends State<LeftBar>
                       route: '/jeevanadi',
                     ),
                     NavigationItem(
-                      iconData: LucideIcons.indianRupee,
-                      title: "DONATIONS",
+                      iconData: LucideIcons.users,
+                      title: "Users",
                       isCondensed: isCondensed,
-                      route: '/donations',
+                      route: '/users',
+                    ),
+
+                    NavigationItem(
+                      iconData: LucideIcons.fileClock,
+                      title: "Requests",
+                      isCondensed: isCondensed,
+                      route: '/requests',
                     ),
                     NavigationItem(
-                      iconData: LucideIcons.link,
-                      title: "ASSIGN MEMBERS",
+                      iconData: LucideIcons.arrowLeftRight,
+                      title: "Dharmasetu",
                       isCondensed: isCondensed,
-                      route: '/assign-members',
+                      route: '/dharmasetu',
+                    ),
+                    NavigationItem(
+                      iconData: LucideIcons.info,
+                      title: "Notices",
+                      isCondensed: isCondensed,
+                      route: '/notices',
+                    ),
+                    NavigationItem(
+                      iconData: LucideIcons.eye,
+                      title: "Visits",
+                      isCondensed: isCondensed,
+                      route: '/visits',
                     ),
 
-                    // //-----------------Project-----------------//
-
-                  MenuWidget(
-                      iconData: LucideIcons.shield,
+                    NavigationItem(
+                      iconData: LucideIcons.userCog,
+                      title: "Profile",
                       isCondensed: isCondensed,
-                      title: "Admin",
-                      children: [
-                        MenuItem(
-                          iconData: LucideIcons.userPlus,
-                          title: "REGISTRATION",
-                          route: '/register',
-                          isCondensed: widget.isCondensed,
-                          onTap: () {
-                            Get.toNamed('/register');
-                          },
-                        ),
-                        MenuItem(
-                          iconData: LucideIcons.briefcase,
-                          title: "OFFICE Staff ADD",
-                          //route: '/all/tasks',
-                          isCondensed: widget.isCondensed,
-                          onTap: () {},
-                        ),
-                      ],
+                      route: '/profile',
                     ),
-
 
                     //-----------------employees-----------------//
 
