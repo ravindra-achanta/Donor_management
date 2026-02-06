@@ -11,7 +11,9 @@ import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
 import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
+import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
+import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
@@ -83,6 +85,7 @@ getPageRoute() {
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
     GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     GetPage(name: '/notices', page: () => const Notices()),
+    GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
     GetPage(name: '/visits', page: () => const Visits()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
     GetPage(name: '/view/visit', page: () => const ViewVisit()),
@@ -102,6 +105,12 @@ getPageRoute() {
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
+     GetPage(
+  name: '/jeevandiview',
+  page: () => ViewJeevanadiScreen(), 
+),
+
+
 
     // GetPage(
     //   name: '/dashboard',

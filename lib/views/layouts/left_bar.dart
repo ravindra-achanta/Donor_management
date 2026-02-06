@@ -182,7 +182,7 @@ class _LeftBarState extends State<LeftBar>
                       iconData: LucideIcons.info,
                       title: "Notices",
                       isCondensed: isCondensed,
-                      route: '/notices',
+                      route: '/notices/list',
                     ),
                     NavigationItem(
                       iconData: LucideIcons.eye,
@@ -197,6 +197,17 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/profile',
                     ),
+
+                    NavigationItem(
+                      iconData: LucideIcons.userCog,
+                      title: "jeevandi view",
+                      isCondensed: isCondensed,
+                      route: '/jeevandiview',
+                    ),
+
+                    
+
+                    
 
                     //-----------------employees-----------------//
 

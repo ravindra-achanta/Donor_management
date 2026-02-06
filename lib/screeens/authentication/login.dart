@@ -63,221 +63,226 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return AuthLayout(
-      child: Padding(
-        padding: FxSpacing.all(16),
-        child: FxFlex(
-          contentPadding: false,
-          children: [
-            FxFlexItem(
-              sizes: "lg-6",
-              child:
-               FxResponsive(
-                builder: (_, __, type) {
-                  return type == FxScreenMediaType.xxl
-                      ? Image.asset(
-                          //Images.login[3],
-                          'assets/images/student.png',
+    return Container(
+      color: const Color.fromARGB(255, 205, 88, 29),
+      child: AuthLayout(
+        
+        child: Padding(
+          padding: FxSpacing.all(16),
+          child: FxFlex(
+            contentPadding: false,
+            children: [
+              FxFlexItem(
+                sizes: "lg-6",
+                child: FxResponsive(
+                  builder: (_, __, type) {
+                    return type == FxScreenMediaType.xxl
+                        ? Image.asset(
+                            //Images.login[3],
+                            'assets/images/student.png',
 
-                          fit: BoxFit.cover,
-                          height: 400,
-                        )
-                      : type == FxScreenMediaType.xl
-                      ? Image.asset(
-                          //Images.login[3],
-                          'assets/images/student.png',
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : type == FxScreenMediaType.xl
+                        ? Image.asset(
+                            //Images.login[3],
+                            'assets/images/student.png',
 
-                          fit: BoxFit.cover,
-                          height: 400,
-                        )
-                      : type == FxScreenMediaType.lg
-                      ? Image.asset(
-                          // Images.login[3],
-                          'assets/images/student.png',
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : type == FxScreenMediaType.lg
+                        ? Image.asset(
+                            // Images.login[3],
+                            'assets/images/student.png',
 
-                          fit: BoxFit.cover,
-                          height: 400,
-                        )
-                      : const SizedBox();
-                },
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : const SizedBox();
+                  },
+                ),
               ),
-            ),
-            FxFlexItem(
-              sizes: "lg-6",
-              child: Padding(
-                padding: FxSpacing.y(28),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Center(
-                        child: FxText.titleLarge(
-                          "Welcome Back !!",
-                          fontWeight: 600,
-                          fontSize: 24,
+              FxFlexItem(
+                sizes: "lg-6",
+                child: Padding(
+                  padding: FxSpacing.y(28),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Center(
+                          child: FxText.titleLarge(
+                            "Welcome Back !!",
+                            fontWeight: 600,
+                            fontSize: 24,
+                          ),
                         ),
-                      ),
-                      Center(
-                        child: FxText.bodyMedium(
-                          "Login to lead your work Force",
-                          fontSize: 16,
+                        Center(
+                          child: FxText.bodyMedium(
+                            "Login to lead your work Force",
+                            fontSize: 16,
+                          ),
                         ),
-                      ),
-                      FxSpacing.height(40),
-                      // FxText.bodyMedium("Email Id"),
-                      // FxSpacing.height(8),
-                      // TextFormField(
-                      //   controller: emailController,
-                      //   autovalidateMode: AutovalidateMode.onUserInteraction,
-                      //   keyboardType: TextInputType.emailAddress,
-                      //   decoration: InputDecoration(
-                      //     labelText: "Email Address",
-                      //     labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                      //     // border: outlineInputBorder,
-                      //     prefixIcon: const Icon(LucideIcons.mail, size: 20),
-                      //     contentPadding: FxSpacing.all(16),
-                      //     isCollapsed: true,
-                      //     floatingLabelBehavior: FloatingLabelBehavior.never,
-                      //   ),
-                      //   validator: FormBuilderValidators.compose([
-                      //     FormBuilderValidators.required(),
-                      //     FormBuilderValidators.email(
-                      //       errorText: "Enter correct email format",
-                      //     ),
-                      //   ]),
-                      //   onFieldSubmitted: (value) {},
-                      // ),
-                      FxText.bodyMedium("Mobile Number"),
-                      FxSpacing.height(8),
-                      TextFormField(
-                        controller:
-                            emailController, // you may rename later if you want
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-                        keyboardType: TextInputType.phone,
-                        maxLength: 10,
-                        decoration: InputDecoration(
-                          labelText: "Mobile Number",
-                          labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                          prefixIcon: const Icon(LucideIcons.phone, size: 20),
-                          contentPadding: FxSpacing.all(16),
-                          isCollapsed: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
-                          counterText: "", // hides character counter
-                        ),
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(
-                            errorText: "Mobile number is required",
+                        FxSpacing.height(40),
+                        // FxText.bodyMedium("Email Id"),
+                        // FxSpacing.height(8),
+                        // TextFormField(
+                        //   controller: emailController,
+                        //   autovalidateMode: AutovalidateMode.onUserInteraction,
+                        //   keyboardType: TextInputType.emailAddress,
+                        //   decoration: InputDecoration(
+                        //     labelText: "Email Address",
+                        //     labelStyle: FxTextStyle.bodySmall(xMuted: true),
+                        //     // border: outlineInputBorder,
+                        //     prefixIcon: const Icon(LucideIcons.mail, size: 20),
+                        //     contentPadding: FxSpacing.all(16),
+                        //     isCollapsed: true,
+                        //     floatingLabelBehavior: FloatingLabelBehavior.never,
+                        //   ),
+                        //   validator: FormBuilderValidators.compose([
+                        //     FormBuilderValidators.required(),
+                        //     FormBuilderValidators.email(
+                        //       errorText: "Enter correct email format",
+                        //     ),
+                        //   ]),
+                        //   onFieldSubmitted: (value) {},
+                        // ),
+                        FxText.bodyMedium("Mobile Number"),
+                        FxSpacing.height(8),
+                        TextFormField(
+                          controller:
+                              emailController, // you may rename later if you want
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+                          keyboardType: TextInputType.phone,
+                          maxLength: 10,
+                          decoration: InputDecoration(
+                            labelText: "Mobile Number",
+                            labelStyle: FxTextStyle.bodySmall(xMuted: true),
+                            prefixIcon: const Icon(LucideIcons.phone, size: 20),
+                            contentPadding: FxSpacing.all(16),
+                            isCollapsed: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                            counterText: "", // hides character counter
                           ),
-                          FormBuilderValidators.numeric(
-                            errorText: "Only numbers allowed",
-                          ),
-                          FormBuilderValidators.minLength(
-                            10,
-                            errorText: "Enter 10 digit mobile number",
-                          ),
-                          FormBuilderValidators.maxLength(
-                            10,
-                            errorText: "Enter 10 digit mobile number",
-                          ),
-                        ]),
-                      ),
-
-                      FxSpacing.height(16),
-                      FxText.labelMedium("password"),
-                      FxSpacing.height(8),
-                      TextFormField(
-                        controller: passwordController,
-
-                        autovalidateMode: AutovalidateMode.onUserInteraction,
-
-                        keyboardType: TextInputType.visiblePassword,
-
-                        obscureText:
-                            !showPassword, // Correct handling of visibility
-
-                        decoration: InputDecoration(
-                          labelText: "Password",
-                          labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                          // border: outlineInputBorder,
-                          prefixIcon: const Icon(LucideIcons.lock, size: 20),
-                          suffixIcon: InkWell(
-                            onTap: () {
-                              setState(() {
-                                showPassword = !showPassword;
-                              });
-                            },
-                            child: Icon(
-                              showPassword
-                                  ? LucideIcons.eye
-                                  : LucideIcons.eyeOff,
-                              size: 20,
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(
+                              errorText: "Mobile number is required",
                             ),
-                          ),
-                          contentPadding: FxSpacing.all(16),
-                          isCollapsed: true,
-                          floatingLabelBehavior: FloatingLabelBehavior.never,
+                            FormBuilderValidators.numeric(
+                              errorText: "Only numbers allowed",
+                            ),
+                            FormBuilderValidators.minLength(
+                              10,
+                              errorText: "Enter 10 digit mobile number",
+                            ),
+                            FormBuilderValidators.maxLength(
+                              10,
+                              errorText: "Enter 10 digit mobile number",
+                            ),
+                          ]),
                         ),
 
-                        validator: FormBuilderValidators.compose([
-                          FormBuilderValidators.required(),
-                          FormBuilderValidators.minLength(
-                            6,
-                            errorText:
-                                'Password length should be 6 or greater than 6',
-                          ),
-                        ]),
-                      ),
-                      FxSpacing.height(12),
-                      if (errorMessage != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: FxText(
-                            errorMessage!,
-                            style: const TextStyle(
-                              color: Colors.red,
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      FxSpacing.height(40),
-                      Center(
-                        child: FxButton.rounded(
-                          onPressed: () {
-                            Get.toNamed('/dashboard');
-                          },
-                          elevation: 0,
-                          padding: FxSpacing.xy(20, 16),
-                          // backgroundColor: contentTheme.primary,
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              loading
-                                  ? SizedBox(
-                                      height: 14,
-                                      width: 14,
-                                      child: CircularProgressIndicator(
-                                        color: colorScheme.onPrimary,
-                                        strokeWidth: 1.2,
-                                      ),
-                                    )
-                                  : Container(),
-                              if (loading) FxSpacing.width(16),
-                              FxText.bodySmall(
-                                'Login',
-                                // color: contentTheme.onPrimary,
+                        FxSpacing.height(16),
+                        FxText.labelMedium("password"),
+                        FxSpacing.height(8),
+                        TextFormField(
+                          controller: passwordController,
+
+                          autovalidateMode: AutovalidateMode.onUserInteraction,
+
+                          keyboardType: TextInputType.visiblePassword,
+
+                          obscureText:
+                              !showPassword, // Correct handling of visibility
+
+                          decoration: InputDecoration(
+                            labelText: "Password",
+                            labelStyle: FxTextStyle.bodySmall(xMuted: true),
+                            // border: outlineInputBorder,
+                            prefixIcon: const Icon(LucideIcons.lock, size: 20),
+                            suffixIcon: InkWell(
+                              onTap: () {
+                                setState(() {
+                                  showPassword = !showPassword;
+                                });
+                              },
+                              child: Icon(
+                                showPassword
+                                    ? LucideIcons.eye
+                                    : LucideIcons.eyeOff,
+                                size: 20,
                               ),
-                            ],
+                            ),
+                            contentPadding: FxSpacing.all(16),
+                            isCollapsed: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+
+                          validator: FormBuilderValidators.compose([
+                            FormBuilderValidators.required(),
+                            FormBuilderValidators.minLength(
+                              6,
+                              errorText:
+                                  'Password length should be 6 or greater than 6',
+                            ),
+                          ]),
+                        ),
+                        FxSpacing.height(12),
+                        if (errorMessage != null)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: FxText(
+                              errorMessage!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                        FxSpacing.height(40),
+                        Center(
+                          child: FxButton.rounded(
+                            onPressed: () {
+                              Get.toNamed('/dashboard');
+                            },
+                            elevation: 0,
+                            padding: FxSpacing.xy(20, 16),
+                            //backgroundColor: contentTheme.primary,
+                            backgroundColor: Colors.brown,
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                loading
+                                    ? SizedBox(
+                                        height: 14,
+                                        width: 14,
+                                        child: CircularProgressIndicator(
+                                          color: colorScheme.onPrimary,
+                                          strokeWidth: 1.2,
+                                        ),
+                                      )
+                                    : Container(),
+                                if (loading) FxSpacing.width(16),
+                                FxText.bodySmall(
+                                  'Login',
+                                  color: Colors.white,
+                                  // color: contentTheme.onPrimary,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
