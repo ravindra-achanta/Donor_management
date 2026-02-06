@@ -31,6 +31,8 @@ class _CommonListState extends State<CommonList> {
       );
     }
 
+    
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
@@ -56,12 +58,59 @@ class _CommonListState extends State<CommonList> {
               ),
             ),
             child: Row(
-              children: [
-                tableHeader('#'),
-                tableHeader('Name'),
-                tableHeader('Mobile'),
-                tableHeader('Email'),
-                tableHeader('Actions'),
+              children: const [
+                Expanded(
+                  child: Text(
+                    'S.No',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Name',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    'Mobile',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: Text(
+                    'Email',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
+
+                Expanded(
+                  child: Text(
+                    'Actions',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                      letterSpacing: 0.4,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -102,10 +151,49 @@ class _CommonListState extends State<CommonList> {
                         ),
                         child: Row(
                           children: [
-                            tableData("${(index + 1).toString()}."),
-                            tableData(user.name ?? "-"),
-                            tableData(user.mobileNumber ?? "-"),
-                            tableData(user.email ?? "-"),
+                            Expanded(
+                              child: Text(
+                                (index + 1).toString(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+
+                            // 👤 Name
+                            Expanded(
+                              child: Text(
+                                user.name ?? "-",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+
+                            Expanded(
+                              child: Text(
+                                user.mobileNumber ?? "-",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              ),
+                            ),
+
+                            // ✉️ Email
+                            Expanded(
+                              child: Text(
+                                user.email ?? "-",
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontSize: 13.5,
+                                  color: Colors.grey.shade700,
+                                ),
+                              ),
+                            ),
+
                             // 🟢 Status Pill
                             // SizedBox(
                             //   width: 120,
@@ -145,29 +233,6 @@ class _CommonListState extends State<CommonList> {
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  tableHeader(String title) {
-    return Expanded(
-      child: Text(
-        title,
-        style: TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 13,
-          letterSpacing: 0.4,
-        ),
-      ),
-    );
-  }
-
-  tableData(String data) {
-    return Expanded(
-      child: Text(
-        data,
-        overflow: TextOverflow.ellipsis,
-        style: TextStyle(fontSize: 13.5, color: Colors.grey.shade700),
       ),
     );
   }
