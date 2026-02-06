@@ -21,10 +21,12 @@ class _NoticesState extends State<Notices> {
   String? _selectedUserType;
   String? _selectedUserName;
   List<String> _selectedUsers = [];
+  DateTime? _selectedDate;
 
   /// Controllers
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _messageController = TextEditingController();
+  TextEditingController _dateController = TextEditingController();
 
   File? _selectedFile;
   Uint8List? _selectedFileBytes;
@@ -71,34 +73,44 @@ class _NoticesState extends State<Notices> {
 
   void _submitNotice() {
     if (_formKey.currentState!.validate()) {
-      // Determine audience based on selection
-      String audienceType = '';
-      String audienceValue = '';
+      if (_formKey.currentState!.validate()) {
+        if (_selectedDate == null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Please select a date'),
+              backgroundColor: Colors.red,
+            ),
+          );
+          return;
+        }
+        String audienceType = '';
+        String audienceValue = '';
 
-      if (_selectedSpecificOption == 'User Type') {
-        audienceType = 'User Type';
-        audienceValue = _selectedUserType ?? 'Not Selected';
-      } else {
-        audienceType = 'Specific Users';
-        audienceValue = _selectedUsers.isEmpty
-            ? 'No users selected'
-            : _selectedUsers.join(', ');
+        if (_selectedSpecificOption == 'User Type') {
+          audienceType = 'User Type';
+          audienceValue = _selectedUserType ?? 'Not Selected';
+        } else {
+          audienceType = 'Specific Users';
+          audienceValue = _selectedUsers.isEmpty
+              ? 'No users selected'
+              : _selectedUsers.join(', ');
+        }
+
+        debugPrint('Audience Type: $audienceType');
+        debugPrint('Audience Value: $audienceValue');
+        debugPrint('Title: ${_titleController.text}');
+        debugPrint('Message: ${_messageController.text}');
+        debugPrint('File: ${_selectedFile?.path}');
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Notice sent successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        _clearForm();
       }
-
-      debugPrint('Audience Type: $audienceType');
-      debugPrint('Audience Value: $audienceValue');
-      debugPrint('Title: ${_titleController.text}');
-      debugPrint('Message: ${_messageController.text}');
-      debugPrint('File: ${_selectedFile?.path}');
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Notice sent successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      _clearForm();
     }
   }
 
@@ -106,6 +118,7 @@ class _NoticesState extends State<Notices> {
   void _clearForm() {
     _titleController.clear();
     _messageController.clear();
+    _dateController.clear();
     setState(() {
       _selectedSpecificOption = 'User Type'; // Reset to default
       _selectedUserType = null;
@@ -227,7 +240,6 @@ class _NoticesState extends State<Notices> {
                   ],
                 ),
 
-              /// Show User selection when User is selected
               if (_selectedSpecificOption == 'User')
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -349,101 +361,187 @@ class _NoticesState extends State<Notices> {
 
               const SizedBox(height: 20),
 
-              // Attach Image field
-              const Text(
-                'Attach Image (Optional)',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
-              const SizedBox(height: 6),
               SizedBox(
-                width: 400,
-                child: Column(
+                width: 700,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: _handleFileSelection,
-                      child: Container(
-                        height: 48,
-                        padding: const EdgeInsets.symmetric(horizontal: 12),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade400),
-                          borderRadius: BorderRadius.circular(8),
-                          color: Colors.white,
-                        ),
-                        child: Row(
-                          children: [
-                            const Icon(Icons.attach_file, color: Colors.blue),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                _selectedFile != null ||
-                                        _selectedFileName != null
-                                    ? _selectedFileName ??
-                                          _selectedFile!.path.split('/').last
-                                    : 'Choose image',
-                                overflow: TextOverflow.ellipsis,
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Date',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+
+                          Container(
+                            height: 48,
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              border: Border.all(color: Colors.grey.shade400),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: TextFormField(
+                              controller: _dateController,
+                              readOnly: true,
+                              validator: (v) => v == null || v.isEmpty
+                                  ? 'Please select a date'
+                                  : null,
+                              decoration: InputDecoration(
+                                hintText: 'Select date',
+                                filled: true,
+                                fillColor: Colors.transparent,
+                                border: InputBorder.none,
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 14, // Added vertical padding
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: const Icon(
+                                    Icons.calendar_today,
+                                    size: 20,
+                                  ),
+                                  onPressed: _selectDate,
+                                  padding: EdgeInsets.zero,
+                                ),
+                              ),
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: _dateController.text.isEmpty
+                                    ? Colors.grey
+                                    : Colors.black,
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
 
-                    // Show image preview if selected
-                    if (_selectedFile != null ||
-                        _selectedFileBytes != null) ...[
-                      const SizedBox(height: 12),
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: kIsWeb && _selectedFileBytes != null
-                              ? Image.memory(
-                                  _selectedFileBytes!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[200],
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.error_outline,
-                                          color: Colors.red,
+                    const SizedBox(width: 20),
+
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Attach Image (Optional)',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 6),
+                          Column(
+                            children: [
+                              InkWell(
+                                onTap: _handleFileSelection,
+                                child: Container(
+                                  height: 48,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                    color: Colors.white,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(
+                                        Icons.attach_file,
+                                        color: Colors.blue,
+                                        size: 20,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          _selectedFile != null ||
+                                                  _selectedFileName != null
+                                              ? _selectedFileName ??
+                                                    _selectedFile!.path
+                                                        .split('/')
+                                                        .last
+                                              : 'Choose image',
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(fontSize: 14),
                                         ),
                                       ),
-                                    );
-                                  },
-                                )
-                              : _selectedFile != null
-                              ? Image.file(
-                                  _selectedFile!,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[200],
-                                      child: const Center(
-                                        child: Icon(
-                                          Icons.error_outline,
-                                          color: Colors.red,
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                )
-                              : Container(),
-                        ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              // Show image preview if selected
+                              if (_selectedFile != null ||
+                                  _selectedFileBytes != null) ...[
+                                const SizedBox(height: 12),
+                                Container(
+                                  width: double.infinity,
+                                  height: 120,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: kIsWeb && _selectedFileBytes != null
+                                        ? Image.memory(
+                                            _selectedFileBytes!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: Colors.grey[200],
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.error_outline,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                          )
+                                        : _selectedFile != null
+                                        ? Image.file(
+                                            _selectedFile!,
+                                            fit: BoxFit.cover,
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                                  return Container(
+                                                    color: Colors.grey[200],
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.error_outline,
+                                                        color: Colors.red,
+                                                      ),
+                                                    ),
+                                                  );
+                                                },
+                                          )
+                                        : Container(),
+                                  ),
+                                ),
+                              ],
+                            ],
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ],
                 ),
               ),
 
               const SizedBox(height: 30),
 
-              // Buttons
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -522,6 +620,7 @@ class _NoticesState extends State<Notices> {
   void dispose() {
     _titleController.dispose();
     _messageController.dispose();
+    _dateController.dispose();
     super.dispose();
   }
 
@@ -579,7 +678,6 @@ class _NoticesState extends State<Notices> {
                       ),
                       const SizedBox(height: 12),
 
-                      // Users list with checkboxes
                       Expanded(
                         child: ListView.builder(
                           shrinkWrap: true,
@@ -652,5 +750,24 @@ class _NoticesState extends State<Notices> {
         );
       },
     );
+  }
+
+  void _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _selectedDate ?? DateTime.now(),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _selectedDate = picked;
+        _dateController.text = "${picked.day}/${picked.month}/${picked.year}";
+        _dateController.selection = TextSelection.fromPosition(
+          TextPosition(offset: _dateController.text.length),
+        );
+      });
+    }
   }
 }

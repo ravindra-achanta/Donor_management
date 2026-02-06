@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
+import 'package:vikas_app/screeens/models/request/notice.dart';
 
 class NoticesListScreen extends StatefulWidget {
   const NoticesListScreen({super.key});
@@ -15,7 +17,8 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     Notice(
       id: '1',
       title: 'Monthly Meeting Announcement',
-      message: 'All staff members are requested to attend the monthly meeting on Friday at 10 AM.',
+      message:
+          'All staff members are requested to attend the monthly meeting on Friday at 10 AM.',
       audience: 'All Users',
       date: '2024-01-15',
       time: '10:00 AM',
@@ -24,7 +27,8 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     Notice(
       id: '2',
       title: 'System Maintenance',
-      message: 'The system will be under maintenance from 2 AM to 4 AM tomorrow.',
+      message:
+          'The system will be under maintenance from 2 AM to 4 AM tomorrow.',
       audience: 'Karyakatha',
       date: '2024-01-14',
       time: '2:00 AM',
@@ -43,16 +47,25 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
   // Dropdown options
   String _selectedFilter = 'All';
-  final List<String> _filterOptions = ['All', 'Today', 'This Week', 'This Month', 'This Year'];
-  
+  final List<String> _filterOptions = [
+    'All',
+    'Today',
+    'This Week',
+    'This Month',
+    'This Year',
+  ];
+
   String _selectedUserType = 'All Users';
-  final List<String> _userTypeOptions = ['All Users', 'Admin', 'Karyakatha', 'Staff'];
+  final List<String> _userTypeOptions = [
+    'All Users',
+    'Admin',
+    'Karyakatha',
+    'Staff',
+  ];
 
   @override
   Widget build(BuildContext context) {
-    return Layout(
-      child: _buildContent(),
-    );
+    return Layout(child: _buildContent());
   }
 
   Widget _buildContent() {
@@ -121,8 +134,14 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                           hintText: 'Search notices...',
                           hintStyle: const TextStyle(fontSize: 13),
                           border: InputBorder.none,
-                          prefixIcon: const Icon(Icons.search, size: 18, color: Colors.grey),
-                          contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            size: 18,
+                            color: Colors.grey,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 12,
+                          ),
                           isDense: true,
                         ),
                         style: const TextStyle(fontSize: 13),
@@ -132,14 +151,10 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                       ),
                     ),
                   ),
-                  
+
                   // Vertical divider
-                  Container(
-                    width: 1,
-                    height: 30,
-                    color: Colors.grey.shade300,
-                  ),
-                  
+                  Container(width: 1, height: 30, color: Colors.grey.shade300),
+
                   // User Type Dropdown
                   Expanded(
                     flex: 1,
@@ -149,7 +164,11 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                         child: DropdownButton<String>(
                           value: _selectedUserType,
                           isExpanded: true,
-                          style: const TextStyle(fontSize: 13, color: Colors.black87),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black87,
+                          ),
+                          dropdownColor: Colors.white,
                           onChanged: (String? newValue) {
                             if (newValue != null) {
                               setState(() {
@@ -157,25 +176,27 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                               });
                             }
                           },
-                          items: _userTypeOptions
-                              .map<DropdownMenuItem<String>>((String value) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              child: Text(value),
-                            );
-                          }).toList(),
+                          items: _userTypeOptions.map<DropdownMenuItem<String>>(
+                            (String value) {
+                              return DropdownMenuItem<String>(
+                                value: value,
+                                child: Text(
+                                  value,
+                                  style: const TextStyle(color: Colors.black87),
+                                ),
+
+                                //child: Text(value),
+                              );
+                            },
+                          ).toList(),
                         ),
                       ),
                     ),
                   ),
-                  
+
                   // Vertical divider
-                  Container(
-                    width: 1,
-                    height: 30,
-                    color: Colors.grey.shade300,
-                  ),
-                  
+                  Container(width: 1, height: 30, color: Colors.grey.shade300),
+
                   // Filter Dropdown
                   Expanded(
                     flex: 1,
@@ -185,7 +206,11 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                         child: DropdownButton<String>(
                           value: _selectedFilter,
                           isExpanded: true,
-                          style: const TextStyle(fontSize: 13, color: Colors.black87),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: Colors.black87,
+                          ),
+                          dropdownColor: Colors.white,
                           onChanged: (String? newValue) {
                             if (newValue != null) {
                               setState(() {
@@ -193,11 +218,16 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                               });
                             }
                           },
-                          items: _filterOptions
-                              .map<DropdownMenuItem<String>>((String value) {
+                          items: _filterOptions.map<DropdownMenuItem<String>>((
+                            String value,
+                          ) {
                             return DropdownMenuItem<String>(
                               value: value,
-                              child: Text(value),
+                              //child: Text(value),
+                               child: Text(
+              value,
+              style: const TextStyle(color: Colors.black87), 
+            ),
                             );
                           }).toList(),
                         ),
@@ -213,17 +243,16 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
             // Notices count
             Text(
               '${_notices.length} notices found',
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
             ),
 
             const SizedBox(height: 16),
 
             // Notices list - REMOVED Expanded
             Column(
-              children: _notices.map((notice) => _buildNoticeCard(notice)).toList(),
+              children: _notices
+                  .map((notice) => _buildNoticeCard(notice))
+                  .toList(),
             ),
           ],
         ),
@@ -235,9 +264,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -295,7 +322,42 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
             const SizedBox(height: 12),
 
-            // Footer with date and sender
+            // Row(
+            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //   children: [
+            //     // Date and time
+            //     Row(
+            //       children: [
+            //         const Icon(Icons.access_time, size: 14, color: Colors.grey),
+            //         const SizedBox(width: 6),
+            //         Text(
+            //           '${notice.date} • ${notice.time}',
+            //           style: const TextStyle(
+            //             fontSize: 12,
+            //             color: Colors.grey,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+
+            //     // Sender
+            //     Row(
+            //       children: [
+            //         const Icon(Icons.person_outline, size: 14, color: Colors.grey),
+            //         const SizedBox(width: 4),
+            //         Text(
+            //           notice.sender,
+            //           style: const TextStyle(
+            //             fontSize: 12,
+            //             color: Colors.grey,
+            //             fontStyle: FontStyle.italic,
+            //           ),
+            //         ),
+            //       ],
+            //     ),
+            //   ],
+            // ),
+            // Footer with date, sender and view button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -306,28 +368,29 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                     const SizedBox(width: 6),
                     Text(
                       '${notice.date} • ${notice.time}',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
 
-                // Sender
-                Row(
-                  children: [
-                    const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-                    const SizedBox(width: 4),
-                    Text(
-                      notice.sender,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                        fontStyle: FontStyle.italic,
-                      ),
+                // View Button
+                ElevatedButton.icon(
+                  onPressed: () => _viewNoticeDetails(notice),
+                  icon: const Icon(Icons.remove_red_eye, size: 14),
+                  label: const Text('View'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue.shade50,
+                    foregroundColor: Colors.blue.shade700,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
                     ),
-                  ],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    elevation: 0,
+                    minimumSize: Size.zero,
+                  ),
                 ),
               ],
             ),
@@ -356,25 +419,13 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     print('Add new notice pressed');
     Navigator.push(context, MaterialPageRoute(builder: (context) => Notices()));
   }
-}
 
-// Notice model class
-class Notice {
-  final String id;
-  final String title;
-  final String message;
-  final String audience;
-  final String date;
-  final String time;
-  final String sender;
-
-  Notice({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.audience,
-    required this.date,
-    required this.time,
-    required this.sender,
-  });
+  void _viewNoticeDetails(Notice notice) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => NoticeDetailScreen(notice: notice),
+      ),
+    );
+  }
 }
