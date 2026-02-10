@@ -30,66 +30,62 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+
   cupertino_icons: ^1.0.2
   flutter_bloc: ^9.1.1
   flutx: ^0.2.0-rc.2
-  shared_preferences: ^2.1.1
   provider: ^6.0.5
+  shared_preferences: ^2.1.1
   url_launcher: ^6.3.1
-  google_maps_flutter: ^2.2.8
-
-  # Syncfusion
-  syncfusion_flutter_charts: ^30.2.4
-  syncfusion_flutter_maps: ^30.2.4
-  syncfusion_flutter_calendar: ^30.2.4
-
-  flutter_blurhash: ^0.8.2
-  feather_icons: ^1.2.0
   url_strategy: ^0.2.0
-
-  # IMPORTANT: Flutter-compatible intl
   intl: ^0.20.2
 
-  quill_html_editor: ^2.1.9
-  flutter_pagination: ^0.0.8
-  qr_flutter: ^4.1.0
-  file_picker: ^6.2.1
+  # UI & Utils
+  feather_icons: ^1.2.0
   font_awesome_flutter: ^10.4.0
-  table_calendar: ^3.0.9
-  maps_launcher: ^2.2.0
-  socket_io_client: ^2.0.2
-  get: ^4.6.5
-  appflowy_board: ^0.1.0
-  timelines: ^0.1.0
-  countup: ^0.1.4
-  image_picker: ^1.2.1
   lucide_icons: ^0.257.0
   google_fonts: ^5.1.0
   dotted_border: ^2.1.0
-  http: ^1.2.2
-  nb_utils: ^7.0.4
+  percent_indicator: ^4.2.4
+  linear_progress_bar: ^2.0.0+2
+  toastification: ^2.3.0
 
+  # Data & Network
+  dio: ^5.7.0
+  http: ^1.2.2
+  socket_io_client: ^2.0.2
+  equatable: ^2.0.8
+  get: ^4.6.5
+
+  # Firebase (Web-safe)
   firebase_core: ^3.4.1
   firebase_auth: ^5.2.1
   google_sign_in: ^6.2.1
+  nb_utils: ^7.0.4
 
-  toastification: ^2.3.0
-  flutter_typeahead: ^5.2.0
-  advance_pdf_viewer: ^2.0.0
-  form_builder_validators: ^11.0.0
-  dio: ^5.7.0
-  geolocator: ^13.0.2
-  super_tooltip: ^2.0.9
-  percent_indicator: ^4.2.4
-  flutter_countdown_timer: ^4.1.0
-  html: ^0.15.0
+  # Charts & Boards
   fl_chart: ^0.66.1
-  multi_progress_bar: ^0.1.9
-  open_file: ^3.5.10
+  syncfusion_flutter_charts: ^30.2.4
+  syncfusion_flutter_maps: ^30.2.4
+  syncfusion_flutter_calendar: ^30.2.4
+  appflowy_board: ^0.1.0
+  timelines: ^0.1.0
+  flutter_blurhash: ^0.8.2
+  image_picker: ^1.2.1
+
+  # Forms & Inputs
+  flutter_typeahead: ^5.2.0
+  form_builder_validators: ^11.0.0
+  multi_select_flutter: ^4.1.3
+  table_calendar: ^3.0.9
+  qr_flutter: ^4.1.0
+  file_picker: ^6.2.1
+
+  # Editors & HTML
+  quill_html_editor: ^2.1.9
+  html: ^0.15.0
   universal_html: ^2.0.11
-  linear_progress_bar: ^2.0.0+2
-  network_info_plus: ^4.1.0
-flutter_typeahead: ^5.2.0
+
 
 dev_dependencies:
   flutter_test:

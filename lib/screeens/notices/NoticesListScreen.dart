@@ -457,7 +457,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => NoticeDetailScreen(notice: notice),
+        builder: (context) => NoticeDetailScreen(notice: notice, noticeId: '',),
       ),
     );
   }

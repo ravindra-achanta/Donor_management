@@ -13,9 +13,9 @@ class NetworkService {
   static final NetworkService instance = NetworkService._();
 
   Future<Map<String, String>> _defaultHeaders() async {
-    // final token = await LocalStorage().getString("TOKEN");
-    final token =
-        "eyJhbGciOiJIUzI1NiJ9.eyJ1dWlkVG9rZW4iOiI5MzFlOWM4Mi1lMDhiLTQ2MTktOGVjMy1hNWJjYzQyOTA3OWEiLCJpZGVudGl0eUlkIjoiMSIsInVzZXJUeXBlIjoiU1VQRVJBRE1JTiIsImlhdCI6MTc2OTc3OTE3MywiZXhwIjoxNzcwMzgzOTczfQ.AzXljLvTirWjHZWRg7oN2DAm9S7NQucQ0SAMkk0tRKk";
+    final token = await Vikasdb().getString("TOKEN");
+    // final token =
+    //     "eyJhbGciOiJIUzI1NiJ9.eyJ1dWlkVG9rZW4iOiI5MzFlOWM4Mi1lMDhiLTQ2MTktOGVjMy1hNWJjYzQyOTA3OWEiLCJpZGVudGl0eUlkIjoiMSIsInVzZXJUeXBlIjoiU1VQRVJBRE1JTiIsImlhdCI6MTc2OTc3OTE3MywiZXhwIjoxNzcwMzgzOTczfQ.AzXljLvTirWjHZWRg7oN2DAm9S7NQucQ0SAMkk0tRKk";
     return {
       "Content-Type": "application/json",
       "Accept": "application/json",
