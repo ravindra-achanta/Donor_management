@@ -69,62 +69,62 @@ class _TopBarState extends State<TopBar>
                     ),
                   ),
                   FxSpacing.width(24),
-                  SizedBox(
-                    width: 190,
-                    child: Builder(
-                      builder: (context) {
-                        // Get the current theme
-                        final isDarkMode =
-                            Theme.of(context).brightness == Brightness.dark;
+                  // SizedBox(
+                  //   width: 190,
+                  //   child: Builder(
+                  //     builder: (context) {
+                  //       // Get the current theme
+                  //       final isDarkMode =
+                  //           Theme.of(context).brightness == Brightness.dark;
 
-                        return TextFormField(
-                          maxLines: 1,
-                          style: FxTextStyle.bodyMedium(
-                            color: isDarkMode
-                                ? Colors.white
-                                : Colors
-                                      .black, // Adjust text color based on theme
-                          ),
-                          decoration: InputDecoration(
-                            hintText: "Search",
-                            hintStyle: FxTextStyle.bodySmall(
-                              xMuted: true,
-                              color: isDarkMode
-                                  ? Colors.grey[400]
-                                  : Colors.grey, // Adjust hint text color
-                            ),
-                            border: outlineInputBorder,
-                            enabledBorder: outlineInputBorder,
-                            focusedBorder: focusedInputBorder,
+                  //       return TextFormField(
+                  //         maxLines: 1,
+                  //         style: FxTextStyle.bodyMedium(
+                  //           color: isDarkMode
+                  //               ? Colors.white
+                  //               : Colors
+                  //                     .black, // Adjust text color based on theme
+                  //         ),
+                  //         decoration: InputDecoration(
+                  //           hintText: "Search",
+                  //           hintStyle: FxTextStyle.bodySmall(
+                  //             xMuted: true,
+                  //             color: isDarkMode
+                  //                 ? Colors.grey[400]
+                  //                 : Colors.grey, // Adjust hint text color
+                  //           ),
+                  //           border: outlineInputBorder,
+                  //           enabledBorder: outlineInputBorder,
+                  //           focusedBorder: focusedInputBorder,
 
-                            // Background color based on the current theme
-                            filled: true,
-                            fillColor: isDarkMode
-                                ? const Color(
-                                    0xFF333333,
-                                  ) // Dark grey for dark mode
-                                : const Color(
-                                    0xFFF0F0F0,
-                                  ), // Light grey for light mode
-                            // Prefix icon for search field
-                            prefixIcon: const Align(
-                              alignment: Alignment.center,
-                              child: Icon(FeatherIcons.search, size: 14),
-                            ),
-                            prefixIconConstraints: const BoxConstraints(
-                              minWidth: 36,
-                              maxWidth: 36,
-                              minHeight: 32,
-                              maxHeight: 32,
-                            ),
-                            contentPadding: FxSpacing.xy(16, 12),
-                            isCollapsed: true,
-                            floatingLabelBehavior: FloatingLabelBehavior.never,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
+                  //           // Background color based on the current theme
+                  //           filled: true,
+                  //           fillColor: isDarkMode
+                  //               ? const Color(
+                  //                   0xFF333333,
+                  //                 ) // Dark grey for dark mode
+                  //               : const Color(
+                  //                   0xFFF0F0F0,
+                  //                 ), // Light grey for light mode
+                  //           // Prefix icon for search field
+                  //           prefixIcon: const Align(
+                  //             alignment: Alignment.center,
+                  //             child: Icon(FeatherIcons.search, size: 14),
+                  //           ),
+                  //           prefixIconConstraints: const BoxConstraints(
+                  //             minWidth: 36,
+                  //             maxWidth: 36,
+                  //             minHeight: 32,
+                  //             maxHeight: 32,
+                  //           ),
+                  //           contentPadding: FxSpacing.xy(16, 12),
+                  //           isCollapsed: true,
+                  //           floatingLabelBehavior: FloatingLabelBehavior.never,
+                  //         ),
+                  //       );
+                  //     },
+                  //   ),
+                  // ),
                 ],
               ),
               Expanded(

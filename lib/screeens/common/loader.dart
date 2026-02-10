@@ -7,10 +7,10 @@ class ScreenLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          SizedBox(height: 8),
-          CircularProgressIndicator(strokeWidth: 5, color: Colors.lightBlue),
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(strokeWidth: 4, color: Colors.lightBlue),
           SizedBox(height: 16),
           Text(
             'Loading ...',

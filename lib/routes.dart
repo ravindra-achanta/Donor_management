@@ -12,12 +12,13 @@ import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
 import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
 import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
+import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
-import 'package:vikas_app/screeens/users/users.dart';
+import 'package:vikas_app/screeens/users/users_list_page.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
 import 'package:vikas_app/screeens/visits/AddVisit.dart';
 import 'package:vikas_app/screeens/visits/ViewVisit.dart';
@@ -58,7 +59,6 @@ getPageRoute() {
     // ),
     GetPage(name: '/login', page: () => const LoginPage()),
     GetPage(name: '/dashboard', page: () => const Dashboard()),
-    
 
     GetPage(
       name: '/karyakarthas',
@@ -92,6 +92,10 @@ getPageRoute() {
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
+      name: '/karyakartha-view',
+      page: () => const KaryaKarthaViewScreen(memberId: ""),
+    ),
+    GetPage(
       name: '/profile-analytics',
       page: () => const ProfileAnalyticsScreen(),
     ),
@@ -105,12 +109,7 @@ getPageRoute() {
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
-     GetPage(
-  name: '/jeevandiview',
-  page: () => ViewJeevanadiScreen(), 
-),
-
-
+    GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
 
     // GetPage(
     //   name: '/dashboard',

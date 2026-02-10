@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
+import '../../screeens/models/response/jeevanadi_member.dart';
+
 enum JeevanaadiApiStatus { initial, loading, loaded, error }
 
 bool profileLoading = false;
@@ -17,6 +19,12 @@ class JeevanaadiState extends Equatable {
   final User? jeevanaadiProfile;
   final bool? profileLoading;
   final String? profileErrorMsg;
+  final JeevanadiMember? jeevanadiMember;
+  final List<User> assignedKaryakarthas;
+  final List<User> unassignedKaryakarthas;
+  final List<String> selectedUnassignedIds;
+  final bool isAssigning;
+  final bool isRemoving;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -30,6 +38,12 @@ class JeevanaadiState extends Equatable {
     this.jeevanaadiProfile,
     this.profileLoading = false,
     this.profileErrorMsg,
+    this.jeevanadiMember,
+    this.assignedKaryakarthas = const [],
+    this.unassignedKaryakarthas = const [],
+    this.selectedUnassignedIds = const [],
+    this.isAssigning = false,
+    this.isRemoving = false,
   });
 
   JeevanaadiState copyWith({
@@ -44,6 +58,12 @@ class JeevanaadiState extends Equatable {
     User? jeevanaadiProfile,
     bool? profileLoading,
     String? profileErrorMsg,
+    JeevanadiMember? jeevanadiMember,
+    List<User>? assignedKaryakarthas,
+    List<User>? unassignedKaryakarthas,
+    List<String>? selectedUnassignedIds,
+    bool? isAssigning,
+    bool? isRemoving,
   }) {
     return JeevanaadiState(
       delLoading: delLoading ?? this.delLoading,
@@ -57,6 +77,14 @@ class JeevanaadiState extends Equatable {
       jeevanaadiProfile: jeevanaadiProfile ?? this.jeevanaadiProfile,
       profileLoading: profileLoading ?? this.profileLoading,
       profileErrorMsg: profileErrorMsg ?? this.profileErrorMsg,
+      jeevanadiMember: jeevanadiMember ?? this.jeevanadiMember,
+      assignedKaryakarthas: assignedKaryakarthas ?? this.assignedKaryakarthas,
+      unassignedKaryakarthas:
+          unassignedKaryakarthas ?? this.unassignedKaryakarthas,
+      selectedUnassignedIds:
+          selectedUnassignedIds ?? this.selectedUnassignedIds,
+      isAssigning: isAssigning ?? this.isAssigning,
+      isRemoving: isRemoving ?? this.isRemoving,
     );
   }
 
@@ -73,5 +101,11 @@ class JeevanaadiState extends Equatable {
     jeevanaadiProfile,
     profileLoading,
     profileErrorMsg,
+    jeevanadiMember,
+    assignedKaryakarthas,
+    unassignedKaryakarthas,
+    selectedUnassignedIds,
+    isAssigning,
+    isRemoving,
   ];
 }

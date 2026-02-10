@@ -1,16 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:percent_indicator/circular_percent_indicator.dart';
+import 'package:percent_indicator/linear_percent_indicator.dart';
+import 'package:percent_indicator/multi_segment_linear_indicator.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
 
 class CommonList extends StatefulWidget {
   const CommonList({
     super.key,
+    required this.currentPage,
     required this.users,
     required this.onUserTap,
     required this.onDelete,
     required this.onUpdate,
+    this.screenType,
   });
 
   final List users;
+  final int currentPage;
+  final String? screenType;
   final Function(String id) onUserTap;
   final Function(String id) onDelete;
   final Function(String id) onUpdate;
@@ -30,8 +37,6 @@ class _CommonListState extends State<CommonList> {
         subtitle: 'There is no user data available to display.',
       );
     }
-
-    
 
     return Container(
       decoration: BoxDecoration(
@@ -58,59 +63,24 @@ class _CommonListState extends State<CommonList> {
               ),
             ),
             child: Row(
-              children: const [
-                Expanded(
-                  child: Text(
-                    'S.No',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Name',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    'Mobile',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: Text(
-                    'Email',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
-
-                Expanded(
-                  child: Text(
-                    'Actions',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 13,
-                      letterSpacing: 0.4,
-                    ),
-                  ),
-                ),
+              children: [
+                tableHeader('#'),
+                widget.screenType == 'DONATION'
+                    ? tableHeader('Amount')
+                    : tableHeader('Name'),
+                widget.screenType == 'DONATION'
+                    ? tableHeader('Donation type')
+                    : tableHeader('Mobile'),
+                widget.screenType == 'DONATION'
+                    ? tableHeader('Date')
+                    : tableHeader('Email'),
+                widget.screenType == 'DONATION'
+                    ? SizedBox.shrink()
+                    : tableHeader(
+                        widget.screenType == 'JEEVANADI'
+                            ? 'Profile %'
+                            : 'Actions',
+                      ),
               ],
             ),
           ),
@@ -151,78 +121,98 @@ class _CommonListState extends State<CommonList> {
                         ),
                         child: Row(
                           children: [
-                            Expanded(
-                              child: Text(
-                                (index + 1).toString(),
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
+                            tableData(
+                              "${widget.currentPage * 10 + (index + 1)}",
                             ),
-
-                            // 👤 Name
-                            Expanded(
-                              child: Text(
-                                user.name ?? "-",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-
-                            Expanded(
-                              child: Text(
-                                user.mobileNumber ?? "-",
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ),
-
-                            // ✉️ Email
-                            Expanded(
-                              child: Text(
-                                user.email ?? "-",
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: 13.5,
-                                  color: Colors.grey.shade700,
-                                ),
-                              ),
-                            ),
-
+                            widget.screenType == 'DONATION'
+                                ? tableData(
+                                    "${(index + 1 * 1000).toString()}/-",
+                                  )
+                                : tableData(user.name ?? "-"),
+                            widget.screenType == 'DONATION'
+                                ? tableData("Seva")
+                                : tableData(user.mobileNumber ?? "-"),
+                            widget.screenType == 'DONATION'
+                                ? tableData("2025-01-${index + 1}")
+                                : tableData(user.email ?? "-"),
                             // 🟢 Status Pill
                             // SizedBox(
                             //   width: 120,
                             //   child: _StatusPill(status: user.status),
                             // ),
-                            Expanded(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  HoverIconButton(
-                                    icon: Icons.delete_outline,
-                                    hoverColor: Colors.red.withOpacity(0.1),
-                                    iconColor: Colors.red,
-                                    onTap: () {
-                                      // delete logic
-                                    },
+                            widget.screenType == 'JEEVANADI'
+                                ? Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(right: 16),
+                                      child: Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          ClipRRect(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            child: LinearProgressIndicator(
+                                              value:
+                                                  index * 20 / 100, // 0.0 - 1.0
+                                              minHeight: 16,
+                                              backgroundColor:
+                                                  Colors.grey.shade300,
+                                              valueColor: index * 20 < 30
+                                                  ? AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.redAccent)
+                                                  : index * 20 < 60
+                                                  ? AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.blue)
+                                                  : AlwaysStoppedAnimation<
+                                                      Color
+                                                    >(Colors.green),
+                                            ),
+                                          ),
+                                          Text(
+                                            "${index * 20 / 100 * 100}%",
+                                            style: const TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                : widget.screenType == 'DONATION'
+                                ? SizedBox.shrink()
+                                : Expanded(
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        HoverIconButton(
+                                          icon: Icons.delete_outline,
+                                          hoverColor: Colors.red.withOpacity(
+                                            0.1,
+                                          ),
+                                          iconColor: Colors.red,
+                                          onTap: () {
+                                            widget.onDelete(user.id);
+                                          },
+                                        ),
+                                        const SizedBox(width: 10),
+                                        HoverIconButton(
+                                          icon: Icons.edit_outlined,
+                                          hoverColor: Colors.blue.withOpacity(
+                                            0.1,
+                                          ),
+                                          iconColor: Colors.blue,
+                                          onTap: () {
+                                            widget.onUpdate(user.id);
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                  const SizedBox(width: 10),
-                                  HoverIconButton(
-                                    icon: Icons.edit_outlined,
-                                    hoverColor: Colors.blue.withOpacity(0.1),
-                                    iconColor: Colors.blue,
-                                    onTap: () {
-                                      // edit logic
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
                           ],
                         ),
                       ),
@@ -233,6 +223,33 @@ class _CommonListState extends State<CommonList> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  tableHeader(String title) {
+    return Expanded(
+      child: Text(
+        title,
+        style: TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+          fontSize: 14,
+        ),
+      ),
+    );
+  }
+
+  tableData(String data) {
+    return Expanded(
+      child: Text(
+        data,
+        overflow: TextOverflow.ellipsis,
+        style: TextStyle(
+          color: Colors.grey.shade700,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }

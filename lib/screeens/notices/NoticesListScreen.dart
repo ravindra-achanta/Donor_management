@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vikas_app/screeens/common/notice_dilouge.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
@@ -224,10 +225,10 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                             return DropdownMenuItem<String>(
                               value: value,
                               //child: Text(value),
-                               child: Text(
-              value,
-              style: const TextStyle(color: Colors.black87), 
-            ),
+                              child: Text(
+                                value,
+                                style: const TextStyle(color: Colors.black87),
+                              ),
                             );
                           }).toList(),
                         ),
@@ -306,21 +307,53 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
               ],
             ),
 
-            const SizedBox(height: 10),
+            // const SizedBox(height: 10),
 
             // Message
-            Text(
-              notice.message,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color.fromARGB(255, 97, 97, 97),
-                height: 1.5,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
+            // Text(
+            //   notice.message,
+            //   style: const TextStyle(
+            //     fontSize: 14,
+            //     color: Color.fromARGB(255, 97, 97, 97),
+            //     height: 1.5,
+            //   ),
+            //   maxLines: 2,
+            //   overflow: TextOverflow.ellipsis,
+            // ),
 
             const SizedBox(height: 12),
+
+            Row(
+              mainAxisAlignment: .spaceBetween,
+              children: [
+                Text(
+                  notice.message,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Color.fromARGB(255, 97, 97, 97),
+                    height: 1.5,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+
+                IconButton(
+                  onPressed: () {
+                    NoticePopup.show(
+                      context: context,
+                      imageUrl:
+                          "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+                      title: "Scheduled System Maintenance",
+                      description:
+                          "Our platform will undergo scheduled maintenance today from 12:00 AM to 2:00 AM.\n"
+                          "During this time, some features may be temporarily unavailable.\n"
+                          "Thank you for your patience.",
+                    );
+                  },
+                  icon: Icon(Icons.remove_red_eye_outlined),
+                ),
+              ],
+            ),
 
             // Row(
             //   mainAxisAlignment: MainAxisAlignment.spaceBetween,

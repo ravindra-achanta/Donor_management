@@ -148,14 +148,14 @@ class _LeftBarState extends State<LeftBar>
 
                     NavigationItem(
                       iconData: LucideIcons.badgeCheck,
-                      title: "KARYAKARTHAS",
+                      title: "Karyakarthas",
                       isCondensed: isCondensed,
                       route: '/karyakarthas',
                     ),
 
                     NavigationItem(
                       iconData: LucideIcons.heartHandshake,
-                      title: "JEEVANADI MEMBERS",
+                      title: "Jeevanadi Members",
                       isCondensed: isCondensed,
                       route: '/jeevanadi',
                     ),
@@ -198,16 +198,12 @@ class _LeftBarState extends State<LeftBar>
                       route: '/profile',
                     ),
 
-                    NavigationItem(
-                      iconData: LucideIcons.userCog,
-                      title: "jeevandi view",
-                      isCondensed: isCondensed,
-                      route: '/jeevandiview',
-                    ),
-
-                    
-
-                    
+                    // NavigationItem(
+                    //   iconData: LucideIcons.userCog,
+                    //   title: "jeevandi view",
+                    //   isCondensed: isCondensed,
+                    //   route: '/jeevandiview',
+                    // ),
 
                     //-----------------employees-----------------//
 

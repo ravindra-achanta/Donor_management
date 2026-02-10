@@ -103,7 +103,9 @@ class _ViewVisitState extends State<ViewVisit> {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Visit record deleted for ${_getVisitValue('name')}'),
+                    content: Text(
+                      'Visit record deleted for ${_getVisitValue('name')}',
+                    ),
                     duration: const Duration(seconds: 2),
                   ),
                 );
@@ -174,20 +176,20 @@ class _ViewVisitState extends State<ViewVisit> {
                       //   ),
                       // ),
                       CircleAvatar(
-  radius: 40,
-  backgroundColor: Colors.blue.shade100,
-  child: Text(
-    (_getVisitValue('name').isNotEmpty
-            ? _getVisitValue('name')[0]
-            : 'U')
-        .toUpperCase(),
-    style: const TextStyle(
-      fontSize: 24,
-      fontWeight: FontWeight.bold,
-      color: Colors.blue,
-    ),
-  ),
-),
+                        radius: 40,
+                        backgroundColor: Colors.blue.shade100,
+                        child: Text(
+                          (_getVisitValue('name').isNotEmpty
+                                  ? _getVisitValue('name')[0]
+                                  : 'U')
+                              .toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
                     ],
                   ),
 
@@ -196,14 +198,14 @@ class _ViewVisitState extends State<ViewVisit> {
                   /// Member Information Section
                   const Text(
                     'Member Information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
-                  _buildDetailRow('Jeevandi Number', _getVisitValue('jeevandNum')),
+                  _buildDetailRow(
+                    'Jeevandi Number',
+                    _getVisitValue('jeevandNum'),
+                  ),
                   _buildDetailRow('Name', _getVisitValue('name')),
                   _buildDetailRow('Phone', _getVisitValue('phone')),
                   _buildDetailRow('Email', _getVisitValue('email')),
@@ -213,14 +215,14 @@ class _ViewVisitState extends State<ViewVisit> {
                   /// Visit Information Section
                   const Text(
                     'Visit Information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
-                  _buildDetailRow('Visit Purpose', _getVisitValue('visitPurpose')),
+                  _buildDetailRow(
+                    'Visit Purpose',
+                    _getVisitValue('visitPurpose'),
+                  ),
                   _buildDetailRow(
                     'Number of Guests',
                     _getVisitValue('noOfGuests', '0'),
@@ -231,10 +233,7 @@ class _ViewVisitState extends State<ViewVisit> {
                   /// Additional Information Section
                   const Text(
                     'Additional Information',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 16),
 
@@ -304,9 +303,7 @@ class _ViewVisitState extends State<ViewVisit> {
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text(
-                                'Edit visit for ${visit['name']}',
-                              ),
+                              content: Text('Edit visit for ${visit['name']}'),
                               duration: const Duration(seconds: 2),
                             ),
                           );

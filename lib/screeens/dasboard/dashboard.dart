@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vikas_app/screeens/common/notice_dilouge.dart';
 import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
@@ -14,7 +15,7 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   String selectedRange = "Week";
   bool _showAllChanges = false;
-  
+
   // Sample data for recent profile changes
   final List<ProfileChange> recentChanges = [
     ProfileChange(
@@ -63,6 +64,27 @@ class _DashboardState extends State<Dashboard> {
 
   List<ProfileChange> get displayedChanges {
     return _showAllChanges ? recentChanges : recentChanges.take(5).toList();
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callNotices();
+    });
+  }
+
+  callNotices() {
+    NoticePopup.show(
+      context: context,
+      imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+      title: "Scheduled System Maintenance",
+      description:
+          "Our platform will undergo scheduled maintenance today from 12:00 AM to 2:00 AM.\n"
+          "During this time, some features may be temporarily unavailable.\n"
+          "Thank you for your patience.",
+    );
   }
 
   @override
@@ -115,10 +137,7 @@ class _DashboardState extends State<Dashboard> {
           children: [
             const Text(
               "Recent Profile Changes",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             TextButton.icon(
               onPressed: () {
@@ -160,7 +179,10 @@ class _DashboardState extends State<Dashboard> {
             children: [
               // Table Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.grey.shade50,
                   borderRadius: const BorderRadius.only(
@@ -247,13 +269,13 @@ class _DashboardState extends State<Dashboard> {
               // Table Rows
               ...displayedChanges.map((change) {
                 return Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 18,
+                  ),
                   decoration: BoxDecoration(
                     border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey.shade100,
-                        width: 1,
-                      ),
+                      bottom: BorderSide(color: Colors.grey.shade100, width: 1),
                     ),
                   ),
                   child: Row(
@@ -329,8 +351,9 @@ class _DashboardState extends State<Dashboard> {
                               vertical: 6,
                             ),
                             decoration: BoxDecoration(
-                              color: _getPercentageColor(change.changePercentage)
-                                  .withOpacity(0.1),
+                              color: _getPercentageColor(
+                                change.changePercentage,
+                              ).withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Row(
@@ -340,7 +363,8 @@ class _DashboardState extends State<Dashboard> {
                                   Icons.trending_up,
                                   size: 14,
                                   color: _getPercentageColor(
-                                      change.changePercentage),
+                                    change.changePercentage,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
@@ -349,7 +373,8 @@ class _DashboardState extends State<Dashboard> {
                                     fontSize: 14,
                                     fontWeight: FontWeight.w600,
                                     color: _getPercentageColor(
-                                        change.changePercentage),
+                                      change.changePercentage,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -405,8 +430,10 @@ class _DashboardState extends State<Dashboard> {
               const SizedBox(height: 12),
               _buildDetailRow("Jeevandi Name:", change.jeevandiName),
               const SizedBox(height: 12),
-              _buildDetailRow("Profile Completion:",
-                  "${change.changePercentage}%"),
+              _buildDetailRow(
+                "Profile Completion:",
+                "${change.changePercentage}%",
+              ),
               const SizedBox(height: 16),
               Container(
                 height: 8,
@@ -431,10 +458,7 @@ class _DashboardState extends State<Dashboard> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text(
-              "Close",
-              style: TextStyle(fontSize: 14),
-            ),
+            child: const Text("Close", style: TextStyle(fontSize: 14)),
           ),
           ElevatedButton(
             onPressed: () {
