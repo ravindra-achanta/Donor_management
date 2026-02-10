@@ -4,10 +4,20 @@ import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
 class ListViewScreen extends StatefulWidget {
-  const ListViewScreen({super.key, required this.user, required this.onClose});
+  const ListViewScreen({
+    super.key,
+    required this.user,
+    required this.onClose,
+    required this.onViewMore,
+    required this.onDelete,
+    this.screenType,
+  });
 
   final User? user;
+  final String? screenType;
   final Function() onClose;
+  final Function() onViewMore;
+  final Function() onDelete;
 
   @override
   State<ListViewScreen> createState() => _ListViewScreenState();
@@ -36,7 +46,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
                         Icon(Icons.person, size: 28),
                         SizedBox(width: 8),
                         Text(
-                          "${widget.user?.name}`s Insigths",
+                          "${widget.user?.name} Demographic Info",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -88,17 +98,22 @@ class _ListViewScreenState extends State<ListViewScreen> {
 
                 Row(
                   children: [
-                    Expanded(
-                      child: OutlinedButton.icon(
-                        onPressed: () {},
-                        icon: const Icon(Icons.delete_outline),
-                        label: const Text('Delete'),
+                    if (widget.screenType != "JEEVANADI")
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            widget.onDelete();
+                          },
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Delete'),
+                        ),
                       ),
-                    ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton.icon(
-                        onPressed: () {},
+                        onPressed: () {
+                          widget.onViewMore();
+                        },
                         icon: const Icon(Icons.more_horiz),
                         label: const Text('View more'),
                       ),

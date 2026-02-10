@@ -21,7 +21,16 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
     FetchKaryakattasEvent event,
     Emitter<KaryakarthaState> emit,
   ) async {
-    emit(state.copyWith(status: KaryakattaApiStatus.loading));
+    emit(
+      state.copyWith(
+        status: KaryakattaApiStatus.loading,
+        isProfileViewVisible: false,
+      ),
+    );
+    await Future.delayed(const Duration(seconds: 1), () {
+      // Code to execute after a 3-second delay
+      // print("3 seconds have passed!");
+    });
     int size = 10;
 
     final response = await karyakattaRepo.getKaryakarthas(event.page, size);

@@ -1,12 +1,9 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/donations/DonationsListPage.dart';
 import 'package:vikas_app/screeens/jeevanadi/edit_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
-
 
 class ViewJeevanadiScreen extends StatelessWidget {
   final JeevanadiProfile? profile;
@@ -92,71 +89,80 @@ class ViewJeevanadiScreen extends StatelessWidget {
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com') ,User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com'),
-       User(
+      email: 'john.doe@example.com',
+    ),
+    User(
       uniqueId: 'UID123',
       userType: "Admin",
       status: "ACTIVE",
       id: '1',
       name: 'John Doe',
       mobileNumber: '1234567890',
-      email: 'john.doe@example.com')
-
+      email: 'john.doe@example.com',
+    ),
   ];
   @override
   Widget build(BuildContext context) {
@@ -191,8 +197,23 @@ class ViewJeevanadiScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            CommonList(users: users, onUserTap: (user) {
-            }, onDelete: (user) {}, onUpdate: (user) {})
+            Text(
+            "Donations ",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.brown,
+            ),
+          ),
+
+            CommonList(
+              users: users,
+              currentPage: 0,
+              onUserTap: (user) {},
+              onDelete: (user) {},
+              onUpdate: (user) {},
+              screenType: "DONATION",
+            ),
           ],
         ),
       ),
@@ -295,7 +316,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
               ),
             ),
           ),
-                  const SizedBox(width: 8),
+          const SizedBox(width: 8),
 
           //  ElevatedButton.icon(
           //   onPressed: () {

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
@@ -43,62 +45,92 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                   children: [
                     Expanded(
                       flex: 6,
-                      child: Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          children: [
-                            CommonList(
-                              users: state?.jeevanaadisMems ?? [],
-                              onUserTap: (id) {
-                                context.read<JeevanaadiBloc>().add(
-                                  FetchJeevanaadiProfileEvent(id),
-                                );
-                              },
-                              onDelete: (id) {},
-                              onUpdate: (id) {},
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Text(
+                                  "All Jeevanaadi Members",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                // AddButton().addButton(
+                                //   context: context,
+                                //   buttonText: "Add Karyakartha",
+                                //   onClicked: () {
+                                //     Get.toNamed('/register');
+                                //   },
+                                // ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 50),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      if (state!.currentPage > 0) {
-                                        context.read<JeevanaadiBloc>().add(
-                                          FetchJeevanaadisEvent(
-                                            (state?.currentPage ?? 0) - 1,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    icon: Icon(Icons.skip_previous_outlined),
-                                  ),
-                                  Text(
-                                    "${(state?.currentPage ?? 0) + 1}/${state?.totalpages}",
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      if (state!.currentPage <
-                                          state!.totalpages - 1) {
-                                        context.read<JeevanaadiBloc>().add(
-                                          FetchJeevanaadisEvent(
-                                            (state?.currentPage ?? 0) + 1,
-                                          ),
-                                        );
-                                      }
-                                    },
-                                    icon: Icon(Icons.skip_next_outlined),
-                                  ),
-                                  SizedBox(height: 16),
-                                ],
-                              ),
+                          ),
+                          Card(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          ],
-                        ),
+                            child: Column(
+                              children: [
+                                CommonList(
+                                  currentPage: state?.currentPage ?? 0,
+                                  users: state?.jeevanaadisMems ?? [],
+                                  onUserTap: (id) {
+                                    context.read<JeevanaadiBloc>().add(
+                                      FetchJeevanaadiProfileEvent(id),
+                                    );
+                                  },
+                                  screenType: "JEEVANADI",
+                                  onDelete: (id) {},
+                                  onUpdate: (id) {},
+                                ),
+                                // const SizedBox(height: 16),
+                                Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 50),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      IconButton(
+                                        onPressed: () {
+                                          if (state!.currentPage > 0) {
+                                            context.read<JeevanaadiBloc>().add(
+                                              FetchJeevanaadisEvent(
+                                                (state?.currentPage ?? 0) - 1,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        icon: Icon(
+                                          Icons.skip_previous_outlined,
+                                        ),
+                                      ),
+                                      Text(
+                                        "${(state?.currentPage ?? 0) + 1}/${state?.totalpages}",
+                                      ),
+                                      IconButton(
+                                        onPressed: () {
+                                          if (state!.currentPage <
+                                              state!.totalpages - 1) {
+                                            context.read<JeevanaadiBloc>().add(
+                                              FetchJeevanaadisEvent(
+                                                (state?.currentPage ?? 0) + 1,
+                                              ),
+                                            );
+                                          }
+                                        },
+                                        icon: Icon(Icons.skip_next_outlined),
+                                      ),
+                                      SizedBox(height: 16),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     if (state?.isProfileViewVisible == true &&
@@ -157,6 +189,11 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                     context.read<JeevanaadiBloc>().add(
                                       CloseProfileView(),
                                     );
+                                  },
+                                  screenType: "JEEVANADI",
+                                  onDelete: () {},
+                                  onViewMore: () {
+                                    Get.toNamed('/jeevandiview');
                                   },
                                 ),
                         ),
