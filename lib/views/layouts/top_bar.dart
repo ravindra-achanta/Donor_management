@@ -31,9 +31,9 @@ class _TopBarState extends State<TopBar>
   bool isMenuVisible = true;
 
   String empId = "";
-  String likeCount = LocalStorage().getString("HEART");
-  String punchesCount = LocalStorage().getString("PUNCH");
-  String rewardPoints = LocalStorage().getString("REWARD");
+  String likeCount = Vikasdb().getString("HEART");
+  String punchesCount = Vikasdb().getString("PUNCH");
+  String rewardPoints = Vikasdb().getString("REWARD");
 
   @override
   Widget build(BuildContext context) {
@@ -69,62 +69,62 @@ class _TopBarState extends State<TopBar>
                     ),
                   ),
                   FxSpacing.width(24),
-                  // SizedBox(
-                  //   width: 190,
-                  //   child: Builder(
-                  //     builder: (context) {
-                  //       // Get the current theme
-                  //       final isDarkMode =
-                  //           Theme.of(context).brightness == Brightness.dark;
+                  SizedBox(
+                    width: 190,
+                    child: Builder(
+                      builder: (context) {
+                        // Get the current theme
+                        final isDarkMode =
+                            Theme.of(context).brightness == Brightness.dark;
 
-                  //       return TextFormField(
-                  //         maxLines: 1,
-                  //         style: FxTextStyle.bodyMedium(
-                  //           color: isDarkMode
-                  //               ? Colors.white
-                  //               : Colors
-                  //                     .black, // Adjust text color based on theme
-                  //         ),
-                  //         decoration: InputDecoration(
-                  //           hintText: "Search",
-                  //           hintStyle: FxTextStyle.bodySmall(
-                  //             xMuted: true,
-                  //             color: isDarkMode
-                  //                 ? Colors.grey[400]
-                  //                 : Colors.grey, // Adjust hint text color
-                  //           ),
-                  //           border: outlineInputBorder,
-                  //           enabledBorder: outlineInputBorder,
-                  //           focusedBorder: focusedInputBorder,
+                        return TextFormField(
+                          maxLines: 1,
+                          style: FxTextStyle.bodyMedium(
+                            color: isDarkMode
+                                ? Colors.white
+                                : Colors
+                                      .black, // Adjust text color based on theme
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Search",
+                            hintStyle: FxTextStyle.bodySmall(
+                              xMuted: true,
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey, // Adjust hint text color
+                            ),
+                            border: outlineInputBorder,
+                            enabledBorder: outlineInputBorder,
+                            focusedBorder: focusedInputBorder,
 
-                  //           // Background color based on the current theme
-                  //           filled: true,
-                  //           fillColor: isDarkMode
-                  //               ? const Color(
-                  //                   0xFF333333,
-                  //                 ) // Dark grey for dark mode
-                  //               : const Color(
-                  //                   0xFFF0F0F0,
-                  //                 ), // Light grey for light mode
-                  //           // Prefix icon for search field
-                  //           prefixIcon: const Align(
-                  //             alignment: Alignment.center,
-                  //             child: Icon(FeatherIcons.search, size: 14),
-                  //           ),
-                  //           prefixIconConstraints: const BoxConstraints(
-                  //             minWidth: 36,
-                  //             maxWidth: 36,
-                  //             minHeight: 32,
-                  //             maxHeight: 32,
-                  //           ),
-                  //           contentPadding: FxSpacing.xy(16, 12),
-                  //           isCollapsed: true,
-                  //           floatingLabelBehavior: FloatingLabelBehavior.never,
-                  //         ),
-                  //       );
-                  //     },
-                  //   ),
-                  // ),
+                            // Background color based on the current theme
+                            filled: true,
+                            fillColor: isDarkMode
+                                ? const Color(
+                                    0xFF333333,
+                                  ) // Dark grey for dark mode
+                                : const Color(
+                                    0xFFF0F0F0,
+                                  ), // Light grey for light mode
+                            // Prefix icon for search field
+                            prefixIcon: const Align(
+                              alignment: Alignment.center,
+                              child: Icon(FeatherIcons.search, size: 14),
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 36,
+                              maxWidth: 36,
+                              minHeight: 32,
+                              maxHeight: 32,
+                            ),
+                            contentPadding: FxSpacing.xy(16, 12),
+                            isCollapsed: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
               Expanded(
@@ -346,7 +346,7 @@ class _TopBarState extends State<TopBar>
                             FxContainer.rounded(
                               paddingAll: 0,
                               child: Image.network(
-                                LocalStorage().getString("USER_PROFILE"),
+                                Vikasdb().getString("USER_PROFILE"),
                                 height: 28,
                                 width: 28,
                                 fit: BoxFit.cover,
@@ -356,7 +356,7 @@ class _TopBarState extends State<TopBar>
                             ),
                             FxSpacing.width(8),
                             FxText.labelLarge(
-                              LocalStorage().getString("USER_NAME"),
+                              Vikasdb().getString("USER_NAME"),
                             ),
                           ],
                         ),
@@ -494,9 +494,9 @@ class _TopBarState extends State<TopBar>
   }
 
   Widget buildAccountMenu() {
-    (LocalStorage().getString("USER_TYPE") == "ADMIN")
-        ? empId = LocalStorage().getString("ADMIN_ID")
-        : LocalStorage().getString("ID");
+    (Vikasdb().getString("USER_TYPE") == "ADMIN")
+        ? empId = Vikasdb().getString("ADMIN_ID")
+        : Vikasdb().getString("ID");
 
     return FxContainer.bordered(
       paddingAll: 0,
@@ -603,7 +603,7 @@ class _TopBarState extends State<TopBar>
               onPressed: () {
                 setState(() {
                   isMenuVisible = false; // Hide the menu
-                  LocalStorage.sharedPreferences!.clear();
+                  Vikasdb.sharedPreferences!.clear();
                 });
 
                 // Add a slight delay to ensure the UI updates

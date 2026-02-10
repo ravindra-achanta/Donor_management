@@ -12,7 +12,8 @@ class RegistrationPage extends StatefulWidget {
 class _RegistrationPageState extends State<RegistrationPage> {
   final _formKey = GlobalKey<FormState>();
 
-  final TextEditingController nameCtrl = TextEditingController();
+  final TextEditingController firstNameCtrl = TextEditingController();
+  final TextEditingController lastNameCtrl = TextEditingController();
   final TextEditingController emailCtrl = TextEditingController();
   final TextEditingController mobileCtrl = TextEditingController();
   final TextEditingController pincodeCtrl = TextEditingController();
@@ -20,6 +21,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController areaCtrl = TextEditingController();
   final TextEditingController stateCtrl = TextEditingController();
   final TextEditingController countryCtrl = TextEditingController();
+  final TextEditingController startDateCtrl = TextEditingController();
 
   final List<Map<String, String>> userTypes = [
     {"label": "SUPER ADMIN", "value": "SUPER_ADMIN"},
@@ -28,7 +30,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
     {"label": "OFFICE STAFF", "value": "OFFICE_STAFF"},
   ];
 
-  String userType = "SUPER_ADMIN";
+  //String userType = "SUPER_ADMIN";
+  List<String> selectedRoles = [];
 
   @override
   Widget build(BuildContext context) {
@@ -82,22 +85,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                     const SizedBox(height: 16),
                     rowFields(
-                      _input(nameCtrl, "Full Name", lettersOnly: true),
+                      _input(firstNameCtrl, "First Name", lettersOnly: true),
+                      _input(lastNameCtrl, "Last Name", lettersOnly: true),
+                    ),
+
+                    rowFields(
                       _input(
                         emailCtrl,
                         "Email",
                         keyboardType: TextInputType.emailAddress,
                       ),
-                    ),
-                    rowFields(
                       _input(
                         mobileCtrl,
                         "Mobile Number",
                         keyboardType: TextInputType.phone,
                         numbersOnly: true,
                       ),
-                      _dropdown(userType, "User Type", userTypes),
                     ),
+
+                    rowFields(_multiSelectRoleField(), _startDateField()),
 
                     const SizedBox(height: 12),
                     const Text(
@@ -109,20 +115,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     ),
                     const SizedBox(height: 16),
                     rowFields(
+                      _input(areaCtrl, "Area", lettersOnly: true),
+
+                      _input(cityCtrl, "City", lettersOnly: true),
+                    ),
+                    rowFields(
+                      _input(stateCtrl, "State", lettersOnly: true),
+                      _input(countryCtrl, "Country", lettersOnly: true),
+                    ),
+                    rowFields(
                       _input(
                         pincodeCtrl,
                         "Pincode",
                         keyboardType: TextInputType.number,
                         numbersOnly: true,
                       ),
-                      _input(cityCtrl, "City", lettersOnly: true),
-                    ),
-                    rowFields(
-                      _input(areaCtrl, "Area", lettersOnly: true),
-                      _input(stateCtrl, "State", lettersOnly: true),
-                    ),
-                    rowFields(
-                      _input(countryCtrl, "Country", lettersOnly: true),
                       const SizedBox(),
                     ),
 
@@ -245,7 +252,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
               ),
             )
             .toList(),
-        onChanged: (val) => setState(() => userType = val!),
+        onChanged: (val) => setState(() => selectedRoles.add(val!)),
         validator: (val) =>
             val == null || val.isEmpty ? 'Please select $label' : null,
       ),
@@ -255,7 +262,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget _registerButton() {
     return Expanded(
       child: SizedBox(
-        height: 45, 
+        height: 45,
         child: ElevatedButton(
           onPressed: _submit,
           style: ElevatedButton.styleFrom(
@@ -268,10 +275,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
           child: const Text(
             "Register",
-            style: TextStyle(
-              fontSize: 14, 
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -288,17 +292,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
             backgroundColor: Colors.white,
             foregroundColor: Colors.grey[700],
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8), 
+              borderRadius: BorderRadius.circular(8),
               side: BorderSide(color: Colors.grey[400]!, width: 1),
             ),
             elevation: 1,
           ),
           child: const Text(
             "Cancel",
-            style: TextStyle(
-              fontSize: 14, 
-              fontWeight: FontWeight.w600,
-            ),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
       ),
@@ -309,10 +310,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
     if (!_formKey.currentState!.validate()) return;
 
     final payload = {
-      "name": nameCtrl.text.trim(),
+      "firstName": firstNameCtrl.text.trim(),
+      "lastName": lastNameCtrl.text.trim(),
       "email": emailCtrl.text.trim(),
       "mobileNumber": mobileCtrl.text.trim(),
-      "userType": userType,
+      "userType": selectedRoles,
+      "startDate": startDateCtrl.text.trim(),
       "pincode": pincodeCtrl.text.trim(),
       "city": cityCtrl.text.trim(),
       "area": areaCtrl.text.trim(),
@@ -326,6 +329,183 @@ class _RegistrationPageState extends State<RegistrationPage> {
   void _cancel() {
     _formKey.currentState?.reset();
     // Or navigate back to previous screen
-    // Navigator.pop(context);
+     Navigator.pop(context);
+  }
+
+  Widget _startDateField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: TextFormField(
+        controller: startDateCtrl,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: "Start Date",
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          suffixIcon: const Icon(Icons.calendar_today, size: 18),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+        ),
+        onTap: () async {
+          final pickedDate = await showDatePicker(
+            context: context,
+            initialDate: DateTime.now(),
+            firstDate: DateTime.now(),
+            lastDate: DateTime(2050),
+          );
+
+          if (pickedDate != null) {
+            startDateCtrl.text =
+                "${pickedDate.day.toString().padLeft(2, '0')}-"
+                "${pickedDate.month.toString().padLeft(2, '0')}-"
+                "${pickedDate.year}";
+          }
+        },
+        validator: (value) =>
+            value == null || value.isEmpty ? "Start Date is required" : null,
+      ),
+    );
+  }
+
+  Widget _multiSelectRoleField() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap: () async {
+              await showModalBottomSheet(
+                context: context,
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent, 
+                builder: (context) {
+                  return StatefulBuilder(
+                    builder: (context, setModalState) {
+                      return Align(
+                        alignment: Alignment.topCenter,
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                            horizontal: 24,
+                            vertical: 8,
+                          ),
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(color: Colors.black26, blurRadius: 8),
+                            ],
+                          ),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Text(
+                                "Select Role(s)",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ...userTypes.map((role) {
+                                final isSelected = selectedRoles.contains(
+                                  role["value"],
+                                );
+                                return CheckboxListTile(
+                                  title: Text(role["label"] ?? "Unknown"),
+                                  value: isSelected,
+                                  controlAffinity:
+                                      ListTileControlAffinity.trailing,
+                                  contentPadding: EdgeInsets.zero,
+                                  dense: true,
+                                  onChanged: (val) {
+                                    setModalState(() {
+                                      if (val == true) {
+                                        if (!selectedRoles.contains(
+                                          role["value"],
+                                        )) {
+                                          selectedRoles.add(role["value"]!);
+                                        }
+                                      } else {
+                                        selectedRoles.remove(role["value"]);
+                                      }
+                                    });
+                                    setState(() {}); 
+                                  },
+                                );
+                              }).toList(),
+                              const SizedBox(height: 12),
+                              Align(
+                                alignment: Alignment.centerRight,
+                                child: TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Done"),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                },
+              );
+            },
+            child: AbsorbPointer(
+              child: TextFormField(
+                decoration: InputDecoration(
+                  labelText: "Role",
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  hintText: "Select Role(s)",
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                ),
+                validator: (value) =>
+                    selectedRoles.isEmpty ? 'Select at least 1 role' : null,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          if (selectedRoles.isNotEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.grey.shade400),
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade100,
+              ),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 4,
+                children: selectedRoles.map((id) {
+                  final label = userTypes.firstWhere(
+                    (e) => e["value"] == id,
+                    orElse: () => {"label": "Unknown", "value": id},
+                  )["label"];
+                  return Chip(
+                    label: Text(label ?? "Unknown"),
+                    onDeleted: () {
+                      setState(() {
+                        selectedRoles.remove(id);
+                      });
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }

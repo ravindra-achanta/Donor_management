@@ -19,7 +19,7 @@ class BaseController {
   }
 
   bool isAuthorizationExpired() {
-    String token = LocalStorage().getString("TOKEN");
+    String token = Vikasdb().getString("TOKEN");
 
     if (!token.isEmptyOrNull) {
       // Decode the JWT token
@@ -92,7 +92,7 @@ class BaseController {
   // }
 
   String getCurrentUserType() {
-    String userType = LocalStorage().getString('USER_TYPE');
+    String userType = Vikasdb().getString('USER_TYPE');
     print("PRINT USER TYPE-----$userType");
     if (!userType.isEmptyOrNull) {
       return userType;

@@ -316,15 +316,26 @@ class _DhramSetuScreenState extends State<DhramSetuScreen> {
                                     ),
                                     onPressed: () {
                                       // TODO: Navigate to edit dharmasetu page
-                                      if (context.mounted) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                                'Edit feature coming soon for ${dharma.name}'),
-                                          ),
-                                        );
-                                      }
+                                      // if (context.mounted) {
+                                      //   ScaffoldMessenger.of(context)
+                                      //       .showSnackBar(
+                                      //     SnackBar(
+                                      //       content: Text(
+                                      //           'Edit feature coming soon for ${dharma.name}'),
+                                      //     ),
+                                      //   );
+                                      // }
+                                      Get.toNamed('/edit/dharmasetu', arguments: {
+      'id': dharma.id,
+      'uid': dharma.uid,
+      'type': dharma.type,
+      'name': dharma.name,
+      'feedback': dharma.feedback,
+      'date': dharma.date,
+      'referredBy': dharma.referredBy,
+      'status': dharma.status,
+    });
+                                      
                                     },
                                   ),
                                   IconButton(

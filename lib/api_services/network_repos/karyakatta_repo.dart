@@ -9,7 +9,7 @@ class KaryakattaRepo {
 
   Future<ApiResult<PaginatedView>> getKaryakarthas(int page, int size) async {
     final result = await _api.get(
-      "${ApiConstants.GET_KARYAKARTHAS}?page=${page}&size=${size}",
+      "${ApiConstants.GET_KARYAKARTHAS}?userType=KARYAKARTHA&page=${page}&size=${size}",
     );
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);

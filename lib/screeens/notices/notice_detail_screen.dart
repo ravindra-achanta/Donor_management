@@ -6,7 +6,7 @@ import '../models/request/notice.dart';
 class NoticeDetailScreen extends StatelessWidget {
   final Notice notice;
 
-  const NoticeDetailScreen({Key? key, required this.notice}) : super(key: key);
+  const NoticeDetailScreen({Key? key, required this.notice, required String noticeId}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
