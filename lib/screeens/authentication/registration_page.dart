@@ -1,9 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_event.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_state.dart';
+import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/screeens/models/request/identity_request.dart';
+import 'package:vikas_app/screeens/models/response/role_response.dart';
 
 class RegistrationPage extends StatefulWidget {
-  const RegistrationPage({super.key});
+  //const RegistrationPage({super.key});
+final String title;
+  final RegistrationType type;
+
+  const RegistrationPage({
+    super.key,
+    required this.title,
+    required this.type,
+  });
 
   @override
   State<RegistrationPage> createState() => _RegistrationPageState();
@@ -23,150 +39,122 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController countryCtrl = TextEditingController();
   final TextEditingController startDateCtrl = TextEditingController();
 
-  final List<Map<String, String>> userTypes = [
-    {"label": "SUPER ADMIN", "value": "SUPER_ADMIN"},
-    {"label": "ADMIN", "value": "ADMIN"},
-    {"label": "KARYAKARTHA", "value": "KARYAKARTHA"},
-    {"label": "OFFICE STAFF", "value": "OFFICE_STAFF"},
-  ];
+  List<Role> selectedRoles = [];
 
-  //String userType = "SUPER_ADMIN";
-  List<String> selectedRoles = [];
+  @override
+  void initState() {
+    super.initState();
+    startDateCtrl.text = _formatDate(DateTime.now());
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
+  }
+
+  @override
+  void dispose() {
+    firstNameCtrl.dispose();
+    lastNameCtrl.dispose();
+    emailCtrl.dispose();
+    mobileCtrl.dispose();
+    pincodeCtrl.dispose();
+    cityCtrl.dispose();
+    areaCtrl.dispose();
+    stateCtrl.dispose();
+    countryCtrl.dispose();
+    startDateCtrl.dispose();
+    super.dispose();
+  }
+
+  void _clearForm() {
+    _formKey.currentState?.reset();
+    setState(() {
+      selectedRoles.clear();
+      startDateCtrl.text = _formatDate(DateTime.now());
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    final isWideScreen = MediaQuery.of(context).size.width > 700;
-
-    Widget rowFields(Widget first, Widget second) {
-      return isWideScreen
-          ? Row(
-              children: [
-                Expanded(child: first),
-                const SizedBox(width: 16),
-                Expanded(child: second),
-              ],
-            )
-          : Column(children: [first, second]);
-    }
-
-    return Layout(
-      child: Center(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Card(
-            elevation: 5,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(32),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      "Register New User",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    const Divider(thickness: 1),
-                    const SizedBox(height: 16),
-
-                    const Text(
-                      "Personal Information",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    rowFields(
-                      _input(firstNameCtrl, "First Name", lettersOnly: true),
-                      _input(lastNameCtrl, "Last Name", lettersOnly: true),
-                    ),
-
-                    rowFields(
-                      _input(
-                        emailCtrl,
-                        "Email",
-                        keyboardType: TextInputType.emailAddress,
-                      ),
-                      _input(
-                        mobileCtrl,
-                        "Mobile Number",
-                        keyboardType: TextInputType.phone,
-                        numbersOnly: true,
-                      ),
-                    ),
-
-                    rowFields(_multiSelectRoleField(), _startDateField()),
-
-                    const SizedBox(height: 12),
-                    const Text(
-                      "Address Information",
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    rowFields(
-                      _input(areaCtrl, "Area", lettersOnly: true),
-
-                      _input(cityCtrl, "City", lettersOnly: true),
-                    ),
-                    rowFields(
-                      _input(stateCtrl, "State", lettersOnly: true),
-                      _input(countryCtrl, "Country", lettersOnly: true),
-                    ),
-                    rowFields(
-                      _input(
-                        pincodeCtrl,
-                        "Pincode",
-                        keyboardType: TextInputType.number,
-                        numbersOnly: true,
-                      ),
-                      const SizedBox(),
-                    ),
-
-                    const SizedBox(height: 22),
-
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: Container(
-                        width: MediaQuery.of(context).size.width > 600
-                            ? 430
-                            : double.infinity,
-                        child: isWideScreen
-                            ? Row(
-                                children: [
-                                  _cancelButton(),
-                                  const SizedBox(width: 16),
-                                  _registerButton(),
-                                ],
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  _registerButton(),
-                                  const SizedBox(height: 12),
-                                  _cancelButton(),
-                                ],
-                              ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
+    return BlocProvider(
+      create: (_) => AuthBloc(authRepository: AuthRepository()),
+      child: _RegistrationFormContent(
+        title: widget.title,
+        type: widget.type,
+        formKey: _formKey,
+        firstNameCtrl: firstNameCtrl,
+        lastNameCtrl: lastNameCtrl,
+        emailCtrl: emailCtrl,
+        mobileCtrl: mobileCtrl,
+        pincodeCtrl: pincodeCtrl,
+        cityCtrl: cityCtrl,
+        areaCtrl: areaCtrl,
+        stateCtrl: stateCtrl,
+        countryCtrl: countryCtrl,
+        startDateCtrl: startDateCtrl,
+        selectedRoles: selectedRoles,
+        onRolesUpdated: (List<Role> updatedList) {
+          setState(() {
+            selectedRoles = updatedList;
+          });
+        },
+        onClearForm: _clearForm,
       ),
     );
+  }
+}
+
+class _RegistrationFormContent extends StatefulWidget {
+  final GlobalKey<FormState> formKey;
+  final String title;
+  final TextEditingController firstNameCtrl;
+  final TextEditingController lastNameCtrl;
+  final TextEditingController emailCtrl;
+  final TextEditingController mobileCtrl;
+  final TextEditingController pincodeCtrl;
+  final TextEditingController cityCtrl;
+  final TextEditingController areaCtrl;
+  final TextEditingController stateCtrl;
+  final TextEditingController countryCtrl;
+  final TextEditingController startDateCtrl;
+  final List<Role> selectedRoles;
+  final Function(List<Role>) onRolesUpdated;
+  final VoidCallback onClearForm;
+  
+  final dynamic type;
+
+  const _RegistrationFormContent({
+    required this.title,
+required this.type,
+    required this.formKey,
+    required this.firstNameCtrl,
+    required this.lastNameCtrl,
+    required this.emailCtrl,
+    required this.mobileCtrl,
+    required this.pincodeCtrl,
+    required this.cityCtrl,
+    required this.areaCtrl,
+    required this.stateCtrl,
+    required this.countryCtrl,
+    required this.startDateCtrl,
+    required this.selectedRoles,
+    required this.onRolesUpdated,
+    required this.onClearForm,
+  });
+
+  @override
+  State<_RegistrationFormContent> createState() => _RegistrationFormContentState();
+}
+
+class _RegistrationFormContentState extends State<_RegistrationFormContent> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<AuthBloc>().add(FetchRolesEvent());
+  }
+
+  String _formatDate(DateTime date) {
+    return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
   Widget _input(
@@ -175,12 +163,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
     TextInputType keyboardType = TextInputType.text,
     bool lettersOnly = false,
     bool numbersOnly = false,
+    bool isLoading = false,
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
+        enabled: !isLoading,
         inputFormatters: [
           if (lettersOnly)
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
@@ -212,9 +202,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
             return 'Pincode must be 6 digits';
           }
           if (label == "Email" &&
-              !RegExp(
-                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-              ).hasMatch(value.trim())) {
+              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
             return 'Enter a valid email';
           }
           return null;
@@ -223,48 +211,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  Widget _dropdown(
-    String value,
-    String label,
-    List<Map<String, String>> items,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        value: value,
-        decoration: InputDecoration(
-          labelText: label,
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 12,
-          ),
-        ),
-        dropdownColor: Colors.white,
-        style: const TextStyle(color: Colors.black),
-        items: items
-            .map(
-              (item) => DropdownMenuItem<String>(
-                value: item["value"],
-                child: Text(item["label"]!),
-              ),
-            )
-            .toList(),
-        onChanged: (val) => setState(() => selectedRoles.add(val!)),
-        validator: (val) =>
-            val == null || val.isEmpty ? 'Please select $label' : null,
-      ),
-    );
-  }
-
-  Widget _registerButton() {
+  Widget _registerButton(BuildContext context, bool isLoading) {
     return Expanded(
       child: SizedBox(
         height: 45,
         child: ElevatedButton(
-          onPressed: _submit,
+          onPressed: isLoading ? null : () => _submit(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF8D6E63),
             foregroundColor: Colors.white,
@@ -273,21 +225,30 @@ class _RegistrationPageState extends State<RegistrationPage> {
             ),
             elevation: 3,
           ),
-          child: const Text(
-            "Register",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          ),
+          child: isLoading
+              ? const SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : const Text(
+                  "Register",
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                ),
         ),
       ),
     );
   }
 
-  Widget _cancelButton() {
+  Widget _cancelButton(BuildContext context, bool isLoading) {
     return Expanded(
       child: SizedBox(
         height: 45,
         child: ElevatedButton(
-          onPressed: _cancel,
+          onPressed: isLoading ? null : () => _cancel(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.white,
             foregroundColor: Colors.grey[700],
@@ -306,38 +267,51 @@ class _RegistrationPageState extends State<RegistrationPage> {
     );
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
+  void _submit(BuildContext context) {
+    if (!widget.formKey.currentState!.validate()) return;
 
-    final payload = {
-      "firstName": firstNameCtrl.text.trim(),
-      "lastName": lastNameCtrl.text.trim(),
-      "email": emailCtrl.text.trim(),
-      "mobileNumber": mobileCtrl.text.trim(),
-      "userType": selectedRoles,
-      "startDate": startDateCtrl.text.trim(),
-      "pincode": pincodeCtrl.text.trim(),
-      "city": cityCtrl.text.trim(),
-      "area": areaCtrl.text.trim(),
-      "state": stateCtrl.text.trim(),
-      "country": countryCtrl.text.trim(),
-    };
+    if (widget.selectedRoles.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one role'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
-    debugPrint(payload.toString());
+    final List<int> roleIds = widget.selectedRoles
+        .map((role) => int.parse(role.id))
+        .toList();
+
+    final request = IdentityRequest(
+      name: "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+      email: widget.emailCtrl.text.trim(),
+      mobileNumber: widget.mobileCtrl.text.trim(),
+      roles: roleIds,
+      startedDate: widget.startDateCtrl.text.trim(),
+      pincode: widget.pincodeCtrl.text.trim(),
+      city: widget.cityCtrl.text.trim(),
+      area: widget.areaCtrl.text.trim(),
+      state: widget.stateCtrl.text.trim(),
+      country: widget.countryCtrl.text.trim(),
+    );
+
+    context.read<AuthBloc>().add(CreateUserEvent(request: request));
   }
 
-  void _cancel() {
-    _formKey.currentState?.reset();
-    // Or navigate back to previous screen
-     Navigator.pop(context);
+  void _cancel(BuildContext context) {
+    widget.onClearForm();
+    Navigator.pop(context);
   }
 
-  Widget _startDateField() {
+  Widget _startDateField(bool isLoading, BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
-        controller: startDateCtrl,
+        controller: widget.startDateCtrl,
         readOnly: true,
+        enabled: !isLoading,
         decoration: InputDecoration(
           labelText: "Start Date",
           filled: true,
@@ -349,114 +323,131 @@ class _RegistrationPageState extends State<RegistrationPage> {
             vertical: 12,
           ),
         ),
-        onTap: () async {
-          final pickedDate = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime.now(),
-            lastDate: DateTime(2050),
-          );
-
-          if (pickedDate != null) {
-            startDateCtrl.text =
-                "${pickedDate.day.toString().padLeft(2, '0')}-"
-                "${pickedDate.month.toString().padLeft(2, '0')}-"
-                "${pickedDate.year}";
-          }
-        },
+        onTap: isLoading
+            ? null
+            : () async {
+                final pickedDate = await showDatePicker(
+                  context: context,
+                  initialDate: DateTime.now(),
+                  firstDate: DateTime(2000),
+                  lastDate: DateTime(2050),
+                );
+                if (pickedDate != null) {
+                  widget.startDateCtrl.text = _formatDate(pickedDate);
+                }
+              },
         validator: (value) =>
             value == null || value.isEmpty ? "Start Date is required" : null,
       ),
     );
   }
 
-  Widget _multiSelectRoleField() {
+  Widget _multiSelectRoleField(
+      bool isLoading, BuildContext context, List<Role> allRoles) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            onTap: () async {
-              await showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent, 
-                builder: (context) {
-                  return StatefulBuilder(
-                    builder: (context, setModalState) {
-                      return Align(
-                        alignment: Alignment.topCenter,
-                        child: Container(
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 8,
-                          ),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(color: Colors.black26, blurRadius: 8),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Text(
-                                "Select Role(s)",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
+            // onTap: isLoading
+            //     ? null
+            //     : () async {
+            onTap: (isLoading || widget.type == RegistrationType.karyakartha)
+    ? null
+    : () async {
+                    await showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) {
+                        return StatefulBuilder(
+                          builder: (context, setModalState) {
+                            return Align(
+                              alignment: Alignment.topCenter,
+                              child: Container(
+                                margin: const EdgeInsets.symmetric(
+                                  horizontal: 24,
+                                  vertical: 8,
+                                ),
+                                padding: const EdgeInsets.all(16),
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  boxShadow: [
+                                    BoxShadow(
+                                        color: Colors.black26, blurRadius: 8),
+                                  ],
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Text(
+                                      "Select Role(s)",
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 12),
+                                    ...allRoles.map((role) {
+                                      final isSelected = widget.selectedRoles
+                                          .any((r) => r.id == role.id);
+                                      return CheckboxListTile(
+                                        title: Text(role.displayName),
+                                        value: isSelected,
+                                        controlAffinity:
+                                            ListTileControlAffinity.trailing,
+                                        contentPadding: EdgeInsets.zero,
+                                        dense: true,
+                                        onChanged: isLoading
+                                            ? null
+                                            : (val) {
+                                                setModalState(() {
+                                                  if (val == true) {
+                                                    if (!widget.selectedRoles
+                                                        .any((r) => r.id == role.id)) {
+                                                      final updatedList =
+                                                          List<Role>.from(
+                                                              widget.selectedRoles);
+                                                      updatedList.add(role);
+                                                      widget.onRolesUpdated(
+                                                          updatedList);
+                                                    }
+                                                  } else {
+                                                    final updatedList =
+                                                        List<Role>.from(
+                                                            widget.selectedRoles);
+                                                    updatedList.removeWhere(
+                                                        (r) => r.id == role.id);
+                                                    widget.onRolesUpdated(
+                                                        updatedList);
+                                                  }
+                                                });
+                                              },
+                                      );
+                                    }).toList(),
+                                    const SizedBox(height: 12),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(context),
+                                        child: const Text("Done"),
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(height: 12),
-                              ...userTypes.map((role) {
-                                final isSelected = selectedRoles.contains(
-                                  role["value"],
-                                );
-                                return CheckboxListTile(
-                                  title: Text(role["label"] ?? "Unknown"),
-                                  value: isSelected,
-                                  controlAffinity:
-                                      ListTileControlAffinity.trailing,
-                                  contentPadding: EdgeInsets.zero,
-                                  dense: true,
-                                  onChanged: (val) {
-                                    setModalState(() {
-                                      if (val == true) {
-                                        if (!selectedRoles.contains(
-                                          role["value"],
-                                        )) {
-                                          selectedRoles.add(role["value"]!);
-                                        }
-                                      } else {
-                                        selectedRoles.remove(role["value"]);
-                                      }
-                                    });
-                                    setState(() {}); 
-                                  },
-                                );
-                              }).toList(),
-                              const SizedBox(height: 12),
-                              Align(
-                                alignment: Alignment.centerRight,
-                                child: TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: const Text("Done"),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              );
-            },
+                            );
+                          },
+                        );
+                      },
+                    );
+                  },
             child: AbsorbPointer(
               child: TextFormField(
+                enabled: !isLoading,
                 decoration: InputDecoration(
                   labelText: "Role",
                   filled: true,
@@ -465,18 +456,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   hintText: "Select Role(s)",
+                  suffixIcon: const Icon(Icons.arrow_drop_down, size: 20),
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
                   ),
                 ),
                 validator: (value) =>
-                    selectedRoles.isEmpty ? 'Select at least 1 role' : null,
+                    widget.selectedRoles.isEmpty ? 'Select at least 1 role' : null,
               ),
             ),
           ),
           const SizedBox(height: 8),
-          if (selectedRoles.isNotEmpty)
+          if (widget.selectedRoles.isNotEmpty)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -488,18 +480,17 @@ class _RegistrationPageState extends State<RegistrationPage> {
               child: Wrap(
                 spacing: 8,
                 runSpacing: 4,
-                children: selectedRoles.map((id) {
-                  final label = userTypes.firstWhere(
-                    (e) => e["value"] == id,
-                    orElse: () => {"label": "Unknown", "value": id},
-                  )["label"];
+                children: widget.selectedRoles.map((role) {
                   return Chip(
-                    label: Text(label ?? "Unknown"),
-                    onDeleted: () {
-                      setState(() {
-                        selectedRoles.remove(id);
-                      });
-                    },
+                    label: Text(role.displayName),
+                    onDeleted: isLoading
+                        ? null
+                        : () {
+                            final updatedList =
+                                List<Role>.from(widget.selectedRoles);
+                            updatedList.removeWhere((r) => r.id == role.id);
+                            widget.onRolesUpdated(updatedList);
+                          },
                   );
                 }).toList(),
               ),
@@ -508,4 +499,244 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<AuthBloc, AuthState>(
+      listener: (context, state) {
+        if (state.isUserCreated) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.creationMessage ?? "User created successfully"),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          Future.delayed(const Duration(milliseconds: 500), () {
+            widget.onClearForm();
+            context.read<AuthBloc>().add(CheckAuthStatusEvent());
+          });
+        }
+        if (state.isError && state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage!),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+        }
+      },
+      child: BlocBuilder<AuthBloc, AuthState>(
+        builder: (context, state) {
+          final isWideScreen = MediaQuery.of(context).size.width > 700;
+          final isLoading = state.isCreatingUser || state.isLoadingRoles;
+          final roles = state.roles;
+          if (widget.type == RegistrationType.karyakartha &&
+    roles.isNotEmpty &&
+    widget.selectedRoles.isEmpty) {
+
+  final karyakarthaRole = roles.firstWhere(
+    (r) => r.displayName.toUpperCase() == "KARYAKARTHA",
+  );
+
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    widget.onRolesUpdated([karyakarthaRole]);
+  });
 }
+
+          // ✅ Loading indicator
+          if (state.isLoadingRoles && roles.isEmpty) {
+            return Layout(
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Loading roles...'),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          // ✅ ERROR HANDLING UI
+          if (!state.isLoadingRoles && roles.isEmpty && state.errorMessage != null) {
+            return Layout(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Failed to load roles: ${state.errorMessage}',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () => context.read<AuthBloc>().add(FetchRolesEvent()),
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }
+
+          Widget rowFields(Widget first, Widget second) {
+            return isWideScreen
+                ? Row(
+                    children: [
+                      Expanded(child: first),
+                      const SizedBox(width: 16),
+                      Expanded(child: second),
+                    ],
+                  )
+                : Column(children: [first, second]);
+          }
+
+          return Layout(
+            child: Center(
+              child: SingleChildScrollView(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                child: Card(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Form(
+                      key: widget.formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // const Text(
+                          //   "Register New User",
+                          //   style: TextStyle(
+                          //     fontSize: 24,
+                          //     fontWeight: FontWeight.bold,
+                          //   ),
+                          // ),
+                          Text(
+  widget.title,
+  style: const TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+  ),
+),
+
+                          const SizedBox(height: 16),
+                          const Divider(thickness: 1),
+                          const SizedBox(height: 16),
+                          const Text(
+                            "Personal Information",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          rowFields(
+                            _input(widget.firstNameCtrl, "First Name",
+                                lettersOnly: true, isLoading: isLoading),
+                            _input(widget.lastNameCtrl, "Last Name",
+                                lettersOnly: true, isLoading: isLoading),
+                          ),
+                          rowFields(
+                            _input(
+                              widget.emailCtrl,
+                              "Email",
+                              keyboardType: TextInputType.emailAddress,
+                              isLoading: isLoading,
+                            ),
+                            _input(
+                              widget.mobileCtrl,
+                              "Mobile Number",
+                              keyboardType: TextInputType.phone,
+                              numbersOnly: true,
+                              isLoading: isLoading,
+                            ),
+                          ),
+                          rowFields(
+                            _multiSelectRoleField(isLoading, context, roles),
+                            _startDateField(isLoading, context),
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            "Address Information",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          rowFields(
+                            _input(widget.areaCtrl, "Area",
+                                lettersOnly: true, isLoading: isLoading),
+                            _input(widget.cityCtrl, "City",
+                                lettersOnly: true, isLoading: isLoading),
+                          ),
+                          rowFields(
+                            _input(widget.stateCtrl, "State",
+                                lettersOnly: true, isLoading: isLoading),
+                            _input(widget.countryCtrl, "Country",
+                                lettersOnly: true, isLoading: isLoading),
+                          ),
+                          rowFields(
+                            _input(
+                              widget.pincodeCtrl,
+                              "Pincode",
+                              keyboardType: TextInputType.number,
+                              numbersOnly: true,
+                              isLoading: isLoading,
+                            ),
+                            const SizedBox(),
+                          ),
+                          const SizedBox(height: 22),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Container(
+                              width: MediaQuery.of(context).size.width > 600
+                                  ? 430
+                                  : double.infinity,
+                              child: isWideScreen
+                                  ? Row(
+                                      children: [
+                                        _cancelButton(context, isLoading),
+                                        const SizedBox(width: 16),
+                                        _registerButton(context, isLoading),
+                                      ],
+                                    )
+                                  : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.stretch,
+                                      children: [
+                                        _registerButton(context, isLoading),
+                                        const SizedBox(height: 12),
+                                        _cancelButton(context, isLoading),
+                                      ],
+                                    ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+

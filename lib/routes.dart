@@ -15,6 +15,7 @@ import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
 import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
+import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
@@ -79,7 +80,7 @@ getPageRoute() {
       // middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(name: '/register', page: () => const RegistrationPage()),
+    GetPage(name: '/register', page: () => const RegistrationPage(title: "Add new User",type: RegistrationType.user,)),
 
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DhramSetuScreen()),

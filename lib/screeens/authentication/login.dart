@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutx/flutx.dart';
@@ -9,6 +8,7 @@ import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_event.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_state.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/screeens/models/response/role_response.dart';
 import 'package:vikas_app/utils/mixins/ui_mixins.dart';
 import 'package:vikas_app/views/layouts/auth_layout.dart';
 import 'package:vikas_app/screeens/models/enum/user_type.dart';
@@ -25,12 +25,17 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   bool showPassword = false;
+  UserType? selectedUserType;
+  List<Role> roles = [];            // ← store fetched roles
+  bool isLoadingRoles = false;      // ← loading indicator for dropdown
+  Role? selectedRole;
 
   @override
   void initState() {
     super.initState();
     emailController.addListener(_resetErrorMessage);
     passwordController.addListener(_resetErrorMessage);
+    _fetchRoles();   
   }
 
   @override
@@ -42,8 +47,7 @@ class _LoginPageState extends State<LoginPage> {
     super.dispose();
   }
 
-  void _resetErrorMessage() {
-  }
+  void _resetErrorMessage() {}
 
   void _onChangeShowPassword() {
     setState(() {
@@ -51,22 +55,29 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
+  
   void _handleLogin(BuildContext context) {
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
+  if (!_formKey.currentState!.validate()) return;
 
-    final mobileNumber = emailController.text.trim();
-    final password = passwordController.text;
-
-    context.read<AuthBloc>().add(
-      LoginEvent(
-        mobileNumber: mobileNumber,
-        password: password,
-        userType: UserType.karyakartha,
-      ),
+  if (selectedRole == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please select a role')),
     );
+    return;
   }
+
+  final mobileNumber = emailController.text.trim();
+  final password = passwordController.text;
+
+  context.read<AuthBloc>().add(
+    LoginEvent(
+      mobileNumber: mobileNumber,
+      password: password,
+      roleName: selectedRole!.roleName,   
+    ),
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -87,25 +98,61 @@ class _LoginPageState extends State<LoginPage> {
                 child: FxFlex(
                   contentPadding: false,
                   children: [
-                    FxFlexItem(
-                      sizes: "lg-6",
-                      child: Center(
-                        child: LayoutBuilder(
-                          builder: (context, constraints) {
-                            double imageHeight = constraints.maxWidth > 1200 ? 520 : 380;
-                            return Image.asset(
-                              'assets/images/student.png',
-                              height: imageHeight,
-                              fit: BoxFit.contain,
-                            );
-                          },
-                        ),
-                      ),
-                    ),
+                    // FxFlexItem(
+                    //   sizes: "lg-6",
+                    //   child: Center(
+                    //     child: LayoutBuilder(
+                    //       builder: (context, constraints) {
+                    //         double imageHeight = constraints.maxWidth > 1200
+                    //             ? 520
+                    //             : 380;
+                    //         return Image.asset(
+                    //           'assets/images/student.png',
+                    //           height: imageHeight,
+                    //           fit: BoxFit.contain,
+                    //         );
+                    //       },
+                    //     ),
+                    //   ),
+                    // ),
+
+                      FxFlexItem(
+                sizes: "lg-6",
+                child: FxResponsive(
+                  builder: (_, __, type) {
+                    return type == FxScreenMediaType.xxl
+                        ? Image.asset(
+                            //Images.login[3],
+                            'assets/images/student.png',
+
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : type == FxScreenMediaType.xl
+                        ? Image.asset(
+                            //Images.login[3],
+                            'assets/images/student.png',
+
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : type == FxScreenMediaType.lg
+                        ? Image.asset(
+                            // Images.login[3],
+                            'assets/images/student.png',
+
+                            fit: BoxFit.cover,
+                            height: 400,
+                          )
+                        : const SizedBox();
+                  },
+                ),
+              ),
+              
                     FxFlexItem(
                       sizes: "lg-6",
                       child: Padding(
-                        padding: FxSpacing.y(28),
+                        padding: FxSpacing.y(10),
                         child: Form(
                           key: _formKey,
                           child: Column(
@@ -125,19 +172,25 @@ class _LoginPageState extends State<LoginPage> {
                                   ],
                                 ),
                               ),
-                              FxSpacing.height(16),
+                              FxSpacing.height(6),
 
                               // Mobile Number Field
                               TextFormField(
                                 controller: emailController,
                                 enabled: !state.isLoading,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
                                 keyboardType: TextInputType.phone,
                                 maxLength: 10,
                                 decoration: InputDecoration(
                                   labelText: "Mobile Number",
-                                  labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                                  prefixIcon: const Icon(LucideIcons.phone, size: 20),
+                                  labelStyle: FxTextStyle.bodySmall(
+                                    xMuted: true,
+                                  ),
+                                  prefixIcon: const Icon(
+                                    LucideIcons.phone,
+                                    size: 20,
+                                  ),
                                   filled: true,
                                   fillColor: Colors.grey.shade100,
                                   contentPadding: const EdgeInsets.symmetric(
@@ -158,7 +211,8 @@ class _LoginPageState extends State<LoginPage> {
                                       width: 1.5,
                                     ),
                                   ),
-                                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
                                   counterText: "",
                                 ),
                                 validator: FormBuilderValidators.compose([
@@ -185,19 +239,29 @@ class _LoginPageState extends State<LoginPage> {
                               TextFormField(
                                 controller: passwordController,
                                 enabled: !state.isLoading,
-                                autovalidateMode: AutovalidateMode.onUserInteraction,
+                                autovalidateMode:
+                                    AutovalidateMode.onUserInteraction,
                                 keyboardType: TextInputType.visiblePassword,
                                 obscureText: !showPassword,
                                 decoration: InputDecoration(
                                   labelText: "Password",
-                                  labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                                  prefixIcon: const Icon(LucideIcons.lock, size: 20),
+                                  labelStyle: FxTextStyle.bodySmall(
+                                    xMuted: true,
+                                  ),
+                                  prefixIcon: const Icon(
+                                    LucideIcons.lock,
+                                    size: 20,
+                                  ),
                                   suffixIcon: InkWell(
-                                    onTap: state.isLoading ? null : () {
-                                      _onChangeShowPassword();
-                                    },
+                                    onTap: state.isLoading
+                                        ? null
+                                        : () {
+                                            _onChangeShowPassword();
+                                          },
                                     child: Icon(
-                                      showPassword ? LucideIcons.eye : LucideIcons.eyeOff,
+                                      showPassword
+                                          ? LucideIcons.eye
+                                          : LucideIcons.eyeOff,
                                       size: 20,
                                     ),
                                   ),
@@ -221,7 +285,8 @@ class _LoginPageState extends State<LoginPage> {
                                       width: 1.5,
                                     ),
                                   ),
-                                  floatingLabelBehavior: FloatingLabelBehavior.never,
+                                  floatingLabelBehavior:
+                                      FloatingLabelBehavior.never,
                                 ),
                                 validator: FormBuilderValidators.compose([
                                   FormBuilderValidators.required(
@@ -229,14 +294,196 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                   FormBuilderValidators.minLength(
                                     6,
-                                    errorText: 'Password length should be 6 or greater than 6',
+                                    errorText:
+                                        'Password length should be 6 or greater than 6',
                                   ),
                                 ]),
                               ),
 
                               FxSpacing.height(16),
 
-                              // Error Message
+                              
+                        //       DropdownButtonFormField<UserType>(
+                        //         value: selectedUserType,
+                        //         decoration: InputDecoration(
+                        //           labelText: "Select User Type",
+                        //           labelStyle: FxTextStyle.bodySmall(
+                        //             xMuted: true,
+                        //           ),
+                        //           filled: true,
+                        //           fillColor:
+                        //               Colors.grey.shade100, // Field background
+                        //           contentPadding: const EdgeInsets.symmetric(
+                        //             horizontal: 16,
+                        //             vertical: 18,
+                        //           ),
+                        //           enabledBorder: OutlineInputBorder(
+                        //             borderRadius: BorderRadius.circular(12),
+                        //             borderSide: BorderSide(
+                        //               color: Colors.brown.shade300,
+                        //               width: 1,
+                        //             ),
+                        //           ),
+                        //           focusedBorder: OutlineInputBorder(
+                        //             borderRadius: BorderRadius.circular(12),
+                        //             borderSide: const BorderSide(
+                        //               color: Colors.brown,
+                        //               width: 1.5,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //         dropdownColor: Colors
+                        //             .grey
+                        //             .shade100, // Popup menu background
+                        //         style: const TextStyle(
+                        //           color: Colors
+                        //               .brown, // Text color for selected item
+                        //           fontSize: 16,
+                        //           fontWeight: FontWeight.w500,
+                        //         ),
+                        //         icon: const Icon(
+                        //           LucideIcons.chevronDown,
+                        //           color: Colors.brown,
+                        //         ),
+                        //         isExpanded: true, // Fill full width
+                        //         validator: (value) {
+                        //           if (value == null) {
+                        //             return 'Please select a user type';
+                        //           }
+                        //           return null;
+                        //         },
+                        //         items: UserType.values.map((UserType type) {
+                        //           return DropdownMenuItem<UserType>(
+                        //             value: type,
+                        //             child: Text(
+                        //               type.displayName,
+                        //               style: const TextStyle(
+                        //                 color: Colors.brown,
+                        //                 fontSize: 16,
+                        //               ),
+                        //             ),
+                        //           );
+                        //         }).toList(),
+                        //         onChanged: (UserType? value) {
+                        //           setState(() {
+                        //             selectedUserType = value;
+                        //           });
+                        //         },
+                        //         selectedItemBuilder: (BuildContext context) {
+                        //           return UserType.values.map((UserType type) {
+                        //             return Text(
+                        //               type.displayName,
+                        //               style: const TextStyle(
+                        //                 color: Colors.brown,
+                        //                 fontSize: 16,
+                        //                 fontWeight: FontWeight.w600,
+                        //               ),
+                        //             );
+                        //           }).toList();
+                        //         },
+                        //       ),
+
+                        // if (state.isError && state.errorMessage != null)
+                        //         Padding(
+                        //           padding: const EdgeInsets.only(bottom: 10),
+                        //           child: FxText(
+                        //             state.errorMessage!,
+                        //             style: const TextStyle(
+                        //               color: Colors.red,
+                        //               fontSize: 16,
+                        //             ),
+                        //           ),
+                        //         ),
+                        //       FxSpacing.height(10),
+                         if (isLoadingRoles)
+                                const Center(
+                                    child: Padding(
+                                  padding: EdgeInsets.all(16.0),
+                                  child: CircularProgressIndicator(),
+                                ))
+                              else if (roles.isEmpty)
+                                Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(16.0),
+                                    child: FxText.bodySmall(
+                                      'No roles available',
+                                      color: Colors.red,
+                                    ),
+                                  ),
+                                )
+                              else
+                                DropdownButtonFormField<Role>(
+                                  value: selectedRole,
+                                  isExpanded: true,
+                                  decoration: InputDecoration(
+                                    labelText: "Select Role",
+                                    labelStyle:
+                                        FxTextStyle.bodySmall(xMuted: true),
+                                    filled: true,
+                                    fillColor: Colors.grey.shade100,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 18,
+                                    ),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.brown.shade300,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: const BorderSide(
+                                        color: Colors.brown,
+                                        width: 1.5,
+                                      ),
+                                    ),
+                                  ),
+                                  dropdownColor: Colors.grey.shade100,
+                                  style: const TextStyle(
+                                    color: Colors.brown,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                  icon: const Icon(
+                                    LucideIcons.chevronDown,
+                                    color: Colors.brown,
+                                  ),
+                                  validator: (value) => value == null
+                                      ? 'Please select a role'
+                                      : null,
+                                  items: roles.map((Role role) {
+                                    return DropdownMenuItem<Role>(
+                                      value: role,
+                                      child: Text(
+                                        role.displayName,
+                                        style: const TextStyle(
+                                          color: Colors.brown,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (Role? value) {
+                                    setState(() => selectedRole = value);
+                                  },
+                                  selectedItemBuilder: (context) {
+                                    return roles.map((Role role) {
+                                      return Text(
+                                        //role.roleName ?? role.roleName ?? 'Role',
+                                        role.displayName,
+
+                                        style: const TextStyle(
+                                          color: Colors.brown,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      );
+                                    }).toList();
+                                  },
+                                ),
+
                               if (state.isError && state.errorMessage != null)
                                 Padding(
                                   padding: const EdgeInsets.only(bottom: 10),
@@ -248,6 +495,7 @@ class _LoginPageState extends State<LoginPage> {
                                     ),
                                   ),
                                 ),
+
                               FxSpacing.height(10),
 
                               // Login Button
@@ -269,7 +517,9 @@ class _LoginPageState extends State<LoginPage> {
                                           height: 14,
                                           width: 14,
                                           child: CircularProgressIndicator(
-                                            color: Theme.of(context).colorScheme.onPrimary,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onPrimary,
                                             strokeWidth: 1.2,
                                           ),
                                         ),
@@ -296,6 +546,21 @@ class _LoginPageState extends State<LoginPage> {
       ),
     );
   }
+  
+  Future<void> _fetchRoles() async {
+  setState(() => isLoadingRoles = true);
+  final result = await AuthRepository().getRoles();  
+  setState(() {
+    if (result.isSuccess) {
+      roles = result.data ?? [];
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load roles: ${result.error?.message}')),
+      );
+    }
+    isLoadingRoles = false;
+  });
+}
 }
 
 

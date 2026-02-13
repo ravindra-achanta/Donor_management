@@ -10,6 +10,7 @@ import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class JeevanaadiListPage extends StatefulWidget {
@@ -75,9 +76,9 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                             ),
                             child: Column(
                               children: [
-                                CommonList(
+                                CommonList<JeevanaadiUser>(
                                   currentPage: state?.currentPage ?? 0,
-                                  users: state?.jeevanaadisMems ?? [],
+                                 users: state!.jeevanaadisMems,
                                   onUserTap: (id) {
                                     context.read<JeevanaadiBloc>().add(
                                       FetchJeevanaadiProfileEvent(id),

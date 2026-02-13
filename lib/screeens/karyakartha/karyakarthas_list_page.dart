@@ -4,12 +4,14 @@ import 'package:get/get.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
+import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class KaryakarthasListPage extends StatefulWidget {
@@ -64,7 +66,13 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   context: context,
                                   buttonText: "Add Karyakartha",
                                   onClicked: () {
-                                    Get.toNamed('/register');
+                                    //Get.toNamed('/register');
+                                    Get.to(() => RegistrationPage(
+      title: "Add Karyakartha",
+      type: RegistrationType.karyakartha,
+    ));
+
+
                                   },
                                 ),
                               ],

@@ -4,7 +4,7 @@ class LoginResponse {
   final String id;
   final String message;
   final String token;
-  final UserType userType;
+  final String userType;
 
   LoginResponse({
     required this.id,
@@ -18,7 +18,8 @@ class LoginResponse {
       id: json['id']?.toString() ?? '',
       message: json['message']?.toString() ?? '',
       token: json['token']?.toString() ?? '',
-      userType: UserType.fromString(json['userType']?.toString() ?? 'KARYAKARTHA'),
+      userType: json['userType']?.toString() ?? '',
+      //userType: UserType.fromString(json['userType']?.toString() ?? 'KARYAKARTHA'),
     );
   }
 }
