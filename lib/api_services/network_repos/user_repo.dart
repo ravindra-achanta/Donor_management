@@ -8,7 +8,7 @@ class UserRepo {
   final _api = NetworkService.instance;
   Future<ApiResult<PaginatedView>> getUsers(int page, int size) async {
     final result = await _api.get(
-      "${ApiConstants.GET_KARYAKARTHAS}?page=${page}&size=${size}",
+      "${ApiConstants.GET_USERS}?page=${page}&size=${size}",
     );
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -23,7 +23,7 @@ class UserRepo {
   }
 
   Future<ApiResult<User>> getUserProfile(String id) async {
-    final result = await _api.get("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
+    final result = await _api.get("${ApiConstants.GET_USER_BY_ID}/$id");
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }

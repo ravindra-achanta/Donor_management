@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:percent_indicator/circular_percent_indicator.dart';
-import 'package:percent_indicator/linear_percent_indicator.dart';
-import 'package:percent_indicator/multi_segment_linear_indicator.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
+import 'package:vikas_app/screeens/models/response/user.dart';
 
-class CommonList extends StatefulWidget {
+class CommonList<T> extends StatefulWidget {
   const CommonList({
     super.key,
     required this.currentPage,
@@ -15,7 +14,7 @@ class CommonList extends StatefulWidget {
     this.screenType,
   });
 
-  final List users;
+  final List<T> users;
   final int currentPage;
   final String? screenType;
   final Function(String id) onUserTap;
@@ -37,6 +36,7 @@ class _CommonListState extends State<CommonList> {
         subtitle: 'There is no user data available to display.',
       );
     }
+    String screenType = widget.screenType ?? "";
 
     return Container(
       decoration: BoxDecoration(
@@ -65,19 +65,19 @@ class _CommonListState extends State<CommonList> {
             child: Row(
               children: [
                 tableHeader('#'),
-                widget.screenType == 'DONATION'
+                screenType == 'DONATION'
                     ? tableHeader('Amount')
                     : tableHeader('Name'),
-                widget.screenType == 'DONATION'
-                    ? tableHeader('Donation type')
+                screenType == 'DONATION'
+                    ? tableHeader('Donation type'): screenType == 'JEEVANADI'?tableHeader('Jeevanaadi.No')
                     : tableHeader('Mobile'),
-                widget.screenType == 'DONATION'
-                    ? tableHeader('Date')
+                screenType == 'DONATION'
+                    ? tableHeader('Date'): screenType == 'JEEVANADI'?tableHeader('User type')
                     : tableHeader('Email'),
-                widget.screenType == 'DONATION'
+                screenType == 'DONATION'
                     ? SizedBox.shrink()
                     : tableHeader(
-                        widget.screenType == 'JEEVANADI'
+                        screenType == 'JEEVANADI'
                             ? 'Profile %'
                             : 'Actions',
                       ),
@@ -97,7 +97,33 @@ class _CommonListState extends State<CommonList> {
               separatorBuilder: (_, __) =>
                   Divider(height: 1, color: Colors.grey.shade100),
               itemBuilder: (context, index) {
-                final user = widget.users[index];
+                final rowData = widget.users[index];
+                String name = "";
+                String mobile = "";
+                String email = "";
+                String amount = "";
+                String JeevanaadiNo = "";
+                String userType = "";
+                String profilePercent = "";
+                String donationType = "";
+                String date = "";
+                if (rowData is JeevanaadiUser) {
+                  name = rowData.userName;
+                  email = rowData.email ?? "";
+                  userType = rowData.userType ?? "";
+                  JeevanaadiNo = rowData.id;
+                  // profilePercent = rowData.profilePercent ?? "";
+                }else if (rowData is User) {
+                  name = rowData.name;
+                  email = rowData.email;
+                  mobile = rowData.mobileNumber ?? "";
+                  userType = rowData.userType ?? "";
+                } 
+                // else if (rowData is DonationView) {
+                //   amount = rowData.amount.toString();
+                //   donationType = rowData.donationType ?? "";
+                //   date = rowData.date ?? "";
+                // }
                 final isHovered = hoveredIndex == index;
 
                 return MouseRegion(
@@ -113,7 +139,7 @@ class _CommonListState extends State<CommonList> {
                           ).colorScheme.primary.withOpacity(0.06)
                         : Colors.transparent,
                     child: InkWell(
-                      onTap: () => widget.onUserTap(user.id),
+                      onTap: () => widget.onUserTap(rowData.id),
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           vertical: 14,
@@ -122,25 +148,25 @@ class _CommonListState extends State<CommonList> {
                         child: Row(
                           children: [
                             tableData(
-                              "${widget.currentPage * 10 + (index + 1)}",
+                              "${ widget.currentPage * 10 + (index + 1)}",
                             ),
-                            widget.screenType == 'DONATION'
+                            screenType == 'DONATION'
                                 ? tableData(
                                     "${(index + 1 * 1000).toString()}/-",
                                   )
-                                : tableData(user.name ?? "-"),
-                            widget.screenType == 'DONATION'
-                                ? tableData("Seva")
-                                : tableData(user.mobileNumber ?? "-"),
-                            widget.screenType == 'DONATION'
-                                ? tableData("2025-01-${index + 1}")
-                                : tableData(user.email ?? "-"),
+                                : tableData(name),
+                            screenType == 'DONATION'
+                                ? tableData("Seva"):screenType=="JEEVANADI"?tableData(JeevanaadiNo)
+                                : tableData(mobile),
+                            screenType == 'DONATION'
+                                ? tableData("2025-01-${index + 1}"):screenType=="JEEVANADI"?tableData(userType)
+                                : tableData(email),
                             // 🟢 Status Pill
                             // SizedBox(
                             //   width: 120,
                             //   child: _StatusPill(status: user.status),
                             // ),
-                            widget.screenType == 'JEEVANADI'
+                            screenType == 'JEEVANADI'
                                 ? Expanded(
                                     child: Padding(
                                       padding: const EdgeInsets.only(right: 16),
@@ -182,7 +208,7 @@ class _CommonListState extends State<CommonList> {
                                       ),
                                     ),
                                   )
-                                : widget.screenType == 'DONATION'
+                                : screenType == 'DONATION'
                                 ? SizedBox.shrink()
                                 : Expanded(
                                     child: Row(
@@ -196,7 +222,7 @@ class _CommonListState extends State<CommonList> {
                                           ),
                                           iconColor: Colors.red,
                                           onTap: () {
-                                            widget.onDelete(user.id);
+                                            widget.onDelete(rowData.id);
                                           },
                                         ),
                                         const SizedBox(width: 10),
@@ -207,7 +233,7 @@ class _CommonListState extends State<CommonList> {
                                           ),
                                           iconColor: Colors.blue,
                                           onTap: () {
-                                            widget.onUpdate(user.id);
+                                            widget.onUpdate(rowData.id);
                                           },
                                         ),
                                       ],

@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/enum/user_type.dart';
+import 'package:vikas_app/screeens/models/response/role_response.dart';
+import 'package:vikas_app/screeens/models/response/user_view.dart';
 
 enum AuthStatus {
   initial,     
@@ -7,7 +9,11 @@ enum AuthStatus {
   loading,    
   authenticated, 
   unauthenticated, 
-  error,       
+  error,  
+  creatingUser, 
+  userCreated,  
+  fetchingUsers, 
+  usersFetched,     
 }
 
 class AuthState extends Equatable {
@@ -16,6 +22,14 @@ class AuthState extends Equatable {
   final String? token;
   final UserType? userType;
   final String? errorMessage;
+  final List<UserView> users; 
+  final int currentPage; 
+  final int totalPages;
+  final bool hasMoreUsers;
+  final String? creationMessage; 
+  final List<Role> roles; 
+  final bool isLoadingRoles;
+  
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -23,6 +37,13 @@ class AuthState extends Equatable {
     this.token,
     this.userType,
     this.errorMessage,
+     this.users = const [], 
+    this.currentPage = 0,
+    this.totalPages = 0,
+    this.hasMoreUsers = false,
+    this.creationMessage,
+    this.roles = const [], 
+    this.isLoadingRoles = false,
   });
 
   AuthState copyWith({
@@ -31,6 +52,13 @@ class AuthState extends Equatable {
     String? token,
     UserType? userType,
     String? errorMessage,
+    List<UserView>? users,
+    int? currentPage,
+    int? totalPages,
+    bool? hasMoreUsers,
+    String? creationMessage,
+     List<Role>? roles,
+    bool? isLoadingRoles,
   }) {
     return AuthState(
       status: status ?? this.status,
@@ -38,6 +66,13 @@ class AuthState extends Equatable {
       token: token ?? this.token,
       userType: userType ?? this.userType,
       errorMessage: errorMessage ?? this.errorMessage,
+      users: users ?? this.users,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      hasMoreUsers: hasMoreUsers ?? this.hasMoreUsers,
+      creationMessage: creationMessage ?? this.creationMessage,
+      roles: roles ?? this.roles,
+      isLoadingRoles: isLoadingRoles ?? this.isLoadingRoles,
     );
   }
 
@@ -48,6 +83,13 @@ class AuthState extends Equatable {
     token,
     userType,
     errorMessage,
+    users,
+    currentPage,
+    totalPages,
+    hasMoreUsers,
+    creationMessage,
+    roles,
+    isLoadingRoles,
   ];
 
   // Helper methods
@@ -56,4 +98,11 @@ class AuthState extends Equatable {
   bool get isAuthenticated => status == AuthStatus.authenticated;
   bool get isUnauthenticated => status == AuthStatus.unauthenticated;
   bool get isError => status == AuthStatus.error;
+  bool get isCreatingUser => status == AuthStatus.creatingUser; 
+  bool get isUserCreated => status == AuthStatus.userCreated; 
+  bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
+  bool get areUsersFetched => status == AuthStatus.usersFetched;
+  // bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
+  // bool get areUsersFetched => status == AuthStatus.usersFetched;
+
 }

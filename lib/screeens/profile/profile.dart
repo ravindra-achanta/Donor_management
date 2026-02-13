@@ -152,12 +152,12 @@ class _MyProfileState extends State<MyProfile>
                                       _infoRow(
                                         Icons.badge_outlined,
                                         'User ID',
-                                        user.uniqueId,
+                                        user.uniqueId!,
                                       ),
                                       _infoRow(
                                         Icons.security_outlined,
                                         'Role',
-                                        user.userType,
+                                        user.userType!,
                                       ),
                                     ],
                                   ),
@@ -336,7 +336,7 @@ class _MyProfileState extends State<MyProfile>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user.userType,
+                  user.userType!,
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
               ],

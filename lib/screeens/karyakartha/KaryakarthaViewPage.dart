@@ -148,7 +148,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                     ),
                                     const SizedBox(width: 12),
                                     FxText.labelMedium(
-                                      "Jeevanadi Member Details",
+                                      "karyakatha  Details",
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineSmall
@@ -546,7 +546,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                         ),
                                         const SizedBox(width: 12),
                                         FxText.bodyMedium(
-                                          "Assigned Karyakarthas",
+                                          "Assigned Jeevanadi members",
                                           style: Theme.of(context)
                                               .textTheme
                                               .titleMedium
@@ -583,7 +583,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                   ),
                                                   const SizedBox(height: 12),
                                                   FxText.bodyMedium(
-                                                    'No assigned karyakarthas',
+                                                    'No assigned jeevanadi members',
                                                     style:
                                                         FxTextStyle.bodyMedium(
                                                           color: Colors
@@ -782,7 +782,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                             ),
                                             const SizedBox(width: 12),
                                             FxText.bodyMedium(
-                                              "Unassigned Karyakarthas",
+                                              "Unassigned jeevanadi members",
                                               style: Theme.of(context)
                                                   .textTheme
                                                   .titleMedium

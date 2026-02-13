@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/api_services/network_repos/jeevanadi_repo.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
 import '../../screeens/models/response/jeevanadi_member.dart';
@@ -22,44 +23,77 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   final JeevanaadiRepo = JeevanadiRepo();
 
   /// Event handler for fetching users
-  Future<void> _onFetchJeevanaadiMems(
-    FetchJeevanaadisEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    emit(
-      state.copyWith(
-        status: JeevanaadiApiStatus.loading,
-        isProfileViewVisible: false,
-      ),
-    );
-    await Future.delayed(const Duration(seconds: 1), () {
-      // Code to execute after a 3-second delay
-      // print("3 seconds have passed!");
-    });
-    int size = 10;
-    final response = await JeevanaadiRepo.getJeevanaadisMems(event.page, size);
+  // Future<void> _onFetchJeevanaadiMems(
+  //   FetchJeevanaadisEvent event,
+  //   Emitter<JeevanaadiState> emit,
+  // ) async {
+  //   emit(
+  //     state.copyWith(
+  //       status: JeevanaadiApiStatus.loading,
+  //       isProfileViewVisible: false,
+  //     ),
+  //   );
+  //   await Future.delayed(const Duration(seconds: 1), () {
+  //     // Code to execute after a 3-second delay
+  //     // print("3 seconds have passed!");
+  //   });
+  //   int size = 10;
+  //   final response = await JeevanaadiRepo.getJeevanaadisMems(event.page, size);
 
+  //   if (response.isSuccess) {
+  //     final List<User> users = response.data?.content ?? [];
+  //     emit(
+  //       state.copyWith(
+  //         status: JeevanaadiApiStatus.loaded,
+  //         jeevanaadisMems: users,
+  //         totalElements: response.data?.totalElements ?? 0,
+  //         totalpages: response.data?.totalPages ?? 0,
+  //         currentPage: response.data?.currentPage ?? 0,
+  //       ),
+  //     );
+  //   } else {
+  //     emit(
+  //       state.copyWith(
+  //         status: JeevanaadiApiStatus.error,
+  //         errorMessage:
+  //             response.error?.message ?? "Failed to fetch Jeevanaadis",
+  //       ),
+  //     );
+  //   }
+  // }
+
+  Future<void> _onFetchJeevanaadiMems(
+  FetchJeevanaadisEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(status: JeevanaadiApiStatus.loading));
+  try {
+    final response = await JeevanaadiRepo.getJeevanaadisMems(event.page, 10);
     if (response.isSuccess) {
-      final List<User> users = response.data?.content ?? [];
-      emit(
-        state.copyWith(
-          status: JeevanaadiApiStatus.loaded,
-          jeevanaadisMems: users,
-          totalElements: response.data?.totalElements ?? 0,
-          totalpages: response.data?.totalPages ?? 0,
-          currentPage: response.data?.currentPage ?? 0,
-        ),
-      );
+      final data = response.data;
+      final members = data?.content ?? [];
+
+      emit(state.copyWith(
+        status: JeevanaadiApiStatus.loaded,
+        jeevanaadisMems: members,
+        totalElements: response.data?.totalElements ?? 0,
+           totalpages: response.data?.totalPages ?? 0,
+           currentPage: response.data?.currentPage ?? 0,
+      ));
     } else {
-      emit(
-        state.copyWith(
-          status: JeevanaadiApiStatus.error,
-          errorMessage:
-              response.error?.message ?? "Failed to fetch Jeevanaadis",
-        ),
-      );
+      emit(state.copyWith(
+        status: JeevanaadiApiStatus.error,
+        errorMessage: response.error?.message ?? 'Failed to fetch members',
+      ));
     }
+  } catch (e, stack) {
+    //debugPrint('Error parsing Jeevanaadi list: $e\n$stack');
+    emit(state.copyWith(
+      status: JeevanaadiApiStatus.error,
+      errorMessage: 'Data parsing error: ${e.toString()}',
+    ));
   }
+}
 
   Future<void> _onFetchJeevanaadiProfile(
     FetchJeevanaadiProfileEvent event,

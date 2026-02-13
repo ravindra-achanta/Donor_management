@@ -36,11 +36,11 @@ class PaginatedView {
 class User {
   final String id;
   final String name;
-  final String uniqueId;
+  final String? uniqueId;
   final String email;
   final String? mobileNumber;
   final String? password;
-  final String userType;
+  final String? userType;
   final String status;
   final String? pincode;
   final String? city;

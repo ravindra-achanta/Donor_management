@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/enum/user_type.dart';
+import 'package:vikas_app/screeens/models/request/identity_request.dart';
 
 abstract class AuthEvent extends Equatable {
   @override
@@ -9,16 +10,42 @@ abstract class AuthEvent extends Equatable {
 class LoginEvent extends AuthEvent {
   final String mobileNumber;
   final String password;
-  final UserType userType;
+  final String roleName;
 
   LoginEvent({
     required this.mobileNumber,
     required this.password,
-    required this.userType,
+    required this.roleName,
   });
 
   @override
-  List<Object?> get props => [mobileNumber, password, userType];
+  List<Object?> get props => [mobileNumber, password];
 }
+
+class CreateUserEvent extends AuthEvent {
+  final IdentityRequest request;
+
+  CreateUserEvent({
+    required this.request,
+  });
+
+  @override
+  List<Object?> get props => [request];
+}
+
+// class FetchAllUsersEvent extends AuthEvent {
+//   final int page;
+//   final int size;
+
+//   FetchAllUsersEvent({
+//     this.page = 0,
+//     this.size = 10,
+//   });
+
+//   @override
+//   List<Object?> get props => [page, size];
+// }
+class FetchRolesEvent extends AuthEvent {}
+
 
 class CheckAuthStatusEvent extends AuthEvent {}

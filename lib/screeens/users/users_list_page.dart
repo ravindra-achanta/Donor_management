@@ -4,11 +4,13 @@ import 'package:get/get.dart';
 import 'package:vikas_app/bloc_management/users/user_bloc.dart';
 import 'package:vikas_app/bloc_management/users/user_event.dart';
 import 'package:vikas_app/bloc_management/users/user_state.dart';
+import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class Users extends StatefulWidget {
@@ -63,7 +65,13 @@ class _UsersState extends State<Users> {
                                   context: context,
                                   buttonText: "Add New User",
                                   onClicked: () {
-                                    Get.toNamed('/register');
+                                    //Get.toNamed('/register');
+                                    Get.to(
+                                      () => RegistrationPage(
+                                        title: "Add New User",
+                                        type: RegistrationType.user,
+                                      ),
+                                    );
                                   },
                                 ),
                               ],

@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
+// import 'package:vikas_app/screeens/models/response/jeevanaadi_user.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
-
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import '../../screeens/models/response/jeevanadi_member.dart';
 
 enum JeevanaadiApiStatus { initial, loading, loaded, error }
@@ -14,7 +15,7 @@ class JeevanaadiState extends Equatable {
   final int totalpages;
   final int currentPage;
   final bool delLoading;
-  final List<User>? jeevanaadisMems;
+  final List<JeevanaadiUser> jeevanaadisMems;
   final bool isProfileViewVisible;
   final User? jeevanaadiProfile;
   final bool? profileLoading;
@@ -28,7 +29,7 @@ class JeevanaadiState extends Equatable {
 
   const JeevanaadiState({
     this.delLoading = false,
-    this.jeevanaadisMems,
+    this.jeevanaadisMems = const [],
     this.status = JeevanaadiApiStatus.initial,
     this.errorMessage,
     this.currentPage = 0,
@@ -50,7 +51,7 @@ class JeevanaadiState extends Equatable {
     JeevanaadiApiStatus? status,
     String? errorMessage,
     bool? delLoading,
-    List<User>? jeevanaadisMems,
+    List<JeevanaadiUser>? jeevanaadisMems,
     int? totalElements,
     int? currentPage,
     int? totalpages,
@@ -72,6 +73,7 @@ class JeevanaadiState extends Equatable {
       totalpages: totalpages ?? this.totalpages,
       errorMessage: errorMessage ?? this.errorMessage,
       currentPage: currentPage ?? this.currentPage,
+      //jeevanaadisMems: jeevanaadisMems ?? this.jeevanaadisMems,
       jeevanaadisMems: jeevanaadisMems ?? this.jeevanaadisMems,
       isProfileViewVisible: isProfileViewVisible ?? this.isProfileViewVisible,
       jeevanaadiProfile: jeevanaadiProfile ?? this.jeevanaadiProfile,
