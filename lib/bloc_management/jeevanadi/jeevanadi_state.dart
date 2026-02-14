@@ -1,4 +1,6 @@
 import 'package:equatable/equatable.dart';
+import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
+import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 // import 'package:vikas_app/screeens/models/response/jeevanaadi_user.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
@@ -18,6 +20,7 @@ class JeevanaadiState extends Equatable {
   final List<JeevanaadiUser> jeevanaadisMems;
   final bool isProfileViewVisible;
   final User? jeevanaadiProfile;
+  final JeevanaadiFullProfile? jeevanaadiProfileFull;
   final bool? profileLoading;
   final String? profileErrorMsg;
   final JeevanadiMember? jeevanadiMember;
@@ -37,6 +40,7 @@ class JeevanaadiState extends Equatable {
     this.totalpages = 0,
     this.isProfileViewVisible = false,
     this.jeevanaadiProfile,
+    this.jeevanaadiProfileFull,
     this.profileLoading = false,
     this.profileErrorMsg,
     this.jeevanadiMember,
@@ -57,6 +61,7 @@ class JeevanaadiState extends Equatable {
     int? totalpages,
     bool? isProfileViewVisible,
     User? jeevanaadiProfile,
+    JeevanaadiFullProfile? jeevanaadiProfileFull,
     bool? profileLoading,
     String? profileErrorMsg,
     JeevanadiMember? jeevanadiMember,
@@ -77,6 +82,8 @@ class JeevanaadiState extends Equatable {
       jeevanaadisMems: jeevanaadisMems ?? this.jeevanaadisMems,
       isProfileViewVisible: isProfileViewVisible ?? this.isProfileViewVisible,
       jeevanaadiProfile: jeevanaadiProfile ?? this.jeevanaadiProfile,
+      jeevanaadiProfileFull:
+          jeevanaadiProfileFull ?? this.jeevanaadiProfileFull,
       profileLoading: profileLoading ?? this.profileLoading,
       profileErrorMsg: profileErrorMsg ?? this.profileErrorMsg,
       jeevanadiMember: jeevanadiMember ?? this.jeevanadiMember,
@@ -101,6 +108,7 @@ class JeevanaadiState extends Equatable {
     jeevanaadisMems,
     isProfileViewVisible,
     jeevanaadiProfile,
+    jeevanaadiProfileFull,
     profileLoading,
     profileErrorMsg,
     jeevanadiMember,

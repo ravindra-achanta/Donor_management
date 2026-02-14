@@ -8,7 +8,7 @@ class ProfileRepo {
   final _api = NetworkService.instance;
 
   Future<ApiResult<User>> getProfile(String id) async {
-    final result = await _api.get("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
+    final result = await _api.get("${ApiConstants.GET_USER_BY_ID}/$id");
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }
@@ -21,4 +21,27 @@ class ProfileRepo {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
+
+
+Future<ApiResult<User>> editProfile(String id, User user) async {
+  final result = await _api.put(
+    "${ApiConstants.UPDATE_PROFILE}/$id",
+    body: user.toJson(),
+  );
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+    
+  }
+
+  try {
+    return ApiResult.success(User.fromJson(result.data));
+  } catch (e) {
+    return ApiResult.failure(
+      ApiError(message: "Data parsing error: $e"),
+    );
+  }
+}
+
+  
 }

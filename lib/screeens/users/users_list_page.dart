@@ -69,7 +69,7 @@ class _UsersState extends State<Users> {
                                     Get.to(
                                       () => RegistrationPage(
                                         title: "Add New User",
-                                        type: RegistrationType.user,
+                                        type: RegistrationType.user, user: null,
                                       ),
                                     );
                                   },

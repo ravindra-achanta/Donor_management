@@ -2,11 +2,14 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/bloc_management/profile/profile_event.dart';
 import 'package:vikas_app/bloc_management/profile/profile_state.dart';
+import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
@@ -26,8 +29,7 @@ class _MyProfileState extends State<MyProfile>
   @override
   void initState() {
     super.initState();
-
-    context.read<ProfileBloc>().add(FetchProfile(id: ""));
+      _loadProfile();
 
     _controller = AnimationController(
       vsync: this,
@@ -41,6 +43,8 @@ class _MyProfileState extends State<MyProfile>
       end: Offset.zero,
     ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
   }
+
+  
 
   @override
   void dispose() {
@@ -152,12 +156,12 @@ class _MyProfileState extends State<MyProfile>
                                       _infoRow(
                                         Icons.badge_outlined,
                                         'User ID',
-                                        user.uniqueId!,
+                                        user.uniqueId ?? "",
                                       ),
                                       _infoRow(
                                         Icons.security_outlined,
                                         'Role',
-                                        user.userType!,
+                                        user.userType ?? "N/A",
                                       ),
                                     ],
                                   ),
@@ -336,13 +340,50 @@ class _MyProfileState extends State<MyProfile>
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  user.userType!,
+                  user.userType != null ? user.userType!.toUpperCase() : "N/A",
                   style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
                 ),
               ],
             ),
           ),
-          _statusChip(user.status),
+          //_statusChip(user.status),
+          Row(
+  mainAxisSize: MainAxisSize.min,
+  children: [
+    _statusChip(user.status),
+    const SizedBox(width: 8),
+    IconButton(
+      tooltip: "Edit Profile",
+      icon: const Icon(
+        Icons.edit_outlined,
+        color: Colors.blue,
+        size: 20,
+      ), 
+      onPressed: () async {
+  await Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => RegistrationPage(
+        title: "Edit Profile",
+        type: RegistrationType.user,
+        user: user,
+        isEdit: true,
+      ),
+    ),
+  );
+
+  // reload profile after returning
+  _loadProfile();
+},
+
+      // onPressed: () {
+      //   RegistrationPage();
+      // },
+    ),
+  ],
+),
+
+          
         ],
       ),
     );
@@ -435,4 +476,11 @@ class _MyProfileState extends State<MyProfile>
     final parts = [u.area, u.city, u.state, u.country];
     return parts.where((e) => e != null && e.trim().isNotEmpty).join(', ');
   }
-}
+  
+Future<void> _loadProfile() async {
+  final userId = await Vikasdb().getString("USER_ID");
+
+  if (userId != null && userId.isNotEmpty) {
+    context.read<ProfileBloc>().add(FetchProfile(id: userId));
+  }}
+    }

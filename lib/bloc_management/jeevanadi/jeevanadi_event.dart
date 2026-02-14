@@ -67,6 +67,17 @@ class RemoveAssignedKaryakarthaEvent extends JeevanaadiEvent {
   List<Object?> get props => [memberId, karyakarthaId];
 }
 
+
+//full profile view
+class FetchJeevanaadiProfileFullEvent extends JeevanaadiEvent {
+  final String userId;
+
+  FetchJeevanaadiProfileFullEvent(this.userId);
+
+  @override
+  List<Object?> get props => [userId];
+}
+
 // class AddUserEvent extends KaryakarthaEvent {
 //   final LocalUser user;
 //   AddUserEvent(this.user);

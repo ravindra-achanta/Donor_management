@@ -25,5 +25,11 @@ class ApiConstants {
   static const String CREATE_USER = "$IDM_URI/user/create";
    static const String GET_USERS = "$IDM_URI/users/all";
    static const String GET_USER_BY_ID = "$IDM_URI/user";
+   static const String UPDATE_PROFILE = "$IDM_URI/user";
+
+   //jeevanadi
+   static const String jeevanadi_fullview = "${JEEVANADI_URI}/";
+
+   
 
 }
