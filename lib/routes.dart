@@ -80,7 +80,7 @@ getPageRoute() {
       // middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(name: '/register', page: () => const RegistrationPage(title: "Add new User",type: RegistrationType.user,)),
+    GetPage(name: '/register', page: () => const RegistrationPage(title: "Add new User",type: RegistrationType.user, user: null,)),
 
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DhramSetuScreen()),
@@ -113,11 +113,11 @@ getPageRoute() {
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
-    GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
+    GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
 
     // GetPage(
     //   name: '/dashboard',
-    //   page: () => const AdminDashboardPage(),
+    //   page: () => const AdminDashboardPage()
     //   middlewares: [AuthMiddleware()],
     // ),
     // GetPage(

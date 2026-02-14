@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/api_services/network_repos/jeevanadi_repo.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
+import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
+
 
 import '../../screeens/models/response/jeevanadi_member.dart';
 
@@ -11,6 +15,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   JeevanaadiBloc() : super(JeevanaadiState()) {
     on<FetchJeevanaadisEvent>(_onFetchJeevanaadiMems);
     on<FetchJeevanaadiProfileEvent>(_onFetchJeevanaadiProfile);
+    on<FetchJeevanaadiProfileFullEvent>(_onFetchJeevanaadiProfileFull);
     on<CloseProfileView>(_closeProfileView);
     on<FetchJeevanadiMemberEvent>(_onFetchJeevanadiMember);
     on<FetchAssignedKaryakarthasEvent>(_onFetchAssignedKaryakarthas);
@@ -360,4 +365,40 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   ) async {
     emit(state.copyWith(isProfileViewVisible: false));
   }
+
+
+//full jeevandi view:
+Future<void> _onFetchJeevanaadiProfileFull(
+  FetchJeevanaadiProfileFullEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(
+    isProfileViewVisible: true,
+    profileLoading: true,
+    profileErrorMsg: null,
+  ));
+
+  try {
+    final response = await JeevanaadiRepo.getJeevanaadiProfileFull(event.userId);
+
+    if (response.isSuccess) {
+      emit(state.copyWith(
+        profileLoading: false,
+        jeevanaadiProfileFull: response.data,
+        profileErrorMsg: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        profileLoading: false,
+        profileErrorMsg: response.error?.message ?? 'Failed to fetch full profile',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      profileLoading: false,
+      profileErrorMsg: 'Data parsing error: ${e.toString()}',
+    ));
+  }
+}
+
 }

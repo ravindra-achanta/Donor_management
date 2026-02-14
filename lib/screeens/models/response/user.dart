@@ -47,21 +47,25 @@ class User {
   final String? area;
   final String? state;
   final String? country;
+  final String? startedDate;
 
   User({
     required this.id,
-    required this.uniqueId,
+    //required this.uniqueId,
+    this.uniqueId,
     required this.name,
     required this.email,
     this.mobileNumber,
     this.password,
-    required this.userType,
+    //required this.userType,
+    this.userType,
     required this.status,
     this.pincode,
     this.city,
     this.area,
     this.state,
     this.country,
+      this.startedDate,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -79,6 +83,7 @@ class User {
       area: json['area'],
       state: json['state'],
       country: json['country'],
+      startedDate: json['startedDate']
     );
   }
 

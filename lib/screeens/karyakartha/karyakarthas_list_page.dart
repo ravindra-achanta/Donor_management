@@ -69,7 +69,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     //Get.toNamed('/register');
                                     Get.to(() => RegistrationPage(
       title: "Add Karyakartha",
-      type: RegistrationType.karyakartha,
+      type: RegistrationType.karyakartha, user: null,
     ));
 
 

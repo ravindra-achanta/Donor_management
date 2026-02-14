@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
+import 'package:vikas_app/bloc_management/profile/profile_event.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
+import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_event.dart';
@@ -12,13 +15,17 @@ import 'package:vikas_app/screeens/models/response/role_response.dart';
 
 class RegistrationPage extends StatefulWidget {
   //const RegistrationPage({super.key});
-final String title;
+  final String title;
   final RegistrationType type;
+  final User? user;
+  final bool isEdit;
 
   const RegistrationPage({
     super.key,
     required this.title,
     required this.type,
+    required this.user,
+    this.isEdit = false,
   });
 
   @override
@@ -42,9 +49,35 @@ class _RegistrationPageState extends State<RegistrationPage> {
   List<Role> selectedRoles = [];
 
   @override
+  // void initState() {
+  //   super.initState();
+  //   startDateCtrl.text = _formatDate(DateTime.now());
+  // }
+  @override
   void initState() {
     super.initState();
-    startDateCtrl.text = _formatDate(DateTime.now());
+
+    if (widget.isEdit && widget.user != null) {
+      final nameParts = widget.user!.name.split(" ");
+
+      firstNameCtrl.text = nameParts.isNotEmpty ? nameParts.first : "";
+
+      lastNameCtrl.text = nameParts.length > 1
+          ? nameParts.sublist(1).join(" ")
+          : "";
+
+      emailCtrl.text = widget.user!.email ?? "";
+      mobileCtrl.text = widget.user!.mobileNumber ?? "";
+      pincodeCtrl.text = widget.user!.pincode ?? "";
+      cityCtrl.text = widget.user!.city ?? "";
+      areaCtrl.text = widget.user!.area ?? "";
+      stateCtrl.text = widget.user!.state ?? "";
+      countryCtrl.text = widget.user!.country ?? "";
+      startDateCtrl.text =
+          widget.user!.startedDate ?? _formatDate(DateTime.now());
+    } else {
+      startDateCtrl.text = _formatDate(DateTime.now());
+    }
   }
 
   String _formatDate(DateTime date) {
@@ -76,9 +109,16 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthBloc(authRepository: AuthRepository()),
-      child: _RegistrationFormContent(
+    // return BlocProvider(
+    //   create: (_) => AuthBloc(authRepository: AuthRepository()),
+    //   child: _RegistrationFormContent(
+          return MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => AuthBloc(authRepository: AuthRepository()),
+          ),
+        ],
+        child: _RegistrationFormContent(
         title: widget.title,
         type: widget.type,
         formKey: _formKey,
@@ -99,6 +139,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
           });
         },
         onClearForm: _clearForm,
+        user: widget.user,
+        isEdit: widget.isEdit,
       ),
     );
   }
@@ -107,6 +149,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
 class _RegistrationFormContent extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final String title;
+  final User? user;
+  final bool isEdit;
+
   final TextEditingController firstNameCtrl;
   final TextEditingController lastNameCtrl;
   final TextEditingController emailCtrl;
@@ -120,12 +165,15 @@ class _RegistrationFormContent extends StatefulWidget {
   final List<Role> selectedRoles;
   final Function(List<Role>) onRolesUpdated;
   final VoidCallback onClearForm;
-  
+
   final dynamic type;
 
   const _RegistrationFormContent({
     required this.title,
-required this.type,
+    required this.type,
+    required this.user,
+    required this.isEdit,
+
     required this.formKey,
     required this.firstNameCtrl,
     required this.lastNameCtrl,
@@ -143,7 +191,8 @@ required this.type,
   });
 
   @override
-  State<_RegistrationFormContent> createState() => _RegistrationFormContentState();
+  State<_RegistrationFormContent> createState() =>
+      _RegistrationFormContentState();
 }
 
 class _RegistrationFormContentState extends State<_RegistrationFormContent> {
@@ -186,25 +235,56 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
             vertical: 12,
           ),
         ),
+        // validator: (value) {
+        //   if (value == null || value.trim().isEmpty)
+        //     return '$label is required';
+        //   if (lettersOnly && !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+        //     return '$label must contain letters only';
+        //   }
+        //   if (numbersOnly && !RegExp(r'^\d+$').hasMatch(value.trim())) {
+        //     return '$label must contain numbers only';
+        //   }
+        //   if (label == "Mobile Number" && value.trim().length != 10) {
+        //     return 'Mobile Number must be 10 digits';
+        //   }
+        //   if (label == "Pincode" && value.trim().length != 6) {
+        //     return 'Pincode must be 6 digits';
+        //   }
+        //   if (label == "Email" &&
+        //       !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+        //     return 'Enter a valid email';
+        //   }
+        //   return null;
+        // },
         validator: (value) {
+          if (widget.isEdit) return null;
+
           if (value == null || value.trim().isEmpty)
             return '$label is required';
+
           if (lettersOnly && !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
             return '$label must contain letters only';
           }
+
           if (numbersOnly && !RegExp(r'^\d+$').hasMatch(value.trim())) {
             return '$label must contain numbers only';
           }
+
           if (label == "Mobile Number" && value.trim().length != 10) {
             return 'Mobile Number must be 10 digits';
           }
+
           if (label == "Pincode" && value.trim().length != 6) {
             return 'Pincode must be 6 digits';
           }
+
           if (label == "Email" &&
-              !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
+              !RegExp(
+                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+              ).hasMatch(value.trim())) {
             return 'Enter a valid email';
           }
+
           return null;
         },
       ),
@@ -234,9 +314,17 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                     color: Colors.white,
                   ),
                 )
-              : const Text(
-                  "Register",
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+              :
+                //  const Text(
+                //     "Register",
+                //     style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                //   ),
+                Text(
+                  widget.isEdit ? "Update" : "Register",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
         ),
       ),
@@ -267,8 +355,65 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     );
   }
 
-  void _submit(BuildContext context) {
-    if (!widget.formKey.currentState!.validate()) return;
+  // void _submit(BuildContext context) {
+  //   if (!widget.formKey.currentState!.validate()) return;
+
+  //   if (widget.selectedRoles.isEmpty) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please select at least one role'),
+  //         backgroundColor: Colors.orange,
+  //       ),
+  //     );
+  //     return;
+  //   }
+
+  //   final List<int> roleIds = widget.selectedRoles
+  //       .map((role) => int.parse(role.id))
+  //       .toList();
+
+  //   final request = IdentityRequest(
+  //     name: "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+  //     email: widget.emailCtrl.text.trim(),
+  //     mobileNumber: widget.mobileCtrl.text.trim(),
+  //     roles: roleIds,
+  //     startedDate: widget.startDateCtrl.text.trim(),
+  //     pincode: widget.pincodeCtrl.text.trim(),
+  //     city: widget.cityCtrl.text.trim(),
+  //     area: widget.areaCtrl.text.trim(),
+  //     state: widget.stateCtrl.text.trim(),
+  //     country: widget.countryCtrl.text.trim(),
+  //   );
+
+  //   context.read<AuthBloc>().add(CreateUserEvent(request: request));
+  // }
+void _submit(BuildContext context) {
+  if (!widget.formKey.currentState!.validate()) return;
+
+  if (widget.isEdit) {
+    final updatedUser = User(
+      id: widget.user!.id,
+      name:
+          "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+      email: widget.emailCtrl.text.trim(),
+      mobileNumber: widget.mobileCtrl.text.trim(),
+      status: widget.user!.status,
+      userType: widget.user!.userType,
+      uniqueId: widget.user!.uniqueId,
+      pincode: widget.pincodeCtrl.text.trim(),
+      city: widget.cityCtrl.text.trim(),
+      area: widget.areaCtrl.text.trim(),
+      state: widget.stateCtrl.text.trim(),
+      country: widget.countryCtrl.text.trim(),
+      startedDate: widget.startDateCtrl.text.trim(),
+    );
+
+    context.read<ProfileBloc>().add(
+      UpdateProfile(id: widget.user!.id, user: updatedUser),
+    );
+
+    Navigator.pop(context);
+  } else {
 
     if (widget.selectedRoles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -285,7 +430,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         .toList();
 
     final request = IdentityRequest(
-      name: "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+      name:
+          "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
       email: widget.emailCtrl.text.trim(),
       mobileNumber: widget.mobileCtrl.text.trim(),
       roles: roleIds,
@@ -299,6 +445,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
 
     context.read<AuthBloc>().add(CreateUserEvent(request: request));
   }
+}
+
 
   void _cancel(BuildContext context) {
     widget.onClearForm();
@@ -343,7 +491,10 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
   }
 
   Widget _multiSelectRoleField(
-      bool isLoading, BuildContext context, List<Role> allRoles) {
+    bool isLoading,
+    BuildContext context,
+    List<Role> allRoles,
+  ) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Column(
@@ -354,8 +505,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
             //     ? null
             //     : () async {
             onTap: (isLoading || widget.type == RegistrationType.karyakartha)
-    ? null
-    : () async {
+                ? null
+                : () async {
                     await showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
@@ -376,7 +527,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                                   borderRadius: BorderRadius.circular(12),
                                   boxShadow: [
                                     BoxShadow(
-                                        color: Colors.black26, blurRadius: 8),
+                                      color: Colors.black26,
+                                      blurRadius: 8,
+                                    ),
                                   ],
                                 ),
                                 child: Column(
@@ -406,22 +559,31 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                                                 setModalState(() {
                                                   if (val == true) {
                                                     if (!widget.selectedRoles
-                                                        .any((r) => r.id == role.id)) {
+                                                        .any(
+                                                          (r) =>
+                                                              r.id == role.id,
+                                                        )) {
                                                       final updatedList =
                                                           List<Role>.from(
-                                                              widget.selectedRoles);
+                                                            widget
+                                                                .selectedRoles,
+                                                          );
                                                       updatedList.add(role);
                                                       widget.onRolesUpdated(
-                                                          updatedList);
+                                                        updatedList,
+                                                      );
                                                     }
                                                   } else {
                                                     final updatedList =
                                                         List<Role>.from(
-                                                            widget.selectedRoles);
+                                                          widget.selectedRoles,
+                                                        );
                                                     updatedList.removeWhere(
-                                                        (r) => r.id == role.id);
+                                                      (r) => r.id == role.id,
+                                                    );
                                                     widget.onRolesUpdated(
-                                                        updatedList);
+                                                      updatedList,
+                                                    );
                                                   }
                                                 });
                                               },
@@ -431,8 +593,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                                     Align(
                                       alignment: Alignment.centerRight,
                                       child: TextButton(
-                                        onPressed: () =>
-                                            Navigator.pop(context),
+                                        onPressed: () => Navigator.pop(context),
                                         child: const Text("Done"),
                                       ),
                                     ),
@@ -462,8 +623,14 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                     vertical: 12,
                   ),
                 ),
-                validator: (value) =>
-                    widget.selectedRoles.isEmpty ? 'Select at least 1 role' : null,
+                // validator: (value) =>
+                //     widget.selectedRoles.isEmpty ? 'Select at least 1 role' : null,
+                validator: (value) {
+                  if (widget.isEdit) return null;
+                  return widget.selectedRoles.isEmpty
+                      ? 'Select at least 1 role'
+                      : null;
+                },
               ),
             ),
           ),
@@ -486,8 +653,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                     onDeleted: isLoading
                         ? null
                         : () {
-                            final updatedList =
-                                List<Role>.from(widget.selectedRoles);
+                            final updatedList = List<Role>.from(
+                              widget.selectedRoles,
+                            );
                             updatedList.removeWhere((r) => r.id == role.id);
                             widget.onRolesUpdated(updatedList);
                           },
@@ -507,7 +675,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         if (state.isUserCreated) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(state.creationMessage ?? "User created successfully"),
+              content: Text(
+                state.creationMessage ?? "User created successfully",
+              ),
               backgroundColor: Colors.green,
               duration: const Duration(seconds: 3),
             ),
@@ -533,17 +703,16 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           final isLoading = state.isCreatingUser || state.isLoadingRoles;
           final roles = state.roles;
           if (widget.type == RegistrationType.karyakartha &&
-    roles.isNotEmpty &&
-    widget.selectedRoles.isEmpty) {
+              roles.isNotEmpty &&
+              widget.selectedRoles.isEmpty) {
+            final karyakarthaRole = roles.firstWhere(
+              (r) => r.displayName.toUpperCase() == "KARYAKARTHA",
+            );
 
-  final karyakarthaRole = roles.firstWhere(
-    (r) => r.displayName.toUpperCase() == "KARYAKARTHA",
-  );
-
-  WidgetsBinding.instance.addPostFrameCallback((_) {
-    widget.onRolesUpdated([karyakarthaRole]);
-  });
-}
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              widget.onRolesUpdated([karyakarthaRole]);
+            });
+          }
 
           // ✅ Loading indicator
           if (state.isLoadingRoles && roles.isEmpty) {
@@ -562,7 +731,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           }
 
           // ✅ ERROR HANDLING UI
-          if (!state.isLoadingRoles && roles.isEmpty && state.errorMessage != null) {
+          if (!state.isLoadingRoles &&
+              roles.isEmpty &&
+              state.errorMessage != null) {
             return Layout(
               child: Center(
                 child: Padding(
@@ -570,7 +741,11 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.error_outline, size: 48, color: Colors.red),
+                      const Icon(
+                        Icons.error_outline,
+                        size: 48,
+                        color: Colors.red,
+                      ),
                       const SizedBox(height: 16),
                       Text(
                         'Failed to load roles: ${state.errorMessage}',
@@ -579,7 +754,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                       ),
                       const SizedBox(height: 16),
                       ElevatedButton(
-                        onPressed: () => context.read<AuthBloc>().add(FetchRolesEvent()),
+                        onPressed: () =>
+                            context.read<AuthBloc>().add(FetchRolesEvent()),
                         child: const Text('Retry'),
                       ),
                     ],
@@ -604,8 +780,10 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           return Layout(
             child: Center(
               child: SingleChildScrollView(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 16,
+                ),
                 child: Card(
                   elevation: 5,
                   shape: RoundedRectangleBorder(
@@ -626,16 +804,16 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                           //   ),
                           // ),
                           Text(
-  widget.title,
-  style: const TextStyle(
-    fontSize: 24,
-    fontWeight: FontWeight.bold,
-  ),
-),
+                            widget.title,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
 
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           const Divider(thickness: 1),
-                          const SizedBox(height: 16),
+                          const SizedBox(height: 10),
                           const Text(
                             "Personal Information",
                             style: TextStyle(
@@ -645,10 +823,18 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                           ),
                           const SizedBox(height: 16),
                           rowFields(
-                            _input(widget.firstNameCtrl, "First Name",
-                                lettersOnly: true, isLoading: isLoading),
-                            _input(widget.lastNameCtrl, "Last Name",
-                                lettersOnly: true, isLoading: isLoading),
+                            _input(
+                              widget.firstNameCtrl,
+                              "First Name",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
+                            _input(
+                              widget.lastNameCtrl,
+                              "Last Name",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
                           ),
                           rowFields(
                             _input(
@@ -679,16 +865,32 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                           ),
                           const SizedBox(height: 16),
                           rowFields(
-                            _input(widget.areaCtrl, "Area",
-                                lettersOnly: true, isLoading: isLoading),
-                            _input(widget.cityCtrl, "City",
-                                lettersOnly: true, isLoading: isLoading),
+                            _input(
+                              widget.areaCtrl,
+                              "Area",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
+                            _input(
+                              widget.cityCtrl,
+                              "City",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
                           ),
                           rowFields(
-                            _input(widget.stateCtrl, "State",
-                                lettersOnly: true, isLoading: isLoading),
-                            _input(widget.countryCtrl, "Country",
-                                lettersOnly: true, isLoading: isLoading),
+                            _input(
+                              widget.stateCtrl,
+                              "State",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
+                            _input(
+                              widget.countryCtrl,
+                              "Country",
+                              lettersOnly: true,
+                              isLoading: isLoading,
+                            ),
                           ),
                           rowFields(
                             _input(
@@ -739,4 +941,3 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     );
   }
 }
-
