@@ -3,6 +3,7 @@ import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
+import 'package:vikas_app/screeens/models/request/unassigned_users_response.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadi_paginated_view.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
@@ -56,6 +57,62 @@ class JeevanadiRepo {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
+
+  //UNASSIGNED MEMBERS
+//   Future<ApiResult<UnassignedUsersResponse>> getUnassignedJeevanadiUsers(
+//   String memberId, 
+//   int page, 
+//   int size,
+//   // {required int size, required int page}
+// ) async {
+//   final result = await _api.get(
+//     "${ApiConstants.jeevanadi_nonallocated_users}?page=$page&size=$size",
+//     // Add headers if needed
+//     // headers: {
+//     //   'Authorization': 'Bearer ${await getToken()}', // If you need to add token
+//     // },
+//   );
+  
+//   if (!result.isSuccess) {
+//     return ApiResult.failure(result.error);
+//   }
+
+//   try {
+//     UnassignedUsersResponse data = UnassignedUsersResponse.fromJson(result.data);
+//     return ApiResult.success(data);
+//   } catch (e) {
+//     return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+//   }
+// }
+
+//unassigned
+ //unassigned
+Future<ApiResult<UnassignedUsersResponse>> getUnassignedJeevanadiUsers({
+  required int page,  
+  required int size,
+}) async {
+  
+  final url = "${ApiConstants.jeevanadi_nonallocated_users}?page=$page&size=$size";
+  
+  
+  final result = await _api.get(url);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final data = UnassignedUsersResponse.fromJson(result.data);
+    
+    return ApiResult.success(data);
+  } catch (e) {
+    print('❌ Parsing error: $e');
+    print('📦 Response data: ${result.data}');
+    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  }
+}
+
+
 
   
 
