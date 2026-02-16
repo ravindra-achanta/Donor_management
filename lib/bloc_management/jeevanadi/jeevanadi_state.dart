@@ -29,6 +29,10 @@ class JeevanaadiState extends Equatable {
   final List<String> selectedUnassignedIds;
   final bool isAssigning;
   final bool isRemoving;
+  final int unassignedTotalPages;
+  final int unassignedTotalElements;
+  final int unassignedCurrentPage;
+  final bool isLoadingUnassigned;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -49,6 +53,12 @@ class JeevanaadiState extends Equatable {
     this.selectedUnassignedIds = const [],
     this.isAssigning = false,
     this.isRemoving = false,
+    this.unassignedTotalPages = 0,
+    this.unassignedTotalElements = 0,
+    this.unassignedCurrentPage = 0,
+    this.isLoadingUnassigned = false,
+    
+    
   });
 
   JeevanaadiState copyWith({
@@ -70,6 +80,10 @@ class JeevanaadiState extends Equatable {
     List<String>? selectedUnassignedIds,
     bool? isAssigning,
     bool? isRemoving,
+     int? unassignedTotalPages,
+    int? unassignedTotalElements,
+    int? unassignedCurrentPage,
+    bool? isLoadingUnassigned,
   }) {
     return JeevanaadiState(
       delLoading: delLoading ?? this.delLoading,
@@ -94,6 +108,10 @@ class JeevanaadiState extends Equatable {
           selectedUnassignedIds ?? this.selectedUnassignedIds,
       isAssigning: isAssigning ?? this.isAssigning,
       isRemoving: isRemoving ?? this.isRemoving,
+      unassignedTotalPages: unassignedTotalPages ?? this.unassignedTotalPages,
+      unassignedTotalElements: unassignedTotalElements ?? this.unassignedTotalElements,
+      unassignedCurrentPage: unassignedCurrentPage ?? this.unassignedCurrentPage,
+      isLoadingUnassigned: isLoadingUnassigned ?? this.isLoadingUnassigned,
     );
   }
 
@@ -117,5 +135,9 @@ class JeevanaadiState extends Equatable {
     selectedUnassignedIds,
     isAssigning,
     isRemoving,
+    unassignedTotalPages,
+    unassignedTotalElements,
+    unassignedCurrentPage,
+    isLoadingUnassigned,
   ];
 }

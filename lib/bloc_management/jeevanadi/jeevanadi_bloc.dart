@@ -211,60 +211,129 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       );
     }
   }
+  
 
-  Future<void> _onFetchUnassignedKaryakarthas(
-    FetchUnassignedKaryakarthasEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    try {
-      // Dummy API call - replace with actual API
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final dummyUnassignedKaryakarthas = [
-        User(
-          id: 'KA-003',
-          name: 'Kiran Sharma',
-          email: 'kiran@example.com',
-          mobileNumber: '9876543213',
-          uniqueId: 'KA-003',
-          userType: 'KARYAKARTHA',
-          status: 'ACTIVE',
-        ),
-        User(
-          id: 'KA-004',
-          name: 'Meena Patel',
-          email: 'meena@example.com',
-          mobileNumber: '9876543214',
-          uniqueId: 'KA-004',
-          userType: 'KARYAKARTHA',
-          status: 'ACTIVE',
-        ),
-        User(
-          id: 'KA-005',
-          name: 'Arun Kumar',
-          email: 'arun.k@example.com',
-          mobileNumber: '9876543215',
-          uniqueId: 'KA-005',
-          userType: 'KARYAKARTHA',
-          status: 'ACTIVE',
-        ),
-      ];
-
-      // If it's not the first page, append to existing list
-      final updatedList = event.page == 1
-          ? dummyUnassignedKaryakarthas
-          : [...state.unassignedKaryakarthas, ...dummyUnassignedKaryakarthas];
-
-      emit(state.copyWith(unassignedKaryakarthas: updatedList));
-    } catch (e) {
-      emit(
-        state.copyWith(
-          errorMessage:
-              'Failed to fetch unassigned karyakarthas: ${e.toString()}',
-        ),
-      );
-    }
+//UNASSIGNED MEMBER
+//UNASSIGNED MEMBER
+Future<void> _onFetchUnassignedKaryakarthas(
+  FetchUnassignedKaryakarthasEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.page == 0) {
+    emit(state.copyWith(
+      isLoadingUnassigned: true, 
+      errorMessage: null,
+      unassignedKaryakarthas: [],
+    ));
   }
+
+  try {
+    print('🔵 Fetching unassigned - Page: ${event.page}');
+    
+    final response = await JeevanaadiRepo.getUnassignedJeevanadiUsers(
+      page: event.page,
+      size: 10,
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      
+      final List<User> users = data?.content.map((unassignedUser) {
+        return User(
+          id: unassignedUser.id,
+          name: unassignedUser.userName,
+          email: unassignedUser.email,
+          mobileNumber: '',
+          uniqueId: unassignedUser.jeevanaadiNo,
+          userType: 'JEEVANAADI',
+          status: 'ACTIVE',
+        );
+      }).toList() ?? [];
+
+      print('🔵 Received ${users.length} users on page ${event.page}');
+      
+      final updatedList = event.page == 0
+          ? users
+          : [...state.unassignedKaryakarthas, ...users];
+
+      emit(state.copyWith(
+        unassignedKaryakarthas: updatedList,
+        unassignedTotalPages: data?.totalPages ?? 0,
+        unassignedTotalElements: data?.totalElements ?? 0,
+        unassignedCurrentPage: data?.currentPage ?? 0,
+        isLoadingUnassigned: false,
+        errorMessage: null,
+      ));
+      
+    
+    } else {
+      emit(state.copyWith(
+        isLoadingUnassigned: false,
+        errorMessage: response.error?.message ?? 'Failed to fetch unassigned users',
+      ));
+    }
+  } catch (e) {
+    //print('❌ Exception in _onFetchUnassignedKaryakarthas: $e');
+    emit(state.copyWith(
+      isLoadingUnassigned: false,
+      errorMessage: 'Failed to fetch unassigned karyakarthas: ${e.toString()}',
+    ));
+  }
+}
+
+  // Future<void> _onFetchUnassignedKaryakarthas(
+  //   FetchUnassignedKaryakarthasEvent event,
+  //   Emitter<JeevanaadiState> emit,
+  // ) async {
+  //   try {
+  //     // Dummy API call - replace with actual API
+  //     await Future.delayed(const Duration(milliseconds: 500));
+
+  //     final dummyUnassignedKaryakarthas = [
+  //       User(
+  //         id: 'KA-003',
+  //         name: 'Kiran Sharma',
+  //         email: 'kiran@example.com',
+  //         mobileNumber: '9876543213',
+  //         uniqueId: 'KA-003',
+  //         userType: 'KARYAKARTHA',
+  //         status: 'ACTIVE',
+  //       ),
+  //       User(
+  //         id: 'KA-004',
+  //         name: 'Meena Patel',
+  //         email: 'meena@example.com',
+  //         mobileNumber: '9876543214',
+  //         uniqueId: 'KA-004',
+  //         userType: 'KARYAKARTHA',
+  //         status: 'ACTIVE',
+  //       ),
+  //       User(
+  //         id: 'KA-005',
+  //         name: 'Arun Kumar',
+  //         email: 'arun.k@example.com',
+  //         mobileNumber: '9876543215',
+  //         uniqueId: 'KA-005',
+  //         userType: 'KARYAKARTHA',
+  //         status: 'ACTIVE',
+  //       ),
+  //     ];
+
+  //     // If it's not the first page, append to existing list
+  //     final updatedList = event.page == 1
+  //         ? dummyUnassignedKaryakarthas
+  //         : [...state.unassignedKaryakarthas, ...dummyUnassignedKaryakarthas];
+
+  //     emit(state.copyWith(unassignedKaryakarthas: updatedList));
+  //   } catch (e) {
+  //     emit(
+  //       state.copyWith(
+  //         errorMessage:
+  //             'Failed to fetch unassigned karyakarthas: ${e.toString()}',
+  //       ),
+  //     );
+  //   }
+  // }
 
   void _onToggleUnassignedSelection(
     ToggleUnassignedSelectionEvent event,

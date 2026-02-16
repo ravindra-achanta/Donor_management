@@ -33,14 +33,14 @@ class FetchAssignedKaryakarthasEvent extends JeevanaadiEvent {
   List<Object?> get props => [memberId];
 }
 
-class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
-  final String memberId;
-  final int page;
-  FetchUnassignedKaryakarthasEvent(this.memberId, this.page);
+// class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
+//   final String memberId;
+//   final int page;
+//   FetchUnassignedKaryakarthasEvent(this.memberId, this.page);
 
-  @override
-  List<Object?> get props => [memberId, page];
-}
+//   @override
+//   List<Object?> get props => [memberId, page];
+// }
 
 class ToggleUnassignedSelectionEvent extends JeevanaadiEvent {
   final String userId;
@@ -76,6 +76,14 @@ class FetchJeevanaadiProfileFullEvent extends JeevanaadiEvent {
 
   @override
   List<Object?> get props => [userId];
+}
+
+class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
+  final int page;
+  FetchUnassignedKaryakarthasEvent(this.page);
+
+  @override
+  List<Object?> get props => [page];
 }
 
 // class AddUserEvent extends KaryakarthaEvent {

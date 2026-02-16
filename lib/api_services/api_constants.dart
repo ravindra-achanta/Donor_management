@@ -29,6 +29,7 @@ class ApiConstants {
 
    //jeevanadi
    static const String jeevanadi_fullview = "${JEEVANADI_URI}/";
+   static const String jeevanadi_nonallocated_users = "${JEEVANADI_URI}/nonallocaed/users";
 
    
 

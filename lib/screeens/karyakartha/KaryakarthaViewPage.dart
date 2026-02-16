@@ -12,6 +12,7 @@ import 'package:vikas_app/views/layouts/layout.dart';
 
 class KaryaKarthaViewScreen extends StatefulWidget {
   final String memberId;
+  
 
   const KaryaKarthaViewScreen({super.key, required this.memberId});
 
@@ -20,7 +21,7 @@ class KaryaKarthaViewScreen extends StatefulWidget {
 }
 
 class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
-  int _unassignedPage = 1;
+  int _unassignedPage = 0;
 
   @override
   void initState() {
@@ -36,7 +37,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
       FetchAssignedKaryakarthasEvent(widget.memberId),
     );
     context.read<JeevanaadiBloc>().add(
-      FetchUnassignedKaryakarthasEvent(widget.memberId, 1),
+      FetchUnassignedKaryakarthasEvent(0),
     );
   }
 
@@ -1090,40 +1091,82 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                             ),
                                     ),
                                     const SizedBox(height: 16),
-                                    SizedBox(
-                                      width: 200,
-                                      child: ElevatedButton.icon(
-                                        onPressed: () {
-                                          _unassignedPage++;
-                                          context.read<JeevanaadiBloc>().add(
-                                            FetchUnassignedKaryakarthasEvent(
-                                              widget.memberId,
-                                              _unassignedPage,
-                                            ),
-                                          );
-                                        },
-                                        icon: const Icon(
-                                          Icons.arrow_downward,
-                                          size: 18,
-                                        ),
-                                        label: FxText.labelMedium('Load More'),
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor:
-                                              Colors.orange.shade600,
-                                          foregroundColor: Colors.white,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 16,
-                                            vertical: 10,
-                                          ),
-                                          shape: RoundedRectangleBorder(
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          elevation: 3,
-                                        ),
-                                      ),
-                                    ),
+SizedBox(
+  width: 200,
+  child: ElevatedButton.icon(
+    onPressed: state.unassignedCurrentPage < state.unassignedTotalPages - 1
+        ? () {
+            setState(() {
+              _unassignedPage = state.unassignedCurrentPage + 1;
+            });
+            context.read<JeevanaadiBloc>().add(
+              FetchUnassignedKaryakarthasEvent(_unassignedPage),
+            );
+          }
+        : null,
+    icon: state.isLoadingUnassigned
+        ? const SizedBox(
+            width: 18,
+            height: 18,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Colors.white,
+            ),
+          )
+        : const Icon(Icons.arrow_downward, size: 18),
+    label: FxText.labelMedium(
+      state.isLoadingUnassigned
+          ? 'Loading...'
+          : state.unassignedCurrentPage < state.unassignedTotalPages - 1
+              ? 'Load More (Page ${state.unassignedCurrentPage + 1}/${state.unassignedTotalPages})'
+              : 'No More Data',
+    ),
+    style: ElevatedButton.styleFrom(
+      backgroundColor: state.unassignedCurrentPage < state.unassignedTotalPages - 1
+          ? Colors.orange.shade600
+          : Colors.grey.shade400,
+      foregroundColor: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 3,
+    ),
+  ),
+),
+                                    // SizedBox(
+                                    //   width: 200,
+                                    //   child: ElevatedButton.icon(
+                                    //     onPressed: () {
+                                    //       _unassignedPage++;
+                                    //       context.read<JeevanaadiBloc>().add(
+                                    //         FetchUnassignedKaryakarthasEvent(
+                                    //           _unassignedPage,
+                                    //         ),
+                                    //       );
+                                    //     },
+                                    //     icon: const Icon(
+                                    //       Icons.arrow_downward,
+                                    //       size: 18,
+                                    //     ),
+                                    //     label: FxText.labelMedium('Load More'),
+                                    //     style: ElevatedButton.styleFrom(
+                                    //       backgroundColor:
+                                    //           Colors.orange.shade600,
+                                    //       foregroundColor: Colors.white,
+                                    //       padding: const EdgeInsets.symmetric(
+                                    //         horizontal: 16,
+                                    //         vertical: 10,
+                                    //       ),
+                                    //       shape: RoundedRectangleBorder(
+                                    //         borderRadius: BorderRadius.circular(
+                                    //           8,
+                                    //         ),
+                                    //       ),
+                                    //       elevation: 3,
+                                    //     ),
+                                    //   ),
+                                    // ),
                                   ],
                                 ),
                               ),
