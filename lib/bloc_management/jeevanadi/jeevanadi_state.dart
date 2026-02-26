@@ -33,6 +33,19 @@ class JeevanaadiState extends Equatable {
   final int unassignedTotalElements;
   final int unassignedCurrentPage;
   final bool isLoadingUnassigned;
+  final int assignedTotalPages;
+final int assignedTotalElements;
+final int assignedCurrentPage;
+final bool isLoadingAssigned;
+final bool? isUpdateLoading;
+  final String? updateSuccessMsg;
+  final String? updateErrorMsg;
+  final Map<String, dynamic>? updateResponse;
+  final bool referredByLoading;
+  final List<dynamic> referredByUsers;
+  final String? referredByError;
+  final int referredByCurrentPage;
+  final int referredByTotalPages;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -57,6 +70,21 @@ class JeevanaadiState extends Equatable {
     this.unassignedTotalElements = 0,
     this.unassignedCurrentPage = 0,
     this.isLoadingUnassigned = false,
+    this.assignedTotalPages = 0,
+  this.assignedTotalElements = 0,
+  this.assignedCurrentPage = 0,
+  this.isLoadingAssigned = false,
+  this.isUpdateLoading = false,
+  this.updateSuccessMsg,
+  this.updateErrorMsg,
+  this.updateResponse,
+  this.referredByLoading = false,
+    this.referredByUsers = const [],
+    this.referredByError,
+    this.referredByCurrentPage = 0,
+    this.referredByTotalPages = 0,
+
+
     
     
   });
@@ -84,6 +112,22 @@ class JeevanaadiState extends Equatable {
     int? unassignedTotalElements,
     int? unassignedCurrentPage,
     bool? isLoadingUnassigned,
+    int? assignedTotalPages,
+  int? assignedTotalElements,
+  int? assignedCurrentPage,
+  bool? isLoadingAssigned,
+  bool? isUpdateLoading,
+  String? updateSuccessMsg,
+  String? updateErrorMsg,
+  Map<String, dynamic>? updateResponse,
+  bool? referredByLoading,
+    List<dynamic>? referredByUsers,
+    String? referredByError,
+    int? referredByCurrentPage,
+    int? referredByTotalPages,
+
+
+
   }) {
     return JeevanaadiState(
       delLoading: delLoading ?? this.delLoading,
@@ -112,6 +156,20 @@ class JeevanaadiState extends Equatable {
       unassignedTotalElements: unassignedTotalElements ?? this.unassignedTotalElements,
       unassignedCurrentPage: unassignedCurrentPage ?? this.unassignedCurrentPage,
       isLoadingUnassigned: isLoadingUnassigned ?? this.isLoadingUnassigned,
+      assignedTotalPages: assignedTotalPages ?? this.assignedTotalPages,
+    assignedTotalElements: assignedTotalElements ?? this.assignedTotalElements,
+    assignedCurrentPage: assignedCurrentPage ?? this.assignedCurrentPage,
+    isLoadingAssigned: isLoadingAssigned ?? this.isLoadingAssigned,
+    isUpdateLoading: isUpdateLoading ?? this.isUpdateLoading,
+    updateSuccessMsg: updateSuccessMsg ?? this.updateSuccessMsg,
+    updateErrorMsg: updateErrorMsg ?? this.updateErrorMsg,
+    updateResponse: updateResponse ?? this.updateResponse,
+    referredByLoading: referredByLoading ?? this.referredByLoading,
+      referredByUsers: referredByUsers ?? this.referredByUsers,
+      referredByError: referredByError ?? this.referredByError,
+      referredByCurrentPage: referredByCurrentPage ?? this.referredByCurrentPage,
+      referredByTotalPages: referredByTotalPages ?? this.referredByTotalPages,
+
     );
   }
 
@@ -139,5 +197,20 @@ class JeevanaadiState extends Equatable {
     unassignedTotalElements,
     unassignedCurrentPage,
     isLoadingUnassigned,
+     assignedTotalPages,
+  assignedTotalElements,
+  assignedCurrentPage,
+  isLoadingAssigned,
+  isUpdateLoading,
+  updateSuccessMsg,
+  updateErrorMsg,
+  updateResponse,
+  referredByLoading,
+    referredByUsers,
+    referredByError,
+    referredByCurrentPage,
+    referredByTotalPages,
+
+
   ];
 }

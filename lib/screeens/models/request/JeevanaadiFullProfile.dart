@@ -3,18 +3,20 @@ class JeevanaadiFullProfile {
   final ProfileDetails profileDetails;
   final List<RelationDetails> relationDetails;
   final OccupationDetails? occupationDetails;
+  final JeevanaadiDemoGraphicDetails jeevanaadiDemoGraphicDetails;
 
   JeevanaadiFullProfile({
     required this.basicDetails,
     required this.profileDetails,
     required this.relationDetails,
     this.occupationDetails,
+    required this.jeevanaadiDemoGraphicDetails,
   });
 
   factory JeevanaadiFullProfile.fromJson(Map<String, dynamic> json) {
     return JeevanaadiFullProfile(
-      basicDetails: BasicDetails.fromJson(json['basicDetails']),
-      profileDetails: ProfileDetails.fromJson(json['profileDetails']),
+      basicDetails: BasicDetails.fromJson(json['basicDetails'] ?? {}),
+      profileDetails: ProfileDetails.fromJson(json['profileDetails'] ?? {}),
       relationDetails: (json['relationDetails'] as List<dynamic>?)
               ?.map((e) => RelationDetails.fromJson(e))
               .toList() ??
@@ -22,50 +24,76 @@ class JeevanaadiFullProfile {
       occupationDetails: json['occupationDetails'] != null
           ? OccupationDetails.fromJson(json['occupationDetails'])
           : null,
+      jeevanaadiDemoGraphicDetails:
+          JeevanaadiDemoGraphicDetails.fromJson(json['jeevanaadiDemoGraphicDetails'] ?? {}),
     );
   }
 }
 
 class BasicDetails {
   final int id;
+  final String? lastLogin;
+  final bool isSuperuser;
   final String email;
   final String username;
-  final bool isSuperuser;
+  final String? otp;
+  final String? otpExpiresAt;
+  final int role;
   final bool isActive;
+  final bool isDeleted;
+  final String createdDate;
+  final String modifiedDate;
+  final String createdBy;
+  final String modifiedBy;
+  final bool isStaff;
+  final bool isAdmin;
   final String jeevanadiNo;
   final bool bulkUpload;
   final String usertype;
-  final int? role;
-  final String? createdDate;
-  final String? modifiedDate;
 
   BasicDetails({
     required this.id,
+    this.lastLogin,
+    required this.isSuperuser,
     required this.email,
     required this.username,
-    required this.isSuperuser,
+    this.otp,
+    this.otpExpiresAt,
+    required this.role,
     required this.isActive,
+    required this.isDeleted,
+    required this.createdDate,
+    required this.modifiedDate,
+    required this.createdBy,
+    required this.modifiedBy,
+    required this.isStaff,
+    required this.isAdmin,
     required this.jeevanadiNo,
     required this.bulkUpload,
     required this.usertype,
-    this.role,
-    this.createdDate,
-    this.modifiedDate,
   });
 
   factory BasicDetails.fromJson(Map<String, dynamic> json) {
     return BasicDetails(
       id: json['id'] ?? 0,
+      lastLogin: json['lastLogin'],
+      isSuperuser: json['isSuperuser'] ?? false,
       email: json['email'] ?? '',
       username: json['username'] ?? '',
-      isSuperuser: json['isSuperuser'] ?? false,
+      otp: json['otp'],
+      otpExpiresAt: json['otpExpiresAt'],
+      role: json['role'] ?? 0,
       isActive: json['isActive'] ?? false,
+      isDeleted: json['isDeleted'] ?? false,
+      createdDate: json['createdDate'] ?? '',
+      modifiedDate: json['modifiedDate'] ?? '',
+      createdBy: json['createdBy'] ?? '',
+      modifiedBy: json['modifiedBy'] ?? '',
+      isStaff: json['isStaff'] ?? false,
+      isAdmin: json['isAdmin'] ?? false,
       jeevanadiNo: json['jeevanadiNo'] ?? '',
       bulkUpload: json['bulkUpload'] ?? false,
       usertype: json['usertype'] ?? '',
-      role: json['role'],
-      createdDate: json['createdDate'],
-      modifiedDate: json['modifiedDate'],
     );
   }
 }
@@ -75,53 +103,56 @@ class ProfileDetails {
   final String fullName;
   final String phoneNumber;
   final String whatsappNumber;
-  final String? gender;
-  final String? maritalStatus;
-  final String? profession;
-  final String? address;
-  final String? city;
-  final String? state;
-  final String? country;
-  final String? pincode;
-  final String? gothram;
-  final String? nakshatram;
-  final int? rashi;
-  final int? paadam;
-  final int fillPercentage;
-  final String? communicationPref;
-  final String? panNumber;
-  final String userType;
-  final String? joinedDate;
   final String? dateOfBirth;
+  final String gender;
+  final String maritalStatus;
+  final String profession;
+  final String address;
+  final String country;
+  final String state;
+  final String city;
+  final String pincode;
   final String? annivDate;
+  final String gothram;
+  final String nakshatram;
+  final int rashi;
+  final double fillPercentage;
+  final String communicationPref;
   final int? referredById;
-  final String? referredByCustom;
+  final int userId;
+  final String joinedDate;
+  final dynamic paadam;
+  final dynamic panNumber;
+  final String userType;
+  final dynamic referredByCustom;
 
   ProfileDetails({
     required this.id,
     required this.fullName,
     required this.phoneNumber,
     required this.whatsappNumber,
-    this.gender,
-    this.maritalStatus,
-    this.profession,
-    this.address,
-    this.city,
-    this.state,
-    this.country,
-    this.pincode,
-    this.gothram,
-    this.nakshatram,
-    this.rashi,
+    this.dateOfBirth,
+    required this.gender,
+    required this.maritalStatus,
+    required this.profession,
+    required this.address,
+    required this.country,
+    required this.state,
+    required this.city,
+    required this.pincode,
+    this.annivDate,
+    required this.gothram,
+    required this.nakshatram,
+    required this.rashi,
+    //required this.fillPercentage,
+    this.fillPercentage = 0.0,
+    required this.communicationPref,
+    this.referredById,
+    required this.userId,
+    required this.joinedDate,
     this.paadam,
-    required this.fillPercentage,
-    this.communicationPref,
     this.panNumber,
     required this.userType,
-    this.joinedDate,
-    this.dateOfBirth,
-    this.annivDate,
-    this.referredById,
     this.referredByCustom,
   });
 
@@ -131,26 +162,27 @@ class ProfileDetails {
       fullName: json['fullName'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       whatsappNumber: json['whatsappNumber'] ?? '',
-      gender: json['gender'],
-      maritalStatus: json['maritalStatus'],
-      profession: json['profession'],
-      address: json['address'],
-      city: json['city'],
-      state: json['state'],
-      country: json['country'],
-      pincode: json['pincode'],
-      gothram: json['gothram'],
-      nakshatram: json['nakshatram'],
-      rashi: json['rashi'],
+      dateOfBirth: json['dateOfBirth'],
+      gender: json['gender'] ?? '',
+      maritalStatus: json['maritalStatus'] ?? '',
+      profession: json['profession'] ?? '',
+      address: json['address'] ?? '',
+      country: json['country'] ?? '',
+      state: json['state'] ?? '',
+      city: json['city'] ?? '',
+      pincode: json['pincode'] ?? '',
+      annivDate: json['annivDate'],
+      gothram: json['gothram'] ?? '',
+      nakshatram: json['nakshatram'] ?? '',
+      rashi: json['rashi'] ?? 0,
+      fillPercentage: json['fillPercentage']?.toDouble() ?? 0.0,
+      communicationPref: json['communicationPref'] ?? '',
+      referredById: json['referredById'],
+      userId: json['userId'] ?? 0,
+      joinedDate: json['joinedDate'] ?? '',
       paadam: json['paadam'],
-      fillPercentage: json['fillPercentage'] ?? 0,
-      communicationPref: json['communicationPref'],
       panNumber: json['panNumber'],
       userType: json['userType'] ?? '',
-      joinedDate: json['joinedDate'],
-      dateOfBirth: json['dateOfBirth'],
-      annivDate: json['annivDate'],
-      referredById: json['referredById'],
       referredByCustom: json['referredByCustom'],
     );
   }
@@ -161,20 +193,22 @@ class RelationDetails {
   final String relation;
   final String name;
   final String? dob;
-  final String? mobileNumber;
-  final String? nakshatram;
-  final int? rashi;
-  final int? paadam;
+  final String? mobilenum;
+  final int? userId;
+  final String? nakshatramRel;
+  final int? paadamRel;
+  final int? rashiRel;
 
   RelationDetails({
     required this.id,
     required this.relation,
     required this.name,
     this.dob,
-    this.mobileNumber,
-    this.nakshatram,
-    this.rashi,
-    this.paadam,
+    this.mobilenum,
+    this.userId,
+    this.nakshatramRel,
+    this.paadamRel,
+    this.rashiRel,
   });
 
   factory RelationDetails.fromJson(Map<String, dynamic> json) {
@@ -183,10 +217,11 @@ class RelationDetails {
       relation: json['relation'] ?? '',
       name: json['name'] ?? '',
       dob: json['dob'],
-      mobileNumber: json['mobileNumber'],
-      nakshatram: json['nakshatram'],
-      rashi: json['rashi'],
-      paadam: json['paadam'],
+      mobilenum: json['mobilenum'],
+      userId: json['userId'],
+      nakshatramRel: json['nakshatramRel'],
+      paadamRel: json['paadamRel'],
+      rashiRel: json['rashiRel'],
     );
   }
 }
@@ -195,11 +230,19 @@ class OccupationDetails {
   final int id;
   final String occName;
   final String occDate;
+  final int? userId;
+  final String? nakshatram;
+  final int? paadam;
+  final int? rashi;
 
   OccupationDetails({
     required this.id,
     required this.occName,
     required this.occDate,
+    this.userId,
+    this.nakshatram,
+    this.paadam,
+    this.rashi,
   });
 
   factory OccupationDetails.fromJson(Map<String, dynamic> json) {
@@ -207,6 +250,26 @@ class OccupationDetails {
       id: json['id'] ?? 0,
       occName: json['occName'] ?? '',
       occDate: json['occDate'] ?? '',
+      userId: json['userId'],
+      nakshatram: json['nakshatram'],
+      paadam: json['paadam'],
+      rashi: json['rashi'],
+    );
+  }
+}
+
+class JeevanaadiDemoGraphicDetails {
+  final double profileCompletionPercentage;
+
+  JeevanaadiDemoGraphicDetails({
+    required this.profileCompletionPercentage,
+  });
+
+  factory JeevanaadiDemoGraphicDetails.fromJson(Map<String, dynamic> json) {
+    return JeevanaadiDemoGraphicDetails(
+      profileCompletionPercentage:
+          //(json['profileCompletionPercentage'] as num?)?.toDouble() ?? 0.0,
+          json['profileCompletionPercentage']?.toDouble() ?? 0.0,
     );
   }
 }

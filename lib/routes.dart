@@ -97,8 +97,13 @@ getPageRoute() {
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
       name: '/karyakartha-view',
-      page: () => const KaryaKarthaViewScreen(memberId: ""),
+      page: () {
+      //=> const KaryaKarthaViewScreen(memberId: ""),
+      final String karyakarthaId = Get.arguments as String? ?? '';
+      return KaryaKarthaViewScreen(karyakarthaId: karyakarthaId);
+      }
     ),
+
     GetPage(
       name: '/profile-analytics',
       page: () => const ProfileAnalyticsScreen(),
@@ -113,7 +118,16 @@ getPageRoute() {
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
-    GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
+    
+    //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
+    GetPage(
+  name: '/jeevandiview',
+  page: () {
+    final String userId = Get.arguments as String? ?? '';
+    return ViewJeevanadiScreen(userId: userId);
+  },
+),
+    
 
     // GetPage(
     //   name: '/dashboard',

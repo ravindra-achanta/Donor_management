@@ -6,8 +6,8 @@ abstract class JeevanaadiEvent extends Equatable {
 }
 
 class FetchJeevanaadiProfileEvent extends JeevanaadiEvent {
-  final String userId;
-  FetchJeevanaadiProfileEvent(this.userId);
+  final String id;
+  FetchJeevanaadiProfileEvent(this.id);
 }
 
 class FetchJeevanaadisEvent extends JeevanaadiEvent {
@@ -15,32 +15,29 @@ class FetchJeevanaadisEvent extends JeevanaadiEvent {
   FetchJeevanaadisEvent(this.page);
 }
 
+
+
 class CloseProfileView extends JeevanaadiEvent {}
 
-class FetchJeevanadiMemberEvent extends JeevanaadiEvent {
-  final String memberId;
-  FetchJeevanadiMemberEvent(this.memberId);
+// class FetchJeevanadiMemberEvent extends JeevanaadiEvent {
+//   final String memberId;
+//   FetchJeevanadiMemberEvent(this.memberId);
 
-  @override
-  List<Object?> get props => [memberId];
-}
+//   @override
+//   List<Object?> get props => [memberId];
+// }
 
 class FetchAssignedKaryakarthasEvent extends JeevanaadiEvent {
   final String memberId;
-  FetchAssignedKaryakarthasEvent(this.memberId);
+  final int page; 
+  final int size;
+  FetchAssignedKaryakarthasEvent(this.memberId, this.page, this.size);
 
   @override
-  List<Object?> get props => [memberId];
+  List<Object?> get props => [memberId, page, size];
 }
 
-// class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
-//   final String memberId;
-//   final int page;
-//   FetchUnassignedKaryakarthasEvent(this.memberId, this.page);
 
-//   @override
-//   List<Object?> get props => [memberId, page];
-// }
 
 class ToggleUnassignedSelectionEvent extends JeevanaadiEvent {
   final String userId;
@@ -50,32 +47,43 @@ class ToggleUnassignedSelectionEvent extends JeevanaadiEvent {
   List<Object?> get props => [userId];
 }
 
+
 class AssignSelectedKaryakarthasEvent extends JeevanaadiEvent {
-  final String memberId;
-  AssignSelectedKaryakarthasEvent(this.memberId);
+  final String karyakarthaId; 
+  final List<String> memberIds; 
+
+  AssignSelectedKaryakarthasEvent({
+    required this.karyakarthaId,
+    required this.memberIds,
+  });
 
   @override
-  List<Object?> get props => [memberId];
+  List<Object?> get props => [karyakarthaId, memberIds];
 }
 
 class RemoveAssignedKaryakarthaEvent extends JeevanaadiEvent {
-  final String memberId;
   final String karyakarthaId;
-  RemoveAssignedKaryakarthaEvent(this.memberId, this.karyakarthaId);
+  final String memberId;
+
+   RemoveAssignedKaryakarthaEvent({
+    required this.karyakarthaId,
+    required this.memberId,
+  });
+
 
   @override
-  List<Object?> get props => [memberId, karyakarthaId];
+  List<Object?> get props => [karyakarthaId,memberId];
 }
 
 
 //full profile view
 class FetchJeevanaadiProfileFullEvent extends JeevanaadiEvent {
-  final String userId;
+  final String jeevanadiNo;
 
-  FetchJeevanaadiProfileFullEvent(this.userId);
+  FetchJeevanaadiProfileFullEvent(this.jeevanadiNo);
 
   @override
-  List<Object?> get props => [userId];
+  List<Object?> get props => [jeevanadiNo];
 }
 
 class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
@@ -86,18 +94,37 @@ class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
   List<Object?> get props => [page];
 }
 
-// class AddUserEvent extends KaryakarthaEvent {
-//   final LocalUser user;
-//   AddUserEvent(this.user);
+class UpdateJeevanaadiProfileEvent extends JeevanaadiEvent {
+  final String userid;
+  final Map<String, dynamic> updateData;
 
-//   @override
-//   List<Object?> get props => [user];
-// }
+  UpdateJeevanaadiProfileEvent({
+    required this.userid,
+    required this.updateData,
+  });
 
-// class UpdateUserEvent extends KaryakarthaEvent {
-//   final LocalUser user;
-//   UpdateUserEvent(this.user);
+  @override
+  List<Object> get props => [userid, updateData];
+}
 
-//   @override
-//   List<Object?> get props => [user];
-// }
+class FetchReferredByUsersEvent extends JeevanaadiEvent {
+  final int page;
+  final int size;
+  final String? searchQuery;
+
+  FetchReferredByUsersEvent({
+    this.page = 0,
+    this.size = 20,
+    this.searchQuery,
+  });
+
+  @override
+  List<Object?> get props => [page, size, searchQuery];
+}
+
+
+
+
+
+
+
