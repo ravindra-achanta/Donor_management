@@ -1,9 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
+import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
+import 'package:vikas_app/bloc_management/notices/notice_event.dart';
+import 'package:vikas_app/bloc_management/notices/notice_state.dart';
 import 'package:vikas_app/screeens/common/notice_dilouge.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
-import 'package:vikas_app/screeens/models/request/notice.dart';
+import 'package:vikas_app/screeens/models/response/notice_response.dart';
 
 class NoticesListScreen extends StatefulWidget {
   const NoticesListScreen({super.key});
@@ -13,39 +20,6 @@ class NoticesListScreen extends StatefulWidget {
 }
 
 class _NoticesListScreenState extends State<NoticesListScreen> {
-  // Sample notices data
-  final List<Notice> _notices = [
-    Notice(
-      id: '1',
-      title: 'Monthly Meeting Announcement',
-      message:
-          'All staff members are requested to attend the monthly meeting on Friday at 10 AM.',
-      audience: 'All Users',
-      date: '2024-01-15',
-      time: '10:00 AM',
-      sender: 'Admin',
-    ),
-    Notice(
-      id: '2',
-      title: 'System Maintenance',
-      message:
-          'The system will be under maintenance from 2 AM to 4 AM tomorrow.',
-      audience: 'Karyakatha',
-      date: '2024-01-14',
-      time: '2:00 AM',
-      sender: 'guruji',
-    ),
-    Notice(
-      id: '3',
-      title: 'Holiday Announcement',
-      message: 'Office will remain closed on 26th January for Republic Day.',
-      audience: 'All Users',
-      date: '2024-01-13',
-      time: '9:00 AM',
-      sender: 'guruji',
-    ),
-  ];
-
   // Dropdown options
   String _selectedFilter = 'All';
   final List<String> _filterOptions = [
@@ -64,204 +38,383 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     'Staff',
   ];
 
+  String _searchQuery = '';
+  Timer? _debounce;
+
+  final ScrollController _scrollController = ScrollController();
+
   @override
-  Widget build(BuildContext context) {
-    return Layout(child: _buildContent());
+  void initState() {
+    super.initState();
+    _loadNotices();
+    _scrollController.addListener(_onScroll);
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Header Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Notices',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown,
-                  ),
-                ),
-                // Add Notice Button
-                ElevatedButton.icon(
-                  onPressed: _addNewNotice,
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Add Notice'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.brown,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 10,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 20),
-
-            // Search and Filters Row
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  // Search bar (compact)
-                  Expanded(
-                    flex: 2,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hintText: 'Search notices...',
-                          hintStyle: const TextStyle(fontSize: 13),
-                          border: InputBorder.none,
-                          prefixIcon: const Icon(
-                            Icons.search,
-                            size: 18,
-                            color: Colors.grey,
-                          ),
-                          contentPadding: const EdgeInsets.symmetric(
-                            vertical: 12,
-                          ),
-                          isDense: true,
-                        ),
-                        style: const TextStyle(fontSize: 13),
-                        onChanged: (value) {
-                          // Implement search functionality
-                        },
-                      ),
-                    ),
-                  ),
-
-                  // Vertical divider
-                  Container(width: 1, height: 30, color: Colors.grey.shade300),
-
-                  // User Type Dropdown
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedUserType,
-                          isExpanded: true,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.black87,
-                          ),
-                          dropdownColor: Colors.white,
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedUserType = newValue;
-                              });
-                            }
-                          },
-                          items: _userTypeOptions.map<DropdownMenuItem<String>>(
-                            (String value) {
-                              return DropdownMenuItem<String>(
-                                value: value,
-                                child: Text(
-                                  value,
-                                  style: const TextStyle(color: Colors.black87),
-                                ),
-
-                                //child: Text(value),
-                              );
-                            },
-                          ).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  // Vertical divider
-                  Container(width: 1, height: 30, color: Colors.grey.shade300),
-
-                  // Filter Dropdown
-                  Expanded(
-                    flex: 1,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          value: _selectedFilter,
-                          isExpanded: true,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: Colors.black87,
-                          ),
-                          dropdownColor: Colors.white,
-                          onChanged: (String? newValue) {
-                            if (newValue != null) {
-                              setState(() {
-                                _selectedFilter = newValue;
-                              });
-                            }
-                          },
-                          items: _filterOptions.map<DropdownMenuItem<String>>((
-                            String value,
-                          ) {
-                            return DropdownMenuItem<String>(
-                              value: value,
-                              //child: Text(value),
-                              child: Text(
-                                value,
-                                style: const TextStyle(color: Colors.black87),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            // Notices count
-            Text(
-              '${_notices.length} notices found',
-              style: const TextStyle(color: Colors.grey, fontSize: 14),
-            ),
-
-            const SizedBox(height: 16),
-
-            // Notices list - REMOVED Expanded
-            Column(
-              children: _notices
-                  .map((notice) => _buildNoticeCard(notice))
-                  .toList(),
-            ),
-          ],
-        ),
+  void _loadNotices() {
+    context.read<NoticeBloc>().add(
+      FetchNoticesEvent(
+        page: 0,
+        filterType: _selectedFilter,
+        userType: _selectedUserType,
+        searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
       ),
     );
   }
 
-  Widget _buildNoticeCard(Notice notice) {
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      final state = context.read<NoticeBloc>().state;
+      if (state.status != NoticeStatus.loading &&
+          !state.isLoadingMore &&
+          state.currentPage < state.totalPages - 1) {
+        context.read<NoticeBloc>().add(
+          FetchNoticesEvent(
+            page: state.currentPage + 1,
+            filterType: _selectedFilter,
+            userType: _selectedUserType,
+            searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
+          ),
+        );
+      }
+    }
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounce?.isActive ?? false) _debounce!.cancel();
+    _debounce = Timer(const Duration(milliseconds: 500), () {
+      setState(() {
+        _searchQuery = query;
+      });
+      _loadNotices();
+    });
+  }
+
+  void _onFilterChanged() {
+    _loadNotices();
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  Color _getAudienceColor(String audience) {
+    switch (audience) {
+      case 'All Users':
+        return Colors.blue.shade600;
+      case 'Admin':
+        return Colors.red.shade600;
+      case 'Karyakatha':
+        return Colors.green.shade600;
+      case 'Staff':
+        return Colors.orange.shade600;
+      default:
+        return Colors.purple.shade600;
+    }
+  }
+
+  void _addNewNotice() {
+    Get.toNamed('/notices');
+  }
+
+  void _viewNoticeDetails(NoticeResponse notice) {
+    Get.toNamed('view/notice', arguments: notice);
+  }
+
+  void _showDeleteDialog(BuildContext context, String id, String title) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Delete Notice'),
+          content: Text('Are you sure you want to delete "$title"?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                context.read<NoticeBloc>().add(DeleteNoticeEvent(id));
+              },
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Layout(
+      child: BlocConsumer<NoticeBloc, NoticeState>(
+        listener: (context, state) {
+          if (state.formStatus == NoticeFormStatus.success) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Notice added successfully'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state.formStatus == NoticeFormStatus.error) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.formErrorMessage ?? 'Error occurred'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          } else if (state.errorMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.errorMessage!),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          if (state.status == NoticeStatus.loading && state.notices.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          return SingleChildScrollView(
+            controller: _scrollController,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header Row
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'Notices',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.brown,
+                        ),
+                      ),
+                      // Add Notice Button
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.refresh),
+                            onPressed: _loadNotices,
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton.icon(
+                            onPressed: _addNewNotice,
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text('Add Notice'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.brown,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          flex: 2,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Search notices...',
+                                hintStyle: const TextStyle(fontSize: 13),
+                                border: InputBorder.none,
+                                prefixIcon: const Icon(
+                                  Icons.search,
+                                  size: 18,
+                                  color: Colors.grey,
+                                ),
+                                contentPadding: const EdgeInsets.symmetric(
+                                  vertical: 12,
+                                ),
+                                isDense: true,
+                              ),
+                              style: const TextStyle(fontSize: 13),
+                              onChanged: _onSearchChanged,
+                            ),
+                          ),
+                        ),
+
+                        // Vertical divider
+                        Container(
+                          width: 1,
+                          height: 30,
+                          color: Colors.grey.shade300,
+                        ),
+
+                        // User Type Dropdown
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedUserType,
+                                isExpanded: true,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                                dropdownColor: Colors.white,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _selectedUserType = newValue;
+                                    });
+                                    _onFilterChanged();
+                                  }
+                                },
+                                items: _userTypeOptions
+                                    .map<DropdownMenuItem<String>>((
+                                      String value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Vertical divider
+                        Container(
+                          width: 1,
+                          height: 30,
+                          color: Colors.grey.shade300,
+                        ),
+
+                        // Filter Dropdown
+                        Expanded(
+                          flex: 1,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                            child: DropdownButtonHideUnderline(
+                              child: DropdownButton<String>(
+                                value: _selectedFilter,
+                                isExpanded: true,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                                dropdownColor: Colors.white,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _selectedFilter = newValue;
+                                    });
+                                    _onFilterChanged();
+                                  }
+                                },
+                                items: _filterOptions
+                                    .map<DropdownMenuItem<String>>((
+                                      String value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
+                                          ),
+                                        ),
+                                      );
+                                    })
+                                    .toList(),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // Notices count
+                  Text(
+                    '${state.totalElements} notices found',
+                    style: const TextStyle(color: Colors.grey, fontSize: 14),
+                  ),
+
+                  const SizedBox(height: 16),
+
+                  // Notices list
+                  state.notices.isEmpty
+                      ? const Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(32.0),
+                            child: Text('No notices found'),
+                          ),
+                        )
+                      : Column(
+                          children: [
+                            ...state.notices
+                                .map((notice) => _buildNoticeCard(notice))
+                                .toList(),
+                            if (state.isLoadingMore)
+                              const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                          ],
+                        ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNoticeCard(NoticeResponse notice) {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -271,7 +424,6 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title and audience badge
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -307,90 +459,32 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
               ],
             ),
 
-            // const SizedBox(height: 10),
-
-            // Message
-            // Text(
-            //   notice.message,
-            //   style: const TextStyle(
-            //     fontSize: 14,
-            //     color: Color.fromARGB(255, 97, 97, 97),
-            //     height: 1.5,
-            //   ),
-            //   maxLines: 2,
-            //   overflow: TextOverflow.ellipsis,
-            // ),
-
             const SizedBox(height: 12),
 
             Row(
-              mainAxisAlignment: .spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  notice.message,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color.fromARGB(255, 97, 97, 97),
-                    height: 1.5,
+                Expanded(
+                  child: Text(
+                    notice.message,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Color.fromARGB(255, 97, 97, 97),
+                      height: 1.5,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-
                 IconButton(
-                  onPressed: () {
-                    NoticePopup.show(
-                      context: context,
-                      imageUrl:
-                          "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-                      title: "Scheduled System Maintenance",
-                      description:
-                          "Our platform will undergo scheduled maintenance today from 12:00 AM to 2:00 AM.\n"
-                          "During this time, some features may be temporarily unavailable.\n"
-                          "Thank you for your patience.",
-                    );
-                  },
-                  icon: Icon(Icons.remove_red_eye_outlined),
+                  onPressed: () => _viewNoticeDetails(notice),
+                  icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
                 ),
               ],
             ),
 
-            // Row(
-            //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //   children: [
-            //     // Date and time
-            //     Row(
-            //       children: [
-            //         const Icon(Icons.access_time, size: 14, color: Colors.grey),
-            //         const SizedBox(width: 6),
-            //         Text(
-            //           '${notice.date} • ${notice.time}',
-            //           style: const TextStyle(
-            //             fontSize: 12,
-            //             color: Colors.grey,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
+            const SizedBox(height: 12),
 
-            //     // Sender
-            //     Row(
-            //       children: [
-            //         const Icon(Icons.person_outline, size: 14, color: Colors.grey),
-            //         const SizedBox(width: 4),
-            //         Text(
-            //           notice.sender,
-            //           style: const TextStyle(
-            //             fontSize: 12,
-            //             color: Colors.grey,
-            //             fontStyle: FontStyle.italic,
-            //           ),
-            //         ),
-            //       ],
-            //     ),
-            //   ],
-            // ),
-            // Footer with date, sender and view button
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -406,58 +500,57 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                   ],
                 ),
 
-                // View Button
-                ElevatedButton.icon(
-                  onPressed: () => _viewNoticeDetails(notice),
-                  icon: const Icon(Icons.remove_red_eye, size: 14),
-                  label: const Text('View'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade50,
-                    foregroundColor: Colors.blue.shade700,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
+                // Action buttons
+                Row(
+                  children: [
+                    // View Button
+                    // ElevatedButton.icon(
+                    //   onPressed: () => _viewNoticeDetails(notice),
+                    //   icon: const Icon(Icons.remove_red_eye, size: 14),
+                    //   label: const Text('View'),
+                    //   style: ElevatedButton.styleFrom(
+                    //     backgroundColor: Colors.blue.shade50,
+                    //     foregroundColor: Colors.blue.shade700,
+                    //     padding: const EdgeInsets.symmetric(
+                    //       horizontal: 12,
+                    //       vertical: 6,
+                    //     ),
+                    //     shape: RoundedRectangleBorder(
+                    //       borderRadius: BorderRadius.circular(6),
+                    //     ),
+                    //     elevation: 0,
+                    //     minimumSize: Size.zero,
+                    //   ),
+                    // ),
+                    //const SizedBox(width: 0),
+                    // Edit Button
+                    IconButton(
+                      onPressed: () {
+                        Get.toNamed('/notices', arguments: notice);
+                      },
+                      icon: const Icon(Icons.edit_outlined, size: 18),
+                      color: Colors.orange,
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
                     ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    elevation: 0,
-                    minimumSize: Size.zero,
-                  ),
+                    const SizedBox(width: 8),
+
+                    // Delete Button
+                    // IconButton(
+                    //   onPressed: () {
+                    //     _showDeleteDialog(context, notice.id, notice.title);
+                    //   },
+                    //   icon: const Icon(Icons.delete_outline, size: 18),
+                    //   color: Colors.red,
+                    //   constraints: const BoxConstraints(),
+                    //   padding: EdgeInsets.zero,
+                    // ),
+                  ],
                 ),
               ],
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Color _getAudienceColor(String audience) {
-    switch (audience) {
-      case 'All Users':
-        return Colors.blue.shade600;
-      case 'Admin':
-        return Colors.red.shade600;
-      case 'Karyakatha':
-        return Colors.green.shade600;
-      case 'Staff':
-        return Colors.orange.shade600;
-      default:
-        return Colors.purple.shade600;
-    }
-  }
-
-  void _addNewNotice() {
-    print('Add new notice pressed');
-    Navigator.push(context, MaterialPageRoute(builder: (context) => Notices()));
-  }
-
-  void _viewNoticeDetails(Notice notice) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => NoticeDetailScreen(notice: notice, noticeId: '',),
       ),
     );
   }

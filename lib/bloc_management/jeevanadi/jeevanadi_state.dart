@@ -46,6 +46,7 @@ final bool? isUpdateLoading;
   final String? referredByError;
   final int referredByCurrentPage;
   final int referredByTotalPages;
+  final List<String> selectedAssignedIds;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -83,6 +84,7 @@ final bool? isUpdateLoading;
     this.referredByError,
     this.referredByCurrentPage = 0,
     this.referredByTotalPages = 0,
+    this.selectedAssignedIds = const [],
 
 
     
@@ -125,6 +127,7 @@ final bool? isUpdateLoading;
     String? referredByError,
     int? referredByCurrentPage,
     int? referredByTotalPages,
+     List<String>? selectedAssignedIds,
 
 
 
@@ -169,6 +172,7 @@ final bool? isUpdateLoading;
       referredByError: referredByError ?? this.referredByError,
       referredByCurrentPage: referredByCurrentPage ?? this.referredByCurrentPage,
       referredByTotalPages: referredByTotalPages ?? this.referredByTotalPages,
+      selectedAssignedIds: selectedAssignedIds ?? this.selectedAssignedIds,
 
     );
   }
@@ -210,6 +214,7 @@ final bool? isUpdateLoading;
     referredByError,
     referredByCurrentPage,
     referredByTotalPages,
+    selectedAssignedIds,
 
 
   ];

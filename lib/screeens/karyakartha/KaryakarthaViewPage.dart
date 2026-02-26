@@ -254,31 +254,139 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                   children: [
                                     Row(
                                       children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(8),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade50,
-                                            borderRadius: BorderRadius.circular(
-                                              8,
-                                            ),
-                                          ),
-                                          child: Icon(
-                                            Icons.people,
-                                            color: Colors.green.shade700,
-                                            size: 22,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 12),
-                                        FxText.bodyMedium(
-                                          "Assigned Jeevanadi members",
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(
-                                                color: Colors.black,
-                                                fontSize: 16,
+                                        Expanded(
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(
+                                                  8,
+                                                ),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.green.shade50,
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                child: Icon(
+                                                  Icons.people,
+                                                  color: Colors.green.shade700,
+                                                  size: 22,
+                                                ),
                                               ),
+                                              const SizedBox(width: 12),
+                                              Expanded(
+                                                child: FxText.bodyMedium(
+                                                  "Assigned Jeevanadi members",
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .titleMedium
+                                                      ?.copyWith(
+                                                        color: Colors.black,
+                                                        fontSize: 16,
+                                                      ),
+                                                  maxLines: 1,
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
+                                        if (state
+                                            .selectedAssignedIds
+                                            .isNotEmpty)
+                                          Row(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              TextButton.icon(
+                                                onPressed: () {
+                                                  context
+                                                      .read<JeevanaadiBloc>()
+                                                      .add(
+                                                        ClearAssignedSelectionEvent(),
+                                                      );
+                                                },
+                                                icon: const Icon(
+                                                  Icons.clear,
+                                                  size: 16,
+                                                ),
+                                                label: FxText.labelMedium(
+                                                  'Clear (${state.selectedAssignedIds.length})',
+                                                ),
+                                                style: TextButton.styleFrom(
+                                                  foregroundColor:
+                                                      Colors.grey.shade700,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 8,
+                                                      ),
+                                                  minimumSize: const Size(
+                                                    0,
+                                                    36,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 4),
+                                              ElevatedButton.icon(
+                                                onPressed: state.isRemoving
+                                                    ? null
+                                                    : () {
+                                                        context
+                                                            .read<
+                                                              JeevanaadiBloc
+                                                            >()
+                                                            .add(
+                                                              RemoveSelectedAssignedMembersEvent(
+                                                                karyakarthaId:
+                                                                    widget
+                                                                        .karyakarthaId,
+                                                              ),
+                                                            );
+                                                      },
+                                                icon: state.isRemoving
+                                                    ? const SizedBox(
+                                                        width: 16,
+                                                        height: 16,
+                                                        child:
+                                                            CircularProgressIndicator(
+                                                              strokeWidth: 2,
+                                                              color:
+                                                                  Colors.white,
+                                                            ),
+                                                      )
+                                                    : const Icon(
+                                                        Icons.remove,
+                                                        size: 16,
+                                                      ),
+                                                label: FxText.labelMedium(
+                                                  state.isRemoving
+                                                      ? ''
+                                                      : 'Remove',
+                                                  maxLines: 1,
+                                                ),
+                                                style: ElevatedButton.styleFrom(
+                                                  backgroundColor:
+                                                      Colors.red.shade600,
+                                                  foregroundColor: Colors.white,
+                                                  padding:
+                                                      const EdgeInsets.symmetric(
+                                                        horizontal: 12,
+                                                        vertical: 8,
+                                                      ),
+                                                  minimumSize: const Size(
+                                                    0,
+                                                    36,
+                                                  ),
+                                                  shape: RoundedRectangleBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          8,
+                                                        ),
+                                                  ),
+                                                  elevation: 3,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                       ],
                                     ),
                                     SizedBox(
@@ -359,6 +467,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                     .assignedKaryakarthas[index];
                                                 return _buildAssignedUserItem(
                                                   user,
+                                                  state,
                                                 );
                                               },
                                             ),
@@ -983,69 +1092,201 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
     );
   }
 
-  Widget _buildAssignedUserItem(User user) {
-    return Column(
-      children: [
-        Stack(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(3),
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                borderRadius: BorderRadius.circular(35),
-              ),
-              child: CircleAvatar(
-                radius: 28,
-                backgroundColor: Colors.blue.shade100,
-                child: Icon(
-                  Icons.person,
-                  color: Colors.blue.shade800,
-                  size: 30,
+  // Widget _buildAssignedUserItem(User user) {
+  //   return Column(
+  //     children: [
+  //       Stack(
+  //         children: [
+  //           Container(
+  //             padding: const EdgeInsets.all(3),
+  //             decoration: BoxDecoration(
+  //               color: Colors.blue.shade50,
+  //               borderRadius: BorderRadius.circular(35),
+  //             ),
+  //             child: CircleAvatar(
+  //               radius: 28,
+  //               backgroundColor: Colors.blue.shade100,
+  //               child: Icon(
+  //                 Icons.person,
+  //                 color: Colors.blue.shade800,
+  //                 size: 30,
+  //               ),
+  //             ),
+  //           ),
+  //           Positioned(
+  //             right: -3,
+  //             top: -3,
+  //             child: GestureDetector(
+  //               onTap: () {
+  //                 context.read<JeevanaadiBloc>().add(
+  //                   RemoveAssignedKaryakarthaEvent(
+  //                     karyakarthaId: widget.karyakarthaId,
+  //                     memberId: user.id,
+  //                   ),
+  //                 );
+  //               },
+  //               child: Container(
+  //                 width: 26,
+  //                 height: 26,
+  //                 decoration: BoxDecoration(
+  //                   color: Colors.red.shade500,
+  //                   shape: BoxShape.circle,
+  //                   border: Border.all(color: Colors.white, width: 3),
+  //                 ),
+  //                 child: const Icon(Icons.close, color: Colors.white, size: 16),
+  //               ),
+  //             ),
+  //           ),
+  //         ],
+  //       ),
+  //       const SizedBox(height: 8),
+  //       SizedBox(
+  //         width: 80,
+  //         child: FxText.bodyMedium(
+  //           user.name,
+  //           style: FxTextStyle.bodyMedium(
+  //             fontSize: 12,
+  //             fontWeight: 600,
+  //             color: Colors.black,
+  //           ),
+  //           textAlign: TextAlign.center,
+  //           maxLines: 2,
+  //           overflow: TextOverflow.ellipsis,
+  //         ),
+  //       ),
+  //     ],
+  //   );
+  // }
+  Widget _buildAssignedUserItem(User user, JeevanaadiState state) {
+    final isSelected = state.selectedAssignedIds.contains(user.id);
+
+    return GestureDetector(
+      onTap: () {
+        context.read<JeevanaadiBloc>().add(
+          ToggleAssignedSelectionEvent(user.id),
+        );
+      },
+      child: Column(
+        children: [
+          Stack(
+            children: [
+              // Member avatar with selection styling
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? Colors.blue.shade50
+                      : Colors.green.shade50,
+                  borderRadius: BorderRadius.circular(30),
+                  border: isSelected
+                      ? Border.all(color: Colors.blue.shade200, width: 2)
+                      : null,
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: Colors.blue.withOpacity(0.3),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ]
+                      : [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                 ),
-              ),
-            ),
-            Positioned(
-              right: -3,
-              top: -3,
-              child: GestureDetector(
-                onTap: () {
-                  context.read<JeevanaadiBloc>().add(
-                    RemoveAssignedKaryakarthaEvent(
-                      karyakarthaId: widget.karyakarthaId,
-                      memberId: user.id,
-                    ),
-                  );
-                },
-                child: Container(
-                  width: 26,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: Colors.red.shade500,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: Colors.white, width: 3),
+                child: CircleAvatar(
+                  radius: 28,
+                  backgroundColor: isSelected
+                      ? Colors.blue.shade200
+                      : Colors.green.shade200,
+                  child: Icon(
+                    Icons.person,
+                    color: isSelected
+                        ? Colors.blue.shade800
+                        : Colors.green.shade800,
+                    size: 30,
                   ),
-                  child: const Icon(Icons.close, color: Colors.white, size: 16),
                 ),
               ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        SizedBox(
-          width: 80,
-          child: FxText.bodyMedium(
-            user.name,
-            style: FxTextStyle.bodyMedium(
-              fontSize: 12,
-              fontWeight: 600,
-              color: Colors.black,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
+              // Selection indicator (checkmark)
+              if (isSelected)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 22,
+                    height: 22,
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.green.withOpacity(0.3),
+                          blurRadius: 4,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
+              // Individual remove button (X)
+              Positioned(
+                right: -3,
+                top: -3,
+                child: GestureDetector(
+                  onTap: () {
+                    context.read<JeevanaadiBloc>().add(
+                      RemoveAssignedKaryakarthaEvent(
+                        karyakarthaId: widget.karyakarthaId,
+                        memberId: user.id,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade500,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                    ),
+                    child: const Icon(
+                      Icons.close,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: 8),
+          // Member name
+          SizedBox(
+            width: 80,
+            child: FxText.bodyMedium(
+              user.name,
+              style: FxTextStyle.bodyMedium(
+                fontSize: 12,
+                fontWeight: 600,
+                color: isSelected ? Colors.blue.shade800 : Colors.black,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

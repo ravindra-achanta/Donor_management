@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/bloc_management/visits/visit_bloc.dart';
+import 'package:vikas_app/bloc_management/visits/visit_event.dart';
+import 'package:vikas_app/bloc_management/visits/visit_state.dart';
+import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/request/visit_model.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class ViewVisit extends StatefulWidget {
-  final Map<String, dynamic>? visitData;
+  final VisitModel? visitData;
 
   const ViewVisit({super.key, this.visitData});
 
@@ -12,59 +19,152 @@ class ViewVisit extends StatefulWidget {
 }
 
 class _ViewVisitState extends State<ViewVisit> {
-  late Map<String, dynamic> visit;
+  late VisitModel visit;
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    // Get visit data from arguments or use provided data with defaults
+    _initializeData();
+  }
+
+  void _initializeData() {
     final args = Get.arguments;
-    if (args != null && args is Map) {
-      visit = args as Map<String, dynamic>;
+
+    if (args != null && args is VisitModel) {
+      visit = args;
+    } else if (args != null && args is Map) {
+      visit = VisitModel(
+        id: args['id'] ?? '',
+        jeevandNum: args['jeevandNum'] ?? 'N/A',
+        name: args['name'] ?? 'Unknown',
+        phone: args['phone'] ?? 'N/A',
+        email: args['email'] ?? 'N/A',
+        visitPurpose: args['visitPurpose'] ?? 'N/A',
+        noOfGuests: args['noOfGuests'] ?? 0,
+        comments: args['comments'] ?? '',
+        date: args['date'] ?? 'N/A',
+        status: args['status'] ?? 'Pending',
+      );
     } else if (widget.visitData != null) {
       visit = widget.visitData!;
     } else {
-      // Default empty visit structure
-      visit = {
-        'id': '',
-        'jeevandNum': 'N/A',
-        'name': 'Unknown',
-        'phone': 'N/A',
-        'email': 'N/A',
-        'visitPurpose': 'N/A',
-        'noOfGuests': 0,
-        'comments': '',
-      };
+      visit = VisitModel(
+        id: '',
+        jeevandNum: 'N/A',
+        name: 'Unknown',
+        phone: 'N/A',
+        email: 'N/A',
+        visitPurpose: 'N/A',
+        noOfGuests: 0,
+        comments: '',
+        date: 'N/A',
+        status: 'Pending',
+      );
     }
   }
 
-  /// Safe getter for visit properties
-  String _getVisitValue(String key, [String defaultValue = 'N/A']) {
-    try {
-      final value = visit[key];
-      if (value == null) return defaultValue;
-      return value.toString();
-    } catch (e) {
-      return defaultValue;
+  String _getValue(String value, [String defaultValue = 'N/A']) {
+    return value.isNotEmpty ? value : defaultValue;
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'completed':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'scheduled':
+        return Colors.blue;
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
     }
   }
 
-  /// Build detail row
-  Widget _buildDetailRow(String label, String value) {
+  Widget _buildStatusChip(String status) {
+    Color color = _getStatusColor(status);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: color.withOpacity(0.5)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 6),
+          Text(
+            status,
+            style: TextStyle(
+              color: color,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoCard(String title, List<Widget> children) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(children: children),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value, {IconData? icon}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      padding: const EdgeInsets.symmetric(vertical: 8),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          if (icon != null) ...[
+            Icon(icon, size: 18, color: Colors.grey.shade600),
+            const SizedBox(width: 12),
+          ],
           Expanded(
             flex: 2,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 14,
-                color: Colors.grey,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
             ),
           ),
           Expanded(
@@ -72,8 +172,8 @@ class _ViewVisitState extends State<ViewVisit> {
             child: Text(
               value,
               style: const TextStyle(
-                fontWeight: FontWeight.w500,
                 fontSize: 14,
+                fontWeight: FontWeight.w500,
                 color: Colors.black87,
               ),
             ),
@@ -83,37 +183,60 @@ class _ViewVisitState extends State<ViewVisit> {
     );
   }
 
-  /// Delete confirmation dialog
   void _showDeleteDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: const Text('Delete Visit'),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          title: const Text(
+            'Delete Visit',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           content: Text(
-            'Are you sure you want to delete the visit record for ${_getVisitValue('name', 'this member')}?',
+            'Are you sure you want to delete the visit record for "${visit.name}"?',
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
+              style: TextButton.styleFrom(
+                foregroundColor: Colors.grey.shade700,
+              ),
               child: const Text('Cancel'),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () {
                 Navigator.pop(context);
+                setState(() => _isLoading = true);
+
+                context.read<VisitBloc>().add(DeleteVisit(visit.id));
+
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text(
-                      'Visit record deleted for ${_getVisitValue('name')}',
+                    content: Text('Deleting visit for ${visit.name}...'),
+                    backgroundColor: Colors.orange,
+                    behavior: SnackBarBehavior.floating,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    duration: const Duration(seconds: 2),
                   ),
                 );
+
                 Future.delayed(const Duration(seconds: 1), () {
-                  Get.offNamed('/visits');
+                  if (mounted) {
+                    Get.offNamed('/visits');
+                  }
                 });
               },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
               child: const Text('Delete'),
             ),
           ],
@@ -127,229 +250,310 @@ class _ViewVisitState extends State<ViewVisit> {
     return Layout(
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Card(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(24),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  /// Header with visitor name
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Visit Details',
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            _getVisitValue('name', 'Unknown'),
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                      // CircleAvatar(
-                      //   radius: 40,
-                      //   backgroundColor: Colors.blue.shade100,
-                      //   child: Text(
-                      //     _getVisitValue('name', 'U')
-                      //         .substring(0, 1)
-                      //         .toUpperCase(),
-                      //     style: const TextStyle(
-                      //       fontSize: 24,
-                      //       fontWeight: FontWeight.bold,
-                      //       color: Colors.blue,
-                      //     ),
-                      //   ),
-                      // ),
-                      CircleAvatar(
-                        radius: 40,
-                        backgroundColor: Colors.blue.shade100,
-                        child: Text(
-                          (_getVisitValue('name').isNotEmpty
-                                  ? _getVisitValue('name')[0]
-                                  : 'U')
-                              .toUpperCase(),
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                    ],
+        child: BlocConsumer<VisitBloc, VisitState>(
+          listener: (context, state) {
+            if (state is VisitOperationSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.green,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-
-                  const Divider(height: 32),
-
-                  /// Member Information Section
-                  const Text(
-                    'Member Information',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
+              );
+            } else if (state is VisitError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Colors.red,
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  const SizedBox(height: 16),
-
-                  _buildDetailRow(
-                    'Jeevandi Number',
-                    _getVisitValue('jeevandNum'),
-                  ),
-                  _buildDetailRow('Name', _getVisitValue('name')),
-                  _buildDetailRow('Phone', _getVisitValue('phone')),
-                  _buildDetailRow('Email', _getVisitValue('email')),
-
-                  const Divider(height: 32),
-
-                  /// Visit Information Section
-                  const Text(
-                    'Visit Information',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildDetailRow(
-                    'Visit Purpose',
-                    _getVisitValue('visitPurpose'),
-                  ),
-                  _buildDetailRow(
-                    'Number of Guests',
-                    _getVisitValue('noOfGuests', '0'),
-                  ),
-
-                  const Divider(height: 32),
-
-                  /// Additional Information Section
-                  const Text(
-                    'Additional Information',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 12),
+                ),
+              );
+              setState(() => _isLoading = false);
+            }
+          },
+          builder: (context, state) {
+            return _isLoading
+                ? const Center(child: ScreenLoader())
+                : SingleChildScrollView(
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Comments',
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
                         Container(
                           width: double.infinity,
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey.shade300),
-                            borderRadius: BorderRadius.circular(8),
-                            color: Colors.grey.shade50,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 12,
                           ),
-                          child: Text(
-                            _getVisitValue('comments', 'No comments'),
-                            style: const TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Avatar with gradient border
+                              Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                    colors: [
+                                      Colors.blue.shade700,
+                                      Colors.blue.shade500,
+                                    ],
+                                  ),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
+                                  child: Text(
+                                    visit.name.isNotEmpty
+                                        ? visit.name[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+
+                              // Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      visit.name,
+                                      style: const TextStyle(
+                                        color: Colors.black87,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Row(
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 2,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: _getStatusColor(
+                                              visit.status,
+                                            ).withOpacity(0.1),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            visit.status,
+                                            style: TextStyle(
+                                              color: _getStatusColor(
+                                                visit.status,
+                                              ),
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(
+                                            'ID: ${visit.jeevandNum}',
+                                            style: TextStyle(
+                                              color: Colors.grey.shade600,
+                                              fontSize: 11,
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        const SizedBox(height: 20),
+
+                        /// Member Information Card
+                        _buildInfoCard('Member Information', [
+                          _buildInfoRow(
+                            'Jeevandi Number',
+                            visit.jeevandNum,
+                            icon: Icons.confirmation_number,
+                          ),
+                          _buildInfoRow('Name', visit.name, icon: Icons.person),
+                          _buildInfoRow(
+                            'Phone',
+                            visit.phone,
+                            icon: Icons.phone,
+                          ),
+                          _buildInfoRow(
+                            'Email',
+                            visit.email,
+                            icon: Icons.email,
+                          ),
+                        ]),
+
+                        /// Visit Information Card
+                        _buildInfoCard('Visit Information', [
+                          _buildInfoRow(
+                            'Visit Purpose',
+                            visit.visitPurpose,
+                            icon: Icons.flag,
+                          ),
+                          _buildInfoRow(
+                            'Number of Guests',
+                            '${visit.noOfGuests} ${visit.noOfGuests == 1 ? 'Guest' : 'Guests'}',
+                            icon: Icons.group,
+                          ),
+                          _buildInfoRow(
+                            'Date',
+                            visit.date,
+                            icon: Icons.calendar_today,
+                          ),
+                          _buildInfoRow(
+                            'Status',
+                            visit.status,
+                            icon: Icons.info,
+                          ),
+                        ]),
+
+                        /// Comments Card
+                        if (visit.comments.isNotEmpty)
+                          _buildInfoCard('Additional Comments', [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade50,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey.shade200),
+                              ),
+                              child: Text(
+                                visit.comments,
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  height: 1.5,
+                                ),
+                              ),
                             ),
+                          ]),
+
+                        const SizedBox(height: 20),
+
+                        /// Action Buttons - Compact Design
+                        Container(
+                          margin: const EdgeInsets.symmetric(vertical: 16),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _buildSmallActionButton(
+                                icon: Icons.arrow_back,
+                                label: 'Back',
+                                color: Colors.grey.shade600,
+                                onPressed: () => Get.back(),
+                              ),
+                              _buildSmallDivider(),
+                              _buildSmallActionButton(
+                                icon: Icons.edit,
+                                label: 'Edit',
+                                color: Colors.orange,
+                                onPressed: () => Get.toNamed(
+                                  '/edit/visit',
+                                  arguments: visit,
+                                ),
+                              ),
+                              _buildSmallDivider(),
+                              _buildSmallActionButton(
+                                icon: Icons.delete,
+                                label: 'Delete',
+                                color: Colors.red,
+                                onPressed: _showDeleteDialog,
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
+                  );
+          },
+        ),
+      ),
+    );
+  }
 
-                  const SizedBox(height: 32),
-
-                  /// Action Buttons
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      /// Back Button
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          Get.back();
-                        },
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Back'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          side: const BorderSide(
-                            color: Colors.grey,
-                            width: 1.5,
-                          ),
-                          foregroundColor: Colors.grey.shade700,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      /// Edit Button
-                      OutlinedButton.icon(
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('Edit visit for ${visit['name']}'),
-                              duration: const Duration(seconds: 2),
-                            ),
-                          );
-                          // TODO: Navigate to edit visit page
-                          // Get.toNamed('/edit/visit', arguments: visit);
-                        },
-                        icon: const Icon(Icons.edit),
-                        label: const Text('Edit'),
-                        style: OutlinedButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          side: const BorderSide(
-                            color: Colors.orange,
-                            width: 1.5,
-                          ),
-                          foregroundColor: Colors.orange,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-
-                      /// Delete Button
-                      ElevatedButton.icon(
-                        onPressed: _showDeleteDialog,
-                        icon: const Icon(Icons.delete),
-                        label: const Text('Delete'),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 16,
-                          ),
-                          elevation: 4,
-                          shadowColor: Colors.red.withOpacity(0.5),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+  Widget _buildSmallActionButton({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required VoidCallback onPressed,
+  }) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(30),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                ),
               ),
-            ),
+            ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildSmallDivider() {
+    return Container(height: 20, width: 1, color: Colors.grey.shade300);
   }
 }

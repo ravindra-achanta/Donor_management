@@ -43,7 +43,7 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
     // Get data from arguments
     final args = Get.arguments ?? {};
     dharma = args is Map<String, dynamic> ? Map.from(args) : {};
-    
+
     // Initialize controllers with existing data
     _uidController.text = dharma['uid']?.toString() ?? '';
     _nameController.text = dharma['name']?.toString() ?? '';
@@ -51,18 +51,19 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
     _feedbackController.text = dharma['feedback']?.toString() ?? '';
     _dateController.text = dharma['date']?.toString() ?? '';
     _referredByController.text = dharma['referredBy']?.toString() ?? '';
-    
+
     _selectedType = dharma['type']?.toString() ?? 'Community';
     _selectedStatus = dharma['status']?.toString() ?? 'Active';
-    
+
     // Initialize type-specific fields
     _communityNameController.text = dharma['communityName']?.toString() ?? '';
-    _communityLocationController.text = dharma['communityLocation']?.toString() ?? '';
+    _communityLocationController.text =
+        dharma['communityLocation']?.toString() ?? '';
     _communityOwnerController.text = dharma['communityOwner']?.toString() ?? '';
-    
+
     _homeOwnerController.text = dharma['homeOwner']?.toString() ?? '';
     _homeAddressController.text = dharma['homeAddress']?.toString() ?? '';
-    
+
     _virtualLinkController.text = dharma['virtualLink']?.toString() ?? '';
   }
 
@@ -140,13 +141,8 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
       labelText: label,
       filled: true,
       fillColor: Colors.white,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      contentPadding: const EdgeInsets.symmetric(
-        horizontal: 16,
-        vertical: 14,
-      ),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
     );
   }
 
@@ -173,164 +169,136 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
   }
 
   Widget _typeDropdown() => DropdownButtonFormField<String>(
-        value: _selectedType,
-        decoration: _inputDecoration('Type *'),
-        dropdownColor: Colors.white,
-        items: dharmaTypes
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-            .toList(),
-        onChanged: (v) => setState(() => _selectedType = v),
-        validator: (v) => v == null ? 'Please select Type' : null,
-      );
+    value: _selectedType,
+    decoration: _inputDecoration('Type *'),
+    dropdownColor: Colors.white,
+    items: dharmaTypes
+        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+        .toList(),
+    onChanged: (v) => setState(() => _selectedType = v),
+    validator: (v) => v == null ? 'Please select Type' : null,
+  );
 
   Widget _statusDropdown() => DropdownButtonFormField<String>(
-        value: _selectedStatus,
-        decoration: _inputDecoration('Status *'),
-        dropdownColor: Colors.white,
-        items: statuses
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
-            .toList(),
-        onChanged: (v) => setState(() => _selectedStatus = v),
-        validator: (v) => v == null ? 'Please select Status' : null,
-      );
+    value: _selectedStatus,
+    decoration: _inputDecoration('Status *'),
+    dropdownColor: Colors.white,
+    items: statuses
+        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+        .toList(),
+    onChanged: (v) => setState(() => _selectedStatus = v),
+    validator: (v) => v == null ? 'Please select Status' : null,
+  );
 
   Widget _dateField() => _textField(
-        'Date',
-        _dateController,
-        required: true,
-        readOnly: true,
-        onTap: () async {
-          final DateTime? picked = await showDatePicker(
-            context: context,
-            initialDate: DateTime.now(),
-            firstDate: DateTime(2000),
-            lastDate: DateTime(2100),
-          );
-          if (picked != null) {
-            setState(() {
-              _dateController.text =
-                  "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
-            });
-          }
-        },
+    'Date',
+    _dateController,
+    required: true,
+    readOnly: true,
+    onTap: () async {
+      final DateTime? picked = await showDatePicker(
+        context: context,
+        initialDate: DateTime.now(),
+        firstDate: DateTime(2000),
+        lastDate: DateTime(2100),
       );
+      if (picked != null) {
+        setState(() {
+          _dateController.text =
+              "${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}";
+        });
+      }
+    },
+  );
 
   Widget _communityFields() => Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            'Community Details',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _twoFieldRow(
-            _textField(
-              'Community Name',
-              _communityNameController,
-              required: true,
-            ),
-            _textField(
-              'Location',
-              _communityLocationController,
-              required: true,
-            ),
-          ),
-          _twoFieldRow(
-            _textField(
-              'Owner',
-              _communityOwnerController,
-              required: true,
-            ),
-            const SizedBox(),
-          ),
-        ],
-      );
+    children: [
+      const SizedBox(height: 16),
+      Text(
+        'Community Details',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      const SizedBox(height: 16),
+      _twoFieldRow(
+        _textField('Community Name', _communityNameController, required: true),
+        _textField('Location', _communityLocationController, required: true),
+      ),
+      _twoFieldRow(
+        _textField('Owner', _communityOwnerController, required: true),
+        const SizedBox(),
+      ),
+    ],
+  );
 
   Widget _homeFields() => Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            'Home Details',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _twoFieldRow(
-            _textField(
-              'Owner Name',
-              _homeOwnerController,
-              required: true,
-            ),
-            _textField(
-              'Address',
-              _homeAddressController,
-              required: true,
-            ),
-          ),
-        ],
-      );
+    children: [
+      const SizedBox(height: 16),
+      Text(
+        'Home Details',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      const SizedBox(height: 16),
+      _twoFieldRow(
+        _textField('Owner Name', _homeOwnerController, required: true),
+        _textField('Address', _homeAddressController, required: true),
+      ),
+    ],
+  );
 
   Widget _virtualFields() => Column(
-        children: [
-          const SizedBox(height: 16),
-          Text(
-            'Virtual Details',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey.shade700,
-            ),
-          ),
-          const SizedBox(height: 16),
-          _twoFieldRow(
-            _textField(
-              'Virtual Link',
-              _virtualLinkController,
-              required: true,
-            ),
-            const SizedBox(),
-          ),
-        ],
-      );
+    children: [
+      const SizedBox(height: 16),
+      Text(
+        'Virtual Details',
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: Colors.grey.shade700,
+        ),
+      ),
+      const SizedBox(height: 16),
+      _twoFieldRow(
+        _textField('Virtual Link', _virtualLinkController, required: true),
+        const SizedBox(),
+      ),
+    ],
+  );
 
   Widget _actionButtons() => Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              side: BorderSide(color: Colors.grey.shade400),
-            ),
-            onPressed: () => Get.back(),
-            icon: const Icon(Icons.close, size: 18),
-            label: const Text('Cancel'),
-          ),
-          const SizedBox(width: 16),
-          ElevatedButton.icon(
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-              backgroundColor: Colors.brown.shade600,
-              foregroundColor: Colors.white,
-            ),
-            onPressed: _submitForm,
-            icon: const Icon(Icons.save_outlined, size: 18),
-            label: const Text('Update'),
-          ),
-        ],
-      );
+    mainAxisAlignment: MainAxisAlignment.end,
+    children: [
+      OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          side: BorderSide(color: Colors.grey.shade400),
+        ),
+        onPressed: () => Get.back(),
+        icon: const Icon(Icons.close, size: 18),
+        label: const Text('Cancel'),
+      ),
+      const SizedBox(width: 16),
+      ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          backgroundColor: Colors.brown.shade600,
+          foregroundColor: Colors.white,
+        ),
+        onPressed: _submitForm,
+        icon: const Icon(Icons.save_outlined, size: 18),
+        label: const Text('Update'),
+      ),
+    ],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -368,9 +336,7 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
                   const SizedBox(height: 8),
                   Text(
                     'Update the details below',
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 24),
 
@@ -405,11 +371,7 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
                             required: true,
                             keyboard: TextInputType.phone,
                           ),
-                          _textField(
-                            'Name',
-                            _nameController,
-                            required: true,
-                          ),
+                          _textField('Name', _nameController, required: true),
                         ),
 
                         _twoFieldRow(
@@ -421,10 +383,7 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
                           _dateField(),
                         ),
 
-                        _twoFieldRow(
-                          _statusDropdown(),
-                          const SizedBox(),
-                        ),
+                        _twoFieldRow(_statusDropdown(), const SizedBox()),
 
                         // Type-specific fields
                         if (_selectedType == 'Community') _communityFields(),
@@ -433,7 +392,6 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
 
                         const SizedBox(height: 16),
 
-                        // Feedback
                         const Text(
                           'Feedback',
                           style: TextStyle(
@@ -450,7 +408,6 @@ class _EditDharmaSetuState extends State<EditDharmasetu> {
 
                         const SizedBox(height: 30),
 
-                        // Action Buttons
                         _actionButtons(),
                       ],
                     ),
