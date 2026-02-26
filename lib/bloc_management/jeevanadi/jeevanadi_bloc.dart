@@ -17,13 +17,14 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     on<FetchJeevanaadiProfileEvent>(_onFetchJeevanaadiProfile);
     on<FetchJeevanaadiProfileFullEvent>(_onFetchJeevanaadiProfileFull);
     on<CloseProfileView>(_closeProfileView);
-    on<FetchJeevanadiMemberEvent>(_onFetchJeevanadiMember);
+    //on<FetchJeevanadiMemberEvent>(_onFetchJeevanadiMember);
     on<FetchAssignedKaryakarthasEvent>(_onFetchAssignedKaryakarthas);
     on<FetchUnassignedKaryakarthasEvent>(_onFetchUnassignedKaryakarthas);
-    on<ToggleUnassignedSelectionEvent>(_onToggleUnassignedSelection);
+   // on<ToggleUnassignedSelectionEvent>(_onToggleUnassignedSelection);
     on<AssignSelectedKaryakarthasEvent>(_onAssignSelectedKaryakarthas);
     on<RemoveAssignedKaryakarthaEvent>(_onRemoveAssignedKaryakartha);
-    // on<ClearJeevanadiDataEvent>(_onClearJeevanadiData);
+    //on<ClearJeevanadiDataEvent>(_onClearJeevanadiData);
+    on<UpdateJeevanaadiProfileEvent>(_onUpdateProfile);
   }
   final JeevanaadiRepo = JeevanadiRepo();
 
@@ -100,120 +101,108 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   }
 }
 
-  Future<void> _onFetchJeevanaadiProfile(
-    FetchJeevanaadiProfileEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    emit(
-      state.copyWith(
-        isProfileViewVisible: true,
-        profileLoading: true,
-        profileErrorMsg: null,
-      ),
-    );
-    await Future.delayed(const Duration(seconds: 1), () {
-      // Code to execute after a 3-second delay
-      // print("3 seconds have passed!");
-    });
-    final response = await JeevanaadiRepo.getJeevanaadiProfile(event.userId);
+//getbyid jeevandi profile:
+Future<void> _onFetchJeevanaadiProfile(
+  FetchJeevanaadiProfileEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(
+    state.copyWith(
+      isProfileViewVisible: true,
+      profileLoading: true,
+      profileErrorMsg: null,
+    ),
+  );
+
+  try {
+    final response = await JeevanaadiRepo.getJeevanaadiProfileFull(event.id);
+    
     if (response.isSuccess) {
       emit(
         state.copyWith(
-          profileLoading: false, // ✅ IMPORTANT
-          jeevanaadiProfile: response.data,
+          profileLoading: false,
+          jeevanaadiProfileFull: response.data, // Store full profile
+          jeevanaadiProfile: null, // Clear old profile type
           profileErrorMsg: null,
         ),
       );
     } else {
       emit(
         state.copyWith(
-          profileLoading: false, // ✅ IMPORTANT
-          profileErrorMsg: 'Failed to fetch profile',
+          profileLoading: false,
+          profileErrorMsg: response.error?.message ?? 'Failed to fetch profile',
         ),
       );
     }
+  } catch (e) {
+    emit(
+      state.copyWith(
+        profileLoading: false,
+        profileErrorMsg: 'Error: ${e.toString()}',
+      ),
+    );
   }
+}
 
-  Future<void> _onFetchJeevanadiMember(
-    FetchJeevanadiMemberEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    emit(state.copyWith(status: JeevanaadiApiStatus.loading));
 
-    try {
-      // Dummy API call - replace with actual API
-      await Future.delayed(const Duration(seconds: 1));
-
-      final dummyMember = JeevanadiMember(
-        id: event.memberId,
-        name: 'Arun Kumar',
-        joined: '2024-01-15',
-        mobile: '9876543210',
-        gothram: 'Kashyapa',
-        referredBy: 'Admin',
-        email: 'arun@example.com',
-        role: 'DONOR',
-        status: true,
-      );
-
-      emit(
-        state.copyWith(
-          status: JeevanaadiApiStatus.loaded,
-          jeevanadiMember: dummyMember,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          status: JeevanaadiApiStatus.error,
-          errorMessage: 'Failed to fetch jeevanadi member: ${e.toString()}',
-        ),
-      );
-    }
-  }
-
+  
+   //assgned member list for karyakatha
   Future<void> _onFetchAssignedKaryakarthas(
-    FetchAssignedKaryakarthasEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    try {
-      // Dummy API call - replace with actual API
-      await Future.delayed(const Duration(milliseconds: 500));
-
-      final dummyAssignedKaryakarthas = [
-        User(
-          id: 'KA-001',
-          name: 'Ravi Shankar',
-          email: 'ravi@example.com',
-          mobileNumber: '9876543211',
-          uniqueId: 'KA-001',
-          userType: 'KARYAKARTHA',
-          status: 'ACTIVE',
-        ),
-        User(
-          id: 'KA-002',
-          name: 'Priya Verma',
-          email: 'priya@example.com',
-          mobileNumber: '9876543212',
-          uniqueId: 'KA-002',
-          userType: 'KARYAKARTHA',
-          status: 'ACTIVE',
-        ),
-      ];
-
-      emit(state.copyWith(assignedKaryakarthas: dummyAssignedKaryakarthas));
-    } catch (e) {
-      emit(
-        state.copyWith(
-          errorMessage:
-              'Failed to fetch assigned karyakarthas: ${e.toString()}',
-        ),
-      );
-    }
+  FetchAssignedKaryakarthasEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.page == 0) {
+    emit(state.copyWith(
+      isLoadingAssigned: true,
+      errorMessage: null,
+    ));
   }
+
+  try {
+    print('🔵 Fetching assigned karyakarthas - MemberId: ${event.memberId}, Page: ${event.page}');
+    
+    final response = await JeevanaadiRepo.getAssignedKaryakarthas(
+      karyakarthaId: event.memberId,
+      page: event.page,
+      size: 10, 
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      
+      final List<User> users = data?.content.map((item) => item.toUser()).toList() ?? [];
+
+      print('🔵 Received ${users.length} assigned users on page ${event.page}');
+      
+      final updatedList = event.page == 0
+          ? users
+          : [...state.assignedKaryakarthas, ...users];
+
+      emit(state.copyWith(
+        assignedKaryakarthas: updatedList,
+        assignedTotalPages: data?.totalPages ?? 0,
+        assignedTotalElements: data?.totalElements ?? 0,
+        assignedCurrentPage: data?.currentPage ?? 0,
+        isLoadingAssigned: false,
+        errorMessage: null,
+      ));
+      
+    } else {
+      emit(state.copyWith(
+        isLoadingAssigned: false,
+        errorMessage: response.error?.message ?? 'Failed to fetch assigned karyakarthas',
+      ));
+    }
+  } catch (e) {
+    print('❌ Exception in _onFetchAssignedKaryakarthas: $e');
+    emit(state.copyWith(
+      isLoadingAssigned: false,
+      errorMessage: 'Failed to fetch assigned karyakarthas: ${e.toString()}',
+    ));
+  }
+}
   
 
-//UNASSIGNED MEMBER
 //UNASSIGNED MEMBER
 Future<void> _onFetchUnassignedKaryakarthas(
   FetchUnassignedKaryakarthasEvent event,
@@ -273,7 +262,6 @@ Future<void> _onFetchUnassignedKaryakarthas(
       ));
     }
   } catch (e) {
-    //print('❌ Exception in _onFetchUnassignedKaryakarthas: $e');
     emit(state.copyWith(
       isLoadingUnassigned: false,
       errorMessage: 'Failed to fetch unassigned karyakarthas: ${e.toString()}',
@@ -281,59 +269,6 @@ Future<void> _onFetchUnassignedKaryakarthas(
   }
 }
 
-  // Future<void> _onFetchUnassignedKaryakarthas(
-  //   FetchUnassignedKaryakarthasEvent event,
-  //   Emitter<JeevanaadiState> emit,
-  // ) async {
-  //   try {
-  //     // Dummy API call - replace with actual API
-  //     await Future.delayed(const Duration(milliseconds: 500));
-
-  //     final dummyUnassignedKaryakarthas = [
-  //       User(
-  //         id: 'KA-003',
-  //         name: 'Kiran Sharma',
-  //         email: 'kiran@example.com',
-  //         mobileNumber: '9876543213',
-  //         uniqueId: 'KA-003',
-  //         userType: 'KARYAKARTHA',
-  //         status: 'ACTIVE',
-  //       ),
-  //       User(
-  //         id: 'KA-004',
-  //         name: 'Meena Patel',
-  //         email: 'meena@example.com',
-  //         mobileNumber: '9876543214',
-  //         uniqueId: 'KA-004',
-  //         userType: 'KARYAKARTHA',
-  //         status: 'ACTIVE',
-  //       ),
-  //       User(
-  //         id: 'KA-005',
-  //         name: 'Arun Kumar',
-  //         email: 'arun.k@example.com',
-  //         mobileNumber: '9876543215',
-  //         uniqueId: 'KA-005',
-  //         userType: 'KARYAKARTHA',
-  //         status: 'ACTIVE',
-  //       ),
-  //     ];
-
-  //     // If it's not the first page, append to existing list
-  //     final updatedList = event.page == 1
-  //         ? dummyUnassignedKaryakarthas
-  //         : [...state.unassignedKaryakarthas, ...dummyUnassignedKaryakarthas];
-
-  //     emit(state.copyWith(unassignedKaryakarthas: updatedList));
-  //   } catch (e) {
-  //     emit(
-  //       state.copyWith(
-  //         errorMessage:
-  //             'Failed to fetch unassigned karyakarthas: ${e.toString()}',
-  //       ),
-  //     );
-  //   }
-  // }
 
   void _onToggleUnassignedSelection(
     ToggleUnassignedSelectionEvent event,
@@ -350,83 +285,85 @@ Future<void> _onFetchUnassignedKaryakarthas(
     emit(state.copyWith(selectedUnassignedIds: currentSelection));
   }
 
+  
+
+  //assign members to karyakatha
+
   Future<void> _onAssignSelectedKaryakarthas(
-    AssignSelectedKaryakarthasEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    if (state.selectedUnassignedIds.isEmpty) return;
+  AssignSelectedKaryakarthasEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.memberIds.isEmpty) return;
 
-    emit(state.copyWith(isAssigning: true));
+  emit(state.copyWith(isAssigning: true, errorMessage: null));
 
-    try {
-      // Dummy API call - replace with actual API
-      await Future.delayed(const Duration(seconds: 1));
+  try {
+    print('🔵 Assigning ${event.memberIds.length} members to karyakartha: ${event.karyakarthaId}');
+    
+    final response = await JeevanaadiRepo.allocateMembersToKaryakartha(
+      karyakarthaId: event.karyakarthaId,
+      memberIds: event.memberIds,
+    );
 
-      // Move selected users from unassigned to assigned
-      final selectedUsers = state.unassignedKaryakarthas
-          .where((user) => state.selectedUnassignedIds.contains(user.id))
-          .toList();
-
-      final updatedAssigned = [...state.assignedKaryakarthas, ...selectedUsers];
-      final updatedUnassigned = state.unassignedKaryakarthas
-          .where((user) => !state.selectedUnassignedIds.contains(user.id))
-          .toList();
-
-      emit(
-        state.copyWith(
-          isAssigning: false,
-          assignedKaryakarthas: updatedAssigned,
-          unassignedKaryakarthas: updatedUnassigned,
-          selectedUnassignedIds: [],
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          isAssigning: false,
-          errorMessage: 'Failed to assign karyakarthas: ${e.toString()}',
-        ),
-      );
+    if (response.isSuccess) {
+      emit(state.copyWith(
+        isAssigning: false,
+        selectedUnassignedIds: [], 
+      ));
+      
+    
+      add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
+      add(FetchUnassignedKaryakarthasEvent(0));
+      
+    } else {
+      emit(state.copyWith(
+        isAssigning: false,
+        errorMessage: response.error?.message ?? 'Failed to assign members',
+      ));
     }
+  } catch (e) {
+    emit(state.copyWith(
+      isAssigning: false,
+      errorMessage: 'Failed to assign members: ${e.toString()}',
+    ));
   }
+}
 
+
+//deallocate member from karyakatha
   Future<void> _onRemoveAssignedKaryakartha(
-    RemoveAssignedKaryakarthaEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    emit(state.copyWith(isRemoving: true));
+  RemoveAssignedKaryakarthaEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(isRemoving: true, errorMessage: null));
 
-    try {
-      // Dummy API call - replace with actual API
-      await Future.delayed(const Duration(milliseconds: 500));
+  try {
+    
+    final response = await JeevanaadiRepo.deallocateMembersFromKaryakartha(
+      karyakarthaId: event.karyakarthaId,
+      memberIds: [event.memberId], 
+    );
 
-      // Remove from assigned and add back to unassigned
-      final removedUser = state.assignedKaryakarthas.firstWhere(
-        (user) => user.id == event.karyakarthaId,
-      );
-
-      final updatedAssigned = state.assignedKaryakarthas
-          .where((user) => user.id != event.karyakarthaId)
-          .toList();
-
-      final updatedUnassigned = [removedUser, ...state.unassignedKaryakarthas];
-
-      emit(
-        state.copyWith(
-          isRemoving: false,
-          assignedKaryakarthas: updatedAssigned,
-          unassignedKaryakarthas: updatedUnassigned,
-        ),
-      );
-    } catch (e) {
-      emit(
-        state.copyWith(
-          isRemoving: false,
-          errorMessage: 'Failed to remove karyakartha: ${e.toString()}',
-        ),
-      );
+    if (response.isSuccess) {
+      emit(state.copyWith(isRemoving: false));
+      
+      
+      add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
+      add(FetchUnassignedKaryakarthasEvent(0));
+      
+    } else {
+      emit(state.copyWith(
+        isRemoving: false,
+        errorMessage: response.error?.message ?? 'Failed to remove member',
+      ));
     }
+  } catch (e) {
+    emit(state.copyWith(
+      isRemoving: false,
+      errorMessage: 'Failed to remove member: ${e.toString()}',
+    ));
   }
+}
 
   Future<void> _closeProfileView(
     CloseProfileView event,
@@ -448,7 +385,7 @@ Future<void> _onFetchJeevanaadiProfileFull(
   ));
 
   try {
-    final response = await JeevanaadiRepo.getJeevanaadiProfileFull(event.userId);
+    final response = await JeevanaadiRepo.getJeevanaadiProfileFull(event.jeevanadiNo);
 
     if (response.isSuccess) {
       emit(state.copyWith(
@@ -469,5 +406,49 @@ Future<void> _onFetchJeevanaadiProfileFull(
     ));
   }
 }
+
+
+Future<void> _onUpdateProfile(
+  UpdateJeevanaadiProfileEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(
+    isUpdateLoading: true,
+    updateErrorMsg: null,
+    updateSuccessMsg: null,
+  ));
+
+  try {
+    final result = await JeevanaadiRepo.updateJeevanaadiProfile(
+      jeevanadiId: event.userid,
+      updateData: event.updateData,
+    );
+
+    if (result.isSuccess) {
+      emit(state.copyWith(
+        isUpdateLoading: false,
+        updateSuccessMsg: "Profile updated successfully",
+        updateResponse: result.data,
+      ));
+      
+      add(FetchJeevanaadiProfileFullEvent(event.userid));
+    } else {
+      emit(state.copyWith(
+        isUpdateLoading: false,
+        updateErrorMsg: result.error?.message ?? "Update failed",
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isUpdateLoading: false,
+      updateErrorMsg: "Error: ${e.toString()}",
+    ));
+  }
+}
+
+
+
+
+
 
 }

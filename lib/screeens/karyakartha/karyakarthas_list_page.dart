@@ -67,12 +67,13 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   buttonText: "Add Karyakartha",
                                   onClicked: () {
                                     //Get.toNamed('/register');
-                                    Get.to(() => RegistrationPage(
-      title: "Add Karyakartha",
-      type: RegistrationType.karyakartha, user: null,
-    ));
-
-
+                                    Get.to(
+                                      () => RegistrationPage(
+                                        title: "Add Karyakartha",
+                                        type: RegistrationType.karyakartha,
+                                        user: null,
+                                      ),
+                                    );
                                   },
                                 ),
                               ],
@@ -221,7 +222,21 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     );
                                   },
                                   onViewMore: () {
-                                    Get.toNamed('/karyakartha-view');
+                                    final String? karyakarthaId =
+                                        state?.karyakarthaProfile?.id;
+
+                                    if (karyakarthaId != null &&
+                                        karyakarthaId.isNotEmpty) {
+                                      print(
+                                        '🔵 Navigating with ID: $karyakarthaId',
+                                      );
+                                      Get.toNamed(
+                                        '/karyakartha-view',
+                                        arguments: karyakarthaId,
+                                      );
+                                    }
+
+                                    //Get.toNamed('/karyakartha-view');
                                   },
                                 ),
                         ),

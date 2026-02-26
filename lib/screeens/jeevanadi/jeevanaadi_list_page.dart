@@ -11,6 +11,8 @@ import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
+import 'package:vikas_app/screeens/models/response/user.dart';
+import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class JeevanaadiListPage extends StatefulWidget {
@@ -23,7 +25,6 @@ class JeevanaadiListPage extends StatefulWidget {
 class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     context.read<JeevanaadiBloc>().add(FetchJeevanaadisEvent(0));
   }
@@ -78,7 +79,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                               children: [
                                 CommonList<JeevanaadiUser>(
                                   currentPage: state?.currentPage ?? 0,
-                                 users: state!.jeevanaadisMems,
+                                  users: state!.jeevanaadisMems,
                                   onUserTap: (id) {
                                     context.read<JeevanaadiBloc>().add(
                                       FetchJeevanaadiProfileEvent(id),
@@ -99,7 +100,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                           if (state!.currentPage > 0) {
                                             context.read<JeevanaadiBloc>().add(
                                               FetchJeevanaadisEvent(
-                                                (state?.currentPage ?? 0) - 1,
+                                                (state.currentPage ?? 0) - 1,
                                               ),
                                             );
                                           }
@@ -109,7 +110,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                         ),
                                       ),
                                       Text(
-                                        "${(state?.currentPage ?? 0) + 1}/${state?.totalpages}",
+                                        "${(state.currentPage ?? 0) + 1}/${state.totalpages}",
                                       ),
                                       IconButton(
                                         onPressed: () {
@@ -117,7 +118,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                               state!.totalpages - 1) {
                                             context.read<JeevanaadiBloc>().add(
                                               FetchJeevanaadisEvent(
-                                                (state?.currentPage ?? 0) + 1,
+                                                (state.currentPage ?? 0) + 1,
                                               ),
                                             );
                                           }
@@ -134,8 +135,9 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                         ],
                       ),
                     ),
-                    if (state?.isProfileViewVisible == true &&
-                        state?.profileLoading != null)
+                    if (state.isProfileViewVisible == true &&
+                        state.profileLoading != null)
+                   // if (state.isProfileViewVisible == true)
                       Expanded(
                         flex: 3, // 30%
                         child: AnimatedSwitcher(
@@ -155,10 +157,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
 
                           transitionBuilder: (child, animation) {
                             final slideAnimation = Tween<Offset>(
-                              begin: const Offset(
-                                0.05,
-                                0,
-                              ), // slight slide from right
+                              begin: const Offset(0.05, 0),
                               end: Offset.zero,
                             ).animate(animation);
 
@@ -176,16 +175,19 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                             );
                           },
 
-                          child: state?.profileLoading ?? false
+                          child: state.profileLoading ?? false
                               ? ScreenLoader(key: ValueKey('loader'))
-                              : state?.profileErrorMsg != null
+                              : state.profileErrorMsg != null
                               ? ErrorCard(
                                   key: ValueKey('error'),
-                                  message: state?.profileErrorMsg ?? "",
+                                  message: state.profileErrorMsg ?? "",
                                 )
                               : ListViewScreen(
                                   key: ValueKey('profile'),
-                                  user: state?.jeevanaadiProfile,
+                                  //user: state?.jeevanaadiProfile,
+                                  user: _convertJeevanaadiProfileToUser(
+                                    state?.jeevanaadiProfileFull,
+                                  ),
                                   onClose: () {
                                     context.read<JeevanaadiBloc>().add(
                                       CloseProfileView(),
@@ -193,8 +195,23 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                   },
                                   screenType: "JEEVANADI",
                                   onDelete: () {},
-                                  onViewMore: () {
-                                    Get.toNamed('/jeevandiview');
+                                  // onViewMore: () {
+                                  //   Get.toNamed('/jeevandiview');
+                                  // },
+
+                                                                    onViewMore: () {
+                                    final String? jeevanadiId = state?.jeevanaadiProfileFull?.basicDetails.id?.toString();
+
+                                    if (jeevanadiId != null && jeevanadiId.isNotEmpty) {
+                                      Get.toNamed('/jeevandiview', arguments: jeevanadiId);
+                                    } else {
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Cannot load view: Member ID not found'),
+                                          backgroundColor: Colors.red,
+                                        ),
+                                      );
+                                    }
                                   },
                                 ),
                         ),
@@ -208,6 +225,23 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
           // child:
         ),
       ),
+    );
+  }
+
+  User? _convertJeevanaadiProfileToUser(JeevanaadiFullProfile? profile) {
+    if (profile == null) return null;
+
+    return User(
+      id: profile.basicDetails.id.toString(),
+      name: profile.profileDetails.fullName,
+      email: profile.basicDetails.email,
+      mobileNumber: profile.profileDetails.phoneNumber,
+      userType: profile.basicDetails.usertype,
+      status: profile.basicDetails.isActive ? 'active' : 'inactive',
+      city: profile.profileDetails.city,
+      state: profile.profileDetails.state,
+      country: profile.profileDetails.country,
+      pincode: profile.profileDetails.pincode,
     );
   }
 }

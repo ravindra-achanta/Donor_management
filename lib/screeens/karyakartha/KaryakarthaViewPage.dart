@@ -7,14 +7,17 @@ import 'package:flutx/widgets/text/text.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
+import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
 import 'package:vikas_app/screeens/common/backButton.dart';
+import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class KaryaKarthaViewScreen extends StatefulWidget {
-  final String memberId;
-  
+  final String karyakarthaId;
 
-  const KaryaKarthaViewScreen({super.key, required this.memberId});
+  const KaryaKarthaViewScreen({super.key, required this.karyakarthaId});
 
   @override
   State<KaryaKarthaViewScreen> createState() => _KaryaKarthaViewScreenState();
@@ -22,6 +25,7 @@ class KaryaKarthaViewScreen extends StatefulWidget {
 
 class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
   int _unassignedPage = 0;
+  int _assignedPage = 0;
 
   @override
   void initState() {
@@ -30,15 +34,20 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
   }
 
   void _loadData() {
-    context.read<JeevanaadiBloc>().add(
-      FetchJeevanadiMemberEvent(widget.memberId),
+    setState(() {
+      _assignedPage = 0;
+      _unassignedPage = 0;
+    });
+    context.read<KaryakarthaBloc>().add(
+      FetchKaryakarthaProfileEvent(widget.karyakarthaId),
     );
+    // context.read<JeevanaadiBloc>().add(
+    //   FetchJeevanadiMemberEvent(widget.karyakarthaId),
+    // );
     context.read<JeevanaadiBloc>().add(
-      FetchAssignedKaryakarthasEvent(widget.memberId),
+      FetchAssignedKaryakarthasEvent(widget.karyakarthaId, _assignedPage, 10),
     );
-    context.read<JeevanaadiBloc>().add(
-      FetchUnassignedKaryakarthasEvent(0),
-    );
+    context.read<JeevanaadiBloc>().add(FetchUnassignedKaryakarthasEvent(0));
   }
 
   @override
@@ -125,7 +134,6 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                       Backbutton().buildBackButton(context, "Karyakartha List"),
                       const SizedBox(height: 20),
 
-                      // Header
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -138,18 +146,22 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                     Container(
                                       padding: const EdgeInsets.all(8),
                                       decoration: BoxDecoration(
-                                        color: Colors.blue.shade50,
+                                        color: Colors
+                                            .purple
+                                            .shade50, // Changed to purple
                                         borderRadius: BorderRadius.circular(8),
                                       ),
                                       child: Icon(
                                         Icons.person,
-                                        color: Colors.blue.shade700,
+                                        color: Colors
+                                            .purple
+                                            .shade700, // Changed to purple
                                         size: 24,
                                       ),
                                     ),
                                     const SizedBox(width: 12),
                                     FxText.labelMedium(
-                                      "karyakatha  Details",
+                                      "Karyakartha Details", // Changed title
                                       style: Theme.of(context)
                                           .textTheme
                                           .headlineSmall
@@ -158,334 +170,46 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                   ],
                                 ),
                                 const SizedBox(height: 20),
-                                if (member != null)
-                                  Container(
-                                    width: double.infinity,
-                                    padding: const EdgeInsets.all(20),
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        colors: [
-                                          Colors.blue.shade50,
-                                          Colors.indigo.shade50,
-                                        ],
-                                        begin: Alignment.topLeft,
-                                        end: Alignment.bottomRight,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: Colors.blue.shade100,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'JN-ID:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.id,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Name:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.name,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Mobile:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.mobile,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Gothram:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.gothram,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+
+                                // Use BlocBuilder to get karyakartha details
+                                BlocBuilder<KaryakarthaBloc, KaryakarthaState>(
+                                  builder: (context, karyakarthaState) {
+                                    if (karyakarthaState.profileLoading ==
+                                        true) {
+                                      return const Center(
+                                        child: Padding(
+                                          padding: EdgeInsets.all(20),
+                                          child: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
+
+                                    final karyakartha =
+                                        karyakarthaState.karyakarthaProfile;
+
+                                    if (karyakartha != null) {
+                                      return _buildKaryakarthaDetails(
+                                        karyakartha,
+                                      );
+                                    } else {
+                                      return Container(
+                                        padding: const EdgeInsets.all(20),
+                                        decoration: BoxDecoration(
+                                          color: Colors.grey.shade100,
+                                          borderRadius: BorderRadius.circular(
+                                            16,
                                           ),
                                         ),
-                                        const SizedBox(width: 20),
-                                        Expanded(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Email:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.email,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Role:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.role,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Joined:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.joined,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                              Padding(
-                                                padding:
-                                                    const EdgeInsets.symmetric(
-                                                      vertical: 3,
-                                                    ),
-                                                child: Row(
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Container(
-                                                      width: 100,
-                                                      child: FxText.labelMedium(
-                                                        'Referred By:',
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 700,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade700,
-                                                              fontSize: 13,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                    Expanded(
-                                                      child: FxText.bodyMedium(
-                                                        member.referredBy,
-                                                        style:
-                                                            FxTextStyle.labelMedium(
-                                                              fontWeight: 600,
-                                                              fontSize: 14,
-                                                            ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ],
+                                        child: Center(
+                                          child: FxText.bodyMedium(
+                                            'No karyakartha data available',
+                                            color: Colors.grey.shade600,
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  ),
+                                      );
+                                    }
+                                  },
+                                ),
                               ],
                             ),
                           ),
@@ -503,7 +227,6 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Left side - Assigned Karyakarthas (40%)
                             Expanded(
                               flex: 4,
                               child: Container(
@@ -634,106 +357,15 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                               itemBuilder: (context, index) {
                                                 final user = state
                                                     .assignedKaryakarthas[index];
-                                                return Column(
-                                                  children: [
-                                                    Stack(
-                                                      children: [
-                                                        Container(
-                                                          padding:
-                                                              const EdgeInsets.all(
-                                                                3,
-                                                              ),
-                                                          decoration: BoxDecoration(
-                                                            color: Colors
-                                                                .blue
-                                                                .shade50,
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                  35,
-                                                                ),
-                                                          ),
-                                                          child: CircleAvatar(
-                                                            radius: 28,
-                                                            backgroundColor:
-                                                                Colors
-                                                                    .blue
-                                                                    .shade100,
-                                                            child: Icon(
-                                                              Icons.person,
-                                                              color: Colors
-                                                                  .blue
-                                                                  .shade800,
-                                                              size: 30,
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        Positioned(
-                                                          right: -3,
-                                                          top: -3,
-                                                          child: GestureDetector(
-                                                            onTap: () {
-                                                              context
-                                                                  .read<
-                                                                    JeevanaadiBloc
-                                                                  >()
-                                                                  .add(
-                                                                    RemoveAssignedKaryakarthaEvent(
-                                                                      widget
-                                                                          .memberId,
-                                                                      user.id,
-                                                                    ),
-                                                                  );
-                                                            },
-                                                            child: Container(
-                                                              width: 26,
-                                                              height: 26,
-                                                              decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .red
-                                                                    .shade500,
-                                                                shape: BoxShape
-                                                                    .circle,
-                                                                border: Border.all(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  width: 3,
-                                                                ),
-                                                              ),
-                                                              child: const Icon(
-                                                                Icons.close,
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 16,
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ),
-                                                      ],
-                                                    ),
-                                                    const SizedBox(height: 8),
-                                                    SizedBox(
-                                                      width: 80,
-                                                      child: FxText.bodyMedium(
-                                                        user.name,
-                                                        style:
-                                                            FxTextStyle.bodyMedium(
-                                                              fontSize: 12,
-                                                              fontWeight: 600,
-                                                              color:
-                                                                  Colors.black,
-                                                            ),
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        maxLines: 2,
-                                                        overflow: TextOverflow
-                                                            .ellipsis,
-                                                      ),
-                                                    ),
-                                                  ],
+                                                return _buildAssignedUserItem(
+                                                  user,
                                                 );
                                               },
                                             ),
                                     ),
+
+                                    const SizedBox(height: 16),
+                                    _buildAssignedLoadMoreButton(state),
                                   ],
                                 ),
                               ),
@@ -801,13 +433,14 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                             onPressed: state.isAssigning
                                                 ? null
                                                 : () {
-                                                    context
-                                                        .read<JeevanaadiBloc>()
-                                                        .add(
-                                                          AssignSelectedKaryakarthasEvent(
-                                                            widget.memberId,
-                                                          ),
-                                                        );
+                                                    context.read<JeevanaadiBloc>().add(
+                                                      AssignSelectedKaryakarthasEvent(
+                                                        karyakarthaId: widget
+                                                            .karyakarthaId,
+                                                        memberIds: state
+                                                            .selectedUnassignedIds,
+                                                      ),
+                                                    );
                                                   },
                                             icon: state.isAssigning
                                                 ? const SizedBox(
@@ -825,7 +458,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                   ),
                                             label: FxText.bodyMedium(
                                               state.isAssigning
-                                                  ? 'Adding...'
+                                                  ? 'Assigning...'
                                                   : 'Add members',
                                             ),
                                             style: ElevatedButton.styleFrom(
@@ -844,6 +477,54 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                               elevation: 3,
                                             ),
                                           ),
+                                        // ElevatedButton.icon(
+                                        //   onPressed: state.isAssigning
+                                        //       ? null
+                                        //       : () {
+                                        //           context
+                                        //               .read<JeevanaadiBloc>()
+                                        //               .add(
+                                        //                 AssignSelectedKaryakarthasEvent(
+                                        //                   widget.karyakarthaId,
+
+                                        //                 ),
+                                        //               );
+                                        //         },
+                                        //   icon: state.isAssigning
+                                        //       ? const SizedBox(
+                                        //           width: 18,
+                                        //           height: 18,
+                                        //           child:
+                                        //               CircularProgressIndicator(
+                                        //                 strokeWidth: 2,
+                                        //                 color: Colors.white,
+                                        //               ),
+                                        //         )
+                                        //       : const Icon(
+                                        //           Icons.add,
+                                        //           size: 20,
+                                        //         ),
+                                        //   label: FxText.bodyMedium(
+                                        //     state.isAssigning
+                                        //         ? 'Adding...'
+                                        //         : 'Add members',
+                                        //   ),
+                                        //   style: ElevatedButton.styleFrom(
+                                        //     backgroundColor:
+                                        //         Colors.green.shade600,
+                                        //     foregroundColor: Colors.white,
+                                        //     padding:
+                                        //         const EdgeInsets.symmetric(
+                                        //           horizontal: 18,
+                                        //           vertical: 12,
+                                        //         ),
+                                        //     shape: RoundedRectangleBorder(
+                                        //       borderRadius:
+                                        //           BorderRadius.circular(8),
+                                        //     ),
+                                        //     elevation: 3,
+                                        //   ),
+                                        // ),
                                       ],
                                     ),
                                     SizedBox(
@@ -1091,82 +772,69 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                             ),
                                     ),
                                     const SizedBox(height: 16),
-SizedBox(
-  width: 200,
-  child: ElevatedButton.icon(
-    onPressed: state.unassignedCurrentPage < state.unassignedTotalPages - 1
-        ? () {
-            setState(() {
-              _unassignedPage = state.unassignedCurrentPage + 1;
-            });
-            context.read<JeevanaadiBloc>().add(
-              FetchUnassignedKaryakarthasEvent(_unassignedPage),
-            );
-          }
-        : null,
-    icon: state.isLoadingUnassigned
-        ? const SizedBox(
-            width: 18,
-            height: 18,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Colors.white,
-            ),
-          )
-        : const Icon(Icons.arrow_downward, size: 18),
-    label: FxText.labelMedium(
-      state.isLoadingUnassigned
-          ? 'Loading...'
-          : state.unassignedCurrentPage < state.unassignedTotalPages - 1
-              ? 'Load More (Page ${state.unassignedCurrentPage + 1}/${state.unassignedTotalPages})'
-              : 'No More Data',
-    ),
-    style: ElevatedButton.styleFrom(
-      backgroundColor: state.unassignedCurrentPage < state.unassignedTotalPages - 1
-          ? Colors.orange.shade600
-          : Colors.grey.shade400,
-      foregroundColor: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      elevation: 3,
-    ),
-  ),
-),
-                                    // SizedBox(
-                                    //   width: 200,
-                                    //   child: ElevatedButton.icon(
-                                    //     onPressed: () {
-                                    //       _unassignedPage++;
-                                    //       context.read<JeevanaadiBloc>().add(
-                                    //         FetchUnassignedKaryakarthasEvent(
-                                    //           _unassignedPage,
-                                    //         ),
-                                    //       );
-                                    //     },
-                                    //     icon: const Icon(
-                                    //       Icons.arrow_downward,
-                                    //       size: 18,
-                                    //     ),
-                                    //     label: FxText.labelMedium('Load More'),
-                                    //     style: ElevatedButton.styleFrom(
-                                    //       backgroundColor:
-                                    //           Colors.orange.shade600,
-                                    //       foregroundColor: Colors.white,
-                                    //       padding: const EdgeInsets.symmetric(
-                                    //         horizontal: 16,
-                                    //         vertical: 10,
-                                    //       ),
-                                    //       shape: RoundedRectangleBorder(
-                                    //         borderRadius: BorderRadius.circular(
-                                    //           8,
-                                    //         ),
-                                    //       ),
-                                    //       elevation: 3,
-                                    //     ),
-                                    //   ),
-                                    // ),
+                                    SizedBox(
+                                      width: 200,
+                                      child: ElevatedButton.icon(
+                                        onPressed:
+                                            state.unassignedCurrentPage <
+                                                state.unassignedTotalPages - 1
+                                            ? () {
+                                                setState(() {
+                                                  _unassignedPage =
+                                                      state
+                                                          .unassignedCurrentPage +
+                                                      1;
+                                                });
+                                                context.read<JeevanaadiBloc>().add(
+                                                  FetchUnassignedKaryakarthasEvent(
+                                                    _unassignedPage,
+                                                  ),
+                                                );
+                                              }
+                                            : null,
+                                        icon: state.isLoadingUnassigned
+                                            ? const SizedBox(
+                                                width: 18,
+                                                height: 18,
+                                                child:
+                                                    CircularProgressIndicator(
+                                                      strokeWidth: 2,
+                                                      color: Colors.white,
+                                                    ),
+                                              )
+                                            : const Icon(
+                                                Icons.arrow_downward,
+                                                size: 18,
+                                              ),
+                                        label: FxText.labelMedium(
+                                          state.isLoadingUnassigned
+                                              ? 'Loading...'
+                                              : state.unassignedCurrentPage <
+                                                    state.unassignedTotalPages -
+                                                        1
+                                              ? 'Load More (Page ${state.unassignedCurrentPage + 1}/${state.unassignedTotalPages})'
+                                              : 'No More Data',
+                                        ),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              state.unassignedCurrentPage <
+                                                  state.unassignedTotalPages - 1
+                                              ? Colors.orange.shade600
+                                              : Colors.grey.shade400,
+                                          foregroundColor: Colors.white,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 16,
+                                            vertical: 10,
+                                          ),
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                          elevation: 3,
+                                        ),
+                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
@@ -1182,6 +850,202 @@ SizedBox(
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildKaryakarthaDetails(User karyakartha) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.purple.shade50, Colors.deepPurple.shade50],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.purple.shade100),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('ID:', karyakartha.id),
+                const SizedBox(height: 8),
+                _buildDetailRow('Name:', karyakartha.name),
+                const SizedBox(height: 8),
+                _buildDetailRow('Email:', karyakartha.email),
+                const SizedBox(height: 8),
+                _buildDetailRow('Mobile:', karyakartha.mobileNumber ?? 'N/A'),
+                const SizedBox(height: 8),
+                _buildDetailRow('Status:', karyakartha.status),
+              ],
+            ),
+          ),
+          const SizedBox(width: 20),
+          // Second column - remaining 5 fields
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildDetailRow('Pincode:', karyakartha.pincode ?? 'N/A'),
+                const SizedBox(height: 8),
+                _buildDetailRow('City:', karyakartha.city ?? 'N/A'),
+                const SizedBox(height: 8),
+                _buildDetailRow('Area:', karyakartha.area ?? 'N/A'),
+                const SizedBox(height: 8),
+                _buildDetailRow('State:', karyakartha.state ?? 'N/A'),
+                const SizedBox(height: 8),
+                _buildDetailRow('Country:', karyakartha.country ?? 'N/A'),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Reusable detail row widget
+  Widget _buildDetailRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 70,
+          child: FxText.labelMedium(
+            label,
+            style: FxTextStyle.labelMedium(
+              fontWeight: 700,
+              color: Colors.deepPurple.shade700,
+              fontSize: 13,
+            ),
+          ),
+        ),
+        Expanded(
+          child: FxText.bodyMedium(
+            value.isEmpty ? 'N/A' : value,
+            style: FxTextStyle.labelMedium(fontWeight: 600, fontSize: 14),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAssignedLoadMoreButton(JeevanaadiState state) {
+    return SizedBox(
+      width: 200,
+      child: ElevatedButton.icon(
+        onPressed: state.assignedCurrentPage < state.assignedTotalPages - 1
+            ? () {
+                setState(() {
+                  _assignedPage = state.assignedCurrentPage + 1;
+                });
+                context.read<JeevanaadiBloc>().add(
+                  FetchAssignedKaryakarthasEvent(
+                    widget.karyakarthaId,
+                    _assignedPage,
+                    10,
+                  ),
+                );
+              }
+            : null,
+        icon: state.isLoadingAssigned
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: Colors.white,
+                ),
+              )
+            : const Icon(Icons.arrow_downward, size: 18),
+        label: FxText.labelMedium(
+          state.isLoadingAssigned
+              ? 'Loading...'
+              : state.assignedCurrentPage < state.assignedTotalPages - 1
+              ? 'Load More (Page ${state.assignedCurrentPage + 1}/${state.assignedTotalPages})'
+              : 'No More Data',
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              state.assignedCurrentPage < state.assignedTotalPages - 1
+              ? Colors.blue.shade600
+              : Colors.grey.shade400,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          elevation: 3,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAssignedUserItem(User user) {
+    return Column(
+      children: [
+        Stack(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(35),
+              ),
+              child: CircleAvatar(
+                radius: 28,
+                backgroundColor: Colors.blue.shade100,
+                child: Icon(
+                  Icons.person,
+                  color: Colors.blue.shade800,
+                  size: 30,
+                ),
+              ),
+            ),
+            Positioned(
+              right: -3,
+              top: -3,
+              child: GestureDetector(
+                onTap: () {
+                  context.read<JeevanaadiBloc>().add(
+                    RemoveAssignedKaryakarthaEvent(
+                      karyakarthaId: widget.karyakarthaId,
+                      memberId: user.id,
+                    ),
+                  );
+                },
+                child: Container(
+                  width: 26,
+                  height: 26,
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade500,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white, width: 3),
+                  ),
+                  child: const Icon(Icons.close, color: Colors.white, size: 16),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        SizedBox(
+          width: 80,
+          child: FxText.bodyMedium(
+            user.name,
+            style: FxTextStyle.bodyMedium(
+              fontSize: 12,
+              fontWeight: 600,
+              color: Colors.black,
+            ),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 }
