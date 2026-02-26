@@ -1,139 +1,40 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
+import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
+import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
+import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/response/dharmasetu_view.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
-/// Dharmasetu Model
-class Dharmasetu {
-  final String id;
-  final String uid;
-  final String type; // community, home, virtual
-  final String name;
-  final String feedback;
-  final String date;
-  final String referredBy;
-  final String status;
-
-  Dharmasetu({
-    required this.id,
-    required this.uid,
-    required this.type,
-    required this.name,
-    required this.feedback,
-    required this.date,
-    required this.referredBy,
-    required this.status,
-  });
-}
-
-// Sample data
-List<Dharmasetu> sampleDharmasetu = [
-  Dharmasetu(
-    id: '1',
-    uid: 'DM001',
-    type: 'Community',
-    name: 'Community Outreach Program',
-    feedback: 'Excellent community engagement',
-    date: '2024-01-15',
-    referredBy: 'Rajesh Kumar',
-    status: 'Active',
-  ),
-  Dharmasetu(
-    id: '2',
-    uid: 'DM002',
-    type: 'Home',
-    name: 'Home Assistance Program',
-    feedback: 'Good response from members',
-    date: '2024-01-20',
-    referredBy: 'Priya Singh',
-    status: 'Active',
-  ),
-  Dharmasetu(
-    id: '3',
-    uid: 'DM003',
-    type: 'Virtual',
-    name: 'Online Spiritual Sessions',
-    feedback: 'High attendance rate',
-    date: '2024-01-25',
-    referredBy: 'Amit Patel',
-    status: 'Pending',
-  ),
-  Dharmasetu(
-    id: '4',
-    uid: 'DM004',
-    type: 'Community',
-    name: 'Community Health Camp',
-    feedback: 'Very successful event',
-    date: '2024-02-01',
-    referredBy: 'Neha Gupta',
-    status: 'Completed',
-  ),
-  Dharmasetu(
-    id: '5',
-    uid: 'DM005',
-    type: 'Home',
-    name: 'Home Prayer Sessions',
-    feedback: 'Positive family feedback',
-    date: '2024-02-05',
-    referredBy: 'Vikram Reddy',
-    status: 'Active',
-  ),
-];
-
-class DhramSetuScreen extends StatefulWidget {
-  const DhramSetuScreen({super.key});
+class DharmasetuListScreen extends StatefulWidget {
+  const DharmasetuListScreen({super.key});
 
   @override
-  State<DhramSetuScreen> createState() => _DhramSetuScreenState();
+  State<DharmasetuListScreen> createState() => _DharmasetuListScreenState();
 }
 
-class _DhramSetuScreenState extends State<DhramSetuScreen> {
-  late List<Dharmasetu> dharmasetus;
-
+class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
   @override
   void initState() {
     super.initState();
-    // Initialize list from sample data
-    dharmasetus = List.from(sampleDharmasetu);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.read<DharmasetuBloc>().add(const LoadDharmasetu(page: 0));
+      }
+    });
   }
 
-  /// Get status badge color
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'active':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'completed':
-        return Colors.blue;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  /// Get type badge color
-  Color _getTypeColor(String type) {
-    switch (type.toLowerCase()) {
-      case 'community':
-        return Colors.purple;
-      case 'home':
-        return Colors.indigo;
-      case 'virtual':
-        return Colors.teal;
-      default:
-        return Colors.grey;
-    }
-  }
-
-  /// Show delete confirmation dialog
-  void _showDeleteDialog(Dharmasetu dharma) {
+  void _showDeleteDialog(BuildContext context, String id, String name) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Delete Dharmasetu'),
-          content: Text(
-            'Are you sure you want to delete the dharmasetu record for ${dharma.name}?',
-          ),
+          content: Text('Are you sure you want to delete "$name"?'),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
@@ -142,16 +43,9 @@ class _DhramSetuScreenState extends State<DhramSetuScreen> {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                setState(() {
-                  dharmasetus.removeWhere((d) => d.id == dharma.id);
-                });
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('Dharmasetu record deleted for ${dharma.name}'),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 2),
-                  ),
-                );
+                if (context.mounted) {
+                  context.read<DharmasetuBloc>().add(DeleteDharmasetu(id));
+                }
               },
               style: TextButton.styleFrom(foregroundColor: Colors.red),
               child: const Text('Delete'),
@@ -165,224 +59,173 @@ class _DhramSetuScreenState extends State<DhramSetuScreen> {
   @override
   Widget build(BuildContext context) {
     return Layout(
-      child: SizedBox(
+      child: Container(
         width: double.infinity,
-        height: MediaQuery.of(context).size.height - 180,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Column(
-              children: [
-                /// HEADER
-                Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        "Dharmasetu",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+        height: MediaQuery.of(context).size.height,
+        padding: const EdgeInsets.all(16),
+        child: BlocBuilder<DharmasetuBloc, DharmasetuState>(
+          builder: (context, state) {
+            if (state is DharmasetuLoading) {
+              return const Center(child: ScreenLoader());
+            } else if (state is DharmasetuError) {
+              return Center(child: ErrorCard(message: state.message));
+            } else if (state is DharmasetuLoaded) {
+              // Convert DharmasetuModel to DharmasetuView for CommonList
+              final List<DharmasetuView> viewList = state.dharmasetuList
+                  .map((model) => DharmasetuView.fromDharmasetuModel(model))
+                  .toList();
+
+              // Calculate total pages (assuming 10 items per page)
+              final int totalPages = (state.dharmasetuList.length / 10).ceil();
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header with title and add button
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          "Dharmasetu Records",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      ElevatedButton.icon(
-                        onPressed: () {
-                          Get.toNamed('/add/dharmasetu');
-                        },
-                        icon: const Icon(Icons.add),
-                        label: const Text("Add Dharmasetu"),
-                      ),
-                    ],
+                        Row(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.refresh),
+                              onPressed: () {
+                                context.read<DharmasetuBloc>().add(
+                                  const LoadDharmasetu(page: 0),
+                                );
+                              },
+                            ),
+                            const SizedBox(width: 8),
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                Get.toNamed('/add/dharmasetu');
+                              },
+                              icon: const Icon(Icons.add),
+                              label: const Text("Add Dharmasetu"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
 
-                const Divider(height: 1),
+                  const SizedBox(height: 8),
 
-                /// DATA TABLE
-                Expanded(
-                  child: SingleChildScrollView(
+                  Card(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                     child: SizedBox(
-                      width: double.infinity,
-                      child: DataTable(
-                        columnSpacing: 15,
-                        dataRowHeight: 70,
-                        columns: const [
-                          DataColumn(label: Text('UID')),
-                          DataColumn(label: Text('Type')),
-                          DataColumn(label: Text('Name')),
-                          DataColumn(label: Text('Feedback')),
-                          DataColumn(label: Text('Date')),
-                          DataColumn(label: Text('Referred By')),
-                          DataColumn(label: Text('Status')),
-                          DataColumn(label: Text('Actions')),
-                        ],
-                        rows: dharmasetus.map((dharma) {
-                          return DataRow(cells: [
-                            DataCell(Text(dharma.uid)),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getTypeColor(dharma.type)
-                                      .withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: _getTypeColor(dharma.type),
-                                  ),
-                                ),
-                                child: Text(
-                                  dharma.type,
-                                  style: TextStyle(
-                                    color: _getTypeColor(dharma.type),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
+                      height: MediaQuery.of(context).size.height - 220,
+                      child: Column(
+                        children: [
+                          // Common List widget with view icon in actions
+                          Expanded(
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.vertical(
+                                top: Radius.circular(12),
+                              ),
+                              child: SingleChildScrollView(
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                child: CommonList<DharmasetuView>(
+                                  currentPage: 0,
+                                  users: viewList,
+                                  screenType: "DHARMASETU",
+                                  onUserTap: (id) {
+                                    print('Row tapped: $id');
+                                  },
+                                  onDelete: (id) {
+                                    final item = viewList.firstWhere(
+                                      (d) => d.id == id,
+                                    );
+                                    _showDeleteDialog(context, id, item.name);
+                                  },
+                                  onUpdate: (id) {
+                                    Get.snackbar(
+                                      'Info',
+                                      'Edit functionality coming soon for ID: $id',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  },
+                                  onApprove: (id) {
+                                    Get.snackbar(
+                                      'View Details',
+                                      'Viewing details for ID: $id',
+                                      snackPosition: SnackPosition.BOTTOM,
+                                    );
+                                  },
                                 ),
                               ),
                             ),
-                            DataCell(Text(dharma.name)),
-                            DataCell(
-                              SizedBox(
-                                width: 150,
-                                child: Text(
-                                  dharma.feedback,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
+                          ),
+
+                          // Pagination
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.grey.shade50,
+                              borderRadius: const BorderRadius.vertical(
+                                bottom: Radius.circular(12),
+                              ),
+                              border: Border(
+                                top: BorderSide(color: Colors.grey.shade200),
                               ),
                             ),
-                            DataCell(Text(dharma.date)),
-                            DataCell(Text(dharma.referredBy)),
-                            DataCell(
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: _getStatusColor(dharma.status)
-                                      .withOpacity(0.2),
-                                  borderRadius: BorderRadius.circular(20),
-                                  border: Border.all(
-                                    color: _getStatusColor(dharma.status),
-                                  ),
-                                ),
-                                child: Text(
-                                  dharma.status,
-                                  style: TextStyle(
-                                    color: _getStatusColor(dharma.status),
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 12,
-                                  ),
-                                ),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 50,
+                                vertical: 12,
                               ),
-                            ),
-                            DataCell(
-                              Row(
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
                                   IconButton(
-                                    tooltip: 'View',
+                                    onPressed: null,
                                     icon: const Icon(
-                                      Icons.visibility_outlined,
-                                      color: Colors.blue,
-                                      size: 20,
+                                      Icons.skip_previous_outlined,
                                     ),
-                                    onPressed: () {
-                                      Get.toNamed('/view/dharmasetu', arguments: {
-                                        'id': dharma.id,
-                                        'uid': dharma.uid,
-                                        'type': dharma.type,
-                                        'name': dharma.name,
-                                        'feedback': dharma.feedback,
-                                        'date': dharma.date,
-                                        'referredBy': dharma.referredBy,
-                                        'status': dharma.status,
-                                      });
-                                    },
+                                  ),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 16,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey.shade100,
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: Text(
+                                      "1/${totalPages}",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                   IconButton(
-                                    tooltip: 'Edit',
-                                    icon: const Icon(
-                                      Icons.edit_outlined,
-                                      color: Colors.orange,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      // TODO: Navigate to edit dharmasetu page
-                                      // if (context.mounted) {
-                                      //   ScaffoldMessenger.of(context)
-                                      //       .showSnackBar(
-                                      //     SnackBar(
-                                      //       content: Text(
-                                      //           'Edit feature coming soon for ${dharma.name}'),
-                                      //     ),
-                                      //   );
-                                      // }
-                                      Get.toNamed('/edit/dharmasetu', arguments: {
-      'id': dharma.id,
-      'uid': dharma.uid,
-      'type': dharma.type,
-      'name': dharma.name,
-      'feedback': dharma.feedback,
-      'date': dharma.date,
-      'referredBy': dharma.referredBy,
-      'status': dharma.status,
-    });
-                                      
-                                    },
-                                  ),
-                                  IconButton(
-                                    tooltip: 'Delete',
-                                    icon: const Icon(
-                                      Icons.delete_outlined,
-                                      color: Colors.red,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      _showDeleteDialog(dharma);
-                                    },
+                                    onPressed: null,
+                                    icon: const Icon(Icons.skip_next_outlined),
                                   ),
                                 ],
                               ),
                             ),
-                          ]);
-                        }).toList(),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                ),
-
-                /// PAGINATION
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 50,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.skip_previous_outlined),
-                      ),
-                      const Text("1/1"),
-                      IconButton(
-                        onPressed: () {},
-                        icon: const Icon(Icons.skip_next_outlined),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+                ],
+              );
+            }
+            return const Center(child: ScreenLoader());
+          },
         ),
       ),
     );

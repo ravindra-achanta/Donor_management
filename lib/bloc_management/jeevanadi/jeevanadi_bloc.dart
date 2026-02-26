@@ -20,11 +20,14 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     //on<FetchJeevanadiMemberEvent>(_onFetchJeevanadiMember);
     on<FetchAssignedKaryakarthasEvent>(_onFetchAssignedKaryakarthas);
     on<FetchUnassignedKaryakarthasEvent>(_onFetchUnassignedKaryakarthas);
-   // on<ToggleUnassignedSelectionEvent>(_onToggleUnassignedSelection);
+    on<ToggleUnassignedSelectionEvent>(_onToggleUnassignedSelection);
     on<AssignSelectedKaryakarthasEvent>(_onAssignSelectedKaryakarthas);
     on<RemoveAssignedKaryakarthaEvent>(_onRemoveAssignedKaryakartha);
     //on<ClearJeevanadiDataEvent>(_onClearJeevanadiData);
     on<UpdateJeevanaadiProfileEvent>(_onUpdateProfile);
+    on<ToggleAssignedSelectionEvent>(_onToggleAssignedSelection);
+  on<ClearAssignedSelectionEvent>(_onClearAssignedSelection);
+  on<RemoveSelectedAssignedMembersEvent>(_onRemoveSelectedAssignedMembers);
   }
   final JeevanaadiRepo = JeevanadiRepo();
 
@@ -446,9 +449,69 @@ Future<void> _onUpdateProfile(
   }
 }
 
+void _onToggleAssignedSelection(
+  ToggleAssignedSelectionEvent event,
+  Emitter<JeevanaadiState> emit,
+) {
+  final currentSelection = List<String>.from(state.selectedAssignedIds);
 
+  if (currentSelection.contains(event.userId)) {
+    currentSelection.remove(event.userId);
+  } else {
+    currentSelection.add(event.userId);
+  }
 
+  emit(state.copyWith(selectedAssignedIds: currentSelection));
+}
 
+void _onClearAssignedSelection(
+  ClearAssignedSelectionEvent event,
+  Emitter<JeevanaadiState> emit,
+) {
+  emit(state.copyWith(selectedAssignedIds: const []));
+}
 
+Future<void> _onRemoveSelectedAssignedMembers(
+  RemoveSelectedAssignedMembersEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (state.selectedAssignedIds.isEmpty) {
+    emit(state.copyWith(
+      errorMessage: 'Please select members to remove',
+    ));
+    return;
+  }
+
+  emit(state.copyWith(isRemoving: true, errorMessage: null));
+
+  try {
+    final response = await JeevanaadiRepo.deallocateMembersFromKaryakartha(
+      karyakarthaId: event.karyakarthaId,
+      memberIds: state.selectedAssignedIds,
+    );
+
+    if (response.isSuccess) {
+      emit(state.copyWith(
+        isRemoving: false,
+        selectedAssignedIds: const [],
+        errorMessage: null,
+      ));
+      
+      add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
+      add(FetchUnassignedKaryakarthasEvent(0));
+      
+    } else {
+      emit(state.copyWith(
+        isRemoving: false,
+        errorMessage: response.error?.message ?? 'Failed to remove members',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isRemoving: false,
+      errorMessage: 'Failed to remove members: ${e.toString()}',
+    ));
+  }
+}
 
 }

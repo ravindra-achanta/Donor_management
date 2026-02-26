@@ -123,6 +123,26 @@ class FetchReferredByUsersEvent extends JeevanaadiEvent {
 }
 
 
+class ToggleAssignedSelectionEvent extends JeevanaadiEvent {
+  final String userId;
+  ToggleAssignedSelectionEvent(this.userId);
+  @override
+  List<Object?> get props => [userId];
+}
+
+class ClearAssignedSelectionEvent extends JeevanaadiEvent {
+  @override
+  List<Object?> get props => [];
+}
+
+class RemoveSelectedAssignedMembersEvent extends JeevanaadiEvent {
+  final String karyakarthaId;
+  RemoveSelectedAssignedMembersEvent({required this.karyakarthaId});
+  @override
+  List<Object?> get props => [karyakarthaId];
+}
+
+
 
 
 

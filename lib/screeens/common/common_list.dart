@@ -118,8 +118,8 @@
 //                   email = rowData.email;
 //                   mobile = rowData.mobileNumber ?? "";
 //                   userType = rowData.userType ?? "";
-                  
-//                 } 
+
+//                 }
 //                 // else if (rowData is DonationView) {
 //                 //   amount = rowData.amount.toString();
 //                 //   donationType = rowData.donationType ?? "";
@@ -330,12 +330,14 @@
 //   }
 // }
 
-
 import 'package:flutter/material.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
-import 'package:vikas_app/screeens/models/response/review_request.dart'; 
+import 'package:vikas_app/screeens/models/response/review_request.dart';
+import 'package:vikas_app/screeens/models/response/visit_view.dart';
 
 class CommonList<T> extends StatefulWidget {
   const CommonList({
@@ -411,6 +413,24 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Updated By'),
                   tableHeader('Status'),
                   tableHeader('Actions'),
+                ] else if (screenType == 'DHARMASETU') ...[
+                  //tableHeader('UID'),
+                  tableHeader('Type'),
+                  tableHeader('Name'),
+                  tableHeader('Feedback'),
+                  tableHeader('Date'),
+                  tableHeader('Referred By'),
+                  tableHeader('Status'),
+                  tableHeader('Actions'),
+                ] else if (screenType == 'VISIT') ...[
+                  tableHeader('Jeevandi Num'),
+                  tableHeader('Name'),
+                  tableHeader('Phone'),
+                  tableHeader('Visit Purpose'),
+                  tableHeader('Guests'),
+                  tableHeader('Date'),
+                  tableHeader('Status'),
+                  tableHeader('Actions'),
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
@@ -428,7 +448,6 @@ class _CommonListState extends State<CommonList> {
           // subtle divider
           Divider(height: 1, color: Colors.grey.shade200),
 
-          // 🟦 LIST - UPDATED SECTION
           SizedBox(
             height: 460,
             child: ListView.separated(
@@ -470,7 +489,9 @@ class _CommonListState extends State<CommonList> {
                     duration: const Duration(milliseconds: 150),
                     curve: Curves.easeOut,
                     color: isHovered
-                        ? Theme.of(context).colorScheme.primary.withOpacity(0.06)
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primary.withOpacity(0.06)
                         : Colors.transparent,
                     child: InkWell(
                       onTap: () => widget.onUserTap(rowData.id),
@@ -497,13 +518,14 @@ class _CommonListState extends State<CommonList> {
                                 ),
                               ),
                             ] else if (screenType == 'REVIEW_REQUEST') ...[
-                              // For Review Request
                               if (rowData is ReviewRequest) ...[
                                 tableData(rowData.jeevnadiName),
                                 tableData(rowData.jeevanadiId),
                                 tableData(rowData.updatedBy),
                                 Expanded(
-                                  child: _buildStatusPill(rowData.status ?? 'Pending'),
+                                  child: _buildStatusPill(
+                                    rowData.status ?? 'Pending',
+                                  ),
                                 ),
                                 Expanded(
                                   child: Row(
@@ -512,23 +534,33 @@ class _CommonListState extends State<CommonList> {
                                       if (widget.onApprove != null)
                                         HoverIconButton(
                                           icon: Icons.check_circle_outline,
-                                          hoverColor: Colors.green.withOpacity(0.1),
+                                          hoverColor: Colors.green.withOpacity(
+                                            0.1,
+                                          ),
                                           iconColor: Colors.green,
-                                          onTap: () => widget.onApprove!(rowData.jeevanadiId),
+                                          onTap: () => widget.onApprove!(
+                                            rowData.jeevanadiId,
+                                          ),
                                         ),
                                       const SizedBox(width: 10),
                                       HoverIconButton(
                                         icon: Icons.remove_red_eye_outlined,
-                                        hoverColor: Colors.blue.withOpacity(0.1),
+                                        hoverColor: Colors.blue.withOpacity(
+                                          0.1,
+                                        ),
                                         iconColor: Colors.blue,
-                                        onTap: () => widget.onUpdate(rowData.jeevanadiId),
+                                        onTap: () => widget.onUpdate(
+                                          rowData.jeevanadiId,
+                                        ),
                                       ),
                                       const SizedBox(width: 10),
                                       HoverIconButton(
                                         icon: Icons.close,
                                         hoverColor: Colors.red.withOpacity(0.1),
                                         iconColor: Colors.red,
-                                        onTap: () => widget.onDelete(rowData.jeevanadiId),
+                                        onTap: () => widget.onDelete(
+                                          rowData.jeevanadiId,
+                                        ),
                                       ),
                                     ],
                                   ),
@@ -539,7 +571,84 @@ class _CommonListState extends State<CommonList> {
                                 tableData(''),
                                 const Expanded(child: SizedBox.shrink()),
                                 const Expanded(child: SizedBox.shrink()),
-                              ]
+                              ],
+                            ] else if (screenType == 'DHARMASETU') ...[
+                              tableData((rowData as dynamic).type ?? ""),
+                              tableData((rowData as dynamic).name ?? ""),
+                              tableData((rowData as dynamic).feedback ?? ""),
+                              tableData((rowData as dynamic).date ?? ""),
+                              tableData((rowData as dynamic).referredBy ?? ""),
+                              Expanded(
+                                child: _buildStatusPill(
+                                  (rowData as dynamic).status ?? 'Unknown',
+                                ),
+                              ),
+                              Expanded(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    _actionIcon(
+                                      Icons.visibility_outlined,
+                                      Colors.blue,
+                                      () {
+                                        Get.toNamed(
+                                          '/view/dharmasetu',
+                                          arguments: rowData,
+                                        );
+                                      },
+                                    ),
+                                    _actionIcon(
+                                      Icons.edit_outlined,
+                                      Colors.orange,
+                                      () => widget.onUpdate(rowData.id),
+                                    ),
+                                    const SizedBox(width: 5),
+                                    _actionIcon(
+                                      Icons.delete_outline,
+                                      Colors.red,
+                                      () => widget.onDelete(rowData.id),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ] else if (screenType == 'VISIT') ...[
+                              if (rowData is VisitView) ...[
+                                tableData(rowData.jeevandNum),
+                                tableData(rowData.name),
+                                tableData(rowData.phone),
+                                tableData(rowData.visitPurpose),
+                                tableData(rowData.noOfGuests.toString()),
+                                tableData(rowData.date),
+                                Expanded(
+                                  child: _buildStatusPill(rowData.status),
+                                ),
+                                Expanded(
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _actionIcon(
+                                        Icons.visibility_outlined,
+                                        Colors.blue,
+                                        () => Get.toNamed(
+                                          '/view/visit',
+                                          arguments: rowData,
+                                        ),
+                                      ),
+                                     _actionIcon(
+  Icons.edit_outlined,
+  Colors.orange,
+  () => Get.toNamed('/edit/visit', arguments: rowData), 
+),
+                                      const SizedBox(width: 5),
+                                      _actionIcon(
+                                        Icons.delete_outline,
+                                        Colors.red,
+                                        () => widget.onDelete(rowData.id),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ] else if (screenType == 'DONATION') ...[
                               tableData("${(index + 1 * 1000).toString()}/-"),
                               tableData("Seva"),
@@ -587,7 +696,7 @@ class _CommonListState extends State<CommonList> {
 
   Widget _buildProfileProgress(double percentage) {
     Color progressColor = _getProgressColor(percentage);
-    
+
     return Stack(
       alignment: Alignment.center,
       children: [
@@ -619,7 +728,6 @@ class _CommonListState extends State<CommonList> {
     return Colors.green;
   }
 
-  // Helper method for status pill
   Widget _buildStatusPill(String status) {
     Color color = _getStatusColor(status);
     return Container(
@@ -639,7 +747,6 @@ class _CommonListState extends State<CommonList> {
     );
   }
 
-  // Helper method for status color
   Color _getStatusColor(String status) {
     switch (status) {
       case "Approved":
@@ -675,6 +782,15 @@ class _CommonListState extends State<CommonList> {
           fontWeight: FontWeight.w500,
         ),
       ),
+    );
+  }
+
+  Widget _actionIcon(IconData icon, Color color, VoidCallback onTap) {
+    return HoverIconButton(
+      icon: icon,
+      hoverColor: color.withOpacity(0.1),
+      iconColor: color,
+      onTap: onTap,
     );
   }
 }

@@ -17,10 +17,12 @@ import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
+import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
 import 'package:vikas_app/screeens/users/users_list_page.dart';
+import 'package:vikas_app/screeens/visits/EditVisit.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
 import 'package:vikas_app/screeens/visits/AddVisit.dart';
 import 'package:vikas_app/screeens/visits/ViewVisit.dart';
@@ -83,15 +85,24 @@ getPageRoute() {
     GetPage(name: '/register', page: () => const RegistrationPage(title: "Add new User",type: RegistrationType.user, user: null,)),
 
     GetPage(name: '/profile', page: () => const MyProfile()),
-    GetPage(name: '/dharmasetu', page: () => const DhramSetuScreen()),
+    GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
     GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
 
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
-    GetPage(name: '/visits', page: () => const Visits()),
+GetPage(
+  name: '/view/notice',
+  page: () => NoticeDetailScreen(notice: Get.arguments),
+),
+   GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
+    //GetPage(name: '/edit/visit', page: () => const EditVisit()),
+  GetPage(
+  name: '/edit/visit', 
+  page: () => EditVisit(visitData: Get.arguments),
+),
     GetPage(name: '/view/visit', page: () => const ViewVisit()),
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),

@@ -1,14 +1,14 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 class NoticeRequest {
   final String title;
   final String message;
-  final String audienceType; // 'User Type' or 'User'
-  final String audienceValue; // 'Admin' or user IDs list as JSON
+  final String audienceType;
+  final String audienceValue;
   final DateTime date;
-  final String? filePath;
-  final Uint8List? fileBytes;
-  final String? fileName;
+  // new field
+  final String time;
+  final File? attachment;
 
   NoticeRequest({
     required this.title,
@@ -16,20 +16,22 @@ class NoticeRequest {
     required this.audienceType,
     required this.audienceValue,
     required this.date,
-    this.filePath,
-    this.fileBytes,
-    this.fileName,
+    required this.time,           // now required
+    this.attachment,
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final Map<String, dynamic> data = {
       'title': title,
       'message': message,
-      'audienceType': audienceType,
-      'audienceValue': audienceValue,
+      'audience_type': audienceType,
+      'audience_value': audienceValue,
       'date': date.toIso8601String(),
-      if (fileName != null) 'fileName': fileName,
-      // File will be sent as multipart form data
+      'time': time,
     };
+    if (attachment != null) {
+      data['attachment'] = attachment;
+    }
+    return data;
   }
 }

@@ -26,8 +26,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
   final _formKey = GlobalKey<FormState>();
   final _dropdownService = DropdownService();
   bool _isUpdateInProgress = false;
-  bool _isActive = true; 
-String _status = 'ACTIVE';
+  bool _isActive = true;
+  String _status = 'ACTIVE';
 
   final TextEditingController _referredBySearchController =
       TextEditingController();
@@ -180,8 +180,8 @@ String _status = 'ACTIVE';
               },
             ]
           : [];
-          _isActive = profile.basicDetails.isActive;
-    _status = _isActive ? 'ACTIVE' : 'INACTIVE';
+      _isActive = profile.basicDetails.isActive;
+      _status = _isActive ? 'ACTIVE' : 'INACTIVE';
 
       print('Data loaded successfully');
     } catch (e) {
@@ -251,10 +251,10 @@ String _status = 'ACTIVE';
           )
           .map(
             (rel) => {
-             // "id": rel["id"] ?? "",
-              "id": (rel["id"] != null && rel["id"].toString().isNotEmpty) 
-            ? int.parse(rel["id"].toString())  
-            : null,
+              // "id": rel["id"] ?? "",
+              "id": (rel["id"] != null && rel["id"].toString().isNotEmpty)
+                  ? int.parse(rel["id"].toString())
+                  : null,
               "relation": rel["relation"] ?? "",
               "name": rel["name"] ?? "",
               "mobileNumber": rel["mobile"] ?? "",
@@ -273,10 +273,10 @@ String _status = 'ACTIVE';
           .where((occ) => occ["name"]?.isNotEmpty == true)
           .map(
             (occ) => {
-             // "id": occ["id"] ?? "",
-               "id": (occ["id"] != null && occ["id"].toString().isNotEmpty)
-                ? int.parse(occ["id"].toString())
-                : null,
+              // "id": occ["id"] ?? "",
+              "id": (occ["id"] != null && occ["id"].toString().isNotEmpty)
+                  ? int.parse(occ["id"].toString())
+                  : null,
               "occName": occ["name"] ?? "",
               "occDate": occ["date"] ?? "",
               "status": "ACTIVE",
@@ -284,12 +284,11 @@ String _status = 'ACTIVE';
           )
           .toList(),
 
-     // "status": "ACTIVE",
-     "status": _status, 
+      // "status": "ACTIVE",
+      "status": _status,
     };
 
     print('📤 Updating profile: ${_jeevanadiIdCtrl.text}');
- 
 
     showDialog(
       context: context,
@@ -428,179 +427,117 @@ String _status = 'ACTIVE';
     );
   }
 
-  
-//   Widget _buildHeader(JeevanaadiFullProfile profile) {
-//   final displayPercentage = profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage > 0 
-//       ? profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage 
-//       : profile.profileDetails.fillPercentage.toDouble();
-  
-//   return Row(
-//     children: [
-//       IconButton(
-//         icon: const Icon(Icons.arrow_back, size: 22),
-//         onPressed: () => Navigator.pop(context),
-//       ),
-//       const SizedBox(width: 4),
-//       const Text(
-//         "EDIT DETAILS",
-//         style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-//       ),
-//       const SizedBox(width: 24),
-//       Expanded(
-//         child: Row(
-//           mainAxisAlignment: MainAxisAlignment.end,
-//           children: [
-//             const Text(
-//               "profile:",
-//               style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-//             ),
-//             const SizedBox(width: 8),
-//             SizedBox(
-//               width: 150,
-//               height: 12,
-//               child: ClipRRect(
-//                 borderRadius: BorderRadius.circular(6),
-//                 child: LinearProgressIndicator(
-//                   value: displayPercentage / 100,                         // <-- UPDATED
-//                   backgroundColor: Colors.grey[300],
-//                   valueColor: const AlwaysStoppedAnimation<Color>(
-//                     Colors.brown,
-//                   ),
-//                 ),
-//               ),
-//             ),
-//             const SizedBox(width: 8),
-//             Text(
-//               "${displayPercentage.toStringAsFixed(1)}%",                 // <-- UPDATED (shows 46.2% instead of 25%)
-//               style: const TextStyle(
-//                 fontSize: 14,
-//                 fontWeight: FontWeight.w500,
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     ],
-//   );
-// }
-Widget _buildHeader(JeevanaadiFullProfile profile) {
-  final displayPercentage = profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage > 0 
-      ? profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage 
-      : profile.profileDetails.fillPercentage.toDouble();
-  
-  return Row(
-    children: [
-      IconButton(
-        icon: const Icon(Icons.arrow_back, size: 22),
-        onPressed: () => Navigator.pop(context),
-      ),
-      const SizedBox(width: 4),
-      const Text(
-        "EDIT DETAILS",
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-      ),
-      
-      const SizedBox(width: 66),
-      
-      Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-        decoration: BoxDecoration(
-          color: _isActive ? Colors.green : Colors.red,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.grey.withOpacity(0.3),
-              spreadRadius: 1,
-              blurRadius: 2,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: InkWell(
-          onTap: () {
-            setState(() {
-              _isActive = !_isActive;
-              _status = _isActive ? 'ACTIVE' : 'INACTIVE';
-            });
-          },
-          borderRadius: BorderRadius.circular(16),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(
-                  width: 8,
-                  height: 8,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  _status,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
-                const SizedBox(width: 4),
-                // Toggle icon
-                Icon(
-                  _isActive ? Icons.toggle_on : Icons.toggle_off,
-                  color: Colors.white,
-                  size: 18,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-      
-      //const Spacer(),
-            const SizedBox(width: 66),
+  Widget _buildHeader(JeevanaadiFullProfile profile) {
+    final displayPercentage =
+        profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage > 0
+        ? profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage
+        : profile.profileDetails.fillPercentage.toDouble();
 
-      
-      // Profile percentage
-      Row(
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          const Text(
-            "profile:",
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back, size: 22),
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 4),
+        const Text(
+          "EDIT DETAILS",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(width: 66),
+
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: _isActive ? Colors.green : Colors.red,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          SizedBox(
-            width: 150,
-            height: 12,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(6),
-              child: LinearProgressIndicator(
-                value: displayPercentage / 100,
-                backgroundColor: Colors.grey[300],
-                valueColor: const AlwaysStoppedAnimation<Color>(
-                  Colors.brown,
-                ),
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _isActive = !_isActive;
+                _status = _isActive ? 'ACTIVE' : 'INACTIVE';
+              });
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _status,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // Toggle icon
+                  Icon(
+                    _isActive ? Icons.toggle_on : Icons.toggle_off,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ],
               ),
             ),
           ),
-          const SizedBox(width: 8),
-          Text(
-            "${displayPercentage.toStringAsFixed(1)}%",
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    ],
-  );
-}
+        ),
 
+        const SizedBox(width: 66),
+
+        // Profile percentage
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text(
+              "profile:",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 150,
+              height: 12,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: displayPercentage / 100,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.brown),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "${displayPercentage.toStringAsFixed(1)}%",
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
 
   Widget _buildPersonalDetails() {
     return _buildSection(
@@ -1058,7 +995,6 @@ Widget _buildHeader(JeevanaadiFullProfile profile) {
     );
   }
 
-  // Relationship field helpers
   Widget _relationField(Map<String, dynamic> rel, int index) =>
       _buildRelDropdown(
         rel,
