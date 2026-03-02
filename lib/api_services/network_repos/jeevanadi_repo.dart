@@ -249,11 +249,15 @@ class JeevanadiRepo {
 
 Future<ApiResult<JeevanaadiFullProfile>> getJeevanaadiProfileFromRequest(
   String jeevanadiId,
+  
 ) async {
-  final url = "${ApiConstants.getrequestview}/staff/requests/$jeevanadiId";
+   print('🔍 Getting profile for ID: $jeevanadiId'); // DEBUG
+  final url = "${ApiConstants.getrequestviewbyid}/$jeevanadiId";
   final result = await _api.get(url);
+   print('📡 Full URL: ${ApiConstants.baseUrl}$url'); // DEBUG
   
   if (!result.isSuccess) {
+      print('❌ Error: ${result.error?.message}');
     return ApiResult.failure(result.error);
   }
 

@@ -171,7 +171,11 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                                     onUpdate: (id) {
                                       Get.toNamed(
                                         '/jeevandiview',
-                                        arguments: id,
+                                        arguments: {
+                                          'jeevanadiId': id,
+                                          'isFromRequest': true,
+                                        },
+                                        
                                       );
                                     },
                                     onApprove: (id) {

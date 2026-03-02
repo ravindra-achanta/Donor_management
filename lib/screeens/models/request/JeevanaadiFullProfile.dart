@@ -57,7 +57,7 @@ class JeevanaadiFullProfile {
 }
 
 class BasicDetails {
-  final int id;
+  final String id;
   final String? lastLogin;
   final bool isSuperuser;
   final String email;
@@ -101,7 +101,7 @@ class BasicDetails {
 
   factory BasicDetails.fromJson(Map<String, dynamic> json) {
     return BasicDetails(
-      id: json['id'] ?? 0,
+      id: json['id'] ?? null,
       lastLogin: json['lastLogin'],
       isSuperuser: json['isSuperuser'] ?? false,
       email: json['email'] ?? '',
@@ -125,7 +125,7 @@ class BasicDetails {
 }
 
 class ProfileDetails {
-  final int id;
+  final String id;
   final String fullName;
   final String phoneNumber;
   final String whatsappNumber;
@@ -184,7 +184,7 @@ class ProfileDetails {
 
   factory ProfileDetails.fromJson(Map<String, dynamic> json) {
     return ProfileDetails(
-      id: json['id'] ?? 0,
+      id: json['id'],
       fullName: json['fullName'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       whatsappNumber: json['whatsappNumber'] ?? '',

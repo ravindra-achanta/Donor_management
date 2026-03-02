@@ -11,7 +11,7 @@ class ReviewRepo {
     required int page,
     int size = 10,
   }) async {
-    final url = "${ApiConstants.REVIEW_REQUESTS}/staff/requests?page=$page&size=$size";
+    final url = "${ApiConstants.getrequestview}?page=$page&size=$size";
     
     print('📡 Fetching review requests from: $url');
     

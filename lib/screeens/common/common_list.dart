@@ -74,15 +74,15 @@ class _CommonListState extends State<CommonList> {
                 //tableHeader('#'),
                 tableHeader('#', flex: 1),
                 if (screenType == 'JEEVANADI') ...[
-                  tableHeader('Name'),
+                  tableHeader('fullName'),
                   tableHeader('Jeevanaadi No'),
                   tableHeader('Profile %'),
                 ] else if (screenType == 'REVIEW_REQUEST') ...[
-                  tableHeader('Jeevanadi Name', flex: 3),
-                  tableHeader('Jeevanadi ID', flex: 2),
+                  tableHeader('Jeevanadi Name', flex: 4),
+                  tableHeader('Jeevanadi no', flex: 2),
                   tableHeader('Updated By', flex: 2),
                   tableHeader('Status', flex: 1),
-                  tableHeader('Actions', flex: 2),
+                  //tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'DHARMASETU') ...[
                   //tableHeader('UID'),
                   tableHeader('Type'),
@@ -139,7 +139,7 @@ class _CommonListState extends State<CommonList> {
 
                 // Data extraction for different types
                 if (rowData is JeevanaadiUser) {
-                  name = rowData.userName;
+                  name = rowData.fullName;
                   JeevanaadiNo = rowData.jeevanaadiNo ?? rowData.id;
                   profilePercent = rowData.profileCompletionPercentage ?? 0.0;
                 } else if (rowData is User) {
@@ -188,8 +188,8 @@ class _CommonListState extends State<CommonList> {
                               ),
                             ] else if (screenType == 'REVIEW_REQUEST') ...[
                               if (rowData is ReviewRequest) ...[
-                                tableData(rowData.jeevnadiName, flex: 3),
-                                tableData(rowData.jeevanadiId, flex: 2),
+                                tableData(rowData.jeevnadiName, flex: 4),
+                                tableData(rowData.jeevanadiNo, flex: 2),
                                 tableData(rowData.updatedBy, flex: 2),
                                 Expanded(
                                   flex: 1,
@@ -197,45 +197,45 @@ class _CommonListState extends State<CommonList> {
                                     rowData.status ?? 'Pending',
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      if (widget.onApprove != null)
-                                        HoverIconButton(
-                                          icon: Icons.check_circle_outline,
-                                          hoverColor: Colors.green.withOpacity(
-                                            0.1,
-                                          ),
-                                          iconColor: Colors.green,
-                                          onTap: () => widget.onApprove!(
-                                            rowData.jeevanadiId,
-                                          ),
-                                        ),
-                                      const SizedBox(width: 10),
-                                      HoverIconButton(
-                                        icon: Icons.remove_red_eye_outlined,
-                                        hoverColor: Colors.blue.withOpacity(
-                                          0.1,
-                                        ),
-                                        iconColor: Colors.blue,
-                                        onTap: () => widget.onUpdate(
-                                          rowData.jeevanadiId,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      HoverIconButton(
-                                        icon: Icons.close,
-                                        hoverColor: Colors.red.withOpacity(0.1),
-                                        iconColor: Colors.red,
-                                        onTap: () => widget.onDelete(
-                                          rowData.jeevanadiId,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                // Expanded(
+                                //   flex: 2,
+                                //   child: Row(
+                                //     mainAxisAlignment: MainAxisAlignment.start,
+                                //     children: [
+                                //       if (widget.onApprove != null)
+                                //         // HoverIconButton(
+                                //         //   icon: Icons.check_circle_outline,
+                                //         //   hoverColor: Colors.green.withOpacity(
+                                //         //     0.1,
+                                //         //   ),
+                                //         //   iconColor: Colors.green,
+                                //         //   onTap: () => widget.onApprove!(
+                                //         //     rowData.jeevanadiNo,
+                                //         //   ),
+                                //         // ),
+                                //       const SizedBox(width: 10),
+                                //       HoverIconButton(
+                                //         icon: Icons.remove_red_eye_outlined,
+                                //         hoverColor: Colors.blue.withOpacity(
+                                //           0.1,
+                                //         ),
+                                //         iconColor: Colors.blue,
+                                //         onTap: () => widget.onUpdate(
+                                //           rowData.jeevanadiId.toString(),
+                                //         ),
+                                //       ),
+                                //       // const SizedBox(width: 10),
+                                //       // HoverIconButton(
+                                //       //   icon: Icons.close,
+                                //       //   hoverColor: Colors.red.withOpacity(0.1),
+                                //       //   iconColor: Colors.red,
+                                //       //   onTap: () => widget.onDelete(
+                                //       //     rowData.jeevanadiNo,
+                                //       //   ),
+                                //       // ),
+                                //     ],
+                                //   ),
+                                // ),
                               ] else ...[
                                 tableData('', flex: 3),
                                 tableData('', flex: 2),
