@@ -82,7 +82,14 @@ getPageRoute() {
       // middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(name: '/register', page: () => const RegistrationPage(title: "Add new User",type: RegistrationType.user, user: null,)),
+    GetPage(
+      name: '/register',
+      page: () => const RegistrationPage(
+        title: "Add new User",
+        type: RegistrationType.user,
+        user: null,
+      ),
+    ),
 
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
@@ -92,27 +99,27 @@ getPageRoute() {
 
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
-GetPage(
-  name: '/view/notice',
-  page: () => NoticeDetailScreen(notice: Get.arguments),
-),
-   GetPage(name: '/visits', page: () => const VisitsListScreen()),
+    GetPage(
+      name: '/view/notice',
+      page: () => NoticeDetailScreen(notice: Get.arguments),
+    ),
+    GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
     //GetPage(name: '/edit/visit', page: () => const EditVisit()),
-  GetPage(
-  name: '/edit/visit', 
-  page: () => EditVisit(visitData: Get.arguments),
-),
+    GetPage(
+      name: '/edit/visit',
+      page: () => EditVisit(visitData: Get.arguments),
+    ),
     GetPage(name: '/view/visit', page: () => const ViewVisit()),
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
       name: '/karyakartha-view',
       page: () {
-      //=> const KaryaKarthaViewScreen(memberId: ""),
-      final String karyakarthaId = Get.arguments as String? ?? '';
-      return KaryaKarthaViewScreen(karyakarthaId: karyakarthaId);
-      }
+        //=> const KaryaKarthaViewScreen(memberId: ""),
+        final String karyakarthaId = Get.arguments as String? ?? '';
+        return KaryaKarthaViewScreen(karyakarthaId: karyakarthaId);
+      },
     ),
 
     GetPage(
@@ -129,16 +136,23 @@ GetPage(
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
-    
+
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
+    // GetPage(
+    //   name: '/jeevandiview',
+    //   page: () {
+    //     final String userId = Get.arguments as String? ?? '';
+    //     return ViewJeevanadiScreen(userId: userId);
+    //   },
+    // ),
+    //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
     GetPage(
-  name: '/jeevandiview',
+  name: '/jeevandiview', 
   page: () {
-    final String userId = Get.arguments as String? ?? '';
-    return ViewJeevanadiScreen(userId: userId);
+    final args = Get.arguments;
+    return ViewJeevanadiScreen.fromArguments(args);
   },
 ),
-    
 
     // GetPage(
     //   name: '/dashboard',

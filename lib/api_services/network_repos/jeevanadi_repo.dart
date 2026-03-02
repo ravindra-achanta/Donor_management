@@ -38,62 +38,62 @@ class JeevanadiRepo {
   }
 
   // In your JeevanadiRepo class
-// Future<ApiResult<User>> getJeevanaadiProfile(
-//   String userId, {
-//   Map<String, String>? customHeaders, required Map<String, String> headers,
-// }) async {
-//   try {
-//     final headers = {
-//       'Content-Type': 'application/json',
-//       'Accept': 'application/json',
-//       ...?customHeaders, // Merge with custom headers
-//     };
+  // Future<ApiResult<User>> getJeevanaadiProfile(
+  //   String userId, {
+  //   Map<String, String>? customHeaders, required Map<String, String> headers,
+  // }) async {
+  //   try {
+  //     final headers = {
+  //       'Content-Type': 'application/json',
+  //       'Accept': 'application/json',
+  //       ...?customHeaders, // Merge with custom headers
+  //     };
 
-//     final response = await http.get(
-//       Uri.parse('${ApiConstants.GET_JEEVANAADIS}/$userId'),
-//       headers: headers,
-//     );
+  //     final response = await http.get(
+  //       Uri.parse('${ApiConstants.GET_JEEVANAADIS}/$userId'),
+  //       headers: headers,
+  //     );
 
-//     if (response.statusCode == 200) {
-//       final data = json.decode(response.body);
-//       return ApiResult.success(User.fromJson(data));
-//     } else {
-//       return ApiResult.failure(
-//         ApiError(message: 'Failed to load profile: ${response.statusCode}'),
-//       );
-//     }
-//   } catch (e) {
-//     return ApiResult.failure(
-//       ApiError(message: 'Network error: ${e.toString()}'),
-//     );
-//   }
-// }
+  //     if (response.statusCode == 200) {
+  //       final data = json.decode(response.body);
+  //       return ApiResult.success(User.fromJson(data));
+  //     } else {
+  //       return ApiResult.failure(
+  //         ApiError(message: 'Failed to load profile: ${response.statusCode}'),
+  //       );
+  //     }
+  //   } catch (e) {
+  //     return ApiResult.failure(
+  //       ApiError(message: 'Network error: ${e.toString()}'),
+  //     );
+  //   }
+  // }
 
-// In Jeevanadi getby id
-Future<ApiResult<User>> getJeevanaadiProfile(String id) async {
-    
-    final url = "${ApiConstants.jeevanadi_fullview}/$id";
-    
+  // In Jeevanadi getby id
+  Future<ApiResult<JeevanaadiFullProfile>> getJeevanaadiProfile(
+    String id,
+  ) async {
+    final url = "${ApiConstants.JEEVANADI_URI}/$id";
     final result = await _api.get(url);
-    
+
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }
 
     try {
-      final fullProfile = JeevanaadiFullProfile.fromJson(result.data);
-      
-      final user = User(
-        id: fullProfile.basicDetails.id.toString(),
-        name: fullProfile.profileDetails.fullName,
-        email: fullProfile.basicDetails.email,
-        mobileNumber: fullProfile.profileDetails.phoneNumber, status: '',
-        uniqueId: fullProfile.basicDetails.jeevanadiNo, 
+      dynamic data = result.data;
+      if (data is List && data.isNotEmpty) {
+        data = data[0];
+      }
 
-        //userType: fullProfile.basicDetails.usertype,
-      );
-      
-      return ApiResult.success(user);
+      if (data is! Map<String, dynamic>) {
+        throw FormatException(
+          'Unexpected response format for profile: ${data.runtimeType}',
+        );
+      }
+
+      final fullProfile = JeevanaadiFullProfile.fromJson(data);
+      return ApiResult.success(fullProfile);
     } catch (e) {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
@@ -104,22 +104,28 @@ Future<ApiResult<User>> getJeevanaadiProfile(String id) async {
     String id,
   ) async {
     final result = await _api.get("${ApiConstants.JEEVANADI_URI}/$id");
-     if (!result.isSuccess) {
-      return ApiResult.failure(result.error);
-    }
-
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }
 
     try {
-      final profile = JeevanaadiFullProfile.fromJson(result.data);
+      dynamic data = result.data;
+      if (data is List && data.isNotEmpty) {
+        data = data[0];
+      }
+
+      if (data is! Map<String, dynamic>) {
+        throw FormatException(
+          'Unexpected response format for full profile: ${data.runtimeType}',
+        );
+      }
+
+      final profile = JeevanaadiFullProfile.fromJson(data);
       return ApiResult.success(profile);
     } catch (e) {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
-
 
   //unassigned jeevandi members
   Future<ApiResult<UnassignedUsersResponse>> getUnassignedJeevanadiUsers({
@@ -200,57 +206,69 @@ Future<ApiResult<User>> getJeevanaadiProfile(String id) async {
 
   //deallocate member from karyakartha
 
-  
-Future<ApiResult<Map<String, dynamic>>> deallocateMembersFromKaryakartha({
-  required String karyakarthaId,
-  required List<String> memberIds, 
-}) async {
-  final url = "${ApiConstants.jeevanadi_deallocate_assignees}/$karyakarthaId";
-  
-  final requestBody = {
-    'membersList': memberIds,
-  };
-  
-  print('📡 Deallocating members from karyakartha: $url');
-  print('📦 Request body: $requestBody');
-  
-  final result = await _api.put(
-    url,
-    body: requestBody,
-  );
+  Future<ApiResult<Map<String, dynamic>>> deallocateMembersFromKaryakartha({
+    required String karyakarthaId,
+    required List<String> memberIds,
+  }) async {
+    final url = "${ApiConstants.jeevanadi_deallocate_assignees}/$karyakarthaId";
 
+    final requestBody = {'membersList': memberIds};
+
+    print('📡 Deallocating members from karyakartha: $url');
+    print('📦 Request body: $requestBody');
+
+    final result = await _api.put(url, body: requestBody);
+
+    if (!result.isSuccess) {
+      print('❌ Failed to deallocate members: ${result.error?.message}');
+      return ApiResult.failure(result.error);
+    }
+
+    print('✅ Members deallocated successfully');
+    return ApiResult.success(result.data);
+  }
+
+  //update jeevandi profile
+  Future<ApiResult<Map<String, dynamic>>> updateJeevanaadiProfile({
+    required String jeevanadiId,
+    required Map<String, dynamic> updateData,
+  }) async {
+    final url = ApiConstants.getJeevanaadiUpdate + jeevanadiId + "/update";
+
+    updateData.removeWhere((key, value) => value == null);
+
+    final result = await _api.put(url, body: updateData);
+
+    if (!result.isSuccess) {
+      return ApiResult.failure(result.error);
+    }
+
+    return ApiResult.success(result.data);
+  }
+
+
+Future<ApiResult<JeevanaadiFullProfile>> getJeevanaadiProfileFromRequest(
+  String jeevanadiId,
+) async {
+  final url = "${ApiConstants.getrequestview}/staff/requests/$jeevanadiId";
+  final result = await _api.get(url);
+  
   if (!result.isSuccess) {
-    print('❌ Failed to deallocate members: ${result.error?.message}');
     return ApiResult.failure(result.error);
   }
 
-  print('✅ Members deallocated successfully');
-  return ApiResult.success(result.data);
-}
+  try {
+    final data = result.data;
+    if (data is! Map<String, dynamic>) {
+      throw FormatException('Unexpected response format: ${data.runtimeType}');
+    }
 
-//update jeevandi profile
-Future<ApiResult<Map<String, dynamic>>> updateJeevanaadiProfile({
-  required String jeevanadiId,
-  required Map<String, dynamic> updateData,
-}) async {
-  final url = ApiConstants.getJeevanaadiUpdate  + jeevanadiId + "/update";
-  
-  updateData.removeWhere((key, value) => value == null);
-  
-  final result = await _api.put(
-    url,
-    body: updateData,
-  );
-
-  if (!result.isSuccess) {
-    return ApiResult.failure(result.error);
+    final profile = JeevanaadiFullProfile.fromJson(data);
+    return ApiResult.success(profile);
+  } catch (e) {
+    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
   }
-
-  
-  return ApiResult.success(result.data);
 }
-
-
 
 
   Future<void> deleteKaryakartha(String id) async {

@@ -143,6 +143,16 @@ class RemoveSelectedAssignedMembersEvent extends JeevanaadiEvent {
 }
 
 
+class FetchJeevanaadiProfileFromRequestEvent extends JeevanaadiEvent {
+  final String jeevanadiid;
+  
+  FetchJeevanaadiProfileFromRequestEvent(this.jeevanadiid);
+  
+  @override
+  List<Object?> get props => [jeevanadiid];
+}
+
+
 
 
 

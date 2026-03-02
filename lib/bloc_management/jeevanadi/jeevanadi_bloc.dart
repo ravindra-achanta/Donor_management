@@ -5,6 +5,7 @@ import 'package:vikas_app/api_services/network_repos/jeevanadi_repo.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
+import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
@@ -16,6 +17,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     on<FetchJeevanaadisEvent>(_onFetchJeevanaadiMems);
     on<FetchJeevanaadiProfileEvent>(_onFetchJeevanaadiProfile);
     on<FetchJeevanaadiProfileFullEvent>(_onFetchJeevanaadiProfileFull);
+    on<FetchJeevanaadiProfileFromRequestEvent>(_onFetchJeevanaadiProfileFromRequest,);
     on<CloseProfileView>(_closeProfileView);
     //on<FetchJeevanadiMemberEvent>(_onFetchJeevanadiMember);
     on<FetchAssignedKaryakarthasEvent>(_onFetchAssignedKaryakarthas);
@@ -118,18 +120,18 @@ Future<void> _onFetchJeevanaadiProfile(
   );
 
   try {
-    final response = await JeevanaadiRepo.getJeevanaadiProfileFull(event.id);
+    final response = await JeevanaadiRepo.getJeevanaadiProfile(event.id);
     
-    if (response.isSuccess) {
-      emit(
-        state.copyWith(
-          profileLoading: false,
-          jeevanaadiProfileFull: response.data, // Store full profile
-          jeevanaadiProfile: null, // Clear old profile type
-          profileErrorMsg: null,
-        ),
-      );
-    } else {
+   if (response.isSuccess) {
+  emit(
+    state.copyWith(
+      profileLoading: false,
+      jeevanaadiProfileFull: response.data,
+      profileErrorMsg: null,
+    ),
+  );
+}
+     else {
       emit(
         state.copyWith(
           profileLoading: false,
@@ -510,6 +512,46 @@ Future<void> _onRemoveSelectedAssignedMembers(
     emit(state.copyWith(
       isRemoving: false,
       errorMessage: 'Failed to remove members: ${e.toString()}',
+    ));
+  }
+}
+
+//FETCH REQUEST VIEW PROFILE
+Future<void> _onFetchJeevanaadiProfileFromRequest(
+  FetchJeevanaadiProfileFromRequestEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(
+    isProfileViewVisible: true,
+    profileLoading: true,
+    profileErrorMsg: null,
+    isFromRequest: true,
+    requestId: event.jeevanadiid,
+    requestStatus: 'PENDING',
+  ));
+
+  try {
+    final response = await JeevanaadiRepo.getJeevanaadiProfileFromRequest(event.jeevanadiid);
+
+    if (response.isSuccess) {
+      emit(state.copyWith(
+        profileLoading: false,
+        jeevanaadiProfileFull: response.data,
+        profileErrorMsg: null,
+         isFromRequest: true,
+      ));
+    } else {
+      emit(state.copyWith(
+        profileLoading: false,
+        profileErrorMsg: response.error?.message ?? 'Failed to fetch request profile',
+        isFromRequest: false,
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      profileLoading: false,
+      profileErrorMsg: 'Error: ${e.toString()}',
+      isFromRequest: false,
     ));
   }
 }

@@ -137,7 +137,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                     ),
                     if (state.isProfileViewVisible == true &&
                         state.profileLoading != null)
-                   // if (state.isProfileViewVisible == true)
+                      //if (state.isProfileViewVisible == true)
                       Expanded(
                         flex: 3, // 30%
                         child: AnimatedSwitcher(
@@ -195,19 +195,31 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                   },
                                   screenType: "JEEVANADI",
                                   onDelete: () {},
+
                                   // onViewMore: () {
                                   //   Get.toNamed('/jeevandiview');
                                   // },
+                                  onViewMore: () {
+                                    final String? jeevanadiId = state
+                                        ?.jeevanaadiProfileFull
+                                        ?.basicDetails
+                                        .id
+                                        ?.toString();
 
-                                                                    onViewMore: () {
-                                    final String? jeevanadiId = state?.jeevanaadiProfileFull?.basicDetails.id?.toString();
-
-                                    if (jeevanadiId != null && jeevanadiId.isNotEmpty) {
-                                      Get.toNamed('/jeevandiview', arguments: jeevanadiId);
+                                    if (jeevanadiId != null &&
+                                        jeevanadiId.isNotEmpty) {
+                                      Get.toNamed(
+                                        '/jeevandiview',
+                                        arguments: jeevanadiId,
+                                      );
                                     } else {
-                                      ScaffoldMessenger.of(context).showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content: Text('Cannot load view: Member ID not found'),
+                                          content: Text(
+                                            'Cannot load view: Member ID not found',
+                                          ),
                                           backgroundColor: Colors.red,
                                         ),
                                       );
@@ -242,6 +254,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
       state: profile.profileDetails.state,
       country: profile.profileDetails.country,
       pincode: profile.profileDetails.pincode,
+      uniqueId: profile.basicDetails.jeevanadiNo,
     );
   }
 }
