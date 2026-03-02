@@ -38,7 +38,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
               children: [
                 // 🔷 Header
                 Row(
-                  mainAxisAlignment: .spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,

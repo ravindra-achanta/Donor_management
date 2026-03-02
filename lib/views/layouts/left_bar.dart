@@ -3,6 +3,7 @@ import 'package:flutx/flutx.dart';
 import 'package:get/route_manager.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons/lucide_icons.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/themes/theme_customizer.dart';
 import 'package:vikas_app/api_services/url_service.dart';
 import 'package:vikas_app/utils/mixins/ui_mixins.dart';
@@ -146,32 +147,39 @@ class _LeftBarState extends State<LeftBar>
                     ),
                     labelWidget("Apps"),
 
-                    NavigationItem(
-                      iconData: LucideIcons.badgeCheck,
-                      title: "Karyakarthas",
-                      isCondensed: isCondensed,
-                      route: '/karyakarthas',
-                    ),
-
-                    NavigationItem(
-                      iconData: LucideIcons.heartHandshake,
-                      title: "Jeevanadi Members",
-                      isCondensed: isCondensed,
-                      route: '/jeevanadi',
-                    ),
-                    NavigationItem(
-                      iconData: LucideIcons.users,
-                      title: "Users",
-                      isCondensed: isCondensed,
-                      route: '/users',
-                    ),
-
-                    NavigationItem(
-                      iconData: LucideIcons.fileClock,
-                      title: "Requests",
-                      isCondensed: isCondensed,
-                      route: '/requests',
-                    ),
+                    if (Vikasdb().getString("USER_TYPE") == "ADMIN" ||
+                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN" ||
+                        Vikasdb().getString("USERTYPE") == "GURUJI")
+                      NavigationItem(
+                        iconData: LucideIcons.badgeCheck,
+                        title: "Karyakarthas",
+                        isCondensed: isCondensed,
+                        route: '/karyakarthas',
+                      ),
+                    if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF")
+                      NavigationItem(
+                        iconData: LucideIcons.heartHandshake,
+                        title: "Jeevanadi Members",
+                        isCondensed: isCondensed,
+                        route: '/jeevanadi',
+                      ),
+                    if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
+                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN" ||
+                        Vikasdb().getString("USER_TYPE") == "ADMIN")
+                      NavigationItem(
+                        iconData: LucideIcons.users,
+                        title: "Users",
+                        isCondensed: isCondensed,
+                        route: '/users',
+                      ),
+                    if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" ||
+                        Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
+                      NavigationItem(
+                        iconData: LucideIcons.fileClock,
+                        title: "Requests",
+                        isCondensed: isCondensed,
+                        route: '/requests',
+                      ),
                     NavigationItem(
                       iconData: LucideIcons.arrowLeftRight,
                       title: "Dharmasetu",
@@ -184,12 +192,13 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/notices/list',
                     ),
-                    NavigationItem(
-                      iconData: LucideIcons.eye,
-                      title: "Visits",
-                      isCondensed: isCondensed,
-                      route: '/visits',
-                    ),
+                    if (Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
+                      NavigationItem(
+                        iconData: LucideIcons.eye,
+                        title: "Visits",
+                        isCondensed: isCondensed,
+                        route: '/visits',
+                      ),
 
                     NavigationItem(
                       iconData: LucideIcons.userCog,
