@@ -19,6 +19,7 @@ class ApiConstants {
   //login
   static const String LOGIN = "$IDM_URI/user/login";
   static const String CREATE_USER = "$IDM_URI/user/create";
+  static const String CHANGE_PASSWORD = "$IDM_URI/user/changePassword";
   static const String GET_USERS = "$IDM_URI/users/all";
   static const String GET_USER_BY_ID = "$IDM_URI/user";
   static const String UPDATE_PROFILE = "$IDM_URI/user";

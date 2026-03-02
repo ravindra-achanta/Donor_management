@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutx/flutx.dart';
 import 'package:form_builder_validators/form_builder_validators.dart';
+import 'package:get/get.dart';
+import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
@@ -86,7 +88,17 @@ class _LoginPageState extends State<LoginPage> {
       child: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) {
           if (state.isAuthenticated) {
-            Navigator.of(context).pushReplacementNamed('/dashboard');
+            Get.offNamed('/dashboard');
+          } else if (state.isPasswordChangeRequired) {
+            // Navigate to password change screen
+            Get.offNamed(
+              '/password-change',
+              arguments: {
+                'mobileNumber': emailController.text.trim(),
+                'userId': state.userId,
+                'token': state.token,
+              },
+            );
           }
         },
         builder: (context, state) {
@@ -174,6 +186,7 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               FxSpacing.height(6),
 
+                              // Normal login form
                               // Mobile Number Field
                               TextFormField(
                                 controller: emailController,
@@ -302,249 +315,160 @@ class _LoginPageState extends State<LoginPage> {
 
                               FxSpacing.height(16),
 
-                              
-                        //       DropdownButtonFormField<UserType>(
-                        //         value: selectedUserType,
-                        //         decoration: InputDecoration(
-                        //           labelText: "Select User Type",
-                        //           labelStyle: FxTextStyle.bodySmall(
-                        //             xMuted: true,
-                        //           ),
-                        //           filled: true,
-                        //           fillColor:
-                        //               Colors.grey.shade100, // Field background
-                        //           contentPadding: const EdgeInsets.symmetric(
-                        //             horizontal: 16,
-                        //             vertical: 18,
-                        //           ),
-                        //           enabledBorder: OutlineInputBorder(
-                        //             borderRadius: BorderRadius.circular(12),
-                        //             borderSide: BorderSide(
-                        //               color: Colors.brown.shade300,
-                        //               width: 1,
-                        //             ),
-                        //           ),
-                        //           focusedBorder: OutlineInputBorder(
-                        //             borderRadius: BorderRadius.circular(12),
-                        //             borderSide: const BorderSide(
-                        //               color: Colors.brown,
-                        //               width: 1.5,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //         dropdownColor: Colors
-                        //             .grey
-                        //             .shade100, // Popup menu background
-                        //         style: const TextStyle(
-                        //           color: Colors
-                        //               .brown, // Text color for selected item
-                        //           fontSize: 16,
-                        //           fontWeight: FontWeight.w500,
-                        //         ),
-                        //         icon: const Icon(
-                        //           LucideIcons.chevronDown,
-                        //           color: Colors.brown,
-                        //         ),
-                        //         isExpanded: true, // Fill full width
-                        //         validator: (value) {
-                        //           if (value == null) {
-                        //             return 'Please select a user type';
-                        //           }
-                        //           return null;
-                        //         },
-                        //         items: UserType.values.map((UserType type) {
-                        //           return DropdownMenuItem<UserType>(
-                        //             value: type,
-                        //             child: Text(
-                        //               type.displayName,
-                        //               style: const TextStyle(
-                        //                 color: Colors.brown,
-                        //                 fontSize: 16,
-                        //               ),
-                        //             ),
-                        //           );
-                        //         }).toList(),
-                        //         onChanged: (UserType? value) {
-                        //           setState(() {
-                        //             selectedUserType = value;
-                        //           });
-                        //         },
-                        //         selectedItemBuilder: (BuildContext context) {
-                        //           return UserType.values.map((UserType type) {
-                        //             return Text(
-                        //               type.displayName,
-                        //               style: const TextStyle(
-                        //                 color: Colors.brown,
-                        //                 fontSize: 16,
-                        //                 fontWeight: FontWeight.w600,
-                        //               ),
-                        //             );
-                        //           }).toList();
-                        //         },
-                        //       ),
-
-                        // if (state.isError && state.errorMessage != null)
-                        //         Padding(
-                        //           padding: const EdgeInsets.only(bottom: 10),
-                        //           child: FxText(
-                        //             state.errorMessage!,
-                        //             style: const TextStyle(
-                        //               color: Colors.red,
-                        //               fontSize: 16,
-                        //             ),
-                        //           ),
-                        //         ),
-                        //       FxSpacing.height(10),
-                         if (isLoadingRoles)
-                                const Center(
+                                // Role Dropdown
+                                if (isLoadingRoles)
+                                  const Center(
                                     child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ))
-                              else if (roles.isEmpty)
-                                Center(
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(16.0),
-                                    child: FxText.bodySmall(
-                                      'No roles available',
-                                      color: Colors.red,
-                                    ),
-                                  ),
-                                )
-                              else
-                                DropdownButtonFormField<Role>(
-                                  value: selectedRole,
-                                  isExpanded: true,
-                                  decoration: InputDecoration(
-                                    labelText: "Select Role",
-                                    labelStyle:
-                                        FxTextStyle.bodySmall(xMuted: true),
-                                    filled: true,
-                                    fillColor: Colors.grey.shade100,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 18,
-                                    ),
-                                    enabledBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: BorderSide(
-                                        color: Colors.brown.shade300,
-                                        width: 1,
+                                      padding: EdgeInsets.all(16.0),
+                                      child: CircularProgressIndicator(),
+                                    ))
+                                else if (roles.isEmpty)
+                                  Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16.0),
+                                      child: FxText.bodySmall(
+                                        'No roles available',
+                                        color: Colors.red,
                                       ),
                                     ),
-                                    focusedBorder: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                      borderSide: const BorderSide(
-                                        color: Colors.brown,
-                                        width: 1.5,
+                                  )
+                                else
+                                  DropdownButtonFormField<Role>(
+                                    value: selectedRole,
+                                    isExpanded: true,
+                                    decoration: InputDecoration(
+                                      labelText: "Select Role",
+                                      labelStyle:
+                                          FxTextStyle.bodySmall(xMuted: true),
+                                      filled: true,
+                                      fillColor: Colors.grey.shade100,
+                                      contentPadding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 18,
                                       ),
-                                    ),
-                                  ),
-                                  dropdownColor: Colors.grey.shade100,
-                                  style: const TextStyle(
-                                    color: Colors.brown,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  icon: const Icon(
-                                    LucideIcons.chevronDown,
-                                    color: Colors.brown,
-                                  ),
-                                  validator: (value) => value == null
-                                      ? 'Please select a role'
-                                      : null,
-                                  items: roles.map((Role role) {
-                                    return DropdownMenuItem<Role>(
-                                      value: role,
-                                      child: Text(
-                                        role.displayName,
-                                        style: const TextStyle(
-                                          color: Colors.brown,
-                                          fontSize: 16,
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: BorderSide(
+                                          color: Colors.brown.shade300,
+                                          width: 1,
                                         ),
                                       ),
-                                    );
-                                  }).toList(),
-                                  onChanged: (Role? value) {
-                                    setState(() => selectedRole = value);
-                                  },
-                                  selectedItemBuilder: (context) {
-                                    return roles.map((Role role) {
-                                      return Text(
-                                        //role.roleName ?? role.roleName ?? 'Role',
-                                        role.displayName,
-
-                                        style: const TextStyle(
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                        borderSide: const BorderSide(
                                           color: Colors.brown,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
+                                          width: 1.5,
                                         ),
-                                      );
-                                    }).toList();
-                                  },
-                                ),
-
-                              if (state.isError && state.errorMessage != null)
-                                Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
-                                  child: FxText(
-                                    state.errorMessage!,
+                                      ),
+                                    ),
+                                    dropdownColor: Colors.grey.shade100,
                                     style: const TextStyle(
-                                      color: Colors.red,
+                                      color: Colors.brown,
                                       fontSize: 16,
+                                      fontWeight: FontWeight.w500,
                                     ),
-                                  ),
-                                ),
-
-                              FxSpacing.height(10),
-
-                              // Login Button
-                              Center(
-                                child: FxButton.rounded(
-                                  onPressed: state.isLoading
-                                      ? null
-                                      : () {
-                                          _handleLogin(context);
-                                        },
-                                  elevation: 0,
-                                  padding: FxSpacing.xy(20, 16),
-                                  backgroundColor: Colors.brown,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (state.isLoading)
-                                        SizedBox(
-                                          height: 14,
-                                          width: 14,
-                                          child: CircularProgressIndicator(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onPrimary,
-                                            strokeWidth: 1.2,
+                                    icon: const Icon(
+                                      LucideIcons.chevronDown,
+                                      color: Colors.brown,
+                                    ),
+                                    validator: (value) => value == null
+                                        ? 'Please select a role'
+                                        : null,
+                                    items: roles.map((Role role) {
+                                      return DropdownMenuItem<Role>(
+                                        value: role,
+                                        child: Text(
+                                          role.displayName,
+                                          style: const TextStyle(
+                                            color: Colors.brown,
+                                            fontSize: 16,
                                           ),
                                         ),
-                                      if (state.isLoading) FxSpacing.width(16),
-                                      FxText.bodySmall(
-                                        'Login',
-                                        color: Colors.white,
+                                      );
+                                    }).toList(),
+                                    onChanged: (Role? value) {
+                                      setState(() => selectedRole = value);
+                                    },
+                                    selectedItemBuilder: (context) {
+                                      return roles.map((Role role) {
+                                        return Text(
+                                          role.displayName,
+                                          style: const TextStyle(
+                                            color: Colors.brown,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        );
+                                      }).toList();
+                                    },
+                                  ),
+
+                                if (state.isError && state.errorMessage != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: FxText(
+                                      state.errorMessage!,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 16,
                                       ),
-                                    ],
+                                    ),
+                                  ),
+
+                                FxSpacing.height(10),
+
+                                // Login Button
+                                Center(
+                                  child: FxButton.rounded(
+                                    onPressed: state.isLoading
+                                        ? null
+                                        : () {
+                                            _handleLogin(context);
+                                          },
+                                    elevation: 0,
+                                    padding: FxSpacing.xy(20, 16),
+                                    backgroundColor: Colors.brown,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (state.isLoading)
+                                          SizedBox(
+                                            height: 14,
+                                            width: 14,
+                                            child: CircularProgressIndicator(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onPrimary,
+                                              strokeWidth: 1.2,
+                                            ),
+                                          ),
+                                        if (state.isLoading) FxSpacing.width(16),
+                                        FxText.bodySmall(
+                                          'Login',
+                                          color: Colors.white,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            ],
+                              ],
                           ),
                         ),
                       ),
                     ),
-                  ],
+                            ],
                 ),
-              ),
-            ),
-          );
+                          ),
+                        ),
+                      );
+          
+      
+               
+              
         },
       ),
     );
+     
   }
   
   Future<void> _fetchRoles() async {

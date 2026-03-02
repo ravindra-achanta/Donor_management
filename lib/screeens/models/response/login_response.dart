@@ -5,12 +5,14 @@ class LoginResponse {
   final String message;
   final String token;
   final String userType;
+  final bool? isPasswordChanged;
 
   LoginResponse({
     required this.id,
     required this.message,
     required this.token,
     required this.userType,
+    this.isPasswordChanged,
   });
 
   factory LoginResponse.fromJson(Map<String, dynamic> json) {
@@ -19,6 +21,7 @@ class LoginResponse {
       message: json['message']?.toString() ?? '',
       token: json['token']?.toString() ?? '',
       userType: json['userType']?.toString() ?? '',
+      isPasswordChanged: json['isPasswordChanged'],
       //userType: UserType.fromString(json['userType']?.toString() ?? 'KARYAKARTHA'),
     );
   }

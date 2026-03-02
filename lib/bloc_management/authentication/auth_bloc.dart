@@ -13,7 +13,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<CreateUserEvent>(_onCreateUser);
     //on<FetchAllUsersEvent>(_onFetchAllUsers);
- on<FetchRolesEvent>(_onFetchRoles);  }
+ on<FetchRolesEvent>(_onFetchRoles);
+ on<ChangePasswordEvent>(_onChangePassword);
+  }
 
   Future<void> _onLogin(
     LoginEvent event,
@@ -30,17 +32,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (response.isSuccess) {
       final loginResponse = response.data!;
-      emit(
-        state.copyWith(
-          status: AuthStatus.authenticated,
-          userId: loginResponse.id,
-          token: loginResponse.token,
-          errorMessage: '',
-        ),
-      );
-      await Vikasdb().setString("TOKEN", loginResponse.token);
-      await Vikasdb().setString("USER_ID", loginResponse.id.toString());
-      await Vikasdb().setUserType("USER_TYPE", loginResponse.userType.toString());
+      
+      // Check if password needs to be changed
+      if (loginResponse.isPasswordChanged == false || loginResponse.isPasswordChanged == null) {
+        // Store login data temporarily and emit password change required state
+        emit(
+          state.copyWith(
+            status: AuthStatus.passwordChangeRequired,
+            userId: loginResponse.id,
+            token: loginResponse.token,
+            userType: UserType.values.firstWhere(
+              (type) => type.toString().split('.').last == loginResponse.userType,
+              orElse: () => UserType.karyakartha,
+            ),
+            errorMessage: '',
+          ),
+        );
+        // Note: Token will be saved after successful password change
+      } else {
+        // Normal login flow - save credentials and navigate
+        emit(
+          state.copyWith(
+            status: AuthStatus.authenticated,
+            userId: loginResponse.id,
+            token: loginResponse.token,
+            userType: UserType.values.firstWhere(
+              (type) => type.toString().split('.').last == loginResponse.userType,
+              orElse: () => UserType.karyakartha,
+            ),
+            errorMessage: '',
+          ),
+        );
+        await Vikasdb().setString("TOKEN", loginResponse.token);
+        await Vikasdb().setString("USER_ID", loginResponse.id.toString());
+        await Vikasdb().setUserType("USER_TYPE", loginResponse.userType.toString());
+      }
     } else {
       emit(
         state.copyWith(
@@ -107,6 +133,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     }
   }
   
+
+  Future<void> _onChangePassword(
+    ChangePasswordEvent event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: AuthStatus.changingPassword, errorMessage: ''));
+
+    final response = await authRepository.changePassword(
+      event.newPassword,
+      event.mobileNumber,
+    );
+
+    if (response.isSuccess) {
+      // Save token after successful password change
+      if (state.token != null && state.userId != null && state.userType != null) {
+        await Vikasdb().setString("TOKEN", state.token!);
+        await Vikasdb().setString("USER_ID", state.userId!);
+        await Vikasdb().setUserType("USER_TYPE", state.userType!.toString());
+      }
+      
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          errorMessage: '',
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          status: AuthStatus.passwordChangeRequired,
+          errorMessage: response.error?.message ?? "Password change failed",
+        ),
+      );
+    }
+  }
 
   Future<void> _onCheckAuthStatus(
     CheckAuthStatusEvent event,
