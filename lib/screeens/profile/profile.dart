@@ -120,7 +120,7 @@ class _MyProfileState extends State<MyProfile>
 
                           // ================= CONTACT =================
                           Row(
-                            mainAxisAlignment: .spaceBetween,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Expanded(
                                 child: _animatedSection(
