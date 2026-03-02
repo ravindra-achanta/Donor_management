@@ -22,7 +22,6 @@ class _ReviewRequestsState extends State<ReviewRequests> {
   @override
   void initState() {
     super.initState();
-    // Don't add event here - moved to build method with BlocProvider
   }
 
   void _showApproveDialog(String jeevanadiId) {
@@ -46,11 +45,8 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                     backgroundColor: Colors.green,
                   ),
                 );
-                // TODO: Implement approve API call
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
               child: const Text('Approve'),
             ),
           ],
@@ -82,9 +78,7 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                 );
                 // TODO: Implement reject API call
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: const Text('Reject'),
             ),
           ],
@@ -96,9 +90,10 @@ class _ReviewRequestsState extends State<ReviewRequests> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => ReviewRequestBloc(
-        repository: ReviewRepo(),
-      )..add(const FetchReviewRequestsEvent(page: 0, size: 10)), // Add event here
+      create: (context) => ReviewRequestBloc(repository: ReviewRepo())
+        ..add(
+          const FetchReviewRequestsEvent(page: 0, size: 10),
+        ), // Add event here
       child: Layout(
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -107,7 +102,7 @@ class _ReviewRequestsState extends State<ReviewRequests> {
               switch (state.status) {
                 case ReviewRequestStatus.loading:
                   return const ScreenLoader();
-                
+
                 case ReviewRequestStatus.error:
                   return Center(
                     child: ErrorCard(
@@ -119,7 +114,7 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                       },
                     ),
                   );
-                
+
                 case ReviewRequestStatus.loaded:
                   return Row(
                     children: [
@@ -128,9 +123,12 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                         child: Column(
                           children: [
                             Padding(
-                              padding: const EdgeInsets.symmetric(vertical: 8.0),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8.0,
+                              ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     "All Review Requests",
@@ -151,54 +149,82 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                                   CommonList<ReviewRequest>(
                                     currentPage: state.currentPage,
                                     users: state.requests,
+                                    // onUserTap: (id) {
+                                    //   Get.toNamed(
+                                    //     '/jeevandiview',
+                                    //     arguments: id,
+                                    //   );
+                                    // },
                                     onUserTap: (id) {
-                                      // Handle user tap - show details
-                                      Get.toNamed('/jeevandiview', arguments: id);
+                                      Get.toNamed(
+                                        '/jeevandiview',
+                                        arguments: {
+                                          'jeevanadiId': id,
+                                          'isFromRequest': true,
+                                        },
+                                      );
                                     },
                                     screenType: "REVIEW_REQUEST",
                                     onDelete: (id) {
                                       _showRejectDialog(id);
                                     },
                                     onUpdate: (id) {
-                                      Get.toNamed('/jeevandiview', arguments: id);
+                                      Get.toNamed(
+                                        '/jeevandiview',
+                                        arguments: id,
+                                      );
                                     },
-                                    onApprove: (id) { // Add this line
+                                    onApprove: (id) {
+                                      // Add this line
                                       _showApproveDialog(id);
                                     },
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 50),
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 50,
+                                    ),
                                     child: Row(
                                       mainAxisAlignment: MainAxisAlignment.end,
                                       children: [
                                         IconButton(
                                           onPressed: () {
                                             if (state.currentPage > 0) {
-                                              context.read<ReviewRequestBloc>().add(
-                                                FetchReviewRequestsEvent(
-                                                  page: state.currentPage - 1,
-                                                  size: 10,
-                                                ),
-                                              );
+                                              context
+                                                  .read<ReviewRequestBloc>()
+                                                  .add(
+                                                    FetchReviewRequestsEvent(
+                                                      page:
+                                                          state.currentPage - 1,
+                                                      size: 10,
+                                                    ),
+                                                  );
                                             }
                                           },
-                                          icon: const Icon(Icons.skip_previous_outlined),
+                                          icon: const Icon(
+                                            Icons.skip_previous_outlined,
+                                          ),
                                         ),
                                         Text(
                                           "${state.currentPage + 1}/${state.totalPages}",
                                         ),
                                         IconButton(
                                           onPressed: () {
-                                            if (state.currentPage < state.totalPages - 1) {
-                                              context.read<ReviewRequestBloc>().add(
-                                                FetchReviewRequestsEvent(
-                                                  page: state.currentPage + 1,
-                                                  size: 10,
-                                                ),
-                                              );
+                                            if (state.currentPage <
+                                                state.totalPages - 1) {
+                                              context
+                                                  .read<ReviewRequestBloc>()
+                                                  .add(
+                                                    FetchReviewRequestsEvent(
+                                                      page:
+                                                          state.currentPage + 1,
+                                                      size: 10,
+                                                    ),
+                                                  );
                                             }
                                           },
-                                          icon: const Icon(Icons.skip_next_outlined),
+                                          icon: const Icon(
+                                            Icons.skip_next_outlined,
+                                          ),
                                         ),
                                         const SizedBox(height: 16),
                                       ],
@@ -212,7 +238,7 @@ class _ReviewRequestsState extends State<ReviewRequests> {
                       ),
                     ],
                   );
-                
+
                 default:
                   return const ScreenLoader();
               }

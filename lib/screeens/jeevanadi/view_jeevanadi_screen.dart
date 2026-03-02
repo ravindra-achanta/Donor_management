@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
@@ -13,23 +11,62 @@ import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class ViewJeevanadiScreen extends StatelessWidget {
-  final String userId;
+  final String? userId;
+  final String? jeevanadiId;
+  final bool isFromRequest;
 
-  const ViewJeevanadiScreen({
-    super.key,
-    required this.userId,
-  });
+const ViewJeevanadiScreen({
+  super.key,
+  this.userId,
+  this.jeevanadiId,
+  this.isFromRequest = false,
+}) : assert(
+  userId != null || jeevanadiId != null,
+  'Either userId or jeevanadiId must be provided',
+);
+
+ factory ViewJeevanadiScreen.fromArguments(dynamic args) {
+  if (args is Map) {
+    return ViewJeevanadiScreen(
+      jeevanadiId: args['jeevanadiId'],      // For request view
+      isFromRequest: args['isFromRequest'] ?? false,
+    );
+  } else {
+    return ViewJeevanadiScreen(
+      userId: args as String?,                 // For normal view
+      isFromRequest: false,
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
-    context.read<JeevanaadiBloc>().add(FetchJeevanaadiProfileFullEvent(userId));
+    // context.read<JeevanaadiBloc>().add(FetchJeevanaadiProfileFullEvent(userId));
+    debugPrint('ViewJeevanadiScreen.build: isFromRequest=$isFromRequest');
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (isFromRequest) {
+        debugPrint(
+          'dispatching FetchJeevanaadiProfileFromRequestEvent($jeevanadiId)',
+        );
+        context.read<JeevanaadiBloc>().add(
+          FetchJeevanaadiProfileFromRequestEvent(jeevanadiId ?? ''),
+        );
+      } else {
+        context.read<JeevanaadiBloc>().add(
+          FetchJeevanaadiProfileFullEvent(userId!),
+        );
+      }
+    });
 
     return Layout(
       child: BlocBuilder<JeevanaadiBloc, JeevanaadiState>(
         buildWhen: (previous, current) {
-          return previous.jeevanaadiProfileFull != current.jeevanaadiProfileFull ||
+          return previous.jeevanaadiProfileFull !=
+                  current.jeevanaadiProfileFull ||
               previous.profileLoading != current.profileLoading ||
-              previous.profileErrorMsg != current.profileErrorMsg;
+              previous.profileErrorMsg != current.profileErrorMsg ||
+              previous.isFromRequest != current.isFromRequest ||
+              previous.requestStatus != current.requestStatus;
         },
         builder: (context, state) {
           if (state.profileLoading == true) {
@@ -71,8 +108,8 @@ class ViewJeevanadiScreen extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         context.read<JeevanaadiBloc>().add(
-                              FetchJeevanaadiProfileFullEvent(userId),
-                            );
+                          FetchJeevanaadiProfileFullEvent(userId ?? ''),
+                        );
                       },
                       child: const Text('Retry'),
                     ),
@@ -83,7 +120,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
           }
 
           final profileFull = state.jeevanaadiProfileFull;
-          
+
           if (profileFull == null) {
             return const SizedBox.shrink();
           }
@@ -94,7 +131,11 @@ class ViewJeevanadiScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // ---------- HEADER ROW ----------
-                _buildHeaderRow(context, profileFull),
+                // _buildHeaderRow(context, profileFull),
+                if (state.isFromRequest)
+                  _buildRequestHeaderRow(context, profileFull, state)
+                else
+                  _buildNormalHeaderRow(context, profileFull),
 
                 const SizedBox(height: 20),
 
@@ -114,9 +155,11 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // ---------- SPECIAL OCCASIONS TABLE ----------
-                _buildOccasionsTable(profileFull.occupationDetails != null 
-                  ? [profileFull.occupationDetails!] 
-                  : []),
+                _buildOccasionsTable(
+                  profileFull.occupationDetails != null
+                      ? [profileFull.occupationDetails!]
+                      : [],
+                ),
 
                 const SizedBox(height: 20),
 
@@ -137,6 +180,9 @@ class ViewJeevanadiScreen extends StatelessWidget {
                   onUpdate: (user) {},
                   screenType: "DONATION",
                 ),
+
+                if (state.isFromRequest && state.requestStatus == 'PENDING')
+                  _buildApprovalButtons(context, state),
               ],
             ),
           );
@@ -145,114 +191,116 @@ class ViewJeevanadiScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderRow(
-  BuildContext context,
-  JeevanaadiFullProfile profileFull,
-) {
-  final basicDetails = profileFull.basicDetails;
-  final profileDetails = profileFull.profileDetails;
-  final demoGraphic = profileFull.jeevanaadiDemoGraphicDetails; // Add this
+  Widget _buildNormalHeaderRow(
+    BuildContext context,
+    JeevanaadiFullProfile profileFull,
+  ) {
+    final basicDetails = profileFull.basicDetails;
+    final profileDetails = profileFull.profileDetails;
+    final demoGraphic = profileFull.jeevanaadiDemoGraphicDetails; // Add this
 
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.grey.withOpacity(0.1),
-          blurRadius: 4,
-          offset: const Offset(0, 1),
-        ),
-      ],
-      border: Border.all(color: Colors.grey.shade200),
-    ),
-    child: Row(
-      children: [
-        Row(
-          children: [
-            IconButton(
-              icon: const Icon(Icons.arrow_back, size: 22),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              onPressed: () {
-                context.read<JeevanaadiBloc>().add(CloseProfileView());
-                Navigator.pop(context);
-              },
-            ),
-            const SizedBox(width: 6),
-            const Text(
-              "PROFILE VIEW",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-          ],
-        ),
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.arrow_back, size: 22),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                onPressed: () {
+                  context.read<JeevanaadiBloc>().add(CloseProfileView());
+                  Navigator.pop(context);
+                },
+              ),
+              const SizedBox(width: 6),
+              const Text(
+                "PROFILE VIEW",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
 
-        Expanded(
-          child: Center(
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Text(
-                  "Profile:",
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
-                ),
-                const SizedBox(width: 8),
-                SizedBox(
-                  width: 160,
-                  height: 12,
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(6),
-                    child: LinearProgressIndicator(
-                      value: (demoGraphic.profileCompletionPercentage) / 100, // Use demoGraphic
-                      backgroundColor: Colors.grey[300],
-                      valueColor: const AlwaysStoppedAnimation<Color>(
-                        Colors.brown,
+          Expanded(
+            child: Center(
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    "Profile:",
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  ),
+                  const SizedBox(width: 8),
+                  SizedBox(
+                    width: 160,
+                    height: 12,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(6),
+                      child: LinearProgressIndicator(
+                        value:
+                            (demoGraphic.profileCompletionPercentage) /
+                            100, // Use demoGraphic
+                        backgroundColor: Colors.grey[300],
+                        valueColor: const AlwaysStoppedAnimation<Color>(
+                          Colors.brown,
+                        ),
                       ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  "${demoGraphic.profileCompletionPercentage.toStringAsFixed(1)}%", 
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                  const SizedBox(width: 8),
+                  Text(
+                    "${demoGraphic.profileCompletionPercentage.toStringAsFixed(1)}%",
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          ElevatedButton.icon(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => EditJeevanadiScreen(
+                    //profile: profileFull,
+                    userId: userId ?? '',
                   ),
                 ),
-              ],
+              );
+            },
+            icon: const Icon(Icons.edit, size: 16),
+            label: const Text("Edit"),
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: Colors.brown,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
           ),
-        ),
-
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => EditJeevanadiScreen(
-          //profile: profileFull, 
-         userId: userId,
-        ),
+        ],
       ),
     );
-          },
-          icon: const Icon(Icons.edit, size: 16),
-          label: const Text("Edit"),
-          style: ElevatedButton.styleFrom(
-            elevation: 0,
-            backgroundColor: Colors.brown,
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
-}
+  }
 
   Widget _buildJeevanadiContactContainer(JeevanaadiFullProfile profileFull) {
     final basicDetails = profileFull.basicDetails;
@@ -325,12 +373,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildFieldItem(
-                      "Email",
-                      basicDetails.email,
-                    ),
-                  ),
+                  Expanded(child: _buildFieldItem("Email", basicDetails.email)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: _buildFieldItem(
@@ -346,10 +389,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: _buildFieldItem(
-                      "Role",
-                      profileDetails.userType,
-                    ),
+                    child: _buildFieldItem("Role", profileDetails.userType),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -359,7 +399,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(child: Container()), 
+                  Expanded(child: Container()),
                 ],
               ),
             ],
@@ -850,5 +890,214 @@ class ViewJeevanadiScreen extends StatelessWidget {
         email: 'john.doe@example.com',
       ),
     ];
+  }
+
+  Widget _buildRequestHeaderRow(
+    BuildContext context,
+    JeevanaadiFullProfile profileFull,
+    JeevanaadiState state,
+  ) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 1),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          IconButton(
+            icon: const Icon(Icons.arrow_back, size: 22),
+            onPressed: () {
+              context.read<JeevanaadiBloc>().add(CloseProfileView());
+              Navigator.pop(context);
+            },
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  "REQUEST VIEW",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 4),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
+                      ),
+                      decoration: BoxDecoration(
+                        color: _getRequestStatusColor(
+                          state.requestStatus,
+                        ), // UNCOMMENT THIS
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Text(
+                        state.requestStatus?.toUpperCase() ?? 'PENDING',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      "Jeevanadi ID: ${profileFull.basicDetails.jeevanadiNo}",
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildApprovalButtons(BuildContext context, JeevanaadiState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(top: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Request Action",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.brown,
+            ),
+          ),
+          const SizedBox(height: 16),
+          if (state.isProcessingRequest)
+            const Center(child: CircularProgressIndicator())
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      _showApprovalDialog(context, state, isApprove: true);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('APPROVE'),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () {
+                      //  _showApprovalDialog(context, state, isApprove: false);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('REJECT'),
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Color _getRequestStatusColor(String? status) {
+    switch (status?.toUpperCase()) {
+      case 'APPROVED':
+        return Colors.green;
+      case 'REJECTED':
+        return Colors.red;
+      case 'PENDING':
+        return Colors.orange;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showApprovalDialog(
+    BuildContext context,
+    JeevanaadiState state, {
+    required bool isApprove,
+  }) {
+    final TextEditingController remarksController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(isApprove ? 'Approve Request' : 'Reject Request'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Are you sure you want to ${isApprove ? 'approve' : 'reject'} this request?',
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: remarksController,
+              decoration: const InputDecoration(
+                labelText: 'Remarks (Optional)',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('CANCEL'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // TODO: Add ApproveRejectRequestEvent to your bloc
+              // context.read<JeevanaadiBloc>().add(
+              //   ApproveRejectRequestEvent(
+              //     jeevanadiId: jeevanadiId!,
+              //     isApprove: isApprove,
+              //     remarks: remarksController.text,
+              //   ),
+              // );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: isApprove ? Colors.green : Colors.red,
+            ),
+            child: Text(isApprove ? 'APPROVE' : 'REJECT'),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -47,6 +47,10 @@ final bool? isUpdateLoading;
   final int referredByCurrentPage;
   final int referredByTotalPages;
   final List<String> selectedAssignedIds;
+  final String? requestId;
+  final String? requestStatus; 
+  final bool isFromRequest;
+  final bool isProcessingRequest;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -85,6 +89,10 @@ final bool? isUpdateLoading;
     this.referredByCurrentPage = 0,
     this.referredByTotalPages = 0,
     this.selectedAssignedIds = const [],
+      this.requestId,
+    this.requestStatus,
+    this.isFromRequest = false,
+    this.isProcessingRequest = false,
 
 
     
@@ -127,7 +135,12 @@ final bool? isUpdateLoading;
     String? referredByError,
     int? referredByCurrentPage,
     int? referredByTotalPages,
-     List<String>? selectedAssignedIds,
+    List<String>? selectedAssignedIds,
+      String? requestId,
+    String? requestStatus,
+    bool? isFromRequest,
+    bool? isProcessingRequest,
+     
 
 
 
@@ -173,6 +186,10 @@ final bool? isUpdateLoading;
       referredByCurrentPage: referredByCurrentPage ?? this.referredByCurrentPage,
       referredByTotalPages: referredByTotalPages ?? this.referredByTotalPages,
       selectedAssignedIds: selectedAssignedIds ?? this.selectedAssignedIds,
+          requestId: requestId ?? this.requestId,
+      requestStatus: requestStatus ?? this.requestStatus,
+      isFromRequest: isFromRequest ?? this.isFromRequest,
+      isProcessingRequest: isProcessingRequest ?? this.isProcessingRequest,
 
     );
   }
@@ -215,6 +232,10 @@ final bool? isUpdateLoading;
     referredByCurrentPage,
     referredByTotalPages,
     selectedAssignedIds,
+     requestId,
+    requestStatus,
+    isFromRequest,
+    isProcessingRequest,
 
 
   ];

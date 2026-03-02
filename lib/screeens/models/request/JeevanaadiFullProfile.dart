@@ -15,15 +15,41 @@ class JeevanaadiFullProfile {
 
   factory JeevanaadiFullProfile.fromJson(Map<String, dynamic> json) {
     return JeevanaadiFullProfile(
-      basicDetails: BasicDetails.fromJson(json['basicDetails'] ?? {}),
-      profileDetails: ProfileDetails.fromJson(json['profileDetails'] ?? {}),
+      basicDetails: BasicDetails.fromJson(
+        (() {
+          final bd = json['basicDetails'];
+          if (bd is Map<String, dynamic>) return bd;
+          if (bd is List && bd.isNotEmpty && bd.first is Map<String, dynamic>) {
+            return bd.first as Map<String, dynamic>;
+          }
+          return <String, dynamic>{};
+        })(),
+      ),
+      profileDetails: ProfileDetails.fromJson(
+        (() {
+          final pd = json['profileDetails'];
+          if (pd is Map<String, dynamic>) return pd;
+          if (pd is List && pd.isNotEmpty && pd.first is Map<String, dynamic>) {
+            return pd.first as Map<String, dynamic>;
+          }
+          return <String, dynamic>{};
+        })(),
+      ),
       relationDetails: (json['relationDetails'] as List<dynamic>?)
               ?.map((e) => RelationDetails.fromJson(e))
               .toList() ??
           [],
-      occupationDetails: json['occupationDetails'] != null
-          ? OccupationDetails.fromJson(json['occupationDetails'])
-          : null,
+      occupationDetails: () {
+        final occ = json['occupationDetails'];
+        if (occ == null) return null;
+        if (occ is Map<String, dynamic>) {
+          return OccupationDetails.fromJson(occ);
+        }
+        if (occ is List && occ.isNotEmpty && occ.first is Map<String, dynamic>) {
+          return OccupationDetails.fromJson(occ.first as Map<String, dynamic>);
+        }
+        return null;
+      }(),
       jeevanaadiDemoGraphicDetails:
           JeevanaadiDemoGraphicDetails.fromJson(json['jeevanaadiDemoGraphicDetails'] ?? {}),
     );

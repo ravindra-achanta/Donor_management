@@ -36,8 +36,9 @@ class ApiConstants {
   static const String jeevanadi_deallocate_assignees =
       "${JEEVANADI_URI}/deallocate/assignees/karyakartha";
 
-static String getJeevanaadiUpdate =
-    "$VIKAS/jeevanaadi/";
+static String getJeevanaadiUpdate = "$VIKAS/jeevanaadi/";
+static String getrequestview = "$VIKAS/jeevanaadi";
+
  
     
   //notices
