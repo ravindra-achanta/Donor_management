@@ -526,12 +526,12 @@ Future<void> _onFetchJeevanaadiProfileFromRequest(
     profileLoading: true,
     profileErrorMsg: null,
     isFromRequest: true,
-    requestId: event.jeevanadiid,
+    requestId: event.jeevanadiId,
     requestStatus: 'PENDING',
   ));
 
   try {
-    final response = await JeevanaadiRepo.getJeevanaadiProfileFromRequest(event.jeevanadiid);
+    final response = await JeevanaadiRepo.getJeevanaadiProfileFromRequest(event.jeevanadiId);
 
     if (response.isSuccess) {
       emit(state.copyWith(

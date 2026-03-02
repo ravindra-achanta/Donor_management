@@ -38,7 +38,8 @@ class ApiConstants {
       "${JEEVANADI_URI}/deallocate/assignees/karyakartha";
 
 static String getJeevanaadiUpdate = "$VIKAS/jeevanaadi/";
-static String getrequestview = "$VIKAS/jeevanaadi";
+static String getrequestview = "$VIKAS/jeevanaadi/staff/requests";
+static String getrequestviewbyid = "$VIKAS/jeevanaadi/staff/requests";
 
  
     
@@ -46,5 +47,5 @@ static String getrequestview = "$VIKAS/jeevanaadi";
   static const String NOTICES_BASE = "${IDM_URI}/notices";
 
   //review 
-  static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";
+  //static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";
 }
