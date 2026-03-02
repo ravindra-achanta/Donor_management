@@ -14,6 +14,9 @@ enum AuthStatus {
   userCreated,  
   fetchingUsers, 
   usersFetched,     
+  changingPassword,
+  passwordChanged,
+  passwordChangeRequired,
 }
 
 class AuthState extends Equatable {
@@ -102,6 +105,9 @@ class AuthState extends Equatable {
   bool get isUserCreated => status == AuthStatus.userCreated; 
   bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
   bool get areUsersFetched => status == AuthStatus.usersFetched;
+  bool get isChangingPassword => status == AuthStatus.changingPassword;
+  bool get isPasswordChanged => status == AuthStatus.passwordChanged;
+  bool get isPasswordChangeRequired => status == AuthStatus.passwordChangeRequired;
   // bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
   // bool get areUsersFetched => status == AuthStatus.usersFetched;
 

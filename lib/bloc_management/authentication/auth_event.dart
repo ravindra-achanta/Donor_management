@@ -48,4 +48,17 @@ class CreateUserEvent extends AuthEvent {
 class FetchRolesEvent extends AuthEvent {}
 
 
+class ChangePasswordEvent extends AuthEvent {
+  final String newPassword;
+  final String mobileNumber;
+
+  ChangePasswordEvent({
+    required this.newPassword,
+    required this.mobileNumber,
+  });
+
+  @override
+  List<Object?> get props => [newPassword, mobileNumber];
+}
+
 class CheckAuthStatusEvent extends AuthEvent {}
