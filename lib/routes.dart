@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
+import 'package:vikas_app/screeens/authentication/password_change_screen.dart';
 import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
@@ -62,6 +63,17 @@ getPageRoute() {
     //   middlewares: [AuthMiddleware()],
     // ),
     GetPage(name: '/login', page: () => const LoginPage()),
+    GetPage(
+      name: '/password-change',
+      page: () {
+        final args = Get.arguments as Map<String, dynamic>? ?? {};
+        return PasswordChangeScreen(
+          mobileNumber: args['mobileNumber'] ?? '',
+          userId: args['userId'] ?? '',
+          token: args['token'] ?? '',
+        );
+      },
+    ),
     GetPage(name: '/dashboard', page: () => const Dashboard()),
 
     GetPage(
