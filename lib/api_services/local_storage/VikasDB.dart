@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-class LocalStorage{
+class Vikasdb{
   static SharedPreferences? sharedPreferences;
   static Future init() async {
     sharedPreferences = await SharedPreferences.getInstance();

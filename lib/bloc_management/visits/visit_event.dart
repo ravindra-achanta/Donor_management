@@ -1,0 +1,50 @@
+// lib/bloc_management/visits/visit_event.dart
+
+import 'package:equatable/equatable.dart';
+import 'package:vikas_app/screeens/models/request/visit_model.dart';
+
+abstract class VisitEvent extends Equatable {
+  const VisitEvent();
+
+  @override
+  List<Object?> get props => [];
+}
+
+class LoadVisits extends VisitEvent {
+  final int page;
+  const LoadVisits({this.page = 0});
+  @override
+  List<Object?> get props => [page];
+}
+
+class LoadVisitDetails extends VisitEvent {
+  final String id;
+  const LoadVisitDetails(this.id);
+  @override
+  List<Object?> get props => [id];
+}
+
+class AddVisit extends VisitEvent {
+  final VisitModel visit;
+  const AddVisit(this.visit);
+  @override
+  List<Object?> get props => [visit];
+}
+
+class UpdateVisit extends VisitEvent {
+  final VisitModel visit;
+  const UpdateVisit(this.visit);
+  @override
+  List<Object?> get props => [visit];
+}
+
+class DeleteVisit extends VisitEvent {
+  final String id;
+  const DeleteVisit(this.id);
+  @override
+  List<Object?> get props => [id];
+}
+
+class CloseVisitProfileView extends VisitEvent {
+  const CloseVisitProfileView();
+}

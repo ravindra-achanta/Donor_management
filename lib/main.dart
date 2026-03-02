@@ -4,7 +4,15 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
+import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
+import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
+import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
+import 'package:vikas_app/bloc_management/users/user_bloc.dart';
+import 'package:vikas_app/bloc_management/visits/visit_bloc.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:vikas_app/routes.dart';
@@ -18,7 +26,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   setPathUrlStrategy();
 
-  await LocalStorage.init();
+  await Vikasdb.init();
   AppStyle.init();
   await ThemeCustomizer.init();
 
@@ -30,18 +38,25 @@ Future<void> main() async {
       ],
       child: MultiBlocProvider(
         providers: [
-          // 🔹 Auth Bloc
+          // 🔹 Karyakartha Bloc
           BlocProvider<KaryakarthaBloc>(create: (_) => KaryakarthaBloc()),
 
-          // 🔹 User Bloc
-          // BlocProvider<UserBloc>(
-          //   create: (_) => UserBloc(),
-          // ),
+          // 🔹 Jeevanadi Bloc
+          BlocProvider<JeevanaadiBloc>(create: (_) => JeevanaadiBloc()),
 
-          // // 🔹 Dashboard Bloc
-          // BlocProvider<DashboardBloc>(
-          //   create: (_) => DashboardBloc(),
-          // ),
+          // 🔹 profile Bloc
+          BlocProvider<ProfileBloc>(create: (_) => ProfileBloc()),
+          BlocProvider<DharmasetuBloc>(create: (_) => DharmasetuBloc()),
+
+
+          BlocProvider<VisitBloc>(create: (_) => VisitBloc()),
+                    BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
+
+
+          BlocProvider<UserBloc>(create: (_) => UserBloc()),
+          BlocProvider<AuthBloc>(
+            create: (_) => AuthBloc(authRepository: AuthRepository()),
+          ),
         ],
         child: const MyApp(),
       ),

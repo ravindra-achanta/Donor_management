@@ -1,0 +1,1129 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
+import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
+import 'package:vikas_app/screeens/common/DropdownService.dart';
+import 'package:vikas_app/screeens/common/referred_by_dropdown.dart';
+import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
+import 'package:vikas_app/views/layouts/layout.dart';
+import 'package:vikas_app/screeens/models/response/jeevanadi_member.dart';
+
+class EditJeevanadiScreen extends StatefulWidget {
+  final String userId;
+
+  const EditJeevanadiScreen({super.key, required this.userId});
+
+  @override
+  State<EditJeevanadiScreen> createState() => _EditJeevanadiScreenState();
+}
+
+class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _dropdownService = DropdownService();
+  bool _isUpdateInProgress = false;
+  bool _isActive = true;
+  String _status = 'ACTIVE';
+
+  final TextEditingController _referredBySearchController =
+      TextEditingController();
+  Map<String, dynamic>? _selectedReferredBy;
+
+  // Controllers
+  late final Map<String, TextEditingController> _controllers = {
+    'name': TextEditingController(),
+    'dob': TextEditingController(),
+    'profession': TextEditingController(),
+    'anniversary': TextEditingController(),
+    'gothram': TextEditingController(),
+    'pan': TextEditingController(),
+    'referredBy': TextEditingController(),
+    'jeevanadiId': TextEditingController(),
+    'doj': TextEditingController(),
+    'mobile': TextEditingController(),
+    'email': TextEditingController(),
+    'whatsapp': TextEditingController(),
+    'address': TextEditingController(),
+  };
+
+  // Dropdown values
+  late final Map<String, dynamic> _dropdownValues = {
+    'gender': 'Male',
+    'maritalStatus': 'Single',
+    'nakshatram': '',
+    'rashi': 'Mesha',
+    'paadam': 'Paadam 1',
+    'communication': 'WhatsApp',
+    'role': '',
+  };
+
+  bool _sameAsMobile = false;
+  List<Map<String, dynamic>> _relationships = [];
+  List<Map<String, dynamic>> _occasions = [];
+
+  // Getters for controllers
+  TextEditingController get _nameCtrl => _controllers['name']!;
+  TextEditingController get _dobCtrl => _controllers['dob']!;
+  TextEditingController get _professionCtrl => _controllers['profession']!;
+  TextEditingController get _anniversaryCtrl => _controllers['anniversary']!;
+  TextEditingController get _gothramCtrl => _controllers['gothram']!;
+  TextEditingController get _panCtrl => _controllers['pan']!;
+  TextEditingController get _referredByCtrl => _controllers['referredBy']!;
+  TextEditingController get _jeevanadiIdCtrl => _controllers['jeevanadiId']!;
+  TextEditingController get _dojCtrl => _controllers['doj']!;
+  TextEditingController get _mobileCtrl => _controllers['mobile']!;
+  TextEditingController get _emailCtrl => _controllers['email']!;
+  TextEditingController get _whatsappCtrl => _controllers['whatsapp']!;
+  TextEditingController get _addressCtrl => _controllers['address']!;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfileData();
+  }
+
+  void _fetchProfileData() {
+    context.read<JeevanaadiBloc>().add(
+      FetchJeevanaadiProfileFullEvent(widget.userId),
+    );
+  }
+
+  // void _fetchMembersForSuggestions() {
+  //   context.read<JeevanaadiBloc>().add(FetchJeevanaadisEvent(0));
+  // }
+
+  void _populateControllers(JeevanaadiFullProfile profile) {
+    try {
+      _nameCtrl.text = profile.profileDetails.fullName;
+      _dobCtrl.text = profile.profileDetails.dateOfBirth ?? '';
+
+      _dropdownValues
+        ..['gender'] = _dropdownService.getGenderValueFromCode(
+          profile.profileDetails.gender,
+        )
+        ..['maritalStatus'] = _dropdownService.getMaritalStatusValueFromCode(
+          profile.profileDetails.maritalStatus,
+        )
+        ..['nakshatram'] = _dropdownService.getNakshatraValue(
+          profile.profileDetails.nakshatram,
+        )
+        ..['rashi'] = _dropdownService.getRashiNameFromId(
+          profile.profileDetails.rashi,
+        )
+        ..['paadam'] = _dropdownService.getPaadamValueFromNumber(
+          profile.profileDetails.paadam,
+        )
+        ..['communication'] = _dropdownService
+            .getCommunicationModeValueFromCode(
+              profile.profileDetails.communicationPref,
+            );
+
+      _professionCtrl.text = profile.profileDetails.profession ?? '';
+      _anniversaryCtrl.text = profile.profileDetails.annivDate ?? '';
+      _gothramCtrl.text = profile.profileDetails.gothram ?? '';
+      _panCtrl.text = profile.profileDetails.panNumber ?? '';
+      _dropdownValues['role'] = profile.profileDetails.userType;
+
+      _referredByCtrl.text = profile.profileDetails.referredByCustom ?? '';
+      if (profile.profileDetails.referredByCustom?.isNotEmpty == true) {
+        bool isManual = profile.profileDetails.referredById == 0;
+
+        _selectedReferredBy = {
+          'id': profile.profileDetails.referredById?.toString() ?? '0',
+          'userName': profile.profileDetails.referredByCustom,
+          'jeevanaadiNo': '',
+          'isManual': isManual,
+        };
+        _referredBySearchController.text =
+            profile.profileDetails.referredByCustom ?? '';
+      }
+
+      _jeevanadiIdCtrl.text = profile.basicDetails.id.toString();
+      _dojCtrl.text = profile.profileDetails.joinedDate ?? '';
+
+      _mobileCtrl.text = profile.profileDetails.phoneNumber;
+      _emailCtrl.text = profile.basicDetails.email;
+      _whatsappCtrl.text = profile.profileDetails.whatsappNumber;
+      _sameAsMobile = _whatsappCtrl.text == _mobileCtrl.text;
+
+      _addressCtrl.text = profile.profileDetails.address ?? '';
+
+      _relationships = profile.relationDetails
+          .map(
+            (rel) => {
+              "id": rel.id?.toString() ?? "",
+              "relation": rel.relation ?? "",
+              "name": rel.name ?? "",
+              "mobile": rel.mobilenum ?? '',
+              "dob": rel.dob ?? '',
+              "nakshatram": _dropdownService.getNakshatraValue(
+                rel.nakshatramRel,
+              ),
+              "rashi": _dropdownService.getRashiNameFromId(rel.rashiRel),
+              "paadam": _dropdownService.getPaadamValueFromNumber(
+                rel.paadamRel,
+              ),
+            },
+          )
+          .toList();
+
+      _occasions = profile.occupationDetails != null
+          ? [
+              {
+                "id": profile.occupationDetails!.id?.toString() ?? "",
+                "name": profile.occupationDetails!.occName ?? "",
+                "date": profile.occupationDetails!.occDate ?? "",
+              },
+            ]
+          : [];
+      _isActive = profile.basicDetails.isActive;
+      _status = _isActive ? 'ACTIVE' : 'INACTIVE';
+
+      print('Data loaded successfully');
+    } catch (e) {
+      print('Error loading data: $e');
+    }
+  }
+
+  Future<void> _pickDate(TextEditingController controller) async {
+    final date = await showDatePicker(
+      context: context,
+      firstDate: DateTime(1900),
+      lastDate: DateTime(2100),
+      initialDate: DateTime.now(),
+    );
+    if (date != null) {
+      controller.text = DateFormat("yyyy-MM-dd").format(date);
+    }
+  }
+
+  void _submitForm() {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isUpdateInProgress = true);
+
+    final requestData = {
+      "fullName": _nameCtrl.text,
+      "dob": _dobCtrl.text,
+      "gender": _dropdownService.getGenderCodeFromValue(
+        _dropdownValues['gender'],
+      ),
+      "maritalStatus": _dropdownService.getMaritalStatusCodeFromValue(
+        _dropdownValues['maritalStatus'],
+      ),
+      "profession": _professionCtrl.text,
+      "anvDate": _anniversaryCtrl.text,
+      "joinDate": _dojCtrl.text,
+      "gotram": _gothramCtrl.text,
+      "nakshatram": _dropdownValues['nakshatram'],
+      "rashi": _dropdownService.getRashiIdFromName(_dropdownValues['rashi']),
+      "padam": _dropdownService.getPaadamNumberFromValue(
+        _dropdownValues['paadam'],
+      ),
+      "communicationpreference": _dropdownService
+          .getCommunicationModeCodeFromValue(_dropdownValues['communication']),
+      "panNumber": _panCtrl.text,
+
+      "referredBy": _selectedReferredBy == null
+          ? 0
+          : _selectedReferredBy!['isManual'] == true
+          ? 0
+          : int.tryParse(_selectedReferredBy!['id']?.toString() ?? '0') ?? 0,
+      "referredByCustome": _selectedReferredBy == null
+          ? ''
+          : _selectedReferredBy!['userName'] ?? '',
+
+      "mobileNumber": _mobileCtrl.text,
+      "email": _emailCtrl.text,
+      "whatsAppNumber": _whatsappCtrl.text,
+      "address": _addressCtrl.text,
+      "referredByCustome": _referredByCtrl.text,
+
+      "relations": _relationships
+          .where(
+            (rel) =>
+                rel["relation"]?.isNotEmpty == true &&
+                rel["name"]?.isNotEmpty == true,
+          )
+          .map(
+            (rel) => {
+              // "id": rel["id"] ?? "",
+              "id": (rel["id"] != null && rel["id"].toString().isNotEmpty)
+                  ? int.parse(rel["id"].toString())
+                  : null,
+              "relation": rel["relation"] ?? "",
+              "name": rel["name"] ?? "",
+              "mobileNumber": rel["mobile"] ?? "",
+              "dob": rel["dob"] ?? "",
+              "nakshatram": rel["nakshatram"] ?? "",
+              "rashi": _dropdownService.getRashiIdFromName(rel["rashi"] ?? ""),
+              "padam": _dropdownService.getPaadamNumberFromValue(
+                rel["paadam"] ?? "",
+              ),
+              "status": "ACTIVE",
+            },
+          )
+          .toList(),
+
+      "occassions": _occasions
+          .where((occ) => occ["name"]?.isNotEmpty == true)
+          .map(
+            (occ) => {
+              // "id": occ["id"] ?? "",
+              "id": (occ["id"] != null && occ["id"].toString().isNotEmpty)
+                  ? int.parse(occ["id"].toString())
+                  : null,
+              "occName": occ["name"] ?? "",
+              "occDate": occ["date"] ?? "",
+              "status": "ACTIVE",
+            },
+          )
+          .toList(),
+
+      // "status": "ACTIVE",
+      "status": _status,
+    };
+
+    print('📤 Updating profile: ${_jeevanadiIdCtrl.text}');
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) =>
+          const Center(child: CircularProgressIndicator(color: Colors.brown)),
+    );
+
+    context.read<JeevanaadiBloc>().add(
+      UpdateJeevanaadiProfileEvent(
+        userid: _jeevanadiIdCtrl.text,
+        updateData: requestData,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    _referredBySearchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Layout(
+      child: BlocConsumer<JeevanaadiBloc, JeevanaadiState>(
+        listenWhen: (previous, current) =>
+            previous.profileLoading != current.profileLoading ||
+            previous.profileErrorMsg != current.profileErrorMsg ||
+            previous.jeevanaadiProfileFull != current.jeevanaadiProfileFull ||
+            previous.isUpdateLoading != current.isUpdateLoading ||
+            previous.updateSuccessMsg != current.updateSuccessMsg ||
+            previous.updateErrorMsg != current.updateErrorMsg,
+
+        listener: (context, state) {
+          if (!(state.profileLoading ?? false) &&
+              state.jeevanaadiProfileFull != null) {
+            _populateControllers(state.jeevanaadiProfileFull!);
+          }
+
+          if (!(state.isUpdateLoading ?? true) && _isUpdateInProgress) {
+            setState(() => _isUpdateInProgress = false);
+            Navigator.of(context).popUntil((route) => route.isFirst);
+
+            final message = state.updateSuccessMsg ?? state.updateErrorMsg;
+            if (message != null) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(message),
+                  backgroundColor: state.updateSuccessMsg != null
+                      ? Colors.green
+                      : Colors.red,
+                  duration: const Duration(seconds: 2),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            }
+
+            if (state.updateSuccessMsg != null) {
+              Future.delayed(const Duration(milliseconds: 500), () {
+                if (Navigator.canPop(context)) Navigator.pop(context, true);
+              });
+            }
+          }
+        },
+
+        builder: (context, state) {
+          if (state.profileLoading ?? false) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(color: Colors.brown),
+                  SizedBox(height: 16),
+                  Text('Loading profile data...'),
+                ],
+              ),
+            );
+          }
+
+          if (state.profileErrorMsg != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.error_outline, color: Colors.red, size: 60),
+                  const SizedBox(height: 16),
+                  Text('Error: ${state.profileErrorMsg}'),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: _fetchProfileData,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                    ),
+                    child: const Text('Retry'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          if (state.jeevanaadiProfileFull == null) {
+            return const Center(child: Text('No profile data available'));
+          }
+
+          return _buildForm(state.jeevanaadiProfileFull!);
+        },
+      ),
+    );
+  }
+
+  Widget _buildForm(JeevanaadiFullProfile profile) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(profile),
+            const SizedBox(height: 12),
+            _buildPersonalDetails(),
+            _buildJeevanadiInfo(),
+            _buildContactDetails(),
+            _buildAddressDetails(),
+            _buildRelationships(),
+            _buildOccasions(),
+            const SizedBox(height: 20),
+            _buildActionButtons(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader(JeevanaadiFullProfile profile) {
+    final displayPercentage =
+        profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage > 0
+        ? profile.jeevanaadiDemoGraphicDetails.profileCompletionPercentage
+        : profile.profileDetails.fillPercentage.toDouble();
+
+    return Row(
+      children: [
+        IconButton(
+          icon: const Icon(Icons.arrow_back, size: 22),
+          onPressed: () => Navigator.pop(context),
+        ),
+        const SizedBox(width: 4),
+        const Text(
+          "EDIT DETAILS",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+
+        const SizedBox(width: 66),
+
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          decoration: BoxDecoration(
+            color: _isActive ? Colors.green : Colors.red,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.white, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 2,
+                offset: const Offset(0, 1),
+              ),
+            ],
+          ),
+          child: InkWell(
+            onTap: () {
+              setState(() {
+                _isActive = !_isActive;
+                _status = _isActive ? 'ACTIVE' : 'INACTIVE';
+              });
+            },
+            borderRadius: BorderRadius.circular(16),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    _status,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 12,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  // Toggle icon
+                  Icon(
+                    _isActive ? Icons.toggle_on : Icons.toggle_off,
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 66),
+
+        // Profile percentage
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text(
+              "profile:",
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 150,
+              height: 12,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: displayPercentage / 100,
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.brown),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "${displayPercentage.toStringAsFixed(1)}%",
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonalDetails() {
+    return _buildSection(
+      title: 'Personal Details',
+      children: [
+        _twoFieldRow(
+          _textField("Full Name *", _nameCtrl),
+          _dateField("Date of Birth *", _dobCtrl),
+        ),
+        _twoFieldRow(
+          _dropdownField(
+            "Gender *",
+            'gender',
+            _dropdownService.getGenderValues(),
+          ),
+          _dropdownField(
+            "Marital Status",
+            'maritalStatus',
+            _dropdownService.getMaritalStatusValues(),
+          ),
+        ),
+        _twoFieldRow(
+          _textField("Profession", _professionCtrl),
+          _dateField("Anniversary Date", _anniversaryCtrl),
+        ),
+        _twoFieldRow(
+          _textField("Gothram", _gothramCtrl),
+          _dropdownField(
+            "Nakshatram",
+            'nakshatram',
+            _dropdownService.getAllNakshatras(),
+          ),
+        ),
+        _twoFieldRow(
+          _dropdownField("Rashi", 'rashi', _dropdownService.getRashiNames()),
+          _dropdownField(
+            "Paadam",
+            'paadam',
+            _dropdownService.getPaadamValues(),
+          ),
+        ),
+        _twoFieldRow(
+          _dropdownField(
+            "Communication Preference *",
+            'communication',
+            _dropdownService.getCommunicationModeValues(),
+          ),
+          _textField("PAN Number", _panCtrl),
+        ),
+        _twoFieldRow(
+          _dropdownField("Role & Permission *", 'role', [
+            "Donor",
+            "Admin",
+            "Member",
+            "Volunteer",
+          ]),
+          _buildReferredByField(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildReferredByField() {
+    return ReferredByDropdown(
+      controller: _referredBySearchController,
+      initialValue: _selectedReferredBy,
+      onSelected: (value) {
+        setState(() {
+          _selectedReferredBy = value;
+          _referredByCtrl.text = value?['userName'] ?? '';
+        });
+      },
+    );
+  }
+
+  Widget _buildJeevanadiInfo() {
+    return _buildSection(
+      title: 'Jeevanadi Info',
+      children: [
+        _twoFieldRow(
+          _textField("Jeevanadi Id", _jeevanadiIdCtrl),
+          _dateField("Date of Joining", _dojCtrl),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildContactDetails() {
+    return _buildSection(
+      title: 'Contact Details',
+      children: [
+        _twoFieldRow(
+          _textField("Mobile Number", _mobileCtrl),
+          _textField("Email *", _emailCtrl),
+        ),
+        Row(
+          children: [
+            Checkbox(
+              value: _sameAsMobile,
+              onChanged: (v) => setState(() {
+                _sameAsMobile = v ?? true;
+                if (_sameAsMobile) _whatsappCtrl.text = _mobileCtrl.text;
+              }),
+            ),
+            const Text("Same number for WhatsApp"),
+          ],
+        ),
+        if (!_sameAsMobile) _textField("WhatsApp Number", _whatsappCtrl),
+      ],
+    );
+  }
+
+  Widget _buildAddressDetails() {
+    return _buildSection(
+      title: 'Address Details',
+      children: [_bigAddressField("Address *", _addressCtrl)],
+    );
+  }
+
+  Widget _buildRelationships() {
+    return _buildSection(
+      title: 'Your Relationships',
+      showAddButton: true,
+      onAdd: () {
+        setState(() {
+          if (_relationships.isEmpty ||
+              _relationships.last["relation"]?.isNotEmpty == true ||
+              _relationships.last["name"]?.isNotEmpty == true) {
+            _relationships.add({
+              "relation": "",
+              "name": "",
+              "mobile": "",
+              "dob": "",
+              "nakshatram": "",
+              "rashi": "",
+              "paadam": "",
+            });
+          }
+        });
+      },
+      children: _relationships
+          .asMap()
+          .entries
+          .map((entry) => _buildRelationshipInline(entry.key, entry.value))
+          .toList(),
+    );
+  }
+
+  Widget _buildOccasions() {
+    return _buildSection(
+      title: 'Occasions Details',
+      showAddButton: true,
+      onAdd: () {
+        setState(() {
+          if (_occasions.isEmpty ||
+              _occasions.last["name"]?.isNotEmpty == true ||
+              _occasions.last["date"]?.isNotEmpty == true) {
+            _occasions.add({"name": "", "date": ""});
+          }
+        });
+      },
+      children: _occasions
+          .asMap()
+          .entries
+          .map((entry) => _buildOccasionInline(entry.key, entry.value))
+          .toList(),
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 45,
+                  child: OutlinedButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    style: OutlinedButton.styleFrom(
+                      side: BorderSide(color: Colors.grey[400]!),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: SizedBox(
+                  height: 45,
+                  child: ElevatedButton(
+                    onPressed: _submitForm,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.brown,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                    ),
+                    child: const Text(
+                      "Submit",
+                      style: TextStyle(fontSize: 14, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Helper widgets
+  Widget _buildSection({
+    required String title,
+    required List<Widget> children,
+    bool showAddButton = false,
+    VoidCallback? onAdd,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (showAddButton)
+                IconButton(
+                  icon: Icon(
+                    Icons.add_circle,
+                    color: Theme.of(context).primaryColor,
+                    size: 30,
+                  ),
+                  onPressed: onAdd,
+                ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...children,
+        ],
+      ),
+    );
+  }
+
+  Widget _twoFieldRow(Widget left, Widget right) => Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Row(
+      children: [
+        Expanded(child: left),
+        const SizedBox(width: 16),
+        Expanded(child: right),
+      ],
+    ),
+  );
+
+  Widget _textField(String label, TextEditingController controller) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextFormField(
+      controller: controller,
+      style: const TextStyle(fontSize: 14),
+      decoration: _inputDecoration(label),
+    ),
+  );
+
+  Widget _bigAddressField(String label, TextEditingController controller) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: TextFormField(
+          controller: controller,
+          style: const TextStyle(fontSize: 14),
+          maxLines: 4,
+          minLines: 3,
+          decoration: _inputDecoration(label).copyWith(
+            contentPadding: const EdgeInsets.symmetric(
+              vertical: 16,
+              horizontal: 12,
+            ),
+          ),
+        ),
+      );
+
+  Widget _dateField(String label, TextEditingController controller) => Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: TextFormField(
+      controller: controller,
+      readOnly: true,
+      onTap: () => _pickDate(controller),
+      decoration: _inputDecoration(
+        label,
+        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+      ),
+    ),
+  );
+
+  Widget _dropdownField(String label, String key, List<String> items) =>
+      Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: DropdownButtonFormField<String>(
+          value: items.contains(_dropdownValues[key])
+              ? _dropdownValues[key]
+              : null,
+          items: [
+            const DropdownMenuItem(
+              value: null,
+              child: Text("Select", style: TextStyle(color: Colors.grey)),
+            ),
+            ...items.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+          ],
+          onChanged: (v) => setState(() => _dropdownValues[key] = v ?? ''),
+          decoration: _inputDecoration(label),
+          icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+          style: const TextStyle(color: Colors.black, fontSize: 14),
+          dropdownColor: Colors.white,
+        ),
+      );
+
+  Widget _buildRelationshipInline(int index, Map<String, dynamic> rel) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (index > 0) const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _relationField(rel, index)),
+            const SizedBox(width: 12),
+            Expanded(child: _nameField(rel, index)),
+            const SizedBox(width: 12),
+            Expanded(child: _mobileField(rel, index)),
+            const SizedBox(width: 12),
+            Expanded(child: _relDobField(rel, index)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _relNakshatramField(rel, index)),
+            const SizedBox(width: 12),
+            Expanded(child: _relRashiField(rel, index)),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Row(
+                children: [
+                  Expanded(child: _relPaadamField(rel, index)),
+                  if (_relationships.length > 1)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 8.0),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.delete,
+                          color: Colors.red,
+                          size: 20,
+                        ),
+                        onPressed: () =>
+                            setState(() => _relationships.removeAt(index)),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        if (index < _relationships.length - 1)
+          const Divider(height: 24, color: Colors.grey),
+      ],
+    );
+  }
+
+  Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (index > 0) const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextFormField(
+                  initialValue: occ["name"],
+                  style: const TextStyle(fontSize: 14),
+                  decoration: _inputDecoration("Occasion Name"),
+                  onChanged: (v) => occ["name"] = v,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: TextFormField(
+                  controller: TextEditingController(text: occ["date"]),
+                  readOnly: true,
+                  onTap: () async {
+                    final date = await showDatePicker(
+                      context: context,
+                      firstDate: DateTime(1900),
+                      lastDate: DateTime(2100),
+                      initialDate: DateTime.now(),
+                    );
+                    if (date != null) {
+                      setState(
+                        () =>
+                            occ["date"] = DateFormat("yyyy-MM-dd").format(date),
+                      );
+                    }
+                  },
+                  decoration: _inputDecoration(
+                    "Occasion Date",
+                    suffixIcon: const Icon(
+                      Icons.calendar_today,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            if (_occasions.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(left: 8.0, bottom: 12),
+                child: IconButton(
+                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                  onPressed: () => setState(() => _occasions.removeAt(index)),
+                ),
+              ),
+          ],
+        ),
+        if (index < _occasions.length - 1)
+          const Divider(height: 16, color: Colors.grey),
+      ],
+    );
+  }
+
+  Widget _relationField(Map<String, dynamic> rel, int index) =>
+      _buildRelDropdown(
+        rel,
+        index,
+        "relation",
+        "Relation",
+        _dropdownService.getAllRelations(),
+      );
+
+  Widget _relNakshatramField(Map<String, dynamic> rel, int index) =>
+      _buildRelDropdown(
+        rel,
+        index,
+        "nakshatram",
+        "Nakshatram",
+        _dropdownService.getAllNakshatras(),
+      );
+
+  Widget _relRashiField(Map<String, dynamic> rel, int index) =>
+      _buildRelDropdown(
+        rel,
+        index,
+        "rashi",
+        "Rashi",
+        _dropdownService.getRashiNames(),
+      );
+
+  Widget _relPaadamField(Map<String, dynamic> rel, int index) =>
+      _buildRelDropdown(
+        rel,
+        index,
+        "paadam",
+        "Paadam",
+        _dropdownService.getPaadamValues(),
+      );
+
+  Widget _buildRelDropdown(
+    Map<String, dynamic> rel,
+    int index,
+    String key,
+    String label,
+    List<String> items,
+  ) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DropdownButtonFormField<String>(
+        value: items.contains(rel[key]) ? rel[key] : null,
+        items: [
+          DropdownMenuItem(
+            value: null,
+            child: Text(
+              "Select $label",
+              style: const TextStyle(color: Colors.grey),
+            ),
+          ),
+          ...items.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+        ],
+        onChanged: (v) => setState(() => rel[key] = v ?? ''),
+        decoration: _inputDecoration(label),
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+        style: const TextStyle(color: Colors.black, fontSize: 14),
+        dropdownColor: Colors.white,
+      ),
+    );
+  }
+
+  Widget _nameField(Map<String, dynamic> rel, int index) =>
+      _buildRelTextField(rel, "name", "Name");
+  Widget _mobileField(Map<String, dynamic> rel, int index) =>
+      _buildRelTextField(rel, "mobile", "Mobile Number", isPhone: true);
+
+  Widget _buildRelTextField(
+    Map<String, dynamic> rel,
+    String key,
+    String label, {
+    bool isPhone = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        initialValue: rel[key],
+        style: const TextStyle(fontSize: 14),
+        keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
+        decoration: _inputDecoration(label),
+        onChanged: (v) => rel[key] = v,
+      ),
+    );
+  }
+
+  Widget _relDobField(Map<String, dynamic> rel, int index) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: TextFormField(
+        controller: TextEditingController(text: rel["dob"]),
+        readOnly: true,
+        onTap: () async {
+          final date = await showDatePicker(
+            context: context,
+            firstDate: DateTime(1900),
+            lastDate: DateTime(2100),
+            initialDate: DateTime.now(),
+          );
+          if (date != null) {
+            setState(() => rel["dob"] = DateFormat("yyyy-MM-dd").format(date));
+          }
+        },
+        decoration: _inputDecoration(
+          "Date of Birth",
+          suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String label, {Widget? suffixIcon}) {
+    return InputDecoration(
+      labelText: label,
+      labelStyle: const TextStyle(color: Colors.grey),
+      filled: true,
+      fillColor: Colors.white,
+      suffixIcon: suffixIcon,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: const BorderSide(color: Colors.grey),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(6),
+        borderSide: BorderSide(color: Theme.of(context).primaryColor),
+      ),
+    );
+  }
+}

@@ -7,20 +7,17 @@ import 'package:vikas_app/screeens/models/response/user.dart';
 class KaryakattaRepo {
   final _api = NetworkService.instance;
 
-  Future<ApiResult<List<User>>> getKaryakarthas() async {
-    final result = await _api.get(ApiConstants.GET_KARYAKARTHAS);
-    // print("data----------------------: ${result.data} ?? ${result.error}");
+  Future<ApiResult<PaginatedView>> getKaryakarthas(int page, int size) async {
+    final result = await _api.get(
+      "${ApiConstants.GET_KARYAKARTHAS}?userType=KARYAKARTHA&page=${page}&size=${size}",
+    );
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }
 
     try {
-      final data = result.data;
-      final usersData = data["listView"] as List;
-
-      final users = usersData.map((json) => User.fromJson(json)).toList();
-
-      return ApiResult.success(users);
+      PaginatedView data = PaginatedView.fromJson(result.data);
+      return ApiResult.success(data);
     } catch (e) {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }

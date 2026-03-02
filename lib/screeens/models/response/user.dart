@@ -1,38 +1,77 @@
+import 'dart:convert';
+
+class PaginatedView {
+  final int? totalElements;
+  final int? totalPages;
+  final List<User>? content;
+  final int? currentPage;
+
+  PaginatedView({
+    this.totalElements,
+    this.totalPages,
+    this.content,
+    this.currentPage,
+  });
+
+  factory PaginatedView.fromJson(Map<String, dynamic> json) {
+    return PaginatedView(
+      totalElements: json['totalElements']?.toInt(),
+      currentPage: json['currentPage']?.toInt(),
+      totalPages: json['totalPages']?.toInt(),
+      content: (json['content'] as List?)
+          ?.map((x) => User.fromJson(x as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'totalElements': totalElements,
+      'totalPages': totalPages,
+      'currentPage': currentPage,
+      'content': content,
+    };
+  }
+}
+
 class User {
   final String id;
   final String name;
-  final String uniqueId;
+  final String? uniqueId;
   final String email;
   final String? mobileNumber;
   final String? password;
-  final String userType;
+  final String? userType;
   final String status;
   final String? pincode;
   final String? city;
   final String? area;
   final String? state;
   final String? country;
+  final String? startedDate;
 
   User({
     required this.id,
-    required this.uniqueId,
+    //required this.uniqueId,
+    this.uniqueId,
     required this.name,
     required this.email,
     this.mobileNumber,
     this.password,
-    required this.userType,
+    //required this.userType,
+    this.userType,
     required this.status,
     this.pincode,
     this.city,
     this.area,
     this.state,
     this.country,
+      this.startedDate,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
       id: json['id']?.toString() ?? '',
-      uniqueId:json['uniqueId'] ?? "",
+      uniqueId: json['uniqueId'] ?? "",
       name: json['name'],
       email: json['email'],
       mobileNumber: json['mobileNumber'],
@@ -44,6 +83,7 @@ class User {
       area: json['area'],
       state: json['state'],
       country: json['country'],
+      startedDate: json['startedDate']
     );
   }
 
@@ -51,7 +91,7 @@ class User {
     return {
       'id': id,
       'name': name,
-      'uniqueId':uniqueId,
+      'uniqueId': uniqueId,
       'email': email,
       'mobileNumber': mobileNumber,
       'password': password,

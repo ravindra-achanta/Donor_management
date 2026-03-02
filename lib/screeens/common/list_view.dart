@@ -4,10 +4,20 @@ import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 
 class ListViewScreen extends StatefulWidget {
-  const ListViewScreen({super.key, required this.user, required this.onClose});
+  const ListViewScreen({
+    super.key,
+    required this.user,
+    required this.onClose,
+    required this.onViewMore,
+    required this.onDelete,
+    this.screenType,
+  });
 
   final User? user;
+  final String? screenType;
   final Function() onClose;
+  final Function() onViewMore;
+  final Function() onDelete;
 
   @override
   State<ListViewScreen> createState() => _ListViewScreenState();
@@ -16,90 +26,103 @@ class ListViewScreen extends StatefulWidget {
 class _ListViewScreenState extends State<ListViewScreen> {
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // 🔷 Header
-              Row(
-                mainAxisAlignment: .spaceBetween,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Icon(Icons.person, size: 28),
-                      SizedBox(width: 8),
-                      Text(
-                        "${widget.user?.name}`s Insigths",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+    return Container(
+      height: 580,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 🔷 Header
+                Row(
+                  mainAxisAlignment: .spaceBetween,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(Icons.person, size: 28),
+                        SizedBox(width: 8),
+                        Text(
+                          "${widget.user?.name} Demographic Info",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                    InkWell(
+                      onTap: () {
+                        widget.onClose();
+                      },
+                      child: Icon(Icons.close, color: Colors.red),
+                    ),
+                  ],
+                ),
+                buildDemoGrphs(),
+
+                const SizedBox(height: 6),
+                const Divider(),
+                _sectionTitle('Basic Details'),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _infoTile(
+                        Icons.person_outline,
+                        'Unique ID',
+                        widget.user?.uniqueId ?? "1234",
+                      ),
+                    ),
+                    Expanded(
+                      child: _infoTile(
+                        Icons.phone_outlined,
+                        'Phone',
+                        widget.user?.mobileNumber ?? "",
+                      ),
+                    ),
+                  ],
+                ),
+                _infoTile(
+                  Icons.location_on_outlined,
+                  'Address',
+                  _buildAddress(),
+                ),
+                const SizedBox(height: 16),
+
+                // 🔷 Actions
+                _sectionTitle('Actions'),
+                const SizedBox(height: 4),
+
+                Row(
+                  children: [
+                    if (widget.screenType != "JEEVANADI")
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            widget.onDelete();
+                          },
+                          icon: const Icon(Icons.delete_outline),
+                          label: const Text('Delete'),
                         ),
                       ),
-                    ],
-                  ),
-                  InkWell(
-                    onTap: () {
-                      widget.onClose();
-                    },
-                    child: Icon(Icons.close, color: Colors.red),
-                  ),
-                ],
-              ),
-              buildDemoGrphs(),
-
-              const SizedBox(height: 6),
-              const Divider(),
-              _sectionTitle('Basic Details'),
-              Row(
-                children: [
-                  Expanded(
-                    child: _infoTile(
-                      Icons.person_outline,
-                      'Unique ID',
-                      widget.user?.uniqueId ?? "1234",
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          widget.onViewMore();
+                        },
+                        icon: const Icon(Icons.more_horiz),
+                        label: const Text('View more'),
+                        
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: _infoTile(
-                      Icons.phone_outlined,
-                      'Phone',
-                      widget.user?.mobileNumber ?? "",
-                    ),
-                  ),
-                ],
-              ),
-              _infoTile(Icons.location_on_outlined, 'Address', _buildAddress()),
-              const SizedBox(height: 16),
-
-              // 🔷 Actions
-              _sectionTitle('Actions'),
-              const SizedBox(height: 4),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.delete_outline),
-                      label: const Text('Delete'),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.more_horiz),
-                      label: const Text('View more'),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
