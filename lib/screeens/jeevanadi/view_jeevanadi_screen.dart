@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
@@ -24,16 +26,45 @@ class ViewJeevanadiScreen extends StatelessWidget {
          userId != null || jeevanadiId != null,
          'Either userId or jeevanadiId must be provided',
        );
+       
+        static Widget withArguments() {
+  final args = Get.arguments;
+  
+  // Handle null arguments
+  if (args == null) {
+    return const Scaffold(
+      body: Center(
+        child: Text('Error: No arguments provided'),
+      ),
+    );
+  }
+  
+  if (args is Map) {
+    return ViewJeevanadiScreen(
+      userId: args['userId'],
+      jeevanadiId: args['jeevanadiId'],
+      isFromRequest: args['isFromRequest'] ?? false,
+    );
+  } else if (args is String) {
+    return ViewJeevanadiScreen(
+      userId: args,
+      isFromRequest: false,
+    );
+  }
+  
+  return const SizedBox.shrink();
+}
 
   factory ViewJeevanadiScreen.fromArguments(dynamic args) {
     if (args is Map) {
       return ViewJeevanadiScreen(
+         userId: args['userId'], 
         jeevanadiId: args['jeevanadiId'],
         isFromRequest: args['isFromRequest'] ?? false,
       );
     } else {
       return ViewJeevanadiScreen(
-        userId: args as String?, // For normal view
+        userId: args as String?, 
         isFromRequest: false,
       );
     }
