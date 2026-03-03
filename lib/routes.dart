@@ -158,13 +158,17 @@ getPageRoute() {
     //   },
     // ),
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
-    GetPage(
+//     GetPage(
+//   name: '/jeevandiview', 
+//   page: () {
+//     final args = Get.arguments;
+//     return ViewJeevanadiScreen.fromArguments(args);
+//   },
+// ),
+GetPage(
   name: '/jeevandiview', 
-  page: () {
-    final args = Get.arguments;
-    return ViewJeevanadiScreen.fromArguments(args);
-  },
-),
+  page: () => ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
+)
 
     // GetPage(
     //   name: '/dashboard',
