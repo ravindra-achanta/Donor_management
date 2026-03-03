@@ -1,0 +1,107 @@
+import 'dart:convert';
+
+class PaginatedView {
+  final int? totalElements;
+  final int? totalPages;
+  final List<User>? content;
+  final int? currentPage;
+
+  PaginatedView({
+    this.totalElements,
+    this.totalPages,
+    this.content,
+    this.currentPage,
+  });
+
+  factory PaginatedView.fromJson(Map<String, dynamic> json) {
+    return PaginatedView(
+      totalElements: json['totalElements']?.toInt(),
+      currentPage: json['currentPage']?.toInt(),
+      totalPages: json['totalPages']?.toInt(),
+      content: (json['content'] as List?)
+          ?.map((x) => User.fromJson(x as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+  Map<String, dynamic> toJson() {
+    return {
+      'totalElements': totalElements,
+      'totalPages': totalPages,
+      'currentPage': currentPage,
+      'content': content,
+    };
+  }
+}
+
+class User {
+  final String id;
+  final String name;
+  final String? uniqueId;
+  final String email;
+  final String? mobileNumber;
+  final String? password;
+  final String? userType;
+  final String status;
+  final String? pincode;
+  final String? city;
+  final String? area;
+  final String? state;
+  final String? country;
+  final String? startedDate;
+
+  User({
+    required this.id,
+    //required this.uniqueId,
+    this.uniqueId,
+    required this.name,
+    required this.email,
+    this.mobileNumber,
+    this.password,
+    //required this.userType,
+    this.userType,
+    required this.status,
+    this.pincode,
+    this.city,
+    this.area,
+    this.state,
+    this.country,
+      this.startedDate,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id']?.toString() ?? '',
+      uniqueId: json['uniqueId'] ?? "",
+      name: json['name'],
+      email: json['email'],
+      mobileNumber: json['mobileNumber'],
+      password: json['password'] ?? "",
+      userType: json['userType'],
+      status: json['status'],
+      pincode: json['pincode'],
+      city: json['city'],
+      area: json['area'],
+      state: json['state'],
+      country: json['country'],
+      startedDate: json['startedDate']
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'uniqueId': uniqueId,
+      'email': email,
+      'mobileNumber': mobileNumber,
+      'password': password,
+      'userType': userType,
+      'status': status,
+      'pincode': pincode,
+      'city': city,
+      'area': area,
+      'state': state,
+      'country': country,
+    };
+  }
+}

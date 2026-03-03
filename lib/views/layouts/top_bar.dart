@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:provider/provider.dart';
 import 'package:vikas_app/images.dart';
-import 'package:vikas_app/apiServices/local_storage/VikasDB.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/localizations/language.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
 import 'package:vikas_app/themes/app_notifier.dart';
@@ -31,10 +31,9 @@ class _TopBarState extends State<TopBar>
   bool isMenuVisible = true;
 
   String empId = "";
-  String likeCount = LocalStorage().getString("HEART");
-  String punchesCount = LocalStorage().getString("PUNCH");
-  String rewardPoints = LocalStorage().getString("REWARD");
-
+  String likeCount = Vikasdb().getString("HEART");
+  String punchesCount = Vikasdb().getString("PUNCH");
+  String rewardPoints = Vikasdb().getString("REWARD");
 
   @override
   Widget build(BuildContext context) {
@@ -42,345 +41,346 @@ class _TopBarState extends State<TopBar>
     var theme = Theme.of(context);
     bool isMobileView = width < 600;
     return Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Container(
-            color: Colors.grey[200],
-            child: FxCard(
-              shadow: FxShadow(
-                  position: FxShadowPosition.bottomRight, elevation: 0.5),
-              height: 75,
-              borderRadiusAll: 0,
-              padding: FxSpacing.x(24),
-              color: topBarTheme.background.withAlpha(246),
-              child: Row(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Container(
+        color: Colors.grey[200],
+        child: FxCard(
+          shadow: FxShadow(
+            position: FxShadowPosition.bottomRight,
+            elevation: 0.5,
+          ),
+          height: 75,
+          borderRadiusAll: 0,
+          padding: FxSpacing.x(24),
+          color: topBarTheme.background.withAlpha(246),
+          child: Row(
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      InkWell(
-                          splashColor: colorScheme.onSurface,
-                          highlightColor: colorScheme.onSurface,
-                          onTap: () {
-                            ThemeCustomizer.toggleLeftBarCondensed();
-                          },
-                          child: Icon(
-                            LucideIcons.menu,
-                            color: topBarTheme.onBackground,
-                          )),
-                      FxSpacing.width(24),
-                      SizedBox(
-                        width: 190,
-                        child: Builder(
-                          builder: (context) {
-                            // Get the current theme
-                            final isDarkMode =
-                                Theme.of(context).brightness == Brightness.dark;
-
-                            return TextFormField(
-                              maxLines: 1,
-                              style: FxTextStyle.bodyMedium(
-                                color: isDarkMode
-                                    ? Colors.white
-                                    : Colors
-                                        .black, // Adjust text color based on theme
-                              ),
-                              decoration: InputDecoration(
-                                hintText: "Search",
-                                hintStyle: FxTextStyle.bodySmall(
-                                  xMuted: true,
-                                  color: isDarkMode
-                                      ? Colors.grey[400]
-                                      : Colors.grey, // Adjust hint text color
-                                ),
-                                border: outlineInputBorder,
-                                enabledBorder: outlineInputBorder,
-                                focusedBorder: focusedInputBorder,
-
-                                // Background color based on the current theme
-                                filled: true,
-                                fillColor: isDarkMode
-                                    ? const Color(
-                                        0xFF333333) // Dark grey for dark mode
-                                    : const Color(
-                                        0xFFF0F0F0), // Light grey for light mode
-
-                                // Prefix icon for search field
-                                prefixIcon: const Align(
-                                  alignment: Alignment.center,
-                                  child: Icon(
-                                    FeatherIcons.search,
-                                    size: 14,
-                                  ),
-                                ),
-                                prefixIconConstraints: const BoxConstraints(
-                                  minWidth: 36,
-                                  maxWidth: 36,
-                                  minHeight: 32,
-                                  maxHeight: 32,
-                                ),
-                                contentPadding: FxSpacing.xy(16, 12),
-                                isCollapsed: true,
-                                floatingLabelBehavior:
-                                    FloatingLabelBehavior.never,
-                              ),
-                            );
-                          },
-                        ),
-                      )
-                    ],
-                  ),
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        // FxSpacing.width(6),
-                        // CustomPopupMenu(
-                        //   backdrop: true,
-                        //   onChange: (_) {},
-                        //   offsetX: -120,
-                        //   menu: Padding(
-                        //     padding: FxSpacing.xy(8, 8),
-                        //     child: Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         GestureDetector(
-                        //           onTap: () {
-                        //             Navigator.push(
-                        //               context,
-                        //               MaterialPageRoute(
-                        //                 builder: (context) => HeartsPunches(),
-                        //               ),
-                        //             );
-                        //           },
-                        //           child: TimeBeatDB().getString("USER_TYPE") ==
-                        //                   "ADMIN"
-                        //               ? Icon(
-                        //                   Icons.favorite, // Heart icon
-                        //                   color: Colors.red,
-                        //                   size: 18,
-                        //                 )
-                        //               : Row(
-                        //                   children: [
-                        //                     Icon(
-                        //                       Icons.favorite, // Heart icon
-                        //                       color: Colors.red,
-                        //                       size: 18,
-                        //                     ),
-                        //                     const SizedBox(
-                        //                         width:
-                        //                             4), // Spacing between heart and count
-                        //                     Text(
-                        //                       likeCount
-                        //                           .toString(), // Ensure likeCount is a string
-                        //                       style: const TextStyle(
-                        //                         fontSize: 14,
-                        //                         fontWeight: FontWeight.bold,
-                        //                         color: Colors.red,
-                        //                       ),
-                        //                     ),
-                        //                   ],
-                        //                 ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        //   menuBuilder: (_) => buildNotifications(),
-                        // ),
-                        FxSpacing.width(12),
-                        // CustomPopupMenu(
-                        //   backdrop: true,
-                        //   // hideFn: (_) => languageHideFn = _,
-                        //   hideFn: (fn) => languageHideFn = fn,
-
-                        //   onChange: (_) {},
-                        //   offsetX: -36,
-                        //   menu: Padding(
-                        //     padding: FxSpacing.xy(8, 8),
-                        //     child: Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         GestureDetector(
-                        //           onTap: () {
-                        //               Navigator.push(
-                        //                 context,
-                        //                 MaterialPageRoute(
-                        //                   builder: (context) => HeartsPunches(),
-                        //                 ),
-                        //               );
-                        //           },
-                        //           child: TimeBeatDB().getString("USER_TYPE") ==
-                        //                   "ADMIN"
-                        //               ? Icon(
-                        //                   Icons.sports_mma, // Punch/Fist icon
-                        //                   color: Color.fromARGB(255, 3, 3, 3),
-                        //                   size: 23,
-                        //                 )
-                        //               : Row(
-                        //                   children: [
-                        //                     Icon(
-                        //                       Icons
-                        //                           .sports_mma, // Punch/Fist icon
-                        //                       color: Color.fromARGB(255, 3, 3, 3),
-                        //                       size: 18,
-                        //                     ),
-                        //                     const SizedBox(
-                        //                         width:
-                        //                             4), // Spacing between icon and count
-                        //                     Text(
-                        //                       punchesCount
-                        //                           .toString(), // Ensure punchesCount is a string
-                        //                       style: const TextStyle(
-                        //                         fontSize: 14,
-                        //                         fontWeight: FontWeight.bold,
-                        //                         color: Color.fromARGB(255, 3, 3, 3),
-                        //                       ),
-                        //                     ),
-                        //                   ],
-                        //                 ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        //   menuBuilder: (_) => buildLanguageSelector(),
-                        // ),
-                        //  FxSpacing.width(12),
-                        // CustomPopupMenu(
-                        //   backdrop: true,
-                        //   // hideFn: (_) => languageHideFn = _,
-                        //   hideFn: (fn) => languageHideFn = fn,
-
-                        //   onChange: (_) {},
-                        //   offsetX: -36,
-                        //   menu: Padding(
-                        //     padding: FxSpacing.xy(8, 8),
-                        //     child: Row(
-                        //       mainAxisSize: MainAxisSize.min,
-                        //       children: [
-                        //         GestureDetector(
-                        //           onTap: () {
-                        //               Navigator.push(
-                        //                 context,
-                        //                 MaterialPageRoute(
-                        //                   builder: (context) => HeartsPunches(),
-                        //                 ),
-                        //               );
-                        //           },
-                                  
-                        //           child: TimeBeatDB().getString("USER_TYPE") ==
-                        //                   "ADMIN"
-                        //               ? Icon(
-                        //                   Icons.military_tech, // Punch/Fist icon
-                        //                   color: const Color.fromARGB(255, 1, 82, 28),
-                        //                   size: 23,
-                        //                 )
-                        //               : Row(
-                        //                   children: [
-                        //                     Icon(
-                        //                       Icons.military_tech, // Punch/Fist icon
-                        //                       color: const Color.fromARGB(255, 1, 82, 28),
-                        //                       size: 18,
-                        //                     ),
-                        //                     const SizedBox(
-                        //                         width:
-                        //                             4), // Spacing between icon and count
-
-                        //                     Text(
-                        //                       rewardPoints
-                        //                           .toString(), // Ensure punchesCount is a string
-                        //                       style: const TextStyle(
-                        //                         fontSize: 14,
-                        //                         fontWeight: FontWeight.bold,
-                        //                         color: const Color.fromARGB(255, 1, 82, 28),
-                        //                       ),
-                        //                     ),
-                        //                   ],
-                        //                 ),
-                        //         ),
-                        //       ],
-                        //     ),
-                        //   ),
-                        //   menuBuilder: (_) => buildLanguageSelector(),
-                        // ),
-                        // FxSpacing.width(12),
-                        // InkWell(
-                        //   onTap: () {
-                        //     ThemeCustomizer.setTheme(
-                        //         ThemeCustomizer.instance.theme == ThemeMode.dark
-                        //             ? ThemeMode.light
-                        //             : ThemeMode.dark);
-                        //   },
-                        //   child: Icon(
-                        //     ThemeCustomizer.instance.theme == ThemeMode.dark
-                        //         ? FeatherIcons.sun
-                        //         : FeatherIcons.moon,
-                        //     size: 18,
-                        //     color: topBarTheme.onBackground,
-                        //   ),
-                        // ),
-                        // FxSpacing.width(12),
-                        FxSpacing.width(6),
-                        // CustomPopupMenu(
-                        //   backdrop: true,
-                        //   onChange: (_) {},
-                        //   offsetX: -120,
-                        //   menu: Padding(
-                        //     padding: FxSpacing.xy(8, 8),
-                        //     child: const Center(
-                        //       child: Icon(
-                        //         FeatherIcons.bell,
-                        //         size: 18,
-                        //       ),
-                        //     ),
-                        //   ),
-                        //   menuBuilder: (_) => buildNotifications(),
-                        // ),
-                        FxSpacing.width(4),
-                        CustomPopupMenu(
-                          backdrop: true,
-                          onChange: (_) {},
-                          offsetX: -60,
-                          offsetY: 8,
-                          menu: Padding(
-                            padding: FxSpacing.xy(8, 8),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                FxContainer.rounded(
-                                    paddingAll: 0,
-                                    child: Image.network(
-                                        LocalStorage().getString("USER_PROFILE"),
-                                        height: 28,
-                                        width: 28,
-                                        fit: BoxFit.cover,
-                                        errorBuilder:
-                                            (context, error, stackTrace) =>
-                                                const Icon(
-                                                  Icons.person,
-                                                  size: 28,
-                                                ))),
-                                FxSpacing.width(8),
-                                FxText.labelLarge(
-                                    LocalStorage().getString("USER_NAME"))
-                              ],
-                            ),
-                          ),
-                          // menuBuilder: (_) => buildAccountMenu(),
-                          menuBuilder: (context) {
-                            return StatefulBuilder(
-                              builder: (context, setState) {
-                                return Visibility(
-                                  visible: isMenuVisible,
-                                  child: buildAccountMenu(),
-                                );
-                              },
-                            );
-                          },
-                        ),
-                      ],
+                  InkWell(
+                    splashColor: colorScheme.onSurface,
+                    highlightColor: colorScheme.onSurface,
+                    onTap: () {
+                      ThemeCustomizer.toggleLeftBarCondensed();
+                    },
+                    child: Icon(
+                      LucideIcons.menu,
+                      color: topBarTheme.onBackground,
                     ),
-                  )
+                  ),
+                  FxSpacing.width(24),
+                  SizedBox(
+                    width: 190,
+                    child: Builder(
+                      builder: (context) {
+                        // Get the current theme
+                        final isDarkMode =
+                            Theme.of(context).brightness == Brightness.dark;
+
+                        return TextFormField(
+                          maxLines: 1,
+                          style: FxTextStyle.bodyMedium(
+                            color: isDarkMode
+                                ? Colors.white
+                                : Colors
+                                      .black, // Adjust text color based on theme
+                          ),
+                          decoration: InputDecoration(
+                            hintText: "Search",
+                            hintStyle: FxTextStyle.bodySmall(
+                              xMuted: true,
+                              color: isDarkMode
+                                  ? Colors.grey[400]
+                                  : Colors.grey, // Adjust hint text color
+                            ),
+                            border: outlineInputBorder,
+                            enabledBorder: outlineInputBorder,
+                            focusedBorder: focusedInputBorder,
+
+                            // Background color based on the current theme
+                            filled: true,
+                            fillColor: isDarkMode
+                                ? const Color(
+                                    0xFF333333,
+                                  ) // Dark grey for dark mode
+                                : const Color(
+                                    0xFFF0F0F0,
+                                  ), // Light grey for light mode
+                            // Prefix icon for search field
+                            prefixIcon: const Align(
+                              alignment: Alignment.center,
+                              child: Icon(FeatherIcons.search, size: 14),
+                            ),
+                            prefixIconConstraints: const BoxConstraints(
+                              minWidth: 36,
+                              maxWidth: 36,
+                              minHeight: 32,
+                              maxHeight: 32,
+                            ),
+                            contentPadding: FxSpacing.xy(16, 12),
+                            isCollapsed: true,
+                            floatingLabelBehavior: FloatingLabelBehavior.never,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
                 ],
               ),
-            )));
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // FxSpacing.width(6),
+                    // CustomPopupMenu(
+                    //   backdrop: true,
+                    //   onChange: (_) {},
+                    //   offsetX: -120,
+                    //   menu: Padding(
+                    //     padding: FxSpacing.xy(8, 8),
+                    //     child: Row(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         GestureDetector(
+                    //           onTap: () {
+                    //             Navigator.push(
+                    //               context,
+                    //               MaterialPageRoute(
+                    //                 builder: (context) => HeartsPunches(),
+                    //               ),
+                    //             );
+                    //           },
+                    //           child: TimeBeatDB().getString("USER_TYPE") ==
+                    //                   "ADMIN"
+                    //               ? Icon(
+                    //                   Icons.favorite, // Heart icon
+                    //                   color: Colors.red,
+                    //                   size: 18,
+                    //                 )
+                    //               : Row(
+                    //                   children: [
+                    //                     Icon(
+                    //                       Icons.favorite, // Heart icon
+                    //                       color: Colors.red,
+                    //                       size: 18,
+                    //                     ),
+                    //                     const SizedBox(
+                    //                         width:
+                    //                             4), // Spacing between heart and count
+                    //                     Text(
+                    //                       likeCount
+                    //                           .toString(), // Ensure likeCount is a string
+                    //                       style: const TextStyle(
+                    //                         fontSize: 14,
+                    //                         fontWeight: FontWeight.bold,
+                    //                         color: Colors.red,
+                    //                       ),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    //   menuBuilder: (_) => buildNotifications(),
+                    // ),
+                    FxSpacing.width(12),
+                    // CustomPopupMenu(
+                    //   backdrop: true,
+                    //   // hideFn: (_) => languageHideFn = _,
+                    //   hideFn: (fn) => languageHideFn = fn,
+
+                    //   onChange: (_) {},
+                    //   offsetX: -36,
+                    //   menu: Padding(
+                    //     padding: FxSpacing.xy(8, 8),
+                    //     child: Row(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         GestureDetector(
+                    //           onTap: () {
+                    //               Navigator.push(
+                    //                 context,
+                    //                 MaterialPageRoute(
+                    //                   builder: (context) => HeartsPunches(),
+                    //                 ),
+                    //               );
+                    //           },
+                    //           child: TimeBeatDB().getString("USER_TYPE") ==
+                    //                   "ADMIN"
+                    //               ? Icon(
+                    //                   Icons.sports_mma, // Punch/Fist icon
+                    //                   color: Color.fromARGB(255, 3, 3, 3),
+                    //                   size: 23,
+                    //                 )
+                    //               : Row(
+                    //                   children: [
+                    //                     Icon(
+                    //                       Icons
+                    //                           .sports_mma, // Punch/Fist icon
+                    //                       color: Color.fromARGB(255, 3, 3, 3),
+                    //                       size: 18,
+                    //                     ),
+                    //                     const SizedBox(
+                    //                         width:
+                    //                             4), // Spacing between icon and count
+                    //                     Text(
+                    //                       punchesCount
+                    //                           .toString(), // Ensure punchesCount is a string
+                    //                       style: const TextStyle(
+                    //                         fontSize: 14,
+                    //                         fontWeight: FontWeight.bold,
+                    //                         color: Color.fromARGB(255, 3, 3, 3),
+                    //                       ),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    //   menuBuilder: (_) => buildLanguageSelector(),
+                    // ),
+                    //  FxSpacing.width(12),
+                    // CustomPopupMenu(
+                    //   backdrop: true,
+                    //   // hideFn: (_) => languageHideFn = _,
+                    //   hideFn: (fn) => languageHideFn = fn,
+
+                    //   onChange: (_) {},
+                    //   offsetX: -36,
+                    //   menu: Padding(
+                    //     padding: FxSpacing.xy(8, 8),
+                    //     child: Row(
+                    //       mainAxisSize: MainAxisSize.min,
+                    //       children: [
+                    //         GestureDetector(
+                    //           onTap: () {
+                    //               Navigator.push(
+                    //                 context,
+                    //                 MaterialPageRoute(
+                    //                   builder: (context) => HeartsPunches(),
+                    //                 ),
+                    //               );
+                    //           },
+
+                    //           child: TimeBeatDB().getString("USER_TYPE") ==
+                    //                   "ADMIN"
+                    //               ? Icon(
+                    //                   Icons.military_tech, // Punch/Fist icon
+                    //                   color: const Color.fromARGB(255, 1, 82, 28),
+                    //                   size: 23,
+                    //                 )
+                    //               : Row(
+                    //                   children: [
+                    //                     Icon(
+                    //                       Icons.military_tech, // Punch/Fist icon
+                    //                       color: const Color.fromARGB(255, 1, 82, 28),
+                    //                       size: 18,
+                    //                     ),
+                    //                     const SizedBox(
+                    //                         width:
+                    //                             4), // Spacing between icon and count
+
+                    //                     Text(
+                    //                       rewardPoints
+                    //                           .toString(), // Ensure punchesCount is a string
+                    //                       style: const TextStyle(
+                    //                         fontSize: 14,
+                    //                         fontWeight: FontWeight.bold,
+                    //                         color: const Color.fromARGB(255, 1, 82, 28),
+                    //                       ),
+                    //                     ),
+                    //                   ],
+                    //                 ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
+                    //   menuBuilder: (_) => buildLanguageSelector(),
+                    // ),
+                    // FxSpacing.width(12),
+                    // InkWell(
+                    //   onTap: () {
+                    //     ThemeCustomizer.setTheme(
+                    //         ThemeCustomizer.instance.theme == ThemeMode.dark
+                    //             ? ThemeMode.light
+                    //             : ThemeMode.dark);
+                    //   },
+                    //   child: Icon(
+                    //     ThemeCustomizer.instance.theme == ThemeMode.dark
+                    //         ? FeatherIcons.sun
+                    //         : FeatherIcons.moon,
+                    //     size: 18,
+                    //     color: topBarTheme.onBackground,
+                    //   ),
+                    // ),
+                    // FxSpacing.width(12),
+                    FxSpacing.width(6),
+                    // CustomPopupMenu(
+                    //   backdrop: true,
+                    //   onChange: (_) {},
+                    //   offsetX: -120,
+                    //   menu: Padding(
+                    //     padding: FxSpacing.xy(8, 8),
+                    //     child: const Center(
+                    //       child: Icon(
+                    //         FeatherIcons.bell,
+                    //         size: 18,
+                    //       ),
+                    //     ),
+                    //   ),
+                    //   menuBuilder: (_) => buildNotifications(),
+                    // ),
+                    FxSpacing.width(4),
+                    CustomPopupMenu(
+                      backdrop: true,
+                      onChange: (_) {},
+                      offsetX: -60,
+                      offsetY: 8,
+                      menu: Padding(
+                        padding: FxSpacing.xy(8, 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            FxContainer.rounded(
+                              paddingAll: 0,
+                              child: Image.network(
+                                Vikasdb().getString("USER_PROFILE"),
+                                height: 28,
+                                width: 28,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) =>
+                                    const Icon(Icons.person, size: 28),
+                              ),
+                            ),
+                            FxSpacing.width(8),
+                            FxText.labelLarge(
+                              Vikasdb().getString("USER_NAME"),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // menuBuilder: (_) => buildAccountMenu(),
+                      menuBuilder: (context) {
+                        return StatefulBuilder(
+                          builder: (context, setState) {
+                            return Visibility(
+                              visible: isMenuVisible,
+                              child: buildAccountMenu(),
+                            );
+                          },
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget buildLanguageSelector() {
@@ -431,7 +431,7 @@ class _TopBarState extends State<TopBar>
         children: [
           FxText.labelLarge(title),
           FxSpacing.height(4),
-          FxText.bodySmall(description)
+          FxText.bodySmall(description),
         ],
       );
     }
@@ -494,9 +494,9 @@ class _TopBarState extends State<TopBar>
   }
 
   Widget buildAccountMenu() {
-    (LocalStorage().getString("USER_TYPE") == "ADMIN")
-        ? empId = LocalStorage().getString("ADMIN_ID")
-        : LocalStorage().getString("ID");
+    (Vikasdb().getString("USER_TYPE") == "ADMIN")
+        ? empId = Vikasdb().getString("ADMIN_ID")
+        : Vikasdb().getString("ID");
 
     return FxContainer.bordered(
       paddingAll: 0,
@@ -603,7 +603,7 @@ class _TopBarState extends State<TopBar>
               onPressed: () {
                 setState(() {
                   isMenuVisible = false; // Hide the menu
-                  LocalStorage.sharedPreferences!.clear();
+                  Vikasdb.sharedPreferences!.clear();
                 });
 
                 // Add a slight delay to ensure the UI updates
@@ -628,11 +628,11 @@ class _TopBarState extends State<TopBar>
                     "Log out",
                     fontWeight: 600,
                     color: contentTheme.danger,
-                  )
+                  ),
                 ],
               ),
             ),
-          )
+          ),
         ],
       ),
     );
