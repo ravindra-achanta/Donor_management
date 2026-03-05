@@ -41,7 +41,7 @@ pipeline {
                     sh """
                         docker stop vikas_web_app || true
                         docker rm vikas_web_app || true
-                        docker run -d --name vikas_web_app -p 4000:4000 ${DOCKER_IMAGE}
+                        docker run -d --name vikas_web_app -p 4001:4001 ${DOCKER_IMAGE}
                         docker network connect vidyaranyam-net vikas_web_app || true
                     """
                 }
