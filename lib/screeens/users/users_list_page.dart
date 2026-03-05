@@ -92,7 +92,24 @@ class _UsersState extends State<Users> {
                                     );
                                   },
                                   onDelete: (id) {},
-                                  onUpdate: (id) {},
+                                 // onUpdate: (id) {},
+                                 onUpdate: (id) {
+  try {
+    final user = state?.users?.firstWhere((u) => u.id == id);
+    if (user != null) {
+      Get.to(
+        () => RegistrationPage(
+          title: "Edit User",
+          type: RegistrationType.user,
+          user: user,
+          isEdit: true,
+        ),
+      );
+    }
+  } catch (e) {
+    debugPrint('User not found with id: $id');
+  }
+},
                                 ),
                                 // const SizedBox(height: 16),
                                 Padding(

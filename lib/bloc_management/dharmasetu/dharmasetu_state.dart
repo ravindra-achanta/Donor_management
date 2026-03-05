@@ -16,9 +16,15 @@ class DharmasetuLoading extends DharmasetuState {}
 
 class DharmasetuLoaded extends DharmasetuState {
   final List<DharmasetuModel> dharmasetuList;
-  const DharmasetuLoaded({required this.dharmasetuList});
+  final int currentPage;
+  final int totalPages;
+  const DharmasetuLoaded({
+    required this.dharmasetuList,
+    required this.currentPage,
+    required this.totalPages,
+  });
   @override
-  List<Object?> get props => [dharmasetuList];
+  List<Object?> get props => [dharmasetuList, currentPage, totalPages];
 }
 
 class DharmasetuOperationSuccess extends DharmasetuState {
