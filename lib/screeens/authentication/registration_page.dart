@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/bloc_management/profile/profile_event.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
@@ -411,8 +412,8 @@ void _submit(BuildContext context) {
     context.read<ProfileBloc>().add(
       UpdateProfile(id: widget.user!.id, user: updatedUser),
     );
-
-    Navigator.pop(context);
+    print("navigating to users");
+    Get.toNamed('/users');
   } else {
 
     if (widget.selectedRoles.isEmpty) {
@@ -685,6 +686,9 @@ void _submit(BuildContext context) {
           Future.delayed(const Duration(milliseconds: 500), () {
             widget.onClearForm();
             context.read<AuthBloc>().add(CheckAuthStatusEvent());
+    print("navigating to users");
+
+            Get.toNamed('/users');
           });
         }
         if (state.isError && state.errorMessage != null) {

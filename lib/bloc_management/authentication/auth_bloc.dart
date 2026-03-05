@@ -63,6 +63,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             errorMessage: '',
           ),
         );
+        print("saving token in login screen");
+        print(state.token);
+        print(state.userId);
+        print(state.userId);
         await Vikasdb().setString("TOKEN", loginResponse.token);
         await Vikasdb().setString("USER_ID", loginResponse.id.toString());
         await Vikasdb().setUserType("USER_TYPE", loginResponse.userType.toString());
@@ -140,6 +144,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(state.copyWith(status: AuthStatus.changingPassword, errorMessage: ''));
 
+    // Debug prints to check state values
+    print("DEBUG: Current state in _onChangePassword");
+    print("DEBUG: token: ${state.token}");
+    print("DEBUG: userId: ${state.userId}");
+    print("DEBUG: userType: ${state.userType}");
+
     final response = await authRepository.changePassword(
       event.newPassword,
       event.mobileNumber,
@@ -147,10 +157,24 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (response.isSuccess) {
       // Save token after successful password change
+      // Use state values if available, otherwise they should already be set from login
       if (state.token != null && state.userId != null && state.userType != null) {
+        print("saving token in change password screen");
+        print(state.token);
+        print(state.userId);
+        print(state.userId);
         await Vikasdb().setString("TOKEN", state.token!);
         await Vikasdb().setString("USER_ID", state.userId!);
         await Vikasdb().setUserType("USER_TYPE", state.userType!.toString());
+      } else {
+        print("ERROR: Missing token, userId, or userType in state");
+        print("token is null: ${state.token == null}");
+        print("userId is null: ${state.userId == null}");
+        print("userType is null: ${state.userType == null}");
+        
+        // As a fallback, try to get the values from the password change screen widget
+        // This is a workaround - the real fix is using the global AuthBloc
+        print("This should not happen if using global AuthBloc instance");
       }
       
       emit(
@@ -180,7 +204,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (isAuthenticated) {
       final authData = await authRepository.getStoredAuthData();
       
-      UserType? userType;
+      UserType? userType; 
       if (authData['userType'] != null) {
         final typeString = authData['userType']!.replaceFirst('UserType.', '');
         userType = UserType.values.firstWhere(
