@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -93,14 +91,13 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Status'),
                   tableHeader('Actions'),
                 ] else if (screenType == 'VISIT') ...[
-                  tableHeader('Jeevandi Num'),
-                  tableHeader('Name'),
-                  tableHeader('Phone'),
-                  tableHeader('Visit Purpose'),
-                  tableHeader('Guests'),
-                  tableHeader('Date'),
-                  tableHeader('Status'),
-                  tableHeader('Actions'),
+                  //tableHeader('ID', flex: 1),
+                  tableHeader('Visitor Name', flex: 2),
+                  tableHeader('Phone Number', flex: 2),
+                  //tableHeader('Visit Purpose', flex: 2),
+                  tableHeader('No. of Guests', flex: 1),
+                  // Actions column (optional - you can keep or remove)
+                  tableHeader('Actions', flex:1 ),
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
@@ -290,34 +287,32 @@ class _CommonListState extends State<CommonList> {
                               ),
                             ] else if (screenType == 'VISIT') ...[
                               if (rowData is VisitView) ...[
-                                tableData(rowData.jeevandNum),
-                                tableData(rowData.name),
-                                tableData(rowData.phone),
-                                tableData(rowData.visitPurpose),
-                                tableData(rowData.noOfGuests.toString()),
-                                tableData(rowData.date),
-                                Expanded(
-                                  child: _buildStatusPill(rowData.status),
-                                ),
+                                
+                                tableData(rowData.visitorName, flex: 2),
+                                tableData(rowData.phoneNumber, flex: 2),
+
+                                tableData(rowData.noOfGuests.toString(), flex: 1),
+                                //tableHeader('Existing', flex: 1),
+                                //tableData(rowData.existing.toString(), flex: 1),
+                                // Expanded(
+                                //   child: _buildStatusPill(rowData.status),
+                                // ),
                                 Expanded(
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _actionIcon(
-                                        Icons.visibility_outlined,
-                                        Colors.blue,
-                                        () => Get.toNamed(
-                                          '/view/visit',
-                                          arguments: rowData,
-                                        ),
-                                      ),
+                                      // _actionIcon(
+                                      //   Icons.visibility_outlined,
+                                      //   Colors.blue,
+                                      //   () => Get.toNamed(
+                                      //     '/view/visit',
+                                      //     arguments: rowData,
+                                      //   ),
+                                      // ),
                                       _actionIcon(
                                         Icons.edit_outlined,
                                         Colors.orange,
-                                        () => Get.toNamed(
-                                          '/edit/visit',
-                                          arguments: rowData,
-                                        ),
+                                        () => widget.onUpdate(rowData.id),
                                       ),
                                       const SizedBox(width: 5),
                                       _actionIcon(
@@ -355,7 +350,6 @@ class _CommonListState extends State<CommonList> {
                                       hoverColor: Colors.blue.withOpacity(0.1),
                                       iconColor: Colors.blue,
                                       onTap: () => widget.onUpdate(rowData.id),
-                                      
                                     ),
                                   ],
                                 ),
@@ -538,8 +532,6 @@ class _HoverIconButtonState extends State<HoverIconButton> {
     );
   }
 }
-
-
 
 // import 'package:flutter/material.dart';
 // import 'package:vikas_app/screeens/common/NoDataFound.dart';

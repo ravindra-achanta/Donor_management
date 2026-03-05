@@ -1,59 +1,49 @@
-// lib/screeens/models/request/visit_model.dart
+// lib/screeens/models/response/visit_view.dart
 
 class VisitModel {
   final String id;
-  final String jeevandNum;
-  final String name;
-  final String phone;
+  final String visitorName;
+  final String phoneNumber;
   final String email;
   final String visitPurpose;
-  final int noOfGuests;
   final String comments;
-  final String date;
-  final String status;
+  final int noOfGuests;
+  final bool existVisitor;
 
   VisitModel({
     required this.id,
-    required this.jeevandNum,
-    required this.name,
-    required this.phone,
+    required this.visitorName,
+    required this.phoneNumber,
     required this.email,
     required this.visitPurpose,
-    required this.noOfGuests,
     required this.comments,
-    required this.date,
-    required this.status,
+    required this.noOfGuests,
+    required this.existVisitor,
   });
 
-  // Factory method to create from JSON
   factory VisitModel.fromJson(Map<String, dynamic> json) {
     return VisitModel(
-      id: json['id'] ?? '',
-      jeevandNum: json['jeevandNum'] ?? '',
-      name: json['name'] ?? '',
-      phone: json['phone'] ?? '',
+      id: json['id']?.toString() ?? '',
+      visitorName: json['visitorName'] ?? '',
+      phoneNumber: json['phoneNumber'] ?? '',
       email: json['email'] ?? '',
       visitPurpose: json['visitPurpose'] ?? '',
-      noOfGuests: json['noOfGuests'] ?? 0,
       comments: json['comments'] ?? '',
-      date: json['date'] ?? '',
-      status: json['status'] ?? 'Pending',
+      noOfGuests: json['noOfGuests'] ?? 0,
+      existVisitor: json['existVisitor'] ?? false,
     );
   }
 
-  // Convert to JSON
   Map<String, dynamic> toJson() {
     return {
       'id': id,
-      'jeevandNum': jeevandNum,
-      'name': name,
-      'phone': phone,
+      'visitorName': visitorName,
+      'phoneNumber': phoneNumber,
       'email': email,
       'visitPurpose': visitPurpose,
-      'noOfGuests': noOfGuests,
       'comments': comments,
-      'date': date,
-      'status': status,
+      'noOfGuests': noOfGuests,
+      'existVisitor': existVisitor,
     };
   }
 }

@@ -192,7 +192,8 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/notices/list',
                     ),
-                    if (Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
+                    if (Vikasdb().getString("USER_TYPE") == "KARYAKARTHA" ||
+                        Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                       NavigationItem(
                         iconData: LucideIcons.eye,
                         title: "Visits",
