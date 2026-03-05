@@ -1,5 +1,3 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
@@ -74,15 +72,15 @@ class _CommonListState extends State<CommonList> {
                 //tableHeader('#'),
                 tableHeader('#', flex: 1),
                 if (screenType == 'JEEVANADI') ...[
-                  tableHeader('Name'),
+                  tableHeader('fullName'),
                   tableHeader('Jeevanaadi No'),
                   tableHeader('Profile %'),
                 ] else if (screenType == 'REVIEW_REQUEST') ...[
-                  tableHeader('Jeevanadi Name', flex: 3),
-                  tableHeader('Jeevanadi ID', flex: 2),
+                  tableHeader('Jeevanadi Name', flex: 4),
+                  tableHeader('Jeevanadi no', flex: 2),
                   tableHeader('Updated By', flex: 2),
                   tableHeader('Status', flex: 1),
-                  tableHeader('Actions', flex: 2),
+                  //tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'DHARMASETU') ...[
                   //tableHeader('UID'),
                   tableHeader('Type'),
@@ -93,14 +91,13 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Status'),
                   tableHeader('Actions'),
                 ] else if (screenType == 'VISIT') ...[
-                  tableHeader('Jeevandi Num'),
-                  tableHeader('Name'),
-                  tableHeader('Phone'),
-                  tableHeader('Visit Purpose'),
-                  tableHeader('Guests'),
-                  tableHeader('Date'),
-                  tableHeader('Status'),
-                  tableHeader('Actions'),
+                  //tableHeader('ID', flex: 1),
+                  tableHeader('Visitor Name', flex: 2),
+                  tableHeader('Phone Number', flex: 2),
+                  //tableHeader('Visit Purpose', flex: 2),
+                  tableHeader('No. of Guests', flex: 1),
+                  // Actions column (optional - you can keep or remove)
+                  tableHeader('Actions', flex:1 ),
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
@@ -139,7 +136,7 @@ class _CommonListState extends State<CommonList> {
 
                 // Data extraction for different types
                 if (rowData is JeevanaadiUser) {
-                  name = rowData.userName;
+                  name = rowData.fullName;
                   JeevanaadiNo = rowData.jeevanaadiNo ?? rowData.id;
                   profilePercent = rowData.profileCompletionPercentage ?? 0.0;
                 } else if (rowData is User) {
@@ -188,8 +185,8 @@ class _CommonListState extends State<CommonList> {
                               ),
                             ] else if (screenType == 'REVIEW_REQUEST') ...[
                               if (rowData is ReviewRequest) ...[
-                                tableData(rowData.jeevnadiName, flex: 3),
-                                tableData(rowData.jeevanadiId, flex: 2),
+                                tableData(rowData.jeevnadiName, flex: 4),
+                                tableData(rowData.jeevanadiNo, flex: 2),
                                 tableData(rowData.updatedBy, flex: 2),
                                 Expanded(
                                   flex: 1,
@@ -197,45 +194,45 @@ class _CommonListState extends State<CommonList> {
                                     rowData.status ?? 'Pending',
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    children: [
-                                      if (widget.onApprove != null)
-                                        HoverIconButton(
-                                          icon: Icons.check_circle_outline,
-                                          hoverColor: Colors.green.withOpacity(
-                                            0.1,
-                                          ),
-                                          iconColor: Colors.green,
-                                          onTap: () => widget.onApprove!(
-                                            rowData.jeevanadiId,
-                                          ),
-                                        ),
-                                      const SizedBox(width: 10),
-                                      HoverIconButton(
-                                        icon: Icons.remove_red_eye_outlined,
-                                        hoverColor: Colors.blue.withOpacity(
-                                          0.1,
-                                        ),
-                                        iconColor: Colors.blue,
-                                        onTap: () => widget.onUpdate(
-                                          rowData.jeevanadiId,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      HoverIconButton(
-                                        icon: Icons.close,
-                                        hoverColor: Colors.red.withOpacity(0.1),
-                                        iconColor: Colors.red,
-                                        onTap: () => widget.onDelete(
-                                          rowData.jeevanadiId,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                // Expanded(
+                                //   flex: 2,
+                                //   child: Row(
+                                //     mainAxisAlignment: MainAxisAlignment.start,
+                                //     children: [
+                                //       if (widget.onApprove != null)
+                                //         // HoverIconButton(
+                                //         //   icon: Icons.check_circle_outline,
+                                //         //   hoverColor: Colors.green.withOpacity(
+                                //         //     0.1,
+                                //         //   ),
+                                //         //   iconColor: Colors.green,
+                                //         //   onTap: () => widget.onApprove!(
+                                //         //     rowData.jeevanadiNo,
+                                //         //   ),
+                                //         // ),
+                                //       const SizedBox(width: 10),
+                                //       HoverIconButton(
+                                //         icon: Icons.remove_red_eye_outlined,
+                                //         hoverColor: Colors.blue.withOpacity(
+                                //           0.1,
+                                //         ),
+                                //         iconColor: Colors.blue,
+                                //         onTap: () => widget.onUpdate(
+                                //           rowData.jeevanadiId.toString(),
+                                //         ),
+                                //       ),
+                                //       // const SizedBox(width: 10),
+                                //       // HoverIconButton(
+                                //       //   icon: Icons.close,
+                                //       //   hoverColor: Colors.red.withOpacity(0.1),
+                                //       //   iconColor: Colors.red,
+                                //       //   onTap: () => widget.onDelete(
+                                //       //     rowData.jeevanadiNo,
+                                //       //   ),
+                                //       // ),
+                                //     ],
+                                //   ),
+                                // ),
                               ] else ...[
                                 tableData('', flex: 3),
                                 tableData('', flex: 2),
@@ -290,34 +287,32 @@ class _CommonListState extends State<CommonList> {
                               ),
                             ] else if (screenType == 'VISIT') ...[
                               if (rowData is VisitView) ...[
-                                tableData(rowData.jeevandNum),
-                                tableData(rowData.name),
-                                tableData(rowData.phone),
-                                tableData(rowData.visitPurpose),
-                                tableData(rowData.noOfGuests.toString()),
-                                tableData(rowData.date),
-                                Expanded(
-                                  child: _buildStatusPill(rowData.status),
-                                ),
+                                
+                                tableData(rowData.visitorName, flex: 2),
+                                tableData(rowData.phoneNumber, flex: 2),
+
+                                tableData(rowData.noOfGuests.toString(), flex: 1),
+                                //tableHeader('Existing', flex: 1),
+                                //tableData(rowData.existing.toString(), flex: 1),
+                                // Expanded(
+                                //   child: _buildStatusPill(rowData.status),
+                                // ),
                                 Expanded(
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      _actionIcon(
-                                        Icons.visibility_outlined,
-                                        Colors.blue,
-                                        () => Get.toNamed(
-                                          '/view/visit',
-                                          arguments: rowData,
-                                        ),
-                                      ),
+                                      // _actionIcon(
+                                      //   Icons.visibility_outlined,
+                                      //   Colors.blue,
+                                      //   () => Get.toNamed(
+                                      //     '/view/visit',
+                                      //     arguments: rowData,
+                                      //   ),
+                                      // ),
                                       _actionIcon(
                                         Icons.edit_outlined,
                                         Colors.orange,
-                                        () => Get.toNamed(
-                                          '/edit/visit',
-                                          arguments: rowData,
-                                        ),
+                                        () => widget.onUpdate(rowData.id),
                                       ),
                                       const SizedBox(width: 5),
                                       _actionIcon(
@@ -537,8 +532,6 @@ class _HoverIconButtonState extends State<HoverIconButton> {
     );
   }
 }
-
-
 
 // import 'package:flutter/material.dart';
 // import 'package:vikas_app/screeens/common/NoDataFound.dart';

@@ -45,7 +45,7 @@ dependencies:
   feather_icons: ^1.2.0
   font_awesome_flutter: ^10.4.0
   lucide_icons: ^0.257.0
-  google_fonts: ^6.2.1
+  google_fonts: ^5.1.0
   dotted_border: ^2.1.0
   percent_indicator: ^4.2.4
   linear_progress_bar: ^2.0.0+2

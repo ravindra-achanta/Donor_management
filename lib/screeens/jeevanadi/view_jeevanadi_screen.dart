@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
@@ -15,29 +17,58 @@ class ViewJeevanadiScreen extends StatelessWidget {
   final String? jeevanadiId;
   final bool isFromRequest;
 
-const ViewJeevanadiScreen({
-  super.key,
-  this.userId,
-  this.jeevanadiId,
-  this.isFromRequest = false,
-}) : assert(
-  userId != null || jeevanadiId != null,
-  'Either userId or jeevanadiId must be provided',
-);
-
- factory ViewJeevanadiScreen.fromArguments(dynamic args) {
+  const ViewJeevanadiScreen({
+    super.key,
+    this.userId,
+    this.jeevanadiId,
+    this.isFromRequest = false,
+  }) : assert(
+         userId != null || jeevanadiId != null,
+         'Either userId or jeevanadiId must be provided',
+       );
+       
+        static Widget withArguments() {
+  final args = Get.arguments;
+  
+  // Handle null arguments
+  if (args == null) {
+    return const Scaffold(
+      body: Center(
+        child: Text('Error: No arguments provided'),
+      ),
+    );
+  }
+  
   if (args is Map) {
     return ViewJeevanadiScreen(
-      jeevanadiId: args['jeevanadiId'],      // For request view
+      userId: args['userId'],
+      jeevanadiId: args['jeevanadiId'],
       isFromRequest: args['isFromRequest'] ?? false,
     );
-  } else {
+  } else if (args is String) {
     return ViewJeevanadiScreen(
-      userId: args as String?,                 // For normal view
+      userId: args,
       isFromRequest: false,
     );
   }
+  
+  return const SizedBox.shrink();
 }
+
+  factory ViewJeevanadiScreen.fromArguments(dynamic args) {
+    if (args is Map) {
+      return ViewJeevanadiScreen(
+         userId: args['userId'], 
+        jeevanadiId: args['jeevanadiId'],
+        isFromRequest: args['isFromRequest'] ?? false,
+      );
+    } else {
+      return ViewJeevanadiScreen(
+        userId: args as String?, 
+        isFromRequest: false,
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -181,8 +212,8 @@ const ViewJeevanadiScreen({
                   screenType: "DONATION",
                 ),
 
-                if (state.isFromRequest && state.requestStatus == 'PENDING')
-                  _buildApprovalButtons(context, state),
+                // if (state.isFromRequest && state.requestStatus == 'PENDING')
+                //  // _buildApprovalButtons(context, state),
               ],
             ),
           );
@@ -897,6 +928,9 @@ const ViewJeevanadiScreen({
     JeevanaadiFullProfile profileFull,
     JeevanaadiState state,
   ) {
+    final double completionPercentage =
+        profileFull.jeevanaadiDemoGraphicDetails.profileCompletionPercentage;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -913,6 +947,7 @@ const ViewJeevanadiScreen({
       ),
       child: Row(
         children: [
+          // Back button
           IconButton(
             icon: const Icon(Icons.arrow_back, size: 22),
             onPressed: () {
@@ -921,112 +956,117 @@ const ViewJeevanadiScreen({
             },
           ),
           const SizedBox(width: 6),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "REQUEST VIEW",
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: _getRequestStatusColor(
-                          state.requestStatus,
-                        ), // UNCOMMENT THIS
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Text(
-                        state.requestStatus?.toUpperCase() ?? 'PENDING',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      "Jeevanadi ID: ${profileFull.basicDetails.jeevanadiNo}",
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildApprovalButtons(BuildContext context, JeevanaadiState state) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      margin: const EdgeInsets.only(top: 20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade200),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+          // REQUEST VIEW text
           const Text(
-            "Request Action",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.brown,
+            "REQUEST VIEW",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+
+          const SizedBox(width: 16),
+
+          // PENDING status pill
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: _getRequestStatusColor(state.requestStatus),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              state.requestStatus?.toUpperCase() ?? 'PENDING',
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
-          const SizedBox(height: 16),
+
+          const Spacer(),
+
+          // Profile percentage (46.2%)
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            child: Text(
+              "${completionPercentage.toStringAsFixed(1)}%",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ),
+
+          // Approve button
+          if (state.isFromRequest &&
+              state.requestStatus == 'PENDING' &&
+              !state.isProcessingRequest)
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () =>
+                    _showApprovalDialog(context, state, isApprove: true),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Approve',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
+          const SizedBox(width: 12),
+
+          // Reject button
+          if (state.isFromRequest &&
+              state.requestStatus == 'PENDING' &&
+              !state.isProcessingRequest)
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () =>
+                    _showApprovalDialog(context, state, isApprove: false),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.red,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Reject',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+
           if (state.isProcessingRequest)
-            const Center(child: CircularProgressIndicator())
-          else
-            Row(
-              children: [
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showApprovalDialog(context, state, isApprove: true);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('APPROVE'),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      //  _showApprovalDialog(context, state, isApprove: false);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    child: const Text('REJECT'),
-                  ),
-                ),
-              ],
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
             ),
         ],
       ),

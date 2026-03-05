@@ -167,7 +167,7 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
       // Search in ALL loaded users
       final searchPattern = pattern.toLowerCase();
       final matches = _allUsers.where((user) {
-        final userName = user.userName?.toLowerCase() ?? '';
+        final userName = user.fullName?.toLowerCase() ?? '';
         final email = user.email?.toLowerCase() ?? '';
         final jeevanaadiNo = user.jeevanaadiNo?.toLowerCase() ?? '';
         return userName.contains(searchPattern) ||

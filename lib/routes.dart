@@ -23,10 +23,8 @@ import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
 import 'package:vikas_app/screeens/users/users_list_page.dart';
-import 'package:vikas_app/screeens/visits/EditVisit.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
 import 'package:vikas_app/screeens/visits/AddVisit.dart';
-import 'package:vikas_app/screeens/visits/ViewVisit.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override
@@ -117,12 +115,7 @@ getPageRoute() {
     ),
     GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
-    //GetPage(name: '/edit/visit', page: () => const EditVisit()),
-    GetPage(
-      name: '/edit/visit',
-      page: () => EditVisit(visitData: Get.arguments),
-    ),
-    GetPage(name: '/view/visit', page: () => const ViewVisit()),
+   
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
@@ -158,13 +151,17 @@ getPageRoute() {
     //   },
     // ),
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
-    GetPage(
+//     GetPage(
+//   name: '/jeevandiview', 
+//   page: () {
+//     final args = Get.arguments;
+//     return ViewJeevanadiScreen.fromArguments(args);
+//   },
+// ),
+GetPage(
   name: '/jeevandiview', 
-  page: () {
-    final args = Get.arguments;
-    return ViewJeevanadiScreen.fromArguments(args);
-  },
-),
+  page: () => ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
+)
 
     // GetPage(
     //   name: '/dashboard',

@@ -23,7 +23,12 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
     try {
       await Future.delayed(const Duration(milliseconds: 500)); // Simulate network delay
       _allDharmasetu = _getSampleData();
-      emit(DharmasetuLoaded(dharmasetuList: _allDharmasetu));
+      final totalPages = (_allDharmasetu.length / 10).ceil();
+      emit(DharmasetuLoaded(
+        dharmasetuList: _allDharmasetu,
+        currentPage: event.page,
+        totalPages: totalPages,
+      ));
     } catch (e) {
       emit(DharmasetuError('Failed to load: $e'));
     }
@@ -35,7 +40,12 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
   ) async {
     try {
       _allDharmasetu.add(event.dharmasetu);
-      emit(DharmasetuLoaded(dharmasetuList: _allDharmasetu));
+      final totalPages = (_allDharmasetu.length / 10).ceil();
+      emit(DharmasetuLoaded(
+        dharmasetuList: _allDharmasetu,
+        currentPage: 0,
+        totalPages: totalPages,
+      ));
       emit(DharmasetuOperationSuccess('Added successfully'));
     } catch (e) {
       emit(DharmasetuError('Failed to add: $e'));
@@ -51,7 +61,12 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
       if (index != -1) {
         _allDharmasetu[index] = event.dharmasetu;
       }
-      emit(DharmasetuLoaded(dharmasetuList: _allDharmasetu));
+      final totalPages = (_allDharmasetu.length / 10).ceil();
+      emit(DharmasetuLoaded(
+        dharmasetuList: _allDharmasetu,
+        currentPage: 0,
+        totalPages: totalPages,
+      ));
       emit(DharmasetuOperationSuccess('Updated successfully'));
     } catch (e) {
       emit(DharmasetuError('Failed to update: $e'));
@@ -64,7 +79,12 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
   ) async {
     try {
       _allDharmasetu.removeWhere((d) => d.id == event.id);
-      emit(DharmasetuLoaded(dharmasetuList: _allDharmasetu));
+      final totalPages = (_allDharmasetu.length / 10).ceil();
+      emit(DharmasetuLoaded(
+        dharmasetuList: _allDharmasetu,
+        currentPage: 0,
+        totalPages: totalPages,
+      ));
       emit(const DharmasetuOperationSuccess('Deleted successfully'));
     } catch (e) {
       emit(DharmasetuError('Failed to delete: $e'));

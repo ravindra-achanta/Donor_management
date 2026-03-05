@@ -1,17 +1,14 @@
-// lib/bloc_management/visits/visit_bloc.dart
-
-import 'package:bloc/bloc.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
+import 'package:vikas_app/bloc_management/visits/visit_event.dart';
+import 'package:vikas_app/bloc_management/visits/visit_state.dart';
 import 'package:vikas_app/screeens/models/request/visit_model.dart';
 import 'package:vikas_app/screeens/models/response/visit_view.dart';
-import 'visit_event.dart';
-import 'visit_state.dart';
 
 class VisitBloc extends Bloc<VisitEvent, VisitState> {
-  List<VisitModel> _allVisits = [];
-  int _currentPage = 0;
-  final int _itemsPerPage = 10;
+  final VisitRepository visitRepository;
 
-  VisitBloc() : super(VisitInitial()) {
+  VisitBloc({required this.visitRepository}) : super(VisitState()) {
     on<LoadVisits>(_onLoadVisits);
     on<LoadVisitDetails>(_onLoadVisitDetails);
     on<AddVisit>(_onAddVisit);
@@ -20,194 +17,239 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     on<CloseVisitProfileView>(_onCloseProfileView);
   }
 
+  /// Fetch paginated visits list
   Future<void> _onLoadVisits(
     LoadVisits event,
     Emitter<VisitState> emit,
   ) async {
-    emit(VisitLoading());
+    emit(state.copyWith(status: VisitApiStatus.loading));
+    
     try {
-      await Future.delayed(const Duration(milliseconds: 500));
-      _allVisits = _getSampleData();
-      _currentPage = event.page;
-      
-      final viewList = _allVisits
-          .map((model) => VisitView.fromVisitModel(model))
-          .toList();
+      final result = await visitRepository.getVisits(
+        page: event.page,
+        size: event.size,
+      );
 
-      emit(VisitLoaded(
+      if (!result.isSuccess) {
+        emit(state.copyWith(
+          status: VisitApiStatus.error,
+          errorMessage: result.error?.message ?? 'Failed to load visits',
+        ));
+        return;
+      }
+
+      final response = result.data;
+      
+      final List<VisitView> viewList = [];
+      if (response != null && response['content'] != null && response['content'] is List) {
+        viewList.addAll(
+          (response['content'] as List)
+              .map((json) => VisitView.fromJson(json as Map<String, dynamic>))
+              .toList()
+        );
+      }
+
+      emit(state.copyWith(
+        status: VisitApiStatus.loaded,
         visitList: viewList,
-        currentPage: _currentPage,
-        totalPages: (_allVisits.length / _itemsPerPage).ceil(),
+        currentPage: response?['currentPage'] ?? 0,
+        totalPages: response?['totalPages'] ?? 0,
+        totalElements: response?['totalElements'] ?? 0,
         isProfileViewVisible: false,
       ));
     } catch (e) {
-      emit(VisitError('Failed to load: $e'));
+      emit(state.copyWith(
+        status: VisitApiStatus.error,
+        errorMessage: 'Failed to load visits: $e',
+      ));
     }
   }
 
+  /// Fetch single visit details by ID
   Future<void> _onLoadVisitDetails(
     LoadVisitDetails event,
     Emitter<VisitState> emit,
   ) async {
-    final currentState = state;
-    if (currentState is VisitLoaded) {
-      emit(VisitLoaded(
-        visitList: currentState.visitList,
-        currentPage: currentState.currentPage,
-        totalPages: currentState.totalPages,
-        isProfileViewVisible: true,
-        profileLoading: true,
-      ));
+    emit(state.copyWith(
+      isProfileViewVisible: true,
+      profileLoading: true,
+      profileErrorMsg: null,
+      selectedVisit: null,
+    ));
 
-      try {
-        await Future.delayed(const Duration(milliseconds: 500));
-        final selected = _allVisits.firstWhere((d) => d.id == event.id);
-        
-        emit(VisitLoaded(
-          visitList: currentState.visitList,
-          currentPage: currentState.currentPage,
-          totalPages: currentState.totalPages,
-          isProfileViewVisible: true,
+    try {
+      final result = await visitRepository.getVisitDetails(event.id);
+
+      if (!result.isSuccess || result.data == null) {
+        emit(state.copyWith(
           profileLoading: false,
-          selectedVisit: selected,
+          profileErrorMsg: result.error?.message ?? 'Failed to load details',
         ));
-      } catch (e) {
-        emit(VisitLoaded(
-          visitList: currentState.visitList,
-          currentPage: currentState.currentPage,
-          totalPages: currentState.totalPages,
-          isProfileViewVisible: true,
-          profileLoading: false,
-          profileErrorMsg: 'Failed to load details: $e',
-        ));
+        return;
       }
+
+      final visitView = result.data!;
+      
+      final visitModel = VisitModel(
+        id: visitView.id,
+        visitorName: visitView.visitorName,
+        phoneNumber: visitView.phoneNumber,
+        email: visitView.email,
+        visitPurpose: visitView.visitPurpose,
+        comments: visitView.comments,
+        noOfGuests: visitView.noOfGuests,
+        existVisitor: visitView.existVisitor,
+      );
+
+      emit(state.copyWith(
+        profileLoading: false,
+        profileErrorMsg: null,
+        selectedVisit: visitModel,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        profileLoading: false,
+        profileErrorMsg: 'Failed to load details: $e',
+      ));
     }
   }
 
+  /// Add new visit
   Future<void> _onAddVisit(
     AddVisit event,
     Emitter<VisitState> emit,
   ) async {
+    emit(state.copyWith(isSubmitting: true, errorMessage: null));
+    
     try {
-      _allVisits.add(event.visit);
-      final viewList = _allVisits
-          .map((model) => VisitView.fromVisitModel(model))
-          .toList();
-          
-      emit(VisitLoaded(
-        visitList: viewList,
-        currentPage: _currentPage,
-        totalPages: (_allVisits.length / _itemsPerPage).ceil(),
+      final visitJson = {
+        'visitorName': event.visit.visitorName,
+        'phoneNumber': event.visit.phoneNumber,
+        'email': event.visit.email,
+        'visitPurpose': event.visit.visitPurpose,
+        'comments': event.visit.comments,
+        'noOfGuests': event.visit.noOfGuests,
+        'existVisitor': event.visit.existVisitor,
+      };
+
+      final result = await visitRepository.createVisit(visitJson);
+
+      if (!result.isSuccess) {
+        emit(state.copyWith(
+          isSubmitting: false,
+          errorMessage: result.error?.message ?? 'Failed to add visit',
+        ));
+        return;
+      }
+
+      // Refresh the list after adding
+      add(LoadVisits(page: state.currentPage));
+      emit(state.copyWith(
+        isSubmitting: false,
+        successMessage: 'Visit added successfully',
       ));
-      emit(VisitOperationSuccess('Added successfully'));
     } catch (e) {
-      emit(VisitError('Failed to add: $e'));
+      emit(state.copyWith(
+        isSubmitting: false,
+        errorMessage: 'Failed to add visit: $e',
+      ));
     }
   }
 
+  /// Update existing visit
   Future<void> _onUpdateVisit(
     UpdateVisit event,
     Emitter<VisitState> emit,
   ) async {
+    emit(state.copyWith(isSubmitting: true, errorMessage: null));
+    
     try {
-      final index = _allVisits.indexWhere((d) => d.id == event.visit.id);
-      if (index != -1) {
-        _allVisits[index] = event.visit;
+      final updateJson = {
+        'visitorName': event.visit.visitorName,
+        'phoneNumber': event.visit.phoneNumber,
+        'email': event.visit.email,
+        'visitPurpose': event.visit.visitPurpose,
+        'comments': event.visit.comments,
+        'noOfGuests': event.visit.noOfGuests,
+        'existVisitor': event.visit.existVisitor,
+      };
+
+      final result = await visitRepository.updateVisit(
+        id: event.visit.id,
+        updateData: updateJson,
+      );
+
+      if (!result.isSuccess) {
+        emit(state.copyWith(
+          isSubmitting: false,
+          errorMessage: result.error?.message ?? 'Failed to update visit',
+        ));
+        return;
+      }
+
+      // Refresh the list after updating
+      add(LoadVisits(page: state.currentPage));
+      
+      // Refresh details if profile is visible
+      if (state.isProfileViewVisible) {
+        add(LoadVisitDetails(event.visit.id));
       }
       
-      final viewList = _allVisits
-          .map((model) => VisitView.fromVisitModel(model))
-          .toList();
-          
-      emit(VisitLoaded(
-        visitList: viewList,
-        currentPage: _currentPage,
-        totalPages: (_allVisits.length / _itemsPerPage).ceil(),
-        isProfileViewVisible: false,
+      emit(state.copyWith(
+        isSubmitting: false,
+        successMessage: 'Visit updated successfully',
       ));
-      emit(VisitOperationSuccess('Updated successfully'));
     } catch (e) {
-      emit(VisitError('Failed to update: $e'));
+      emit(state.copyWith(
+        isSubmitting: false,
+        errorMessage: 'Failed to update visit: $e',
+      ));
     }
   }
 
+  /// Delete visit
   Future<void> _onDeleteVisit(
     DeleteVisit event,
     Emitter<VisitState> emit,
   ) async {
+    emit(state.copyWith(isDeleting: true, errorMessage: null));
+    
     try {
-      _allVisits.removeWhere((d) => d.id == event.id);
-      
-      final viewList = _allVisits
-          .map((model) => VisitView.fromVisitModel(model))
-          .toList();
-          
-      emit(VisitLoaded(
-        visitList: viewList,
-        currentPage: _currentPage,
-        totalPages: (_allVisits.length / _itemsPerPage).ceil(),
+      final result = await visitRepository.deleteVisit(event.id);
+
+      if (!result.isSuccess) {
+        emit(state.copyWith(
+          isDeleting: false,
+          errorMessage: result.error?.message ?? 'Failed to delete visit',
+        ));
+        return;
+      }
+
+      // Refresh the list after deleting
+      add(LoadVisits(page: state.currentPage));
+      emit(state.copyWith(
+        isDeleting: false,
         isProfileViewVisible: false,
+        successMessage: 'Visit deleted successfully',
       ));
-      emit(const VisitOperationSuccess('Deleted successfully'));
     } catch (e) {
-      emit(VisitError('Failed to delete: $e'));
+      emit(state.copyWith(
+        isDeleting: false,
+        errorMessage: 'Failed to delete visit: $e',
+      ));
     }
   }
 
+  /// Close profile view
   void _onCloseProfileView(
     CloseVisitProfileView event,
     Emitter<VisitState> emit,
   ) {
-    final currentState = state;
-    if (currentState is VisitLoaded) {
-      emit(VisitLoaded(
-        visitList: currentState.visitList,
-        currentPage: currentState.currentPage,
-        totalPages: currentState.totalPages,
-        isProfileViewVisible: false,
-      ));
-    }
-  }
-
-  List<VisitModel> _getSampleData() {
-    return [
-      VisitModel(
-        id: '1',
-        jeevandNum: 'JN001',
-        name: 'Rajesh Kumar',
-        phone: '9876543210',
-        email: 'rajesh@example.com',
-        visitPurpose: 'General Visit',
-        noOfGuests: 2,
-        comments: 'First time visitor',
-        date: '2024-01-15',
-        status: 'Completed',
-      ),
-      VisitModel(
-        id: '2',
-        jeevandNum: 'JN002',
-        name: 'Priya Singh',
-        phone: '9876543211',
-        email: 'priya@example.com',
-        visitPurpose: 'Donation',
-        noOfGuests: 1,
-        comments: 'Wants to donate',
-        date: '2024-01-20',
-        status: 'Pending',
-      ),
-      VisitModel(
-        id: '3',
-        jeevandNum: 'JN003',
-        name: 'Amit Patel',
-        phone: '9876543212',
-        email: 'amit@example.com',
-        visitPurpose: 'Volunteering',
-        noOfGuests: 3,
-        comments: 'Interested in volunteering',
-        date: '2024-01-25',
-        status: 'Scheduled',
-      ),
-      
-    ];
+    emit(state.copyWith(
+      isProfileViewVisible: false,
+      profileLoading: null,
+      profileErrorMsg: null,
+      selectedVisit: null,
+    ));
   }
 }

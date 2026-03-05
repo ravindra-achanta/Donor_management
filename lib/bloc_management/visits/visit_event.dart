@@ -1,5 +1,3 @@
-// lib/bloc_management/visits/visit_event.dart
-
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/request/visit_model.dart';
 
@@ -12,9 +10,10 @@ abstract class VisitEvent extends Equatable {
 
 class LoadVisits extends VisitEvent {
   final int page;
-  const LoadVisits({this.page = 0});
+  final int size;
+  const LoadVisits({this.page = 0, this.size = 10});
   @override
-  List<Object?> get props => [page];
+  List<Object?> get props => [page, size];
 }
 
 class LoadVisitDetails extends VisitEvent {

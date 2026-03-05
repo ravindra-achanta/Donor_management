@@ -57,7 +57,7 @@ class JeevanaadiFullProfile {
 }
 
 class BasicDetails {
-  final int id;
+  final String id;
   final String? lastLogin;
   final bool isSuperuser;
   final String email;
@@ -101,7 +101,7 @@ class BasicDetails {
 
   factory BasicDetails.fromJson(Map<String, dynamic> json) {
     return BasicDetails(
-      id: json['id'] ?? 0,
+      id: json['id']?.toString() ?? '',
       lastLogin: json['lastLogin'],
       isSuperuser: json['isSuperuser'] ?? false,
       email: json['email'] ?? '',
@@ -125,7 +125,7 @@ class BasicDetails {
 }
 
 class ProfileDetails {
-  final int id;
+  final String id;
   final String fullName;
   final String phoneNumber;
   final String whatsappNumber;
@@ -184,7 +184,7 @@ class ProfileDetails {
 
   factory ProfileDetails.fromJson(Map<String, dynamic> json) {
     return ProfileDetails(
-      id: json['id'] ?? 0,
+      id: json['id']?.toString() ?? '',
       fullName: json['fullName'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       whatsappNumber: json['whatsappNumber'] ?? '',
@@ -203,9 +203,9 @@ class ProfileDetails {
       rashi: json['rashi'] ?? 0,
       fillPercentage: json['fillPercentage']?.toDouble() ?? 0.0,
       communicationPref: json['communicationPref'] ?? '',
-      referredById: json['referredById'],
-      userId: json['userId'] ?? 0,
-      joinedDate: json['joinedDate'] ?? '',
+      referredById: json['referredById'] is int ? json['referredById'] : (int.tryParse(json['referredById']?.toString() ?? '') ?? null),
+      userId: json['userId'] is int ? json['userId'] : (int.tryParse(json['userId']?.toString() ?? '') ?? 0),
+      joinedDate: json['joinedDate']?.toString() ?? '',
       paadam: json['paadam'],
       panNumber: json['panNumber'],
       userType: json['userType'] ?? '',
