@@ -2,7 +2,8 @@ import 'package:vikas_app/screeens/models/enum/user_type.dart';
 
 class ApiConstants {
   static const String baseUrl = "http://172.235.18.48:8050";
-  static const String VIKAS = "/vikas/api/v1/vikas";
+  
+  static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
   static const String JEEVANADI_URI = "/vikas/api/v1/jeevanaadi";
   static const String role_URI = "/vikas/api/v1/role";
@@ -37,14 +38,18 @@ class ApiConstants {
   static const String jeevanadi_deallocate_assignees =
       "${JEEVANADI_URI}/deallocate/assignees/karyakartha";
 
-static String getJeevanaadiUpdate = "$VIKAS/jeevanaadi/";
-static String getrequestview = "$VIKAS/jeevanaadi/staff/requests";
-static String getrequestviewbyid = "$VIKAS/jeevanaadi/staff/requests";
+static String getJeevanaadiUpdate = "$VIKAS/vikas/jeevanaadi/";
+static String getrequestview = "$VIKAS/vikas/jeevanaadi/staff/requests";
+static String getrequestviewbyid = "$VIKAS/vikas/jeevanaadi/staff/requests";
 
- 
-    
-  //notices
+//notices
   static const String NOTICES_BASE = "${IDM_URI}/notices";
+   //visits
+  static const String visitsList = "$VIKAS/visits/list";          
+  static const String visitsCreate = "$VIKAS/visits/create";      
+  static const String visitsUpdate = "$VIKAS/visits";      
+  static const String visitsDetails = "$VIKAS/visits";             
+  static const String visitsDelete = "$VIKAS/visits";
 
   //review 
   //static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";
