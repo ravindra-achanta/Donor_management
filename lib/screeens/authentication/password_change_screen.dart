@@ -37,6 +37,11 @@ class _PasswordChangeScreenState extends State<PasswordChangeScreen> {
     super.initState();
     newPasswordController.addListener(_resetErrorMessage);
     
+    // Debug prints to check current AuthBloc state
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authState = context.read<AuthBloc>().state;
+    });
+    
     // Prevent back navigation
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setupNavigationGuard();
