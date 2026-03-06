@@ -34,6 +34,7 @@ class KaryakattaRepo {
       User user = User.fromJson(data);
       return ApiResult.success(user);
     } catch (e) {
+      print("Error parsing user data: $e");
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
