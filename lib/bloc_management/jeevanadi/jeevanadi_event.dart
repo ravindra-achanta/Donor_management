@@ -15,8 +15,6 @@ class FetchJeevanaadisEvent extends JeevanaadiEvent {
   FetchJeevanaadisEvent(this.page);
 }
 
-
-
 class CloseProfileView extends JeevanaadiEvent {}
 
 // class FetchJeevanadiMemberEvent extends JeevanaadiEvent {
@@ -29,15 +27,13 @@ class CloseProfileView extends JeevanaadiEvent {}
 
 class FetchAssignedKaryakarthasEvent extends JeevanaadiEvent {
   final String memberId;
-  final int page; 
+  final int page;
   final int size;
   FetchAssignedKaryakarthasEvent(this.memberId, this.page, this.size);
 
   @override
   List<Object?> get props => [memberId, page, size];
 }
-
-
 
 class ToggleUnassignedSelectionEvent extends JeevanaadiEvent {
   final String userId;
@@ -47,10 +43,9 @@ class ToggleUnassignedSelectionEvent extends JeevanaadiEvent {
   List<Object?> get props => [userId];
 }
 
-
 class AssignSelectedKaryakarthasEvent extends JeevanaadiEvent {
-  final String karyakarthaId; 
-  final List<String> memberIds; 
+  final String karyakarthaId;
+  final List<String> memberIds;
 
   AssignSelectedKaryakarthasEvent({
     required this.karyakarthaId,
@@ -65,16 +60,14 @@ class RemoveAssignedKaryakarthaEvent extends JeevanaadiEvent {
   final String karyakarthaId;
   final String memberId;
 
-   RemoveAssignedKaryakarthaEvent({
+  RemoveAssignedKaryakarthaEvent({
     required this.karyakarthaId,
     required this.memberId,
   });
 
-
   @override
-  List<Object?> get props => [karyakarthaId,memberId];
+  List<Object?> get props => [karyakarthaId, memberId];
 }
-
 
 //full profile view
 class FetchJeevanaadiProfileFullEvent extends JeevanaadiEvent {
@@ -84,6 +77,15 @@ class FetchJeevanaadiProfileFullEvent extends JeevanaadiEvent {
 
   @override
   List<Object?> get props => [jeevanadiNo];
+}
+
+class FetchJeevanaadiDonationEvent extends JeevanaadiEvent {
+  final String jeevanadiId;
+  final int page;
+  FetchJeevanaadiDonationEvent(this.jeevanadiId, this.page);
+
+  @override
+  List<Object?> get props => [jeevanadiId, page];
 }
 
 class FetchUnassignedKaryakarthasEvent extends JeevanaadiEvent {
@@ -112,16 +114,11 @@ class FetchReferredByUsersEvent extends JeevanaadiEvent {
   final int size;
   final String? searchQuery;
 
-  FetchReferredByUsersEvent({
-    this.page = 0,
-    this.size = 20,
-    this.searchQuery,
-  });
+  FetchReferredByUsersEvent({this.page = 0, this.size = 20, this.searchQuery});
 
   @override
   List<Object?> get props => [page, size, searchQuery];
 }
-
 
 class ToggleAssignedSelectionEvent extends JeevanaadiEvent {
   final String userId;
@@ -142,19 +139,11 @@ class RemoveSelectedAssignedMembersEvent extends JeevanaadiEvent {
   List<Object?> get props => [karyakarthaId];
 }
 
-
 class FetchJeevanaadiProfileFromRequestEvent extends JeevanaadiEvent {
   final String jeevanadiId;
-  
+
   FetchJeevanaadiProfileFromRequestEvent(this.jeevanadiId);
-  
+
   @override
   List<Object?> get props => [jeevanadiId];
 }
-
-
-
-
-
-
-

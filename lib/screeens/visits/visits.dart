@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -37,17 +36,21 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     Get.dialog(
       AlertDialog(
         title: const Text('Delete Visit'),
-        content: Text('Are you sure you want to delete the visit for "$visitorName"?'),
+        content: Text(
+          'Are you sure you want to delete the visit for "$visitorName"?',
+        ),
         actions: [
           TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
           TextButton(
             onPressed: () {
               Get.back();
               context.read<VisitBloc>().add(DeleteVisit(id));
-              Get.showSnackbar(const GetSnackBar(
-                message: 'Deleting visit...',
-                duration: Duration(seconds: 1),
-              ));
+              Get.showSnackbar(
+                const GetSnackBar(
+                  message: 'Deleting visit...',
+                  duration: Duration(seconds: 1),
+                ),
+              );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -57,17 +60,8 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     );
   }
 
-  void _onVisitTap(String id) => context.read<VisitBloc>().add(LoadVisitDetails(id));
-
-  User? _convertVisitToUser(VisitView? visit) => visit == null ? null : User(
-    id: visit.id,
-    name: visit.visitorName,
-    email: visit.email,
-    mobileNumber: visit.phoneNumber,
-    userType: 'Visit',
-    status: visit.existVisitor ? 'Existing Visitor' : 'New Visitor',
-    uniqueId: visit.id,
-  );
+  void _onVisitTap(String id) =>
+      context.read<VisitBloc>().add(LoadVisitDetails(id));
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +76,11 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
               return const Center(child: ScreenLoader());
             }
             if (state.status == VisitApiStatus.error) {
-              return Center(child: ErrorCard(message: state.errorMessage ?? 'Unknown error'));
+              return Center(
+                child: ErrorCard(
+                  message: state.errorMessage ?? 'Unknown error',
+                ),
+              );
             }
             if (state.status == VisitApiStatus.loaded) {
               return _buildContent(state);
@@ -125,12 +123,16 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
         const SizedBox(height: 8),
         Expanded(
           child: Card(
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
               children: [
                 Expanded(
                   child: ClipRRect(
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(12),
+                    ),
                     child: SingleChildScrollView(
                       child: CommonList<VisitView>(
                         currentPage: state.currentPage,
@@ -138,21 +140,28 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
                         screenType: "VISIT",
                         onUserTap: _onVisitTap,
                         onDelete: (id) {
-                          final item = state.visitList.firstWhere((d) => d.id == id);
+                          final item = state.visitList.firstWhere(
+                            (d) => d.id == id,
+                          );
                           _showDeleteDialog(id, item.visitorName);
                         },
                         onUpdate: (id) {
-                          final item = state.visitList.firstWhere((d) => d.id == id);
-                          Get.toNamed('/add/visit', arguments: VisitModel(
-                            id: item.id,
-                            visitorName: item.visitorName,
-                            phoneNumber: item.phoneNumber,
-                            email: item.email,
-                            visitPurpose: item.visitPurpose,
-                            comments: item.comments,
-                            noOfGuests: item.noOfGuests,
-                            existVisitor: item.existVisitor,
-                          ));
+                          final item = state.visitList.firstWhere(
+                            (d) => d.id == id,
+                          );
+                          Get.toNamed(
+                            '/add/visit',
+                            arguments: VisitModel(
+                              id: item.id,
+                              visitorName: item.visitorName,
+                              phoneNumber: item.phoneNumber,
+                              email: item.email,
+                              visitPurpose: item.visitPurpose,
+                              comments: item.comments,
+                              noOfGuests: item.noOfGuests,
+                              existVisitor: item.existVisitor,
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -173,12 +182,18 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text("Visits", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const Text(
+            "Visits",
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           Row(
             children: [
-              IconButton(icon: const Icon(Icons.refresh), onPressed: () {
-                context.read<VisitBloc>().add(const LoadVisits(page: 0));
-              }),
+              IconButton(
+                icon: const Icon(Icons.refresh),
+                onPressed: () {
+                  context.read<VisitBloc>().add(const LoadVisits(page: 0));
+                },
+              ),
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () => Get.toNamed('/add/visit'),
@@ -206,7 +221,11 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             IconButton(
-              onPressed: state.currentPage > 0 ? () => context.read<VisitBloc>().add(LoadVisits(page: state.currentPage - 1)) : null,
+              onPressed: state.currentPage > 0
+                  ? () => context.read<VisitBloc>().add(
+                      LoadVisits(page: state.currentPage - 1),
+                    )
+                  : null,
               icon: const Icon(Icons.skip_previous_outlined),
             ),
             Container(
@@ -215,10 +234,17 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
                 color: Colors.grey.shade100,
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: Text("${state.currentPage + 1}/${state.totalPages}", style: const TextStyle(fontWeight: FontWeight.w600)),
+              child: Text(
+                "${state.currentPage + 1}/${state.totalPages}",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
             ),
             IconButton(
-              onPressed: state.currentPage < state.totalPages - 1 ? () => context.read<VisitBloc>().add(LoadVisits(page: state.currentPage + 1)) : null,
+              onPressed: state.currentPage < state.totalPages - 1
+                  ? () => context.read<VisitBloc>().add(
+                      LoadVisits(page: state.currentPage + 1),
+                    )
+                  : null,
               icon: const Icon(Icons.skip_next_outlined),
             ),
           ],
@@ -230,17 +256,15 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
   Widget _buildProfileSection(VisitState state) {
     return AnimatedSwitcher(
       duration: _animationDuration,
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      transitionBuilder: (child, animation) =>
+          FadeTransition(opacity: animation, child: child),
       child: state.profileLoading == true
           ? const ScreenLoader(key: ValueKey('loader'))
           : state.profileErrorMsg != null
-              ? Center(child: ErrorCard(message: state.profileErrorMsg!))
-              : state.selectedVisit != null
-                  ? _buildProfileView(state.selectedVisit!)
-                  : const SizedBox.shrink(),
+          ? Center(child: ErrorCard(message: state.profileErrorMsg!))
+          : state.selectedVisit != null
+          ? _buildProfileView(state.selectedVisit!)
+          : const SizedBox.shrink(),
     );
   }
 
@@ -258,10 +282,11 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
 
     return ListViewScreen(
       key: ValueKey('profile_${visit.id}'),
-      user: _convertVisitToUser(visitView),
-      visitData: visitView,
-      onClose: () => context.read<VisitBloc>().add(const CloseVisitProfileView()),
-      screenType: "VISIT",
+      data: visitView,
+      // visitData: visitView,
+      onClose: () =>
+          context.read<VisitBloc>().add(const CloseVisitProfileView()),
+      screenType: "VISITS",
       onDelete: () => _showDeleteDialog(visit.id, visit.visitorName),
       onViewMore: () => Get.toNamed('/view/visit', arguments: visitView),
     );

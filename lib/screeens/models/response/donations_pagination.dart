@@ -1,25 +1,25 @@
-import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
+import 'package:vikas_app/screeens/models/response/donations.dart';
 
-class JeevanaadiPaginatedView {
+class JeevanaadiDonationView {
   final int? totalElements;
   final int? totalPages;
-  final List<JeevanaadiUser>? content;
+  final List<DonationEvent>? content;
   final int? currentPage;
 
-  JeevanaadiPaginatedView({
+  JeevanaadiDonationView({
     this.totalElements,
     this.totalPages,
     this.content,
     this.currentPage,
   });
 
-  factory JeevanaadiPaginatedView.fromJson(Map<String, dynamic> json) {
-    return JeevanaadiPaginatedView(
+  factory JeevanaadiDonationView.fromJson(Map<String, dynamic> json) {
+    return JeevanaadiDonationView(
       totalElements: json['totalElements']?.toInt(),
       currentPage: json['currentPage']?.toInt(),
       totalPages: json['totalPages']?.toInt(),
       content: (json['content'] as List?)
-          ?.map((x) => JeevanaadiUser.fromJson(x as Map<String, dynamic>))
+          ?.map((x) => DonationEvent.fromJson(x as Map<String, dynamic>))
           .toList(),
     );
   }

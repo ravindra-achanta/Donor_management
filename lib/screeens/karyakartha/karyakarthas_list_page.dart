@@ -205,7 +205,8 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                 )
                               : ListViewScreen(
                                   key: ValueKey('profile'),
-                                  user: state?.karyakarthaProfile,
+                                  data: state?.karyakarthaProfile,
+                                  screenType: "USER_PROFILE",
                                   onClose: () {
                                     context.read<KaryakarthaBloc>().add(
                                       CloseProfileView(),
