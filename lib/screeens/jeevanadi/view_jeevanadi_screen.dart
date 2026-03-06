@@ -202,6 +202,8 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 ),
 
                 CommonList(
+
+                  
                   users: state.allDonations,
                   currentPage: state.donationCurrentPage,
                   onUserTap: (user) {},
