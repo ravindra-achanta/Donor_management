@@ -8,8 +8,6 @@ import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/jeevanadi/edit_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
-import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
-import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class ViewJeevanadiScreen extends StatelessWidget {
@@ -26,47 +24,39 @@ class ViewJeevanadiScreen extends StatelessWidget {
          userId != null || jeevanadiId != null,
          'Either userId or jeevanadiId must be provided',
        );
-       
-        static Widget withArguments() {
-  final args = Get.arguments;
-  
-  // Handle null arguments
-  if (args == null) {
-    return const Scaffold(
-      body: Center(
-        child: Text('Error: No arguments provided'),
-      ),
-    );
+
+  static Widget withArguments() {
+    final args = Get.arguments;
+
+    // Handle null arguments
+    if (args == null) {
+      return const Scaffold(
+        body: Center(child: Text('Error: No arguments provided')),
+      );
+    }
+
+    if (args is Map) {
+      return ViewJeevanadiScreen(
+        userId: args['userId'],
+        jeevanadiId: args['jeevanadiId'],
+        isFromRequest: args['isFromRequest'] ?? false,
+      );
+    } else if (args is String) {
+      return ViewJeevanadiScreen(userId: args, isFromRequest: false);
+    }
+
+    return const SizedBox.shrink();
   }
-  
-  if (args is Map) {
-    return ViewJeevanadiScreen(
-      userId: args['userId'],
-      jeevanadiId: args['jeevanadiId'],
-      isFromRequest: args['isFromRequest'] ?? false,
-    );
-  } else if (args is String) {
-    return ViewJeevanadiScreen(
-      userId: args,
-      isFromRequest: false,
-    );
-  }
-  
-  return const SizedBox.shrink();
-}
 
   factory ViewJeevanadiScreen.fromArguments(dynamic args) {
     if (args is Map) {
       return ViewJeevanadiScreen(
-         userId: args['userId'], 
+        userId: args['userId'],
         jeevanadiId: args['jeevanadiId'],
         isFromRequest: args['isFromRequest'] ?? false,
       );
     } else {
-      return ViewJeevanadiScreen(
-        userId: args as String?, 
-        isFromRequest: false,
-      );
+      return ViewJeevanadiScreen(userId: args as String?, isFromRequest: false);
     }
   }
 
@@ -87,6 +77,11 @@ class ViewJeevanadiScreen extends StatelessWidget {
           FetchJeevanaadiProfileFullEvent(userId!),
         );
       }
+      if (userId != null || jeevanadiId != null) {
+        context.read<JeevanaadiBloc>().add(
+          FetchJeevanaadiDonationEvent(userId ?? jeevanadiId ?? '', 0),
+        );
+      }
     });
 
     return Layout(
@@ -97,7 +92,10 @@ class ViewJeevanadiScreen extends StatelessWidget {
               previous.profileLoading != current.profileLoading ||
               previous.profileErrorMsg != current.profileErrorMsg ||
               previous.isFromRequest != current.isFromRequest ||
-              previous.requestStatus != current.requestStatus;
+              previous.requestStatus != current.requestStatus ||
+              previous.allDonations != current.allDonations ||
+              previous.donationCurrentPage != current.donationCurrentPage ||
+              previous.totalDonationpages != current.totalDonationpages;
         },
         builder: (context, state) {
           if (state.profileLoading == true) {
@@ -204,14 +202,56 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 ),
 
                 CommonList(
-                  users: _getDummyUsers(),
-                  currentPage: 0,
+                  users: state.allDonations,
+                  currentPage: state.donationCurrentPage,
                   onUserTap: (user) {},
                   onDelete: (user) {},
                   onUpdate: (user) {},
                   screenType: "DONATION",
                 ),
-
+                if (state.allDonations.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            if (state.donationCurrentPage > 0) {
+                              context.read<JeevanaadiBloc>().add(
+                                FetchJeevanaadiDonationEvent(
+                                  userId ?? jeevanadiId ?? '',
+                                  (state.donationCurrentPage) - 1,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.skip_previous_outlined),
+                        ),
+                        Text(
+                          "${(state.donationCurrentPage) + 1}/${state.totalDonationpages}",
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            if (state.donationCurrentPage <
+                                state.totalDonationpages - 1) {
+                              print(
+                                "Fetching next page: ${(state.donationCurrentPage) + 1}",
+                              );
+                              context.read<JeevanaadiBloc>().add(
+                                FetchJeevanaadiDonationEvent(
+                                  userId ?? jeevanadiId ?? '',
+                                  (state.donationCurrentPage) + 1,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.skip_next_outlined),
+                        ),
+                        SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 // if (state.isFromRequest && state.requestStatus == 'PENDING')
                 //  // _buildApprovalButtons(context, state),
               ],
@@ -226,8 +266,6 @@ class ViewJeevanadiScreen extends StatelessWidget {
     BuildContext context,
     JeevanaadiFullProfile profileFull,
   ) {
-    final basicDetails = profileFull.basicDetails;
-    final profileDetails = profileFull.profileDetails;
     final demoGraphic = profileFull.jeevanaadiDemoGraphicDetails; // Add this
 
     return Container(
@@ -907,20 +945,6 @@ class ViewJeevanadiScreen extends StatelessWidget {
       default:
         return Colors.grey.shade100;
     }
-  }
-
-  List<User> _getDummyUsers() {
-    return [
-      User(
-        uniqueId: 'UID123',
-        userType: "Admin",
-        status: "ACTIVE",
-        id: '1',
-        name: 'John Doe',
-        mobileNumber: '1234567890',
-        email: 'john.doe@example.com',
-      ),
-    ];
   }
 
   Widget _buildRequestHeaderRow(

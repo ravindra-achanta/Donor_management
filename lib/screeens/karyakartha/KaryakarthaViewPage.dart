@@ -11,6 +11,7 @@ import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
 import 'package:vikas_app/screeens/common/backButton.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
@@ -41,9 +42,6 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
     context.read<KaryakarthaBloc>().add(
       FetchKaryakarthaProfileEvent(widget.karyakarthaId),
     );
-    // context.read<JeevanaadiBloc>().add(
-    //   FetchJeevanadiMemberEvent(widget.karyakarthaId),
-    // );
     context.read<JeevanaadiBloc>().add(
       FetchAssignedKaryakarthasEvent(widget.karyakarthaId, _assignedPage, 10),
     );
@@ -523,126 +521,81 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                               ),
                                             ),
                                             const SizedBox(width: 12),
-                                            FxText.bodyMedium(
-                                              "Unassigned jeevanadi members",
-                                              style: Theme.of(context)
-                                                  .textTheme
-                                                  .titleMedium
-                                                  ?.copyWith(
-                                                    color: Colors.black,
-                                                    fontSize: 16,
-                                                  ),
+                                            SizedBox(
+                                              width: 235,
+                                              child: FxText.bodyMedium(
+                                                "Unassigned jeevanadi members",
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .titleMedium
+                                                    ?.copyWith(
+                                                      color: Colors.black,
+                                                      fontSize: 16,
+                                                    ),
+                                                maxLines: 1,
+                                                overflow:
+                                                    TextOverflow.ellipsis,
+                                              ),
                                             ),
                                           ],
                                         ),
+                                        SizedBox(width: 10,),
                                         if (state
                                             .selectedUnassignedIds
                                             .isNotEmpty)
-                                          ElevatedButton.icon(
-                                            onPressed: state.isAssigning
-                                                ? null
-                                                : () {
-                                                    context.read<JeevanaadiBloc>().add(
-                                                      AssignSelectedKaryakarthasEvent(
-                                                        karyakarthaId: widget
-                                                            .karyakarthaId,
-                                                        memberIds: state
-                                                            .selectedUnassignedIds,
-                                                      ),
-                                                    );
-                                                  },
-                                            icon: state.isAssigning
-                                                ? const SizedBox(
-                                                    width: 18,
-                                                    height: 18,
-                                                    child:
-                                                        CircularProgressIndicator(
-                                                          strokeWidth: 2,
-                                                          color: Colors.white,
+                                          Expanded(
+                                            child: ElevatedButton.icon(
+                                              onPressed: state.isAssigning
+                                                  ? null
+                                                  : () {
+                                                      context.read<JeevanaadiBloc>().add(
+                                                        AssignSelectedKaryakarthasEvent(
+                                                          karyakarthaId: widget
+                                                              .karyakarthaId,
+                                                          memberIds: state
+                                                              .selectedUnassignedIds,
                                                         ),
-                                                  )
-                                                : const Icon(
-                                                    Icons.add,
-                                                    size: 20,
-                                                  ),
-                                            label: FxText.bodyMedium(
-                                              state.isAssigning
-                                                  ? 'Assigning...'
-                                                  : 'Add members',
-                                            ),
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.green.shade600,
-                                              foregroundColor: Colors.white,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 18,
-                                                    vertical: 12,
-                                                  ),
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(8),
+                                                      );
+                                                    },
+                                              icon: state.isAssigning
+                                                  ? const SizedBox(
+                                                      width: 18,
+                                                      height: 18,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                            color: Colors.white,
+                                                          ),
+                                                    )
+                                                  : const Icon(
+                                                      Icons.add,
+                                                      size: 20,
+                                                    ),
+                                              label: FxText.bodyMedium(
+                                                state.isAssigning
+                                                    ? 'Assigning...'
+                                                    : 'Add',
                                               ),
-                                              elevation: 3,
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.green.shade600,
+                                                foregroundColor: Colors.white,
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 18,
+                                                      vertical: 12,
+                                                    ),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                ),
+                                                elevation: 3,
+                                              ),
                                             ),
                                           ),
-                                        // ElevatedButton.icon(
-                                        //   onPressed: state.isAssigning
-                                        //       ? null
-                                        //       : () {
-                                        //           context
-                                        //               .read<JeevanaadiBloc>()
-                                        //               .add(
-                                        //                 AssignSelectedKaryakarthasEvent(
-                                        //                   widget.karyakarthaId,
-
-                                        //                 ),
-                                        //               );
-                                        //         },
-                                        //   icon: state.isAssigning
-                                        //       ? const SizedBox(
-                                        //           width: 18,
-                                        //           height: 18,
-                                        //           child:
-                                        //               CircularProgressIndicator(
-                                        //                 strokeWidth: 2,
-                                        //                 color: Colors.white,
-                                        //               ),
-                                        //         )
-                                        //       : const Icon(
-                                        //           Icons.add,
-                                        //           size: 20,
-                                        //         ),
-                                        //   label: FxText.bodyMedium(
-                                        //     state.isAssigning
-                                        //         ? 'Adding...'
-                                        //         : 'Add members',
-                                        //   ),
-                                        //   style: ElevatedButton.styleFrom(
-                                        //     backgroundColor:
-                                        //         Colors.green.shade600,
-                                        //     foregroundColor: Colors.white,
-                                        //     padding:
-                                        //         const EdgeInsets.symmetric(
-                                        //           horizontal: 18,
-                                        //           vertical: 12,
-                                        //         ),
-                                        //     shape: RoundedRectangleBorder(
-                                        //       borderRadius:
-                                        //           BorderRadius.circular(8),
-                                        //     ),
-                                        //     elevation: 3,
-                                        //   ),
-                                        // ),
                                       ],
                                     ),
-                                    SizedBox(
-                                      height:
-                                          MediaQuery.of(context).size.width >
-                                              1200
-                                          ? 16
-                                          : 12,
-                                    ),
+
                                     Expanded(
                                       child:
                                           state.unassignedKaryakarthas.isEmpty
@@ -857,7 +810,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                       SizedBox(
                                                         width: 70,
                                                         child: FxText.bodyMedium(
-                                                          user.name,
+                                                          user.fullName,
                                                           style: FxTextStyle.bodyMedium(
                                                             fontSize: 11,
                                                             fontWeight: 600,
@@ -1157,7 +1110,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
   //     ],
   //   );
   // }
-  Widget _buildAssignedUserItem(User user, JeevanaadiState state) {
+  Widget _buildAssignedUserItem(JeevanaadiUser user, JeevanaadiState state) {
     final isSelected = state.selectedAssignedIds.contains(user.id);
 
     return GestureDetector(
@@ -1274,7 +1227,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
           SizedBox(
             width: 80,
             child: FxText.bodyMedium(
-              user.name,
+              user.fullName,
               style: FxTextStyle.bodyMedium(
                 fontSize: 12,
                 fontWeight: 600,

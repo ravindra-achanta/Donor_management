@@ -35,7 +35,8 @@ class JeevanaadiFullProfile {
           return <String, dynamic>{};
         })(),
       ),
-      relationDetails: (json['relationDetails'] as List<dynamic>?)
+      relationDetails:
+          (json['relationDetails'] as List<dynamic>?)
               ?.map((e) => RelationDetails.fromJson(e))
               .toList() ??
           [],
@@ -45,13 +46,16 @@ class JeevanaadiFullProfile {
         if (occ is Map<String, dynamic>) {
           return OccupationDetails.fromJson(occ);
         }
-        if (occ is List && occ.isNotEmpty && occ.first is Map<String, dynamic>) {
+        if (occ is List &&
+            occ.isNotEmpty &&
+            occ.first is Map<String, dynamic>) {
           return OccupationDetails.fromJson(occ.first as Map<String, dynamic>);
         }
         return null;
       }(),
-      jeevanaadiDemoGraphicDetails:
-          JeevanaadiDemoGraphicDetails.fromJson(json['jeevanaadiDemoGraphicDetails'] ?? {}),
+      jeevanaadiDemoGraphicDetails: JeevanaadiDemoGraphicDetails.fromJson(
+        json['jeevanaadiDemoGraphicDetails'] ?? {},
+      ),
     );
   }
 }
@@ -203,8 +207,12 @@ class ProfileDetails {
       rashi: json['rashi'] ?? 0,
       fillPercentage: json['fillPercentage']?.toDouble() ?? 0.0,
       communicationPref: json['communicationPref'] ?? '',
-      referredById: json['referredById'] is int ? json['referredById'] : (int.tryParse(json['referredById']?.toString() ?? '') ?? null),
-      userId: json['userId'] is int ? json['userId'] : (int.tryParse(json['userId']?.toString() ?? '') ?? 0),
+      referredById: json['referredById'] is int
+          ? json['referredById']
+          : (int.tryParse(json['referredById']?.toString() ?? '') ?? null),
+      userId: json['userId'] is int
+          ? json['userId']
+          : (int.tryParse(json['userId']?.toString() ?? '') ?? 0),
       joinedDate: json['joinedDate']?.toString() ?? '',
       paadam: json['paadam'],
       panNumber: json['panNumber'],
@@ -239,7 +247,9 @@ class RelationDetails {
 
   factory RelationDetails.fromJson(Map<String, dynamic> json) {
     return RelationDetails(
-      id: json['id'] ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       relation: json['relation'] ?? '',
       name: json['name'] ?? '',
       dob: json['dob'],
@@ -273,7 +283,9 @@ class OccupationDetails {
 
   factory OccupationDetails.fromJson(Map<String, dynamic> json) {
     return OccupationDetails(
-      id: json['id'] ?? 0,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? '') ?? 0,
       occName: json['occName'] ?? '',
       occDate: json['occDate'] ?? '',
       userId: json['userId'],
@@ -287,9 +299,7 @@ class OccupationDetails {
 class JeevanaadiDemoGraphicDetails {
   final double profileCompletionPercentage;
 
-  JeevanaadiDemoGraphicDetails({
-    required this.profileCompletionPercentage,
-  });
+  JeevanaadiDemoGraphicDetails({required this.profileCompletionPercentage});
 
   factory JeevanaadiDemoGraphicDetails.fromJson(Map<String, dynamic> json) {
     return JeevanaadiDemoGraphicDetails(

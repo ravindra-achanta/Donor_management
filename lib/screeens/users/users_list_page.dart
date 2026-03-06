@@ -69,7 +69,8 @@ class _UsersState extends State<Users> {
                                     Get.to(
                                       () => RegistrationPage(
                                         title: "Add New User",
-                                        type: RegistrationType.user, user: null,
+                                        type: RegistrationType.user,
+                                        user: null,
                                       ),
                                     );
                                   },
@@ -92,24 +93,26 @@ class _UsersState extends State<Users> {
                                     );
                                   },
                                   onDelete: (id) {},
-                                 // onUpdate: (id) {},
-                                 onUpdate: (id) {
-  try {
-    final user = state?.users?.firstWhere((u) => u.id == id);
-    if (user != null) {
-      Get.to(
-        () => RegistrationPage(
-          title: "Edit User",
-          type: RegistrationType.user,
-          user: user,
-          isEdit: true,
-        ),
-      );
-    }
-  } catch (e) {
-    debugPrint('User not found with id: $id');
-  }
-},
+                                  // onUpdate: (id) {},
+                                  onUpdate: (id) {
+                                    try {
+                                      final user = state?.users?.firstWhere(
+                                        (u) => u.id == id,
+                                      );
+                                      if (user != null) {
+                                        Get.to(
+                                          () => RegistrationPage(
+                                            title: "Edit User",
+                                            type: RegistrationType.user,
+                                            user: user,
+                                            isEdit: true,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      debugPrint('User not found with id: $id');
+                                    }
+                                  },
                                 ),
                                 // const SizedBox(height: 16),
                                 Padding(
@@ -208,7 +211,8 @@ class _UsersState extends State<Users> {
                                 )
                               : ListViewScreen(
                                   key: ValueKey('profile'),
-                                  user: state?.user,
+                                  data: state?.user,
+                                  screenType: "USER_PROFILE",
                                   onClose: () {
                                     context.read<UserBloc>().add(
                                       CloseProfileView(),

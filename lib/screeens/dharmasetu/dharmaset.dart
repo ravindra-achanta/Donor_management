@@ -316,21 +316,6 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
     }
   }
 
-  // Convert DharmasetuView to User format that ListViewScreen expects
-  User? _convertDharmasetuToUser(DharmasetuView? dharmasetu) {
-    if (dharmasetu == null) return null;
-
-    return User(
-      id: dharmasetu.id,
-      name: dharmasetu.name,
-      email: '',
-      mobileNumber: '',
-      userType: 'Dharmasetu',
-      status: dharmasetu.status,
-      uniqueId: dharmasetu.uid,
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Layout(
@@ -430,7 +415,7 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                   );
                                 },
                               ),
-                              
+
                               // Pagination
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -443,11 +428,14 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     IconButton(
                                       onPressed: state.currentPage > 0
                                           ? () {
-                                              context.read<DharmasetuBloc>().add(
-                                                LoadDharmasetu(
-                                                  page: state.currentPage - 1,
-                                                ),
-                                              );
+                                              context
+                                                  .read<DharmasetuBloc>()
+                                                  .add(
+                                                    LoadDharmasetu(
+                                                      page:
+                                                          state.currentPage - 1,
+                                                    ),
+                                                  );
                                               // Hide profile view on page change
                                               setState(() {
                                                 _isProfileViewVisible = false;
@@ -476,14 +464,18 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: state.currentPage <
-                                          state.totalPages - 1
+                                      onPressed:
+                                          state.currentPage <
+                                              state.totalPages - 1
                                           ? () {
-                                              context.read<DharmasetuBloc>().add(
-                                                LoadDharmasetu(
-                                                  page: state.currentPage + 1,
-                                                ),
-                                              );
+                                              context
+                                                  .read<DharmasetuBloc>()
+                                                  .add(
+                                                    LoadDharmasetu(
+                                                      page:
+                                                          state.currentPage + 1,
+                                                    ),
+                                                  );
                                               setState(() {
                                                 _isProfileViewVisible = false;
                                                 _selectedDharmasetu = null;
@@ -543,9 +535,10 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                         child: _isProfileLoading
                             ? const ScreenLoader(key: ValueKey('loader'))
                             : ListViewScreen(
-                                key: ValueKey('profile_${_selectedDharmasetu?.id}'),
-                                user: _convertDharmasetuToUser(_selectedDharmasetu),
-                                dharmasetuData: _selectedDharmasetu,
+                                key: ValueKey(
+                                  'profile_${_selectedDharmasetu?.id}',
+                                ),
+                                data: _selectedDharmasetu,
                                 onClose: () {
                                   setState(() {
                                     _isProfileViewVisible = false;
