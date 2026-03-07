@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
 import 'package:vikas_app/screeens/models/response/donations.dart';
 import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
+import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/screeens/models/response/review_request.dart';
@@ -88,13 +89,15 @@ class _CommonListState extends State<CommonList> {
                   //tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'DHARMASETU') ...[
                   //tableHeader('UID'),
-                  tableHeader('Type'),
-                  tableHeader('Name'),
-                  tableHeader('Feedback'),
-                  tableHeader('Date'),
-                  tableHeader('Referred By'),
-                  tableHeader('Status'),
-                  tableHeader('Actions'),
+                 // tableHeader('S.No', flex: 1),
+                  //tableHeader('Type', flex: 1),
+                  tableHeader('Community Name', flex: 2),
+                  tableHeader('POC', flex: 1),
+                  //tableHeader('Feedback', flex: 2),
+                  tableHeader('Date', flex: 1),
+                  tableHeader('Referred By', flex: 1),
+                  tableHeader('Status', flex: 1),
+                  tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'VISIT') ...[
                   //tableHeader('ID', flex: 1),
                   tableHeader('Visitor Name', flex: 2),
@@ -218,44 +221,55 @@ class _CommonListState extends State<CommonList> {
                                 ),
                               ],
                             ] else if (screenType == 'DHARMASETU') ...[
-                              tableData((rowData as dynamic).type ?? ""),
-                              tableData((rowData as dynamic).name ?? ""),
-                              tableData((rowData as dynamic).feedback ?? ""),
-                              tableData((rowData as dynamic).date ?? ""),
-                              tableData((rowData as dynamic).referredBy ?? ""),
-                              Expanded(
-                                child: _buildStatusPill(
-                                  (rowData as dynamic).status ?? 'Unknown',
+                              if (rowData is DharmasetuView) ...[
+                                // tableData(
+                                //   (widget.currentPage * 10 + (index + 1))
+                                //       .toString(),
+                                //   flex: 1,
+                                // ),
+                                //tableData(rowData.type, flex: 1),
+                                tableData(rowData.communityName, flex: 2),
+                                tableData(rowData.pointOfContact, flex: 1),
+                               // tableData(rowData.feedback, flex: 2),
+                                tableData(rowData.date, flex: 1),
+                                tableData(rowData.referredBy, flex: 1),
+                                Expanded(
+                                  flex: 1,
+                                  child: _buildStatusPill(
+                                    rowData.dharmasetuStatus,
+                                  ),
                                 ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _actionIcon(
-                                      Icons.visibility_outlined,
-                                      Colors.blue,
-                                      () {
-                                        Get.toNamed(
-                                          '/view/dharmasetu',
-                                          arguments: rowData,
-                                        );
-                                      },
-                                    ),
-                                    _actionIcon(
-                                      Icons.edit_outlined,
-                                      Colors.orange,
-                                      () => widget.onUpdate(rowData.id),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    _actionIcon(
-                                      Icons.delete_outline,
-                                      Colors.red,
-                                      () => widget.onDelete(rowData.id),
-                                    ),
-                                  ],
+                                Expanded(
+                                  flex: 2,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      _actionIcon(
+                                        Icons.visibility_outlined,
+                                        Colors.blue,
+                                        () {
+                                          Get.toNamed(
+                                            '/view/dharmasetu',
+                                            arguments: rowData,
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(width: 5),
+                                      _actionIcon(
+                                        Icons.edit_outlined,
+                                        Colors.orange,
+                                        () => widget.onUpdate(rowData.id),
+                                      ),
+                                      const SizedBox(width: 5),
+                                      _actionIcon(
+                                        Icons.delete_outline,
+                                        Colors.red,
+                                        () => widget.onDelete(rowData.id),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
+                              ],
                             ] else if (screenType == 'VISIT') ...[
                               if (rowData is VisitView) ...[
                                 tableData(rowData.visitorName, flex: 2),
