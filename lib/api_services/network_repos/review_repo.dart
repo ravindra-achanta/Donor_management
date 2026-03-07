@@ -12,11 +12,11 @@ class ReviewRepo {
     int size = 10,
   }) async {
     final url = "${ApiConstants.getrequestview}?page=$page&size=$size";
-    
+
     print('📡 Fetching review requests from: $url');
-    
+
     final result = await _api.get(url);
-    
+
     if (!result.isSuccess) {
       print('❌ Failed to fetch review requests: ${result.error?.message}');
       return ApiResult.failure(result.error);
@@ -28,7 +28,6 @@ class ReviewRepo {
       print('✅ Parsed ${data.content.length} requests');
       return ApiResult.success(data);
     } catch (e) {
-      
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
