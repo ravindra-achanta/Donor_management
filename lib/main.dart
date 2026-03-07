@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
@@ -47,12 +48,14 @@ Future<void> main() async {
 
           // 🔹 profile Bloc
           BlocProvider<ProfileBloc>(create: (_) => ProfileBloc()),
-          BlocProvider<DharmasetuBloc>(create: (_) => DharmasetuBloc()),
+          BlocProvider<DharmasetuBloc>(
+            create: (_) => DharmasetuBloc(DharmasetuRepository()),
+          ),
 
-
-          BlocProvider<VisitBloc>(create: (_) => VisitBloc(visitRepository: VisitRepository())),
-                    BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
-
+          BlocProvider<VisitBloc>(
+            create: (_) => VisitBloc(visitRepository: VisitRepository()),
+          ),
+          BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
 
           BlocProvider<UserBloc>(create: (_) => UserBloc()),
           BlocProvider<AuthBloc>(
