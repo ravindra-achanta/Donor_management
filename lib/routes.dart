@@ -8,8 +8,8 @@ import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
-import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
+import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
 import 'package:vikas_app/screeens/dharmasetu/editDharmasetu.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
@@ -104,8 +104,8 @@ getPageRoute() {
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
-    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
-    GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
+    //GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
+    //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
 
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),

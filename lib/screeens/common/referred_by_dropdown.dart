@@ -152,25 +152,25 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
     results.add(_buildManualEntry(pattern));
 
     if (pattern.isEmpty) {
-      // Show ALL loaded users (not just first page)
+     
       if (_allUsers.isNotEmpty) {
         results.addAll(_allUsers);
       }
 
-      // Add loading indicator at bottom if more data available
+   
       if (_hasMoreData) {
         results.add(_buildLoadingMoreItem());
       } else if (_allUsers.isNotEmpty) {
         results.add(_buildInfoItem('✓ All ${_allUsers.length} users loaded'));
       }
     } else {
-      // Search in ALL loaded users
+      
       final searchPattern = pattern.toLowerCase();
       final matches = _allUsers.where((user) {
-        final userName = user.fullName?.toLowerCase() ?? '';
+        final fullName = user.fullName.toLowerCase();
         final email = user.email?.toLowerCase() ?? '';
         final jeevanaadiNo = user.jeevanaadiNo?.toLowerCase() ?? '';
-        return userName.contains(searchPattern) ||
+        return fullName.contains(searchPattern) ||
                email.contains(searchPattern) ||
                jeevanaadiNo.contains(searchPattern);
       }).toList();
@@ -285,7 +285,7 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
               );
             }
             
-            // Loading more indicator (auto-load)
+           
             if (item is Map && item['type'] == 'loadingmore') {
               return Container(
                 padding: const EdgeInsets.all(12),
@@ -368,7 +368,7 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
               );
             }
 
-            // User item
+         
             final user = item;
             return Container(
               decoration: BoxDecoration(
@@ -378,7 +378,7 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
               ),
               child: ListTile(
                 title: Text(
-                  user.userName ?? '',
+                  user.fullName, 
                   style: const TextStyle(fontWeight: FontWeight.w500),
                 ),
                 subtitle: Text(
@@ -391,13 +391,13 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
                 onTap: () {
                   final selected = {
                     'id': user.id,
-                    'userName': user.userName,
+                    'userName': user.fullName, 
                     'email': user.email,
                     'jeevanaadiNo': user.jeevanaadiNo,
                   };
                   setState(() {
                     _selectedReferredBy = selected;
-                    widget.controller.text = user.userName ?? '';
+                    widget.controller.text = user.fullName; 
                   });
                   widget.onSelected(selected);
                   FocusScope.of(context).unfocus();
@@ -432,34 +432,6 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
                   ? Colors.orange.shade50 
                   : Colors.green.shade50,
               borderRadius: BorderRadius.circular(4),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              // children: [
-              //   Icon(
-              //     _selectedReferredBy!['isManual'] == true 
-              //         ? Icons.edit 
-              //         : Icons.check_circle,
-              //     color: _selectedReferredBy!['isManual'] == true 
-              //         ? Colors.orange 
-              //         : Colors.green,
-              //     size: 16,
-              //   ),
-              //   const SizedBox(width: 4),
-                // Expanded(
-                //   child: Text(
-                //     _selectedReferredBy!['isManual'] == true 
-                //         ? 'Manual: ${_selectedReferredBy!['userName']}'
-                //         : 'Selected: ${_selectedReferredBy!['userName']}',
-                //     style: TextStyle(
-                //       fontSize: 12, 
-                //       color: _selectedReferredBy!['isManual'] == true 
-                //           ? Colors.orange 
-                //           : Colors.green,
-                //     ),
-                //   ),
-                // ),
-             // ],
             ),
           ),
       ],
