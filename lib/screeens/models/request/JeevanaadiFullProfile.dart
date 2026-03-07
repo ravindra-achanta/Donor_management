@@ -298,14 +298,23 @@ class OccupationDetails {
 
 class JeevanaadiDemoGraphicDetails {
   final double profileCompletionPercentage;
+  final List<double> percentageHistory;
 
-  JeevanaadiDemoGraphicDetails({required this.profileCompletionPercentage});
+  JeevanaadiDemoGraphicDetails({
+    required this.profileCompletionPercentage,
+    required this.percentageHistory,
+  });
 
   factory JeevanaadiDemoGraphicDetails.fromJson(Map<String, dynamic> json) {
     return JeevanaadiDemoGraphicDetails(
       profileCompletionPercentage:
-          //(json['profileCompletionPercentage'] as num?)?.toDouble() ?? 0.0,
-          json['profileCompletionPercentage']?.toDouble() ?? 0.0,
+          (json['profileCompletionPercentage'] as num?)?.toDouble() ?? 0.0,
+
+      percentageHistory:
+          (json['percentageHistory'] as List<dynamic>?)
+              ?.map((e) => (e as num).toDouble())
+              .toList() ??
+          [],
     );
   }
 }

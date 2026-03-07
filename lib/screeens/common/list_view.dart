@@ -45,7 +45,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
         : _visit != null
         ? _visit.visitorName
         : _dharmasetu != null
-        ? _dharmasetu.name
+        ? _dharmasetu.communityName
         : "N/A";
 
     String email = _user != null
@@ -371,7 +371,21 @@ class _ListViewScreenState extends State<ListViewScreen> {
       child: Column(
         children: [
           if (screenType == "JEEVANAADI_PROFILE")
-            ProfileScoreCard(scores: [20, 45, 70, 90, 30]),
+            ProfileScoreCard(
+              scores:
+                  jeevanaadiUser
+                      .jeevanaadiDemoGraphicDetails
+                      .percentageHistory
+                      .isNotEmpty
+                  ? jeevanaadiUser
+                        .jeevanaadiDemoGraphicDetails
+                        .percentageHistory
+                  : [
+                      jeevanaadiUser
+                          .jeevanaadiDemoGraphicDetails
+                          .profileCompletionPercentage,
+                    ],
+            ),
           Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
@@ -502,9 +516,18 @@ class _ListViewScreenState extends State<ListViewScreen> {
 
 class ProfileScoreCard extends StatelessWidget {
   ProfileScoreCard({super.key, required this.scores});
-  List<double> scores = [];
 
-  bool get isDownTrend => scores.last < scores[scores.length - 2];
+  final List<double> scores;
+
+  bool get isDownTrend {
+    if (scores.length < 2) return false;
+    return scores.last < scores[scores.length - 2];
+  }
+
+  double get lastScore {
+    if (scores.isEmpty) return 0;
+    return scores.last;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -515,7 +538,6 @@ class ProfileScoreCard extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         child: Row(
           children: [
-            /// Left icon
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
@@ -527,7 +549,6 @@ class ProfileScoreCard extends StatelessWidget {
 
             const SizedBox(width: 12),
 
-            /// Metric details
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -542,51 +563,56 @@ class ProfileScoreCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        "${scores.last.toInt()}%",
+                        "${lastScore.toInt()}%",
                         style: const TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(width: 6),
 
-                      Icon(
-                        isDownTrend ? Icons.arrow_downward : Icons.arrow_upward,
-                        color: isDownTrend ? Colors.red : Colors.green,
-                        size: 18,
-                      ),
+                      if (scores.length >= 2) ...[
+                        const SizedBox(width: 6),
+                        Icon(
+                          isDownTrend
+                              ? Icons.arrow_downward
+                              : Icons.arrow_upward,
+                          color: isDownTrend ? Colors.red : Colors.green,
+                          size: 18,
+                        ),
+                      ],
                     ],
                   ),
                 ],
               ),
             ),
 
-            /// Mini trend chart
             SizedBox(
               width: 100,
               height: 50,
-              child: LineChart(
-                LineChartData(
-                  minY: 0,
-                  maxY: 100,
-                  gridData: FlGridData(show: false),
-                  titlesData: FlTitlesData(show: false),
-                  borderData: FlBorderData(show: false),
-                  lineBarsData: [
-                    LineChartBarData(
-                      isCurved: true,
-                      color: Colors.blue,
-                      barWidth: 2,
-                      spots: scores
-                          .asMap()
-                          .entries
-                          .map((e) => FlSpot(e.key.toDouble(), e.value))
-                          .toList(),
-                      dotData: FlDotData(show: false),
+              child: scores.isEmpty
+                  ? const Center(child: Text("No Data"))
+                  : LineChart(
+                      LineChartData(
+                        minY: 0,
+                        maxY: 100,
+                        gridData: FlGridData(show: false),
+                        titlesData: FlTitlesData(show: false),
+                        borderData: FlBorderData(show: false),
+                        lineBarsData: [
+                          LineChartBarData(
+                            isCurved: true,
+                            color: Colors.blue,
+                            barWidth: 2,
+                            spots: scores
+                                .asMap()
+                                .entries
+                                .map((e) => FlSpot(e.key.toDouble(), e.value))
+                                .toList(),
+                            dotData: FlDotData(show: false),
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                ),
-              ),
             ),
           ],
         ),

@@ -70,15 +70,14 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
   void _onDharmasetuTap(String id, List<DharmasetuView> dharmasetuList) {
     try {
       final dharmasetu = dharmasetuList.firstWhere((d) => d.id == id);
-      
+
       setState(() {
         _isProfileViewVisible = true;
         _isProfileLoading = true;
-        _selectedDharmasetu = dharmasetu; 
+        _selectedDharmasetu = dharmasetu;
       });
 
       context.read<DharmasetuBloc>().add(LoadDharmasetuDetails(id));
-      
     } catch (e) {
       debugPrint('Dharmasetu not found with id: $id');
       setState(() {
@@ -146,14 +145,18 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
             }
           },
           builder: (context, state) {
-            if (state.status == DharmasetuApiStatus.loading && state.dharmasetuList.isEmpty) {
+            if (state.status == DharmasetuApiStatus.loading &&
+                state.dharmasetuList.isEmpty) {
               return const Center(child: ScreenLoader());
-            } else if (state.status == DharmasetuApiStatus.error && state.dharmasetuList.isEmpty) {
+            } else if (state.status == DharmasetuApiStatus.error &&
+                state.dharmasetuList.isEmpty) {
               return Center(
                 child: ErrorCard(
                   message: state.errorMessage ?? 'Failed to load dharmasetu',
                   onRetry: () {
-                    context.read<DharmasetuBloc>().add(const LoadDharmasetu(page: 0));
+                    context.read<DharmasetuBloc>().add(
+                      const LoadDharmasetu(page: 0),
+                    );
                   },
                 ),
               );
@@ -219,19 +222,23 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                             children: [
                               CommonList<DharmasetuView>(
                                 currentPage: state.currentPage,
-                                users: viewList,
+                                users: state.dharmasetuList,
                                 screenType: "DHARMASETU",
                                 onUserTap: (id) {
-                                  _onDharmasetuTap(id, viewList);
+                                  _onDharmasetuTap(id, state.dharmasetuList);
                                 },
                                 onDelete: (id) {
-                                  final item = viewList.firstWhere(
+                                  final item = state.dharmasetuList.firstWhere(
                                     (d) => d.id == id,
                                   );
-                                  _showDeleteDialog(context, id, item.name);
+                                  _showDeleteDialog(
+                                    context,
+                                    id,
+                                    item.communityName,
+                                  );
                                 },
                                 onUpdate: (id) {
-                                  final item = viewList.firstWhere(
+                                  final item = state.dharmasetuList.firstWhere(
                                     (d) => d.id == id,
                                   );
                                   Get.toNamed(
@@ -240,7 +247,7 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                   );
                                 },
                               ),
-                              
+
                               // Pagination
                               Padding(
                                 padding: const EdgeInsets.symmetric(
@@ -253,11 +260,14 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     IconButton(
                                       onPressed: state.currentPage > 0
                                           ? () {
-                                              context.read<DharmasetuBloc>().add(
-                                                LoadDharmasetu(
-                                                  page: state.currentPage - 1,
-                                                ),
-                                              );
+                                              context
+                                                  .read<DharmasetuBloc>()
+                                                  .add(
+                                                    LoadDharmasetu(
+                                                      page:
+                                                          state.currentPage - 1,
+                                                    ),
+                                                  );
                                               // Hide profile view on page change
                                               setState(() {
                                                 _isProfileViewVisible = false;
@@ -286,14 +296,18 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                       ),
                                     ),
                                     IconButton(
-                                      onPressed: state.currentPage <
-                                          state.totalPages - 1
+                                      onPressed:
+                                          state.currentPage <
+                                              state.totalPages - 1
                                           ? () {
-                                              context.read<DharmasetuBloc>().add(
-                                                LoadDharmasetu(
-                                                  page: state.currentPage + 1,
-                                                ),
-                                              );
+                                              context
+                                                  .read<DharmasetuBloc>()
+                                                  .add(
+                                                    LoadDharmasetu(
+                                                      page:
+                                                          state.currentPage + 1,
+                                                    ),
+                                                  );
                                               setState(() {
                                                 _isProfileViewVisible = false;
                                                 _selectedDharmasetu = null;
@@ -353,9 +367,10 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                         child: _isProfileLoading
                             ? const ScreenLoader(key: ValueKey('loader'))
                             : ListViewScreen(
-                                key: ValueKey('profile_${_selectedDharmasetu?.id}'),
-                                user: _convertDharmasetuToUser(_selectedDharmasetu),
-                                dharmasetuData: _selectedDharmasetu,
+                                key: ValueKey(
+                                  'profile_${_selectedDharmasetu?.id}',
+                                ),
+                                data: (_selectedDharmasetu,),
                                 onClose: () {
                                   setState(() {
                                     _isProfileViewVisible = false;
@@ -368,7 +383,7 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     _showDeleteDialog(
                                       context,
                                       _selectedDharmasetu!.id,
-                                      _selectedDharmasetu!.name,
+                                      _selectedDharmasetu!.communityName,
                                     );
                                   }
                                 },
