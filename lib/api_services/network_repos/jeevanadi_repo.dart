@@ -249,7 +249,7 @@ class JeevanadiRepo {
   }) async {
     final url = ApiConstants.getJeevanaadiUpdate + jeevanadiId + "/update";
 
-    updateData.removeWhere((key, value) => value == null);
+    //updateData.removeWhere((key, value) => value == null);
 
     final result = await _api.put(url, body: updateData);
 
