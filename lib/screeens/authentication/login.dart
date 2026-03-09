@@ -466,7 +466,7 @@ class _LoginPageState extends State<LoginPage> {
 
   Future<void> _fetchRoles() async {
     setState(() => isLoadingRoles = true);
-    final result = await AuthRepository().getRoles();
+    final result = await AuthRepository().getRoles("");
     setState(() {
       if (result.isSuccess) {
         roles = result.data ?? [];

@@ -15,7 +15,6 @@ import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/bloc_management/users/user_bloc.dart';
 import 'package:vikas_app/bloc_management/visits/visit_bloc.dart';
-import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:url_strategy/url_strategy.dart';
 import 'package:vikas_app/routes.dart';
 import 'localizations/app_localization_delegate.dart';
@@ -71,7 +70,11 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  @override
+  getInitialRoute() {
+    String? token = Vikasdb().getString("TOKEN");
+    return token.isNotEmpty ? '/dashboard' : '/login';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<AppNotifier>(
@@ -82,7 +85,7 @@ class MyApp extends StatelessWidget {
           darkTheme: AppTheme.darkTheme,
           themeMode: ThemeCustomizer.instance.theme,
           navigatorKey: NavigationService.navigatorKey,
-          initialRoute: "/login",
+          initialRoute: getInitialRoute(),
           getPages: getPageRoute(),
           localizationsDelegates: [
             AppLocalizationsDelegate(context),

@@ -89,7 +89,7 @@ class _CommonListState extends State<CommonList> {
                   //tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'DHARMASETU') ...[
                   //tableHeader('UID'),
-                 // tableHeader('S.No', flex: 1),
+                  // tableHeader('S.No', flex: 1),
                   //tableHeader('Type', flex: 1),
                   tableHeader('Community Name', flex: 2),
                   tableHeader('POC', flex: 1),
@@ -114,7 +114,7 @@ class _CommonListState extends State<CommonList> {
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
-                  tableHeader('Email'),
+                  tableHeader('Role'),
                   tableHeader('Actions'),
                 ],
               ],
@@ -230,7 +230,7 @@ class _CommonListState extends State<CommonList> {
                                 //tableData(rowData.type, flex: 1),
                                 tableData(rowData.communityName, flex: 2),
                                 tableData(rowData.pointOfContact, flex: 1),
-                               // tableData(rowData.feedback, flex: 2),
+                                // tableData(rowData.feedback, flex: 2),
                                 tableData(rowData.date, flex: 1),
                                 tableData(rowData.referredBy, flex: 1),
                                 Expanded(
@@ -320,7 +320,7 @@ class _CommonListState extends State<CommonList> {
                               // Default case (User)
                               tableData(name),
                               tableData(mobile),
-                              tableData(email),
+                              tableData(userType),
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
