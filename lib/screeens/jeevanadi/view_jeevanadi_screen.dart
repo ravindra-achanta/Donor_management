@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
@@ -202,8 +203,6 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 ),
 
                 CommonList(
-
-                  
                   users: state.allDonations,
                   currentPage: state.donationCurrentPage,
                   onUserTap: (user) {},
@@ -344,7 +343,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
             ),
           ),
 
-          ElevatedButton.icon(
+         if(Vikasdb().getString("USER_TYPE") == 'OFFICE_STAFF' || (Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA')) ElevatedButton.icon(
             onPressed: () {
               Navigator.push(
                 context,
@@ -1084,52 +1083,50 @@ class ViewJeevanadiScreen extends StatelessWidget {
           //       ),
           //     ),
           //   ),
-                    const SizedBox(width: 12),
-           if (state.isFromRequest && state.requestStatus == 'PENDING')
-          MouseRegion(
-            cursor: SystemMouseCursors.click,
-            child: GestureDetector(
-             
-                    onTap: () {
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (_) => EditJeevanadiScreen(
-        userId: userId ?? '',
-        isFromRequest: true,
-        jeevanadiId: jeevanadiId, 
-      ),
-    ),
-  );
-},
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.blue,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    Icon(Icons.edit, size: 16, color: Colors.white),
-                    SizedBox(width: 4),
-                    Text(
-                      'Edit',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+          const SizedBox(width: 12),
+          if (state.isFromRequest && state.requestStatus == 'PENDING')
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditJeevanadiScreen(
+                        userId: userId ?? '',
+                        isFromRequest: true,
+                        jeevanadiId: jeevanadiId,
                       ),
                     ),
-                  ],
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.blue,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.edit, size: 16, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        'Edit',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-
 
           if (state.isProcessingRequest)
             const Padding(
