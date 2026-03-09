@@ -1,6 +1,7 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
@@ -28,6 +29,24 @@ class ListViewScreen extends StatefulWidget {
 
 class _ListViewScreenState extends State<ListViewScreen> {
   String screenType = "";
+
+  Future<bool> isDeleteButtonVisible() async {
+    String userType = await Vikasdb().getString("USER_TYPE");
+
+    if (userType == 'SUPER_ADMIN' &&
+            (screenType == "USER_PROFILE" || screenType == "DHARMASETU") ||
+        screenType == "USER_PROFILE" ||
+        screenType == "VISITS") {
+      return true;
+    }
+
+    if (userType == 'ADMIN' && screenType == "USER_PROFILE") {
+      return true;
+    }
+
+    return false;
+  }
+
   @override
   Widget build(BuildContext context) {
     dynamic data = widget.data;
@@ -35,6 +54,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
     VisitView? _visit = data is VisitView ? data : null;
     DharmasetuView? _dharmasetu = data is DharmasetuView ? data : null;
     User? _user = data is User ? data : null;
+
     JeevanaadiFullProfile? _jeevanaadiUser = data is JeevanaadiFullProfile
         ? data
         : null;
@@ -286,40 +306,48 @@ class _ListViewScreenState extends State<ListViewScreen> {
                 // Actions - Show for all screen types
                 _sectionTitle('Actions'),
                 const SizedBox(height: 4),
+                if (screenType != "DARMASETU" && screenType != "VISITS")
                 Row(
                   children: [
-                    if (screenType != "JEEVANADI_PROFILE")
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: () {
-                            widget.onDelete();
-                          },
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.white,
-                          ),
-                          label: Text(
-                            screenType == "VISIT" ? 'Delete Visit' : 'Delete',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          style: OutlinedButton.styleFrom(
-                            backgroundColor: const Color.fromARGB(
-                              255,
-                              255,
-                              103,
-                              92,
-                            ), // background color
-                            shape: const RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(8),
-                              ),
+                    FutureBuilder<bool>(
+                      future: isDeleteButtonVisible(),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData || snapshot.data == false) {
+                          return const SizedBox();
+                        }
+
+                        return Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () {
+                              widget.onDelete();
+                            },
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.white,
                             ),
-                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            label: Text(
+                              screenType == "VISIT" ? 'Delete Visit' : 'Delete',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: const Color.fromARGB(
+                                255,
+                                255,
+                                103,
+                                92,
+                              ),
+                              shape: const RoundedRectangleBorder(
+                                borderRadius: BorderRadius.all(
+                                  Radius.circular(8),
+                                ),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
                           ),
-                        ),
-                      ),
-                    if (screenType != "JEEVANADI_PROFILE")
-                      const SizedBox(width: 8),
+                        );
+                      },
+                    ),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: ElevatedButton.icon(
                         onPressed: () {
@@ -349,20 +377,6 @@ class _ListViewScreenState extends State<ListViewScreen> {
         ),
       ),
     );
-  }
-
-  // Add status color method
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'completed':
-        return Colors.green;
-      case 'pending':
-        return Colors.orange;
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
   }
 
   Widget buildDemoGrphs(dynamic jeevanaadiUser) {

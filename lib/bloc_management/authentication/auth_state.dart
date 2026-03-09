@@ -4,16 +4,16 @@ import 'package:vikas_app/screeens/models/response/role_response.dart';
 import 'package:vikas_app/screeens/models/response/user_view.dart';
 
 enum AuthStatus {
-  initial,     
-  checking,   
-  loading,    
-  authenticated, 
-  unauthenticated, 
-  error,  
-  creatingUser, 
-  userCreated,  
-  fetchingUsers, 
-  usersFetched,     
+  initial,
+  checking,
+  loading,
+  authenticated,
+  unauthenticated,
+  error,
+  creatingUser,
+  userCreated,
+  fetchingUsers,
+  usersFetched,
   changingPassword,
   passwordChanged,
   passwordChangeRequired,
@@ -25,14 +25,14 @@ class AuthState extends Equatable {
   final String? token;
   final UserType? userType;
   final String? errorMessage;
-  final List<UserView> users; 
-  final int currentPage; 
+  final List<UserView> users;
+  final int currentPage;
   final int totalPages;
   final bool hasMoreUsers;
-  final String? creationMessage; 
-  final List<Role> roles; 
+  final String? creationMessage;
+  final List<Role> roles;
+  final List<Role> typeBasedRoles;
   final bool isLoadingRoles;
-  
 
   const AuthState({
     this.status = AuthStatus.initial,
@@ -40,12 +40,14 @@ class AuthState extends Equatable {
     this.token,
     this.userType,
     this.errorMessage,
-     this.users = const [], 
+    this.users = const [],
     this.currentPage = 0,
     this.totalPages = 0,
+
     this.hasMoreUsers = false,
     this.creationMessage,
-    this.roles = const [], 
+    this.roles = const [],
+    this.typeBasedRoles = const [],
     this.isLoadingRoles = false,
   });
 
@@ -60,7 +62,8 @@ class AuthState extends Equatable {
     int? totalPages,
     bool? hasMoreUsers,
     String? creationMessage,
-     List<Role>? roles,
+    List<Role>? roles,
+    List<Role>? typeBasedRoles,
     bool? isLoadingRoles,
   }) {
     return AuthState(
@@ -75,6 +78,7 @@ class AuthState extends Equatable {
       hasMoreUsers: hasMoreUsers ?? this.hasMoreUsers,
       creationMessage: creationMessage ?? this.creationMessage,
       roles: roles ?? this.roles,
+      typeBasedRoles: typeBasedRoles ?? this.typeBasedRoles,
       isLoadingRoles: isLoadingRoles ?? this.isLoadingRoles,
     );
   }
@@ -88,6 +92,7 @@ class AuthState extends Equatable {
     errorMessage,
     users,
     currentPage,
+    typeBasedRoles,
     totalPages,
     hasMoreUsers,
     creationMessage,
@@ -101,14 +106,14 @@ class AuthState extends Equatable {
   bool get isAuthenticated => status == AuthStatus.authenticated;
   bool get isUnauthenticated => status == AuthStatus.unauthenticated;
   bool get isError => status == AuthStatus.error;
-  bool get isCreatingUser => status == AuthStatus.creatingUser; 
-  bool get isUserCreated => status == AuthStatus.userCreated; 
-  bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
+  bool get isCreatingUser => status == AuthStatus.creatingUser;
+  bool get isUserCreated => status == AuthStatus.userCreated;
+  bool get isFetchingUsers => status == AuthStatus.fetchingUsers;
   bool get areUsersFetched => status == AuthStatus.usersFetched;
   bool get isChangingPassword => status == AuthStatus.changingPassword;
   bool get isPasswordChanged => status == AuthStatus.passwordChanged;
-  bool get isPasswordChangeRequired => status == AuthStatus.passwordChangeRequired;
-  // bool get isFetchingUsers => status == AuthStatus.fetchingUsers; 
+  bool get isPasswordChangeRequired =>
+      status == AuthStatus.passwordChangeRequired;
+  // bool get isFetchingUsers => status == AuthStatus.fetchingUsers;
   // bool get areUsersFetched => status == AuthStatus.usersFetched;
-
 }

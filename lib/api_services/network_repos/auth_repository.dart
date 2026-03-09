@@ -14,19 +14,19 @@ class AuthRepository {
   final _api = NetworkService.instance;
 
   Future<ApiResult<LoginResponse>> login(
-  String mobileNumber,
-  String password,  
-  String roleName,    
-) async {
-  final request = LoginRequest(
-    mobileNumber: mobileNumber,
-    password: password,
-  );
+    String mobileNumber,
+    String password,
+    String roleName,
+  ) async {
+    final request = LoginRequest(
+      mobileNumber: mobileNumber,
+      password: password,
+    );
 
-  final result = await _api.post(
-    "${ApiConstants.IDM_URI}/user/login/$roleName",  // ← use rolePath
-    body: request.toJson(),
-  );
+    final result = await _api.post(
+      "${ApiConstants.IDM_URI}/user/login/$roleName", // ← use rolePath
+      body: request.toJson(),
+    );
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -39,9 +39,8 @@ class AuthRepository {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
-Future<ApiResult<LoginResponse>> createUser(
-    IdentityRequest request,
-  ) async {
+
+  Future<ApiResult<LoginResponse>> createUser(IdentityRequest request) async {
     final result = await _api.post(
       "${ApiConstants.IDM_URI}/user/create",
       body: request.toJson(),
@@ -79,11 +78,10 @@ Future<ApiResult<LoginResponse>> createUser(
     }
   }
 
-
-   Future<ApiResult<List<Role>>> getRoles() async {
-    final result = await _api.get(
-      "${ApiConstants.GET_ROLES}",
-    );
+  Future<ApiResult<List<Role>>> getRoles(String? type) async {
+    final result = type?.isNotEmpty == true
+        ? await _api.get("${ApiConstants.GET_ROLES}/$type")
+        : await _api.get("${ApiConstants.GET_ROLES}");
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -101,7 +99,7 @@ Future<ApiResult<LoginResponse>> createUser(
           print('Error parsing role: $e');
         }
       }
-      
+
       return ApiResult.success(roles);
     } catch (e) {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
@@ -119,7 +117,7 @@ Future<ApiResult<LoginResponse>> createUser(
 
     final result = await _api.put(
       ApiConstants.CHANGE_PASSWORD,
-     
+
       body: request.toJson(),
     );
 
@@ -149,12 +147,8 @@ Future<ApiResult<LoginResponse>> createUser(
       final token = await Vikasdb().getString("TOKEN");
       final userId = await Vikasdb().getString("USER_ID");
       final userType = await Vikasdb().getString("USER_TYPE");
-      
-      return {
-        'token': token,
-        'userId': userId,
-        'userType': userType,
-      };
+
+      return {'token': token, 'userId': userId, 'userType': userType};
     } catch (e) {
       return {};
     }
