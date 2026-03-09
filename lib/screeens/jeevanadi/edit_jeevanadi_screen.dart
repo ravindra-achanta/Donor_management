@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
@@ -303,10 +305,10 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
           const Center(child: CircularProgressIndicator(color: Colors.brown)),
     );
 
-    if (widget.jeevanadiId != null) {
+    if (widget.jeevanadiId != null || widget.userId != null) {
       context.read<JeevanaadiBloc>().add(
         UpdateJeevanaadiProfileEvent(
-          userid: widget.jeevanadiId ?? "0",
+          userid: widget.jeevanadiId ?? widget.userId,
           updateData: requestData,
         ),
       );
@@ -415,7 +417,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
             if (state.updateSuccessMsg != null) {
               Future.delayed(const Duration(milliseconds: 500), () {
-                if (Navigator.canPop(context)) Navigator.pop(context, true);
+                // if (Navigator.canPop(context)) Navigator.pop(context, true);
+                 Get.offAllNamed('/jeevanadi');
               });
             }
           }
