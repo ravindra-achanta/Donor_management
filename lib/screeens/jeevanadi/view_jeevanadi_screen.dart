@@ -1053,37 +1053,83 @@ class ViewJeevanadiScreen extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(width: 12),
+          //const SizedBox(width: 12),
 
           // Reject button
-          if (state.isFromRequest &&
-              state.requestStatus == 'PENDING' &&
-              !state.isProcessingRequest)
-            MouseRegion(
-              cursor: SystemMouseCursors.click,
-              child: GestureDetector(
-                onTap: () =>
-                    _showApprovalDialog(context, state, isApprove: false),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.red,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Text(
-                    'Reject',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+          // if (state.isFromRequest &&
+          //     state.requestStatus == 'PENDING' &&
+          //     !state.isProcessingRequest)
+          //   MouseRegion(
+          //     cursor: SystemMouseCursors.click,
+          //     child: GestureDetector(
+          //       onTap: () =>
+          //           _showApprovalDialog(context, state, isApprove: false),
+          //       child: Container(
+          //         padding: const EdgeInsets.symmetric(
+          //           horizontal: 16,
+          //           vertical: 8,
+          //         ),
+          //         decoration: BoxDecoration(
+          //           color: Colors.red,
+          //           borderRadius: BorderRadius.circular(8),
+          //         ),
+          //         child: const Text(
+          //           'Reject',
+          //           style: TextStyle(
+          //             fontSize: 14,
+          //             fontWeight: FontWeight.w600,
+          //             color: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+                    const SizedBox(width: 12),
+           if (state.isFromRequest && state.requestStatus == 'PENDING')
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: GestureDetector(
+             
+                    onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (_) => EditJeevanadiScreen(
+        userId: userId ?? '',
+        isFromRequest: true,
+        jeevanadiId: jeevanadiId, 
+      ),
+    ),
+  );
+},
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.blue,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: const [
+                    Icon(Icons.edit, size: 16, color: Colors.white),
+                    SizedBox(width: 4),
+                    Text(
+                      'Edit',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
             ),
+          ),
+
 
           if (state.isProcessingRequest)
             const Padding(
