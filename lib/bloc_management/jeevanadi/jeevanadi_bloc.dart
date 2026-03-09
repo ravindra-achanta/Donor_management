@@ -5,7 +5,6 @@ import 'package:vikas_app/api_services/network_repos/jeevanadi_repo.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadi_paginated_view.dart';
-import 'package:vikas_app/screeens/models/response/user.dart';
 
 class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   JeevanaadiBloc() : super(JeevanaadiState()) {
@@ -173,7 +172,6 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       print(
         '🔵 Fetching assigned karyakarthas - MemberId: ${event.memberId}, Page: ${event.page}',
       );
-
       final response = await JeevanaadiRepo.getAssignedJeevanaadis(
         karyakarthaId: event.memberId,
         page: event.page,

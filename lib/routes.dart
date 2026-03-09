@@ -44,15 +44,6 @@ class AuthMiddleware extends GetMiddleware {
   }
 }
 
-onLoginSuccess() {
-  String? redirectRoute = Get.arguments;
-  if (redirectRoute != null) {
-    Get.offNamed(redirectRoute);
-  } else {
-    Get.offNamed('/dashboard'); // Default to dashboard if no specific redirect
-  }
-}
-
 getPageRoute() {
   var routes = [
     // GetPage(
@@ -104,9 +95,9 @@ getPageRoute() {
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
+
     //GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
-
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
     GetPage(
@@ -115,7 +106,7 @@ getPageRoute() {
     ),
     GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
-   
+
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
@@ -151,17 +142,18 @@ getPageRoute() {
     //   },
     // ),
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
-//     GetPage(
-//   name: '/jeevandiview', 
-//   page: () {
-//     final args = Get.arguments;
-//     return ViewJeevanadiScreen.fromArguments(args);
-//   },
-// ),
-GetPage(
-  name: '/jeevandiview', 
-  page: () => ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
-)
+    //     GetPage(
+    //   name: '/jeevandiview',
+    //   page: () {
+    //     final args = Get.arguments;
+    //     return ViewJeevanadiScreen.fromArguments(args);
+    //   },
+    // ),
+    GetPage(
+      name: '/jeevandiview',
+      page: () =>
+          ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
+    ),
 
     // GetPage(
     //   name: '/dashboard',

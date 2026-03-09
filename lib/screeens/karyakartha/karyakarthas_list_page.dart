@@ -105,7 +105,22 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     );
                                   },
                                   onUpdate: (id) {
-                                    Get.toNamed('/register');
+                                    try {
+                                      final user = state?.karyakarthas
+                                          ?.firstWhere((u) => u.id == id);
+                                      if (user != null) {
+                                        Get.to(
+                                          () => RegistrationPage(
+                                            title: "Edit User",
+                                            type: RegistrationType.karyakartha,
+                                            user: user,
+                                            isEdit: true,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      debugPrint('User not found with id: $id');
+                                    }
                                   },
                                 ),
                                 // const SizedBox(height: 16),

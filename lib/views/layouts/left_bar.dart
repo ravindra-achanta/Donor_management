@@ -148,28 +148,29 @@ class _LeftBarState extends State<LeftBar>
                     labelWidget("Apps"),
 
                     if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
-                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA" )
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.badgeCheck,
                         title: "Karyakarthas",
                         isCondensed: isCondensed,
                         route: '/karyakarthas',
                       ),
-                      NavigationItem(
-                        iconData: LucideIcons.heartHandshake,
-                        title: "Jeevanadi Members",
-                        isCondensed: isCondensed,
-                        route: '/jeevanadi',
-                      ),
+                    NavigationItem(
+                      iconData: LucideIcons.heartHandshake,
+                      title: "Jeevanadi Members",
+                      isCondensed: isCondensed,
+                      route: '/jeevanadi',
+                    ),
                     if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
-                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA" )
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.users,
                         title: "Users",
                         isCondensed: isCondensed,
                         route: '/users',
                       ),
-                    if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" )
+                    if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" ||
+                        Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.fileClock,
                         title: "Requests",
@@ -188,13 +189,13 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/notices/list',
                     ),
-                    
-                      NavigationItem(
-                        iconData: LucideIcons.eye,
-                        title: "Visits",
-                        isCondensed: isCondensed,
-                        route: '/visits',
-                      ),
+
+                    NavigationItem(
+                      iconData: LucideIcons.eye,
+                      title: "Visits",
+                      isCondensed: isCondensed,
+                      route: '/visits',
+                    ),
 
                     NavigationItem(
                       iconData: LucideIcons.userCog,
