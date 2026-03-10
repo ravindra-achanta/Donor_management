@@ -1,6 +1,6 @@
 class ApiConstants {
-  static const String baseUrl = "http://172.235.18.48:8050";
-  // static const String baseUrl = "https://vikas.vidyaranyam.in";
+  //static const String baseUrl = "http://172.235.18.48:8050";
+   static const String baseUrl = "https://vikas.vidyaranyam.in";
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -50,7 +50,7 @@ class ApiConstants {
   static const String DHARMASETU_LIST = "$VIKAS/dharmasetu/list";
   static const String DHARMASETU_GET_BY_ID = "$VIKAS/dharmasetu";
   static const String DHARMASETU_CREATE = "$VIKAS/dharmasetu";
-  static const String DHARMASETU_UPDATE = "$VIKAS/dharmasetu";
+  static const String DHARMASETU_UPDATE = "$VIKAS/dharmasetu/{id}";
   static const String DHARMASETU_DELETE = "$VIKAS/dharmasetu/{id}/delete";
 
   //review

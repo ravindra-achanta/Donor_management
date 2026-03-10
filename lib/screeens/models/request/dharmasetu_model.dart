@@ -1,3 +1,5 @@
+import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
+
 class DharmasetuModel {
   final String id;
   final String dharmasetuId;
@@ -52,6 +54,25 @@ class DharmasetuModel {
       dharmasetuStatus: json['dharmasetuStatus'] ?? '',
     );
   }
+  factory DharmasetuModel.fromView(DharmasetuView view) {
+  return DharmasetuModel(
+    id: view.id,
+    dharmasetuId: view.dharmasetuId,
+    type: view.type,
+    communityName: view.communityName,
+    pointOfContact: view.pointOfContact,
+    address: view.address,
+    city: view.city,
+    state: view.state,
+    country: view.country,
+    pincode: view.pincode,
+    meetingLink: view.meetingLink,
+    feedback: view.feedback,
+    date: view.date,
+    referredBy: view.referredBy,
+    dharmasetuStatus: view.dharmasetuStatus,
+  );
+}
 
   Map<String, dynamic> toJson() {
     return {
@@ -73,6 +94,9 @@ class DharmasetuModel {
     };
   }
 }
+
+
+
 
 // Optional: Create a wrapper class for the paginated response
 class DharmasetuPaginatedResponse {

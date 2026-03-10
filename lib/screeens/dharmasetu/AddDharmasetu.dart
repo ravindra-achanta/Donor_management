@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
@@ -34,6 +35,8 @@ class AddDharmasetu extends StatefulWidget {
 
 class _AddDharmaSetuState extends State<AddDharmasetu> {
   final _formKey = GlobalKey<FormState>();
+  late bool isEdit;
+  late DharmasetuModel? model;
 
   // Common fields matching DharmasetuModel
   final _communityNameController = TextEditingController();
@@ -52,6 +55,8 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   DharmasetuStatus? _selectedStatus;
 
   bool _isSubmitting = false;
+  bool _isLoading = false;
+  final _dharmaRepository = DharmasetuRepository();
 
   // Helper method to convert string to enum
   DharmasetuType? _getTypeFromString(String? type) {
@@ -82,33 +87,77 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   void initState() {
     super.initState();
     
-    if (widget.dharmasetu != null) {
-      // Populate form for update
-      final d = widget.dharmasetu!;
-      
-      // Set type
-      _selectedType = _getTypeFromString(d.type);
-      
-      // Set status
-      _selectedStatus = _getStatusFromString(d.dharmasetuStatus);
-      
-      // Populate all fields
-      _communityNameController.text = d.communityName ?? '';
-      _pointOfContactController.text = d.pointOfContact ?? '';
-      _addressController.text = d.address ?? '';
-      _cityController.text = d.city ?? '';
-      _stateController.text = d.state ?? '';
-      _countryController.text = d.country ?? '';
-      _pincodeController.text = d.pincode ?? '';
-      _meetingLinkController.text = d.meetingLink ?? '';
-      _feedbackController.text = d.feedback ?? '';
-      _dateController.text = d.date ?? '';
-      _referredByController.text = d.referredBy ?? '';
+    // Get arguments for edit mode
+    final args = Get.arguments;
+    isEdit = args is Map && args['isEdit'] == true;
+    model = args is Map ? args['model'] : args;
+    
+    final d = widget.dharmasetu ?? model;
+    
+    // If edit mode, fetch fresh data from server
+    if (isEdit && d != null && (d.id?.isNotEmpty ?? false)) {
+      _loadFreshData(d.id!);
+    } else if (d != null) {
+      // Populate form with existing data
+      _populateForm(d);
     } else {
       // Set default values for new entry
       _selectedType = DharmasetuType.COMMUNITY;
       _selectedStatus = DharmasetuStatus.WIP;
     }
+  }
+
+  Future<void> _loadFreshData(String dharmasetuId) async {
+    setState(() => _isLoading = true);
+    try {
+      final result = await _dharmaRepository.getDharmasetuById(dharmasetuId);
+      
+      if (result.isSuccess && result.data != null) {
+        final freshModel = DharmasetuModel.fromView(result.data!);
+        setState(() {
+          model = freshModel;
+          _populateForm(freshModel);
+          _isLoading = false;
+        });
+      } else {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load data: ${result.error?.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error loading data: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  void _populateForm(DharmasetuModel d) {
+    // Set type
+    _selectedType = _getTypeFromString(d.type);
+    
+    // Set status
+    _selectedStatus = _getStatusFromString(d.dharmasetuStatus);
+    
+    // Populate all fields
+    _communityNameController.text = d.communityName ?? '';
+    _pointOfContactController.text = d.pointOfContact ?? '';
+    _addressController.text = d.address ?? '';
+    _cityController.text = d.city ?? '';
+    _stateController.text = d.state ?? '';
+    _countryController.text = d.country ?? '';
+    _pincodeController.text = d.pincode ?? '';
+    _meetingLinkController.text = d.meetingLink ?? '';
+    _feedbackController.text = d.feedback ?? '';
+    _dateController.text = d.date ?? '';
+    _referredByController.text = d.referredBy ?? '';
   }
 
   @override
@@ -135,8 +184,8 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
 
       // Create the model with all fields
       final dharmasetu = DharmasetuModel(
-        id: widget.dharmasetu?.id ?? '', // Keep existing ID for update
-        dharmasetuId: widget.dharmasetu?.dharmasetuId ?? '', // Keep existing ID for update
+        id: widget.dharmasetu?.id ?? model?.id ?? '', // Use model ID if widget ID not available
+        dharmasetuId: widget.dharmasetu?.dharmasetuId ?? model?.dharmasetuId ?? '', // Use model ID if widget ID not available
         type: _selectedType!.name,
         communityName: _communityNameController.text.isNotEmpty 
             ? _communityNameController.text.trim() 
@@ -170,7 +219,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
 
       print('Submitting Dharmasetu: ${dharmasetu.toJson()}');
       
-      if (widget.dharmasetu != null) {
+      if (widget.dharmasetu != null || isEdit) {
         // Update existing
         context.read<DharmasetuBloc>().add(UpdateDharmasetuEvent(dharmasetu));
       } else {
@@ -183,7 +232,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   // ---------------- BUILD ----------------
   @override
   Widget build(BuildContext context) {
-    final isUpdate = widget.dharmasetu != null;
+    final isUpdate = widget.dharmasetu != null || isEdit;
     
     return BlocListener<DharmasetuBloc, DharmasetuState>(
       listener: (context, state) {
@@ -212,7 +261,11 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
       child: Layout(
         child: Padding(
           padding: const EdgeInsets.all(16),
-          child: Card(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(),
+                )
+              : Card(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
@@ -234,7 +287,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
                       if (isUpdate) ...[
                         const SizedBox(height: 8),
                         Text(
-                          'ID: ${widget.dharmasetu?.dharmasetuId ?? widget.dharmasetu?.id}',
+                          'ID: ${widget.dharmasetu?.dharmasetuId ?? widget.dharmasetu?.id ?? model?.dharmasetuId ?? model?.id}',
                           style: TextStyle(
                             fontSize: 14,
                             color: Colors.grey[600],

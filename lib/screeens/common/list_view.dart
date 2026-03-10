@@ -207,7 +207,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
                         child: _infoTile(
                           Icons.category,
                           'Type',
-                          _dharmasetu.type,
+                          _dharmasetu.type?? 'N/A',
                         ),
                       ),
                     ],

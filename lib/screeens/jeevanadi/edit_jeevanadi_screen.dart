@@ -72,7 +72,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
   bool _sameAsMobile = false;
   List<Map<String, dynamic>> _relationships = [];
-  List<Map<String, dynamic>> _occasions = [];
+  //List<Map<String, dynamic>> _occasions = [];
+  List<Map<String, dynamic>> _occasions = <Map<String, dynamic>>[];
 
   // Getters for controllers
   TextEditingController get _nameCtrl => _controllers['name']!;
@@ -183,15 +184,24 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
       }).toList();
       //.cast<Map<String, String>>();
 
-      _occasions = profile.occupationDetails != null
-          ? [
-              {
-                "id": profile.occupationDetails!.id?.toString() ?? "",
-                "name": profile.occupationDetails!.occName ?? "",
-                "date": profile.occupationDetails!.occDate ?? "",
-              },
-            ]
-          : [];
+      // _occasions = profile.occupationDetails != null
+      //     ? [
+      //         {
+      //           "id": profile.occupationDetails.id?.toString() ?? "",
+      //           "name": profile.occupationDetails.occName ?? "",
+      //           "date": profile.occupationDetails.occDate ?? "",
+      //         },
+      //       ]
+      //     : [];
+   _occasions = profile.occasionsDetails
+    .where((occ) => occ != null)  
+    .map((occ) => <String, dynamic>{  
+          "id": occ!.id.toString(),
+          "name": occ.occName,
+          "date": occ.occDate,
+          "uniqueId": occ.id.toString(),  
+        })
+    .toList();
       _isActive = profile.basicDetails.isActive;
       _status = _isActive ? 'ACTIVE' : 'INACTIVE';
 
@@ -744,7 +754,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
                   "paadam": "",
                 }
                 as Map<String, dynamic>,
-          ); // ← ADD THIS CAST
+          ); 
         });
       },
       children: [
@@ -760,26 +770,34 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     );
   }
 
-  Widget _buildOccasions() {
-    return _buildSection(
-      title: 'Occasions Details',
-      showAddButton: true,
-      onAdd: () {
-        setState(() {
-          if (_occasions.isEmpty ||
-              _occasions.last["name"]?.isNotEmpty == true ||
-              _occasions.last["date"]?.isNotEmpty == true) {
-            _occasions.add({"name": "", "date": ""});
-          }
+Widget _buildOccasions() {
+  return _buildSection(
+    title: 'Occasions Details',
+    showAddButton: true,
+    onAdd: () {
+      setState(() {
+        _occasions.add(<String, dynamic>{  
+          "id": "",
+          "name": "",
+          "date": "",
+          "uniqueId": DateTime.now().millisecondsSinceEpoch.toString(),
+          
         });
-      },
-      children: _occasions
-          .asMap()
-          .entries
-          .map((entry) => _buildOccasionInline(entry.key, entry.value))
-          .toList(),
-    );
-  }
+        print('Added occasion, total: ${_occasions.length}'); 
+      });
+    },
+    children: [
+      if (_occasions.isEmpty)
+        const Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: Text('No occasions added yet'),
+        ),
+      ...List.generate(_occasions.length, (index) {
+        return _buildOccasionInline(index, _occasions[index]);
+      }),
+    ],
+  );
+}
 
   Widget _buildActionButtons() {
     return Row(
@@ -982,11 +1000,12 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     rel['rashi'] = rel['rashi'] ?? '';
     rel['paadam'] = rel['paadam'] ?? '';
 
+    final key = rel['id'].toString().isNotEmpty && rel['id'] != '0'
+        ? ValueKey('relation_${rel['id']}') 
+        : UniqueKey();
+
     return Container(
-      // key: ValueKey('relation_${index}_${rel['id'] ?? 'new'}'),
-      key: ValueKey(
-        'relation_${rel['id']?.isNotEmpty == true ? rel['id'] : 'new_${index}'}',
-      ),
+      key: key,
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -1040,30 +1059,40 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     );
   }
 
-  Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (index > 0) const SizedBox(height: 12),
-        Row(
+
+Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
+    final key = ValueKey('occasion_${index}_${occ['uniqueId']}');
+  return Column(
+     key: key,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (index > 0) const SizedBox(height: 12),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
+            SizedBox(
+              width: 250,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
-                  initialValue: occ["name"],
+                  initialValue: occ['name'] ?? '',
                   style: const TextStyle(fontSize: 14),
                   decoration: _inputDecoration("Occasion Name"),
-                  onChanged: (v) => occ["name"] = v,
+                  onChanged: (value) {
+                    _occasions[index]['name'] = value;
+                  },
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: 200,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
-                  controller: TextEditingController(text: occ["date"]),
+                  initialValue: occ['date'] ?? '',
                   readOnly: true,
                   onTap: () async {
                     final date = await showDatePicker(
@@ -1073,18 +1102,15 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
                       initialDate: DateTime.now(),
                     );
                     if (date != null) {
-                      setState(
-                        () =>
-                            occ["date"] = DateFormat("yyyy-MM-dd").format(date),
-                      );
+                      final formattedDate = DateFormat("yyyy-MM-dd").format(date);
+                      setState(() {
+                        _occasions[index]['date'] = formattedDate;
+                      });
                     }
                   },
                   decoration: _inputDecoration(
                     "Occasion Date",
-                    suffixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.grey,
-                    ),
+                    suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
                   ),
                 ),
               ),
@@ -1099,11 +1125,12 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
               ),
           ],
         ),
-        if (index < _occasions.length - 1)
-          const Divider(height: 16, color: Colors.grey),
-      ],
-    );
-  }
+      ),
+      if (index < _occasions.length - 1)
+        const Divider(height: 16, color: Colors.grey),
+    ],
+  );
+}
 
   Widget _relationField(Map<String, dynamic> rel, int index) =>
       _buildRelDropdown(

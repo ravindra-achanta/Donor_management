@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
 import 'package:vikas_app/screeens/models/response/donations.dart';
 import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
@@ -97,15 +98,17 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Date', flex: 1),
                   tableHeader('Referred By', flex: 1),
                   tableHeader('Status', flex: 1),
-                  tableHeader('Actions', flex: 2),
+                  if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" ||
+                      Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
+                    tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'VISIT') ...[
                   //tableHeader('ID', flex: 1),
                   tableHeader('Visitor Name', flex: 2),
                   tableHeader('Phone Number', flex: 2),
                   //tableHeader('Visit Purpose', flex: 2),
                   tableHeader('No. of Guests', flex: 1),
-                  // Actions column (optional - you can keep or remove)
-                  tableHeader('Actions', flex: 1),
+                  if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+                    tableHeader('Actions', flex: 1),
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
@@ -239,36 +242,41 @@ class _CommonListState extends State<CommonList> {
                                     rowData.dharmasetuStatus,
                                   ),
                                 ),
-                                Expanded(
-                                  flex: 2,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _actionIcon(
-                                        Icons.visibility_outlined,
-                                        Colors.blue,
-                                        () {
-                                          Get.toNamed(
-                                            '/view/dharmasetu',
-                                            arguments: rowData,
-                                          );
-                                        },
-                                      ),
-                                      const SizedBox(width: 5),
-                                      _actionIcon(
-                                        Icons.edit_outlined,
-                                        Colors.orange,
-                                        () => widget.onUpdate(rowData.id),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      _actionIcon(
-                                        Icons.delete_outline,
-                                        Colors.red,
-                                        () => widget.onDelete(rowData.id),
-                                      ),
-                                    ],
+                                const SizedBox(width: 10),
+                                if (Vikasdb().getString("USER_TYPE") ==
+                                        "OFFICE_STAFF" ||
+                                    Vikasdb().getString("USER_TYPE") ==
+                                        "KARYAKARTHA")
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // _actionIcon(
+                                        //   Icons.visibility_outlined,
+                                        //   Colors.blue,
+                                        //   () {
+                                        //     Get.toNamed(
+                                        //       '/view/dharmasetu',
+                                        //       arguments: rowData,
+                                        //     );
+                                        //   },
+                                        // ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.edit_outlined,
+                                          Colors.orange,
+                                          () => widget.onUpdate(rowData.id),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.delete_outline,
+                                          Colors.red,
+                                          () => widget.onDelete(rowData.id),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
                               ],
                             ] else if (screenType == 'VISIT') ...[
                               if (rowData is VisitView) ...[
@@ -284,32 +292,26 @@ class _CommonListState extends State<CommonList> {
                                 // Expanded(
                                 //   child: _buildStatusPill(rowData.status),
                                 // ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // _actionIcon(
-                                      //   Icons.visibility_outlined,
-                                      //   Colors.blue,
-                                      //   () => Get.toNamed(
-                                      //     '/view/visit',
-                                      //     arguments: rowData,
-                                      //   ),
-                                      // ),
-                                      _actionIcon(
-                                        Icons.edit_outlined,
-                                        Colors.orange,
-                                        () => widget.onUpdate(rowData.id),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      _actionIcon(
-                                        Icons.delete_outline,
-                                        Colors.red,
-                                        () => widget.onDelete(rowData.id),
-                                      ),
-                                    ],
+                                if (Vikasdb().getString("USER_TYPE") ==
+                                    "OFFICE_STAFF")
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _actionIcon(
+                                          Icons.edit_outlined,
+                                          Colors.orange,
+                                          () => widget.onUpdate(rowData.id),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.delete_outline,
+                                          Colors.red,
+                                          () => widget.onDelete(rowData.id),
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ),
                               ],
                             ] else if (screenType == 'DONATION') ...[
                               tableData(amount),

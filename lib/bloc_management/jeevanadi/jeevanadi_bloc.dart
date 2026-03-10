@@ -160,112 +160,119 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
   }
 
   //assgned member list for karyakatha
+ 
   Future<void> _onFetchAssignedJeevanadis(
-    FetchAssignedKaryakarthasEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    if (event.page == 0) {
-      emit(state.copyWith(isLoadingAssigned: true, errorMessage: null));
-    }
-
-    try {
-      print(
-        '🔵 Fetching assigned karyakarthas - MemberId: ${event.memberId}, Page: ${event.page}',
-      );
-      final response = await JeevanaadiRepo.getAssignedJeevanaadis(
-        karyakarthaId: event.memberId,
-        page: event.page,
-        size: 10,
-      );
-
-      if (response.isSuccess) {
-        JeevanaadiPaginatedView? data = response.data;
-        emit(
-          state.copyWith(
-            assignedKaryakarthas: data!.content ?? [],
-            assignedTotalPages: data.totalPages ?? 0,
-            assignedTotalElements: data.totalElements ?? 0,
-            assignedCurrentPage: data.currentPage ?? 0,
-            isLoadingAssigned: false,
-            errorMessage: null,
-          ),
-        );
-      } else {
-        emit(
-          state.copyWith(
-            isLoadingAssigned: false,
-            errorMessage:
-                response.error?.message ??
-                'Failed to fetch assigned karyakarthas',
-          ),
-        );
-      }
-    } catch (e) {
-      print('❌ Exception in _onFetchAssignedKaryakarthas: $e');
-      emit(
-        state.copyWith(
-          isLoadingAssigned: false,
-          errorMessage:
-              'Failed to fetch assigned karyakarthas: ${e.toString()}',
-        ),
-      );
-    }
+  FetchAssignedKaryakarthasEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.page == 0) {
+    emit(state.copyWith(
+      isLoadingAssigned: true,
+      errorMessage: null,
+      assignedKaryakarthas: [],
+    ));
+  } else {
+    emit(state.copyWith(
+      isLoadingAssigned: true,
+      errorMessage: null,
+    ));
   }
 
-  //UNASSIGNED MEMBER
+  try {
+    final response = await JeevanaadiRepo.getAssignedJeevanaadis(
+      karyakarthaId: event.memberId,
+      page: event.page,
+      size: 10,
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      final newMembers = data?.content ?? [];
+
+      final updatedList = (event.page == 0)
+          ? newMembers
+          : [...state.assignedKaryakarthas, ...newMembers];
+
+      emit(state.copyWith(
+        assignedKaryakarthas: updatedList,              
+        assignedTotalPages: data?.totalPages ?? 0,
+        assignedTotalElements: data?.totalElements ?? 0,
+        assignedCurrentPage: data?.currentPage ?? 0,
+        isLoadingAssigned: false,
+        errorMessage: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        isLoadingAssigned: false,
+        errorMessage: response.error?.message ?? 'Failed to fetch assigned karyakarthas',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isLoadingAssigned: false,
+      errorMessage: 'Failed to fetch assigned karyakarthas: ${e.toString()}',
+    ));
+  }
+}
+
+  
+
+ // //UNASSIGNED MEMBER
   Future<void> _onFetchUnassignedJeevanaadies(
-    FetchUnassignedKaryakarthasEvent event,
-    Emitter<JeevanaadiState> emit,
-  ) async {
-    if (event.page == 0) {
-      emit(
-        state.copyWith(
-          isLoadingUnassigned: true,
-          errorMessage: null,
-          unassignedKaryakarthas: [],
-        ),
-      );
-    }
-
-    try {
-      print('🔵 Fetching unassigned - Page: ${event.page}');
-
-      final response = await JeevanaadiRepo.getUnassignedJeevanadiUsers(
-        page: event.page,
-        size: 10,
-      );
-
-      if (response.isSuccess) {
-        JeevanaadiPaginatedView? data = response.data;
-        emit(
-          state.copyWith(
-            unassignedKaryakarthas: data!.content ?? [],
-            unassignedTotalPages: data.totalPages ?? 0,
-            unassignedTotalElements: data.totalElements ?? 0,
-            unassignedCurrentPage: data.currentPage ?? 0,
-            isLoadingUnassigned: false,
-            errorMessage: null,
-          ),
-        );
-      } else {
-        emit(
-          state.copyWith(
-            isLoadingUnassigned: false,
-            errorMessage:
-                response.error?.message ?? 'Failed to fetch unassigned users',
-          ),
-        );
-      }
-    } catch (e) {
-      emit(
-        state.copyWith(
-          isLoadingUnassigned: false,
-          errorMessage:
-              'Failed to fetch unassigned karyakarthas: ${e.toString()}',
-        ),
-      );
-    }
+  FetchUnassignedKaryakarthasEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.page == 0) {
+    emit(state.copyWith(
+      isLoadingUnassigned: true,
+      errorMessage: null,
+      unassignedKaryakarthas: [],
+    ));
+  } else {
+    emit(state.copyWith(
+      isLoadingUnassigned: true,
+      errorMessage: null,
+    ));
   }
+
+  try {
+    print('🔵 Fetching unassigned - Page: ${event.page}');
+
+    final response = await JeevanaadiRepo.getUnassignedJeevanadiUsers(
+      page: event.page,
+      size: 10,
+    );
+
+    if (response.isSuccess) {
+      final data = response.data;
+      final newMembers = data?.content ?? [];
+
+     
+      final updatedList = (event.page == 0)
+          ? newMembers
+          : [...state.unassignedKaryakarthas, ...newMembers];
+
+      emit(state.copyWith(
+        unassignedKaryakarthas: updatedList,           
+        unassignedTotalPages: data?.totalPages ?? 0,
+        unassignedTotalElements: data?.totalElements ?? 0,
+        unassignedCurrentPage: data?.currentPage ?? 0,
+        isLoadingUnassigned: false,
+        errorMessage: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        isLoadingUnassigned: false,
+        errorMessage: response.error?.message ?? 'Failed to fetch unassigned users',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isLoadingUnassigned: false,
+      errorMessage: 'Failed to fetch unassigned karyakarthas: ${e.toString()}',
+    ));
+  }
+}
 
   void _onToggleUnassignedSelection(
     ToggleUnassignedSelectionEvent event,

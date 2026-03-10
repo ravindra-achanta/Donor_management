@@ -6,6 +6,7 @@ import 'package:vikas_app/bloc_management/visits/visit_event.dart';
 import 'package:vikas_app/bloc_management/visits/visit_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/screeens/models/request/visit_model.dart';
@@ -32,33 +33,24 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     });
   }
 
-  void _showDeleteDialog(String id, String visitorName) {
-    Get.dialog(
-      AlertDialog(
-        title: const Text('Delete Visit'),
-        content: Text(
-          'Are you sure you want to delete the visit for "$visitorName"?',
+ void _showDeleteDialog(String id, String visitorName) {
+  DeletionPopup.showDeleteConfirmation(
+    context: context,
+    title: 'Delete Visit',
+    message: 'Are you sure you want to delete the visit for "$visitorName"?',
+    confirmText: 'Delete',
+    cancelText: 'Cancel',
+    onConfirm: () {
+      context.read<VisitBloc>().add(DeleteVisit(id));
+      Get.showSnackbar(
+        const GetSnackBar(
+          message: 'Deleting visit...',
+          duration: Duration(seconds: 1),
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () {
-              Get.back();
-              context.read<VisitBloc>().add(DeleteVisit(id));
-              Get.showSnackbar(
-                const GetSnackBar(
-                  message: 'Deleting visit...',
-                  duration: Duration(seconds: 1),
-                ),
-              );
-            },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-  }
+      );
+    },
+  );
+}
 
   void _onVisitTap(String id) =>
       context.read<VisitBloc>().add(LoadVisitDetails(id));

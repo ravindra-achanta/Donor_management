@@ -447,8 +447,8 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                               context,
                                                             ).size.width >
                                                             1200
-                                                        ? 10
-                                                        : 8,
+                                                        ? 2
+                                                        : 1,
                                                     childAspectRatio:
                                                         MediaQuery.of(
                                                               context,
@@ -595,6 +595,13 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                           ),
                                       ],
                                     ),
+                                    SizedBox(
+                                      height:
+                                          MediaQuery.of(context).size.width >
+                                              1200
+                                          ? 16
+                                          : 12,
+                                    ),
 
                                     Expanded(
                                       child:
@@ -638,15 +645,15 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                                               context,
                                                             ).size.width >
                                                             1200
-                                                        ? 10
-                                                        : 8,
+                                                        ? 5
+                                                        : 4,
                                                     mainAxisSpacing:
                                                         MediaQuery.of(
                                                               context,
                                                             ).size.width >
                                                             1200
-                                                        ? 10
-                                                        : 8,
+                                                        ? 2
+                                                        : 1,
                                                     childAspectRatio:
                                                         MediaQuery.of(
                                                               context,
@@ -833,7 +840,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen> {
                                               },
                                             ),
                                     ),
-                                    const SizedBox(height: 16),
+                                    const SizedBox(height: 8),
                                     SizedBox(
                                       width: 200,
                                       child: ElevatedButton.icon(
