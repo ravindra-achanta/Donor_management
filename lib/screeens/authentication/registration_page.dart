@@ -726,14 +726,27 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
               duration: const Duration(seconds: 3),
             ),
           );
-          Future.delayed(const Duration(milliseconds: 500), () {
-            widget.onClearForm();
-            context.read<AuthBloc>().add(CheckAuthStatusEvent());
-            print("navigating to users");
+        //   Future.delayed(const Duration(milliseconds: 500), () {
+        //     widget.onClearForm();
+        //     context.read<AuthBloc>().add(CheckAuthStatusEvent());
+        //     print("navigating to users");
 
+        //     Get.toNamed('/users');
+        //   });
+        // }
+        Future.delayed(const Duration(milliseconds: 500), () {
+          widget.onClearForm();
+          context.read<AuthBloc>().add(CheckAuthStatusEvent());
+          
+          if (widget.type == RegistrationType.karyakartha) {
+            print("navigating to karyakarthas list");
+            Get.toNamed('/karyakarthas');
+          } else {
+            print("navigating to users list");
             Get.toNamed('/users');
-          });
-        }
+          }
+        });
+      }
         if (state.isError && state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

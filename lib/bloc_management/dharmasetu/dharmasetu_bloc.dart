@@ -218,14 +218,14 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
       emit(
         state.copyWith(
           isSubmitting: false,
-          successMessage: 'Dharmasetu updated successfully',
+          //successMessage: 'Dharmasetu updated successfully',
         ),
       );
     } catch (e) {
       emit(
         state.copyWith(
           isSubmitting: false,
-          errorMessage: 'Failed to update dharmasetu: $e',
+          //errorMessage: 'Failed to update dharmasetu: $e',
         ),
       );
     }

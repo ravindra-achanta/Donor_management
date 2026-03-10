@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/request/dharmasetu_model.dart';
 import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
 
 import 'package:vikas_app/views/layouts/layout.dart';
@@ -35,34 +38,23 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
   }
 
   void _showDeleteDialog(BuildContext context, String id, String name) {
-    showDialog(
+    DeletionPopup.showDeleteConfirmation(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Dharmasetu'),
-          content: Text('Are you sure you want to delete "$name"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                if (context.mounted) {
-                  context.read<DharmasetuBloc>().add(DeleteDharmasetu(id));
-                  // Hide profile view after delete
-                  setState(() {
-                    _isProfileViewVisible = false;
-                    _selectedDharmasetu = null;
-                  });
-                }
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
+      title: 'Delete Dharmasetu',
+      message:
+          'Are you sure you want to delete "$name"?\nThis action cannot be undone.',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () {
+        // This will be called after the popup is dismissed and user confirms
+        if (context.mounted) {
+          context.read<DharmasetuBloc>().add(DeleteDharmasetu(id));
+          // Hide profile view after delete
+          setState(() {
+            _isProfileViewVisible = false;
+            _selectedDharmasetu = null;
+          });
+        }
       },
     );
   }
@@ -228,24 +220,46 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                   _onDharmasetuTap(id, state.dharmasetuList);
                                 },
                                 onDelete: (id) {
-                                  final item = state.dharmasetuList.firstWhere(
-                                    (d) => d.id == id,
+                                  String? userType = Vikasdb().getString(
+                                    "USER_TYPE",
                                   );
-                                  _showDeleteDialog(
-                                    context,
-                                    id,
-                                    item.communityName,
-                                  );
+                                  bool canDelete =
+                                      userType == "OFFICE_STAFF" ||
+                                      userType == "KARYAKARTHA";
+
+                                  if (canDelete) {
+                                    final item = state.dharmasetuList
+                                        .firstWhere((d) => d.id == id);
+                                    _showDeleteDialog(
+                                      context,
+                                      id,
+                                      item.communityName,
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text(
+                                          'You do not have permission to delete',
+                                        ),
+                                        backgroundColor: Colors.red,
+                                        duration: Duration(seconds: 2),
+                                      ),
+                                    );
+                                  }
                                 },
-                                onUpdate: (id) {
-                                  final item = state.dharmasetuList.firstWhere(
-                                    (d) => d.id == id,
-                                  );
-                                  Get.toNamed(
-                                    '/edit/dharmasetu',
-                                    arguments: item,
-                                  );
-                                },
+                               onUpdate: (id) {
+  final item = state.dharmasetuList.firstWhere(
+    (d) => d.id == id,
+  );
+  final model = DharmasetuModel.fromView(item);
+  Get.toNamed(
+    '/add/dharmasetu',
+    arguments: {
+      'model': model,
+      'isEdit': true,  
+    },
+  );
+},
                               ),
 
                               // Pagination
@@ -370,7 +384,8 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                 key: ValueKey(
                                   'profile_${_selectedDharmasetu?.id}',
                                 ),
-                                data: (_selectedDharmasetu,),
+                                // data: (_selectedDharmasetu,),
+                                data: _selectedDharmasetu,
                                 onClose: () {
                                   setState(() {
                                     _isProfileViewVisible = false;
@@ -391,7 +406,7 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                   if (_selectedDharmasetu != null) {
                                     Get.toNamed(
                                       '/view/dharmasetu',
-                                      arguments: _selectedDharmasetu,
+                                      arguments: _selectedDharmasetu!.id,
                                     );
                                   }
                                 },

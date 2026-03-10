@@ -83,10 +83,10 @@ class DharmasetuRepository {
     required String id,
     required Map<String, dynamic> updateData,
   }) async {
-    final url = "${ApiConstants.DHARMASETU_UPDATE}/$id/update";
+    final url = "${ApiConstants.DHARMASETU_UPDATE.replaceFirst('{id}', id)}/update";
 
     // Remove null values from update data
-    updateData.removeWhere((key, value) => value == null);
+    //updateData.removeWhere((key, value) => value == null);
 
     final result = await _api.put(url, body: updateData);
 

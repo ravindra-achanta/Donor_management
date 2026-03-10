@@ -96,7 +96,7 @@ getPageRoute() {
     GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
 
-    //GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
+    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
     GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
