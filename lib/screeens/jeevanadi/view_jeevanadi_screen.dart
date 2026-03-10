@@ -162,7 +162,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
               children: [
                 // ---------- HEADER ROW ----------
                 // _buildHeaderRow(context, profileFull),
-                if (state.isFromRequest)
+                if (isFromRequest)
                   _buildRequestHeaderRow(context, profileFull, state)
                 else
                   _buildNormalHeaderRow(context, profileFull),
@@ -185,10 +185,16 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // ---------- SPECIAL OCCASIONS TABLE ----------
+                // _buildOccasionsTable(
+                //   profileFull.occupationDetails != null
+                //       ? [profileFull.occupationDetails!]
+                //       : [],
+                // ),
                 _buildOccasionsTable(
-                  profileFull.occupationDetails != null
-                      ? [profileFull.occupationDetails!]
-                      : [],
+                  profileFull.occasionsDetails
+                      .where((occ) => occ != null)
+                      .map((occ) => occ as OccasionsDetails)
+                      .toList(),
                 ),
 
                 const SizedBox(height: 20),
@@ -343,30 +349,35 @@ class ViewJeevanadiScreen extends StatelessWidget {
             ),
           ),
 
-         if(Vikasdb().getString("USER_TYPE") == 'OFFICE_STAFF' || (Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA')) ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditJeevanadiScreen(
-                    //profile: profileFull,
-                    userId: userId ?? '',
+          if (Vikasdb().getString("USER_TYPE") == 'OFFICE_STAFF' ||
+              (Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA'))
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditJeevanadiScreen(
+                      //profile: profileFull,
+                      userId: userId ?? '',
+                    ),
                   ),
+                );
+              },
+              icon: const Icon(Icons.edit, size: 16),
+              label: const Text("Edit"),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.brown,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
                 ),
-              );
-            },
-            icon: const Icon(Icons.edit, size: 16),
-            label: const Text("Edit"),
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Colors.brown,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -790,7 +801,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOccasionsTable(List<OccupationDetails> occasions) {
+  Widget _buildOccasionsTable(List<OccasionsDetails> occasions) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1025,7 +1036,8 @@ class ViewJeevanadiScreen extends StatelessWidget {
           // Approve button
           if (state.isFromRequest &&
               state.requestStatus == 'PENDING' &&
-              !state.isProcessingRequest)
+              !state.isProcessingRequest &&
+              Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
@@ -1084,7 +1096,9 @@ class ViewJeevanadiScreen extends StatelessWidget {
           //     ),
           //   ),
           const SizedBox(width: 12),
-          if (state.isFromRequest && state.requestStatus == 'PENDING')
+          if (state.isFromRequest &&
+              state.requestStatus == 'PENDING' &&
+              Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(

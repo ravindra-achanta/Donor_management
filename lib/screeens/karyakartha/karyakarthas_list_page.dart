@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
@@ -62,6 +63,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                                if (Vikasdb().getString("USER_TYPE") != "GURUJI")
                                 AddButton().addButton(
                                   context: context,
                                   buttonText: "Add Karyakartha",

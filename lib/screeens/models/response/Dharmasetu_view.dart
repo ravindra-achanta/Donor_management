@@ -54,6 +54,7 @@ class DharmasetuView {
       dharmasetuStatus: json['dharmasetuStatus'] ?? '',
     );
   }
+  
 
   Map<String, dynamic> toJson() {
     return {

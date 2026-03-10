@@ -2,14 +2,14 @@ class JeevanaadiFullProfile {
   final BasicDetails basicDetails;
   final ProfileDetails profileDetails;
   final List<RelationDetails> relationDetails;
-  final OccupationDetails? occupationDetails;
+  final List<OccasionsDetails?> occasionsDetails;
   final JeevanaadiDemoGraphicDetails jeevanaadiDemoGraphicDetails;
 
   JeevanaadiFullProfile({
     required this.basicDetails,
     required this.profileDetails,
     required this.relationDetails,
-    this.occupationDetails,
+    required this.occasionsDetails,
     required this.jeevanaadiDemoGraphicDetails,
   });
 
@@ -40,19 +40,28 @@ class JeevanaadiFullProfile {
               ?.map((e) => RelationDetails.fromJson(e))
               .toList() ??
           [],
-      occupationDetails: () {
-        final occ = json['occupationDetails'];
-        if (occ == null) return null;
-        if (occ is Map<String, dynamic>) {
-          return OccupationDetails.fromJson(occ);
-        }
-        if (occ is List &&
-            occ.isNotEmpty &&
-            occ.first is Map<String, dynamic>) {
-          return OccupationDetails.fromJson(occ.first as Map<String, dynamic>);
-        }
-        return null;
-      }(),
+      // occupationDetails: () {
+      //   final occ = json['occupationDetails'];
+      //   if (occ == null) return null;
+      //   if (occ is Map<String, dynamic>) {
+      //     return OccupationDetails.fromJson(occ);
+      //   }
+      //   if (occ is List &&
+      //       occ.isNotEmpty &&
+      //       occ.first is Map<String, dynamic>) {
+      //     return OccupationDetails.fromJson(occ.first as Map<String, dynamic>);
+      //   }
+      //   return null;
+      // }(),
+      occasionsDetails: (() {
+        final occKey = json.containsKey('occupationDetails')
+            ? 'occupationDetails'
+            : 'occassionDetails';
+        return (json[occKey] as List<dynamic>?)
+                ?.map((e) => OccasionsDetails.fromJson(e))
+                .toList() ??
+            [];
+      })(),
       jeevanaadiDemoGraphicDetails: JeevanaadiDemoGraphicDetails.fromJson(
         json['jeevanaadiDemoGraphicDetails'] ?? {},
       ),
@@ -262,7 +271,7 @@ class RelationDetails {
   }
 }
 
-class OccupationDetails {
+class OccasionsDetails {
   final int id;
   final String occName;
   final String occDate;
@@ -271,7 +280,7 @@ class OccupationDetails {
   final int? paadam;
   final int? rashi;
 
-  OccupationDetails({
+  OccasionsDetails({
     required this.id,
     required this.occName,
     required this.occDate,
@@ -281,8 +290,8 @@ class OccupationDetails {
     this.rashi,
   });
 
-  factory OccupationDetails.fromJson(Map<String, dynamic> json) {
-    return OccupationDetails(
+  factory OccasionsDetails.fromJson(Map<String, dynamic> json) {
+    return OccasionsDetails(
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id']?.toString() ?? '') ?? 0,
