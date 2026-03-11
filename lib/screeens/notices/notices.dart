@@ -10,8 +10,8 @@ import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
-import 'package:vikas_app/screeens/models/enum/user_type.dart';
-import 'package:vikas_app/screeens/models/request/notice_request.dart';          // for create
+import 'package:vikas_app/screeens/models/enum/notice_type.dart';
+import 'package:vikas_app/screeens/models/request/notice_request.dart';
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/models/response/user_view.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
@@ -30,10 +30,11 @@ class _NoticesState extends State<Notices> {
 
   /// Audience selection
   String _selectedSpecificOption = 'User Type';
-  String? _selectedUserType; // Stores display name (e.g., "Admin", "All Users")
-  List<String> _selectedUsers = []; // Will store user IDs when integrated
+  NoticeType? _selectedAudienceType;
+  List<String> _selectedUserIds = []; // Store user IDs, not names
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
+  late List<NoticeType> _audienceTypes;
 
   /// Controllers
   final TextEditingController _titleController = TextEditingController();
@@ -48,24 +49,17 @@ class _NoticesState extends State<Notices> {
   bool _isSubmitting = false;
   bool _isLoading = true;
 
-
-  //List<UserView> _allUsers = [];
-  List<String> _allUsers = [];
+  // Store full user objects and a map for name lookup
+  List<UserView> _allUsers = [];
+  Map<String, String> _userIdToName = {};
   bool _isLoadingUsers = false;
-
-  final List<String> _userTypeOptions = [
-    'All Users',
-    UserType.admin.displayName,
-    UserType.karyakartha.displayName,
-    UserType.officeStaff.displayName,
-    UserType.superAdmin.displayName,
-  ];
-
-
 
   @override
   void initState() {
     super.initState();
+    _audienceTypes = NoticeType.values
+        .where((type) => type != NoticeType.toSpecific)
+        .toList();
     _initializeData();
     _fetchUsers();
   }
@@ -75,7 +69,7 @@ class _NoticesState extends State<Notices> {
       _populateFields();
     }
     setState(() => _isLoading = false);
-    
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_selectedTime != null) {
         _timeController.text = _selectedTime!.format(context);
@@ -83,58 +77,83 @@ class _NoticesState extends State<Notices> {
     });
   }
 
-  void _fetchUsers() async {
-  setState(() => _isLoadingUsers = true);
-  final authRepo = AuthRepository();
-  final result = await authRepo.getAllUsers(page: 0, size: 1000); 
-  
-  if (result.isSuccess && result.data != null) {
-    setState(() {
-      _allUsers = result.data!.content
-          .map((user) => user.name ?? 'Unknown User')
-          .where((name) => name.isNotEmpty) 
-          .toList();
-      _isLoadingUsers = false;
-      
-      print('Loaded ${_allUsers.length} users: $_allUsers');
-    });
-  } else {
-    print('Failed to load users: ${result.error?.message}');
-    setState(() => _isLoadingUsers = false);
+  Widget _buildAudienceDropdown({
+    required String hint,
+    required NoticeType? value,
+    required List<NoticeType> items,
+    required ValueChanged<NoticeType?> onChanged,
+  }) {
+    return Container(
+      height: 48,
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.grey.shade400),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButton<NoticeType>(
+        value: items.contains(value) ? value : null,
+        hint: Text(hint, style: const TextStyle(color: Colors.black54)),
+        isExpanded: true,
+        underline: const SizedBox(),
+        dropdownColor: Colors.white,
+        onChanged: onChanged,
+        items: items.map((type) {
+          return DropdownMenuItem(
+            value: type,
+            child: Text(type.displayName,
+                style: const TextStyle(color: Colors.black)),
+          );
+        }).toList(),
+      ),
+    );
   }
-}
+
+  void _fetchUsers() async {
+    setState(() => _isLoadingUsers = true);
+    final authRepo = AuthRepository();
+    final result = await authRepo.getAllUsers(page: 0, size: 1000);
+
+    if (result.isSuccess && result.data != null) {
+      setState(() {
+        _allUsers = result.data!.content;
+        _userIdToName = {
+          for (var user in _allUsers) user.id: user.name ?? 'Unknown'
+        };
+        _isLoadingUsers = false;
+        print('Loaded ${_allUsers.length} users');
+      });
+    } else {
+      print('Failed to load users: ${result.error?.message}');
+      setState(() => _isLoadingUsers = false);
+    }
+  }
 
   void _populateFields() {
     final notice = widget.noticeData;
-    if (notice == null) return; 
-    
+    if (notice == null) return;
+
     _titleController.text = notice.title;
     _descriptionController.text = notice.description;
 
-    // Map sendTo to UI
     if (notice.sendTo != null) {
-      if (notice.sendTo == 'TO_ALL') {
-  _selectedUserType = 'All Users';
-}
-else if (notice.sendTo == 'TO_ADMINS') {
-  _selectedUserType = UserType.admin.displayName;
-}
-else if (notice.sendTo == 'TO_KARYAKARTHAS') {
-  _selectedUserType = UserType.karyakartha.displayName;
-}
-else if (notice.sendTo == 'TO_OFFICESTAFF') {
-  _selectedUserType = UserType.officeStaff.displayName;
-}
-else if (notice.sendTo == 'TO_SPECIFIC') {
-  _selectedSpecificOption = 'User';
-}
+      if (notice.sendTo == 'TO_SPECIFIC') {
+        _selectedSpecificOption = 'User';
+
+      } else {
+        _selectedSpecificOption = 'User Type';
+        try {
+          _selectedAudienceType = NoticeType.fromString(notice.sendTo!);
+        } catch (e) {
+          _selectedAudienceType = NoticeType.toAll;
+        }
+      }
     }
 
     if (notice.sendTime != null) {
       _selectedDate = notice.sendTime;
       _selectedTime = TimeOfDay.fromDateTime(notice.sendTime!);
       _dateController.text = DateFormat('yyyy-MM-dd').format(notice.sendTime!);
-      // Time formatting moved to addPostFrameCallback in _initializeData()
     }
 
     // TODO: Load existing image if any (requires handling base64/URL)
@@ -175,7 +194,6 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
     }
   }
 
-  /// Convert selected image to base64
   Future<String?> _imageToBase64() async {
     if (kIsWeb && _selectedFileBytes != null) {
       return base64Encode(_selectedFileBytes!);
@@ -186,77 +204,72 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
     return null;
   }
 
-  /// Map selected display name to API sendTo value
- String _mapDisplayNameToSendTo(String? displayName) {
-  if (displayName == null || displayName == 'All Users') return 'TO_ALL';
-  if (displayName == UserType.admin.displayName) return 'TO_ADMINS';
-  if (displayName == UserType.karyakartha.displayName) return 'TO_KARYAKARTHAS';
-  if (displayName == UserType.officeStaff.displayName) return 'TO_OFFICESTAFF';
-  return 'TO_ALL';
-}
-
-  /// Main submit method
   void _submitNotice() async {
-  final formState = _formKey.currentState;
-  if (formState == null || !formState.validate()) return;
+    final formState = _formKey.currentState;
+    if (formState == null || !formState.validate()) return;
 
-  final isEditing = widget.noticeData != null;
+    final isEditing = widget.noticeData != null;
 
-  if (!isEditing) {
-    if (_selectedDate == null) {
-      _showError('Please select a date');
-      return;
+    if (!isEditing) {
+      if (_selectedDate == null) {
+        _showError('Please select a date');
+        return;
+      }
+      if (_selectedTime == null) {
+        _showError('Please select a time');
+        return;
+      }
     }
 
-    if (_selectedTime == null) {
-      _showError('Please select a time');
-      return;
+    setState(() => _isSubmitting = true);
+
+    final imageBase64 = await _imageToBase64();
+
+
+    final sendDateTime = DateTime(
+      _selectedDate!.year,
+      _selectedDate!.month,
+      _selectedDate!.day,
+      _selectedTime!.hour,
+      _selectedTime!.minute,
+    ).toUtc().toIso8601String();
+
+    String sendTo;
+    List<String>? specificUsers;
+
+    if (_selectedSpecificOption == 'User Type') {
+      if (_selectedAudienceType == null) {
+        _showError('Please select a user type');
+        setState(() => _isSubmitting = false);
+        return;
+      }
+      sendTo = _selectedAudienceType!.value;
+      specificUsers = []; 
+    } else {
+      sendTo = "TO_SPECIFIC";
+      specificUsers = _selectedUserIds; 
+    }
+
+    final request = NoticeRequest(
+      image: imageBase64,
+      title: _titleController.text,
+      description: _descriptionController.text,
+      sendDate: DateTime.parse(sendDateTime),
+      sendTo: sendTo,
+      specificUsers: specificUsers,
+    );
+
+    // Debug print
+    print('Sending request: ${jsonEncode(request.toJson())}');
+
+    if (isEditing) {
+      context
+          .read<NoticeBloc>()
+          .add(UpdateNoticeEvent(widget.noticeData!.id, request));
+    } else {
+      context.read<NoticeBloc>().add(CreateNoticeEvent(request));
     }
   }
-
-  setState(() => _isSubmitting = true);
-
-  final imageBase64 = await _imageToBase64();
-
-  final sendDateTime = DateTime(
-    _selectedDate!.year,
-    _selectedDate!.month,
-    _selectedDate!.day,
-    _selectedTime!.hour,
-    _selectedTime!.minute,
-  );
-
-  String sendTo;
-  List<String>? specificUsers;
-
-  if (_selectedSpecificOption == 'User Type') {
-    sendTo = _mapDisplayNameToSendTo(_selectedUserType);
-    specificUsers = [];
-  } else {
-    sendTo = "TO_SPECIFIC";
-    specificUsers = _selectedUsers;
-  }
-
-  final request = NoticeRequest(
-    title: _titleController.text,
-    message: _descriptionController.text,
-    audienceType: _selectedSpecificOption == 'User Type' ? 'USER_TYPE' : 'SPECIFIC_USERS',
-    audienceValue: _selectedSpecificOption == 'User Type' ? sendTo : _selectedUsers.join(','),
-    date: sendDateTime,
-    time: _selectedTime!.format(context),
-    attachment: _selectedFile,
-  );
-
-  if (isEditing) {
-    context.read<NoticeBloc>().add(
-      UpdateNoticeEvent(widget.noticeData!.id, request),
-    );
-  } else {
-    context.read<NoticeBloc>().add(
-      CreateNoticeEvent(request),
-    );
-  }
-}
 
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -271,8 +284,8 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
     _timeController.clear();
     setState(() {
       _selectedSpecificOption = 'User Type';
-      _selectedUserType = null;
-      _selectedUsers.clear();
+      _selectedAudienceType = null;
+      _selectedUserIds.clear();
       _selectedFile = null;
       _selectedFileBytes = null;
       _selectedFileName = null;
@@ -282,13 +295,7 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
   }
 
   void _showUserSelectionDialog() {
-    // Use fetched users if available, otherwise show loading or empty state
-    List<String> allUsers = [];
-    if (_allUsers.isNotEmpty) {
-      allUsers = _allUsers.map((user) => user ?? 'Unknown User').toList();
-    }
-
-    List<String> tempSelectedUsers = List.from(_selectedUsers);
+    List<String> tempSelectedIds = List.from(_selectedUserIds);
 
     showDialog(
       context: context,
@@ -319,28 +326,30 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                       Expanded(
                         child: _isLoadingUsers
                             ? const Center(child: CircularProgressIndicator())
-                            : allUsers.isEmpty
+                            : _allUsers.isEmpty
                                 ? const Center(child: Text('No users available'))
                                 : ListView.builder(
                                     shrinkWrap: true,
-                                    itemCount: allUsers.length,
+                                    itemCount: _allUsers.length,
                                     itemBuilder: (context, index) {
-                                      final user = allUsers[index];
-                                      final isSelected = tempSelectedUsers.contains(user);
+                                      final user = _allUsers[index];
+                                      final isSelected =
+                                          tempSelectedIds.contains(user.id);
                                       return CheckboxListTile(
                                         value: isSelected,
                                         title: Text(
-                                          user,
+                                          user.name ?? 'Unknown',
                                           style: const TextStyle(fontSize: 14),
                                         ),
                                         onChanged: (checked) {
                                           setStateDialog(() {
                                             if (checked == true) {
-                                              if (!tempSelectedUsers.contains(user)) {
-                                                tempSelectedUsers.add(user);
+                                              if (!tempSelectedIds
+                                                  .contains(user.id)) {
+                                                tempSelectedIds.add(user.id);
                                               }
                                             } else {
-                                              tempSelectedUsers.remove(user);
+                                              tempSelectedIds.remove(user.id);
                                             }
                                           });
                                         },
@@ -361,7 +370,7 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _selectedUsers = List.from(tempSelectedUsers);
+                                _selectedUserIds = List.from(tempSelectedIds);
                               });
                               Navigator.pop(context);
                             },
@@ -423,21 +432,11 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
       child: BlocConsumer<NoticeBloc, NoticeState>(
         listener: (context, state) {
           if (state.formStatus == NoticeFormStatus.success) {
-            // ScaffoldMessenger.of(context).showSnackBar(
-            //   SnackBar(
-            //     content: Text(
-            //       isEditing
-            //           ? 'Notice updated successfully'
-            //           : 'Notice sent successfully',
-            //     ),
-            //     backgroundColor: Colors.green,
-            //   ),
-            // );
-           Future.delayed(const Duration(milliseconds: 500), () {
-  if (mounted) {
-    Get.offNamed('/notices/list');
-  }
-});
+            Future.delayed(const Duration(milliseconds: 500), () {
+              if (mounted) {
+                Get.offNamed('/notices/list');
+              }
+            });
           } else if (state.formStatus == NoticeFormStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -456,7 +455,6 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Header with back button
                   Row(
                     children: [
                       IconButton(
@@ -479,7 +477,6 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
 
                   const SizedBox(height: 10),
 
-                  // Audience selection – only show when creating
                   if (!isEditing) ...[
                     Row(
                       children: [
@@ -489,8 +486,8 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                           onChanged: (v) {
                             setState(() {
                               _selectedSpecificOption = v!;
-                              _selectedUserType = null;
-                              _selectedUsers.clear();
+                              _selectedAudienceType = null;
+                              _selectedUserIds.clear();
                             });
                           },
                         ),
@@ -502,8 +499,8 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                           onChanged: (v) {
                             setState(() {
                               _selectedSpecificOption = v!;
-                              _selectedUserType = null;
-                              _selectedUsers.clear();
+                              _selectedAudienceType = null;
+                              _selectedUserIds.clear();
                             });
                           },
                         ),
@@ -524,13 +521,13 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                           const SizedBox(height: 6),
                           SizedBox(
                             width: 700,
-                            child: _buildDropdown(
+                            child: _buildAudienceDropdown(
                               hint: 'Choose user type',
-                              value: _selectedUserType,
-                              items: _userTypeOptions,
-                              onChanged: (value) {
+                              value: _selectedAudienceType,
+                              items: _audienceTypes,
+                              onChanged: (NoticeType? value) {
                                 setState(() {
-                                  _selectedUserType = value;
+                                  _selectedAudienceType = value;
                                 });
                               },
                             ),
@@ -565,11 +562,11 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        _selectedUsers.isEmpty
+                                        _selectedUserIds.isEmpty
                                             ? 'Select users'
-                                            : '${_selectedUsers.length} user(s) selected',
+                                            : '${_selectedUserIds.length} user(s) selected',
                                         style: TextStyle(
-                                          color: _selectedUsers.isEmpty
+                                          color: _selectedUserIds.isEmpty
                                               ? Colors.grey
                                               : Colors.black,
                                         ),
@@ -584,12 +581,13 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                               ),
                             ),
                           ),
-                          if (_selectedUsers.isNotEmpty) ...[
+                          if (_selectedUserIds.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: _selectedUsers.map((user) {
+                              children: _selectedUserIds.map((id) {
+                                final name = _userIdToName[id] ?? id;
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -605,12 +603,12 @@ else if (notice.sendTo == 'TO_SPECIFIC') {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(user),
+                                      Text(name),
                                       const SizedBox(width: 6),
                                       GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            _selectedUsers.remove(user);
+                                            _selectedUserIds.remove(id);
                                           });
                                         },
                                         child: const Icon(
