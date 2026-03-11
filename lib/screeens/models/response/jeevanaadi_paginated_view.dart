@@ -1,4 +1,3 @@
-
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 
 class JeevanaadiPaginatedView {

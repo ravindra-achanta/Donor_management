@@ -1,14 +1,12 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
-import 'package:vikas_app/screeens/common/notice_dilouge.dart';
-import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
-import 'package:vikas_app/screeens/notices/notices.dart';
+import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
 
@@ -20,7 +18,7 @@ class NoticesListScreen extends StatefulWidget {
 }
 
 class _NoticesListScreenState extends State<NoticesListScreen> {
-  // Dropdown options
+  // Filter options
   String _selectedFilter = 'All';
   final List<String> _filterOptions = [
     'All',
@@ -41,44 +39,74 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   String _searchQuery = '';
   Timer? _debounce;
 
-  final ScrollController _scrollController = ScrollController();
+  List<NoticeResponse> _allNotices = [];
 
   @override
   void initState() {
     super.initState();
     _loadNotices();
-    _scrollController.addListener(_onScroll);
   }
 
   void _loadNotices() {
-    context.read<NoticeBloc>().add(
-      FetchNoticesEvent(
-        page: 0,
-        filterType: _selectedFilter,
-        userType: _selectedUserType,
-        searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
-      ),
-    );
+    context.read<NoticeBloc>().add(FetchNoticesEvent());
   }
 
-  void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent - 200) {
-      final state = context.read<NoticeBloc>().state;
-      if (state.status != NoticeStatus.loading &&
-          !state.isLoadingMore &&
-          state.currentPage < state.totalPages - 1) {
-        context.read<NoticeBloc>().add(
-          FetchNoticesEvent(
-            page: state.currentPage + 1,
-            filterType: _selectedFilter,
-            userType: _selectedUserType,
-            searchQuery: _searchQuery.isEmpty ? null : _searchQuery,
-          ),
-        );
+  // List<NoticeResponse> get _filteredNotices {
+  //   return _allNotices.where((notice) {
+  //     // TODO: Implement search by title/description
+  //     // TODO: Implement filter by date (sendTime)
+  //     // TODO: Implement filter by audience (sendTo)
+  //     return true;
+  //   }).toList();
+  // }
+  List<NoticeResponse> get _filteredNotices {
+  return _allNotices.where((notice) {
+    // 1. search title/description
+    if (_searchQuery.isNotEmpty) {
+      final q = _searchQuery.toLowerCase();
+      if (!notice.title.toLowerCase().contains(q) &&
+          !notice.description.toLowerCase().contains(q)) {
+        return false;
       }
     }
-  }
+
+    // 2. audience type dropdown
+    if (_selectedUserType != 'All Users') {
+      final aud = notice.sendTo ?? '';
+      if (_selectedUserType == 'Admin' && aud != 'TO_ADMINS') return false;
+      if (_selectedUserType == 'Karyakatha' && aud != 'TO_KARYAKARTHAS')
+        return false;
+      if (_selectedUserType == 'Staff' && aud != 'TO_OFFICESTAFF') return false;
+    }
+
+    // 3. date filter
+    if (_selectedFilter != 'All') {
+      final dt = notice.sendTime;
+      if (dt == null) return false;
+      final now = DateTime.now();
+      switch (_selectedFilter) {
+        case 'Today':
+          if (!(dt.year == now.year &&
+              dt.month == now.month &&
+              dt.day == now.day)) return false;
+          break;
+        case 'This Week':
+          final weekStart =
+              now.subtract(Duration(days: now.weekday - 1)); // Mon
+          if (dt.isBefore(weekStart)) return false;
+          break;
+        case 'This Month':
+          if (dt.year != now.year || dt.month != now.month) return false;
+          break;
+        case 'This Year':
+          if (dt.year != now.year) return false;
+          break;
+      }
+    }
+
+    return true;
+  }).toList();
+}
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -86,90 +114,98 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
       setState(() {
         _searchQuery = query;
       });
-      _loadNotices();
     });
   }
 
   void _onFilterChanged() {
-    _loadNotices();
+    setState(() {}); 
   }
 
   @override
   void dispose() {
     _debounce?.cancel();
-    _scrollController.dispose();
     super.dispose();
   }
 
-  Color _getAudienceColor(String audience) {
-    switch (audience) {
-      case 'All Users':
+  Color _getAudienceColor(String sendTo) {
+    switch (sendTo) {
+      case 'TO_ALL':
         return Colors.blue.shade600;
-      case 'Admin':
+      case 'TO_ADMIN':
         return Colors.red.shade600;
-      case 'Karyakatha':
+      case 'TO_KARYAKATHA':
         return Colors.green.shade600;
-      case 'Staff':
+      case 'TO_STAFF':
         return Colors.orange.shade600;
       default:
         return Colors.purple.shade600;
     }
   }
 
-  void _addNewNotice() {
-    Get.toNamed('/notices');
+  String _getAudienceDisplay(String sendTo) {
+    switch (sendTo) {
+      case 'TO_ALL':
+        return 'All Users';
+      case 'TO_ADMIN':
+        return 'Admin';
+      case 'TO_KARYAKATHA':
+        return 'Karyakatha';
+      case 'TO_STAFF':
+        return 'Staff';
+      default:
+        return sendTo; // fallback to raw value
+    }
+  }
+
+void _addNewNotice() {
+    // Clear arguments to ensure fresh form (no stale NoticeResponse)
+    Get.toNamed('/notices', arguments: null);
   }
 
   void _viewNoticeDetails(NoticeResponse notice) {
-    Get.toNamed('view/notice', arguments: notice);
+    Get.toNamed('/view/notice', arguments: notice);
   }
 
   void _showDeleteDialog(BuildContext context, String id, String title) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Delete Notice'),
-          content: Text('Are you sure you want to delete "$title"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-                context.read<NoticeBloc>().add(DeleteNoticeEvent(id));
-              },
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+  DeletionPopup.showDeleteConfirmation(
+    context: context,
+    title: 'Delete Notice',
+    message: 'Are you sure you want to delete "$title"?',
+    onConfirm: () {
+      context.read<NoticeBloc>().add(DeleteNoticeEvent(id));
+    },
+  );
+}
 
   @override
   Widget build(BuildContext context) {
     return Layout(
       child: BlocConsumer<NoticeBloc, NoticeState>(
         listener: (context, state) {
+          // Update local list when new data arrives
+          if (state.status == NoticeStatus.success) {
+            _allNotices = state.notices;
+          }
+
+          // Handle create/update form status
           if (state.formStatus == NoticeFormStatus.success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Notice added successfully'),
-                backgroundColor: Colors.green,
-              ),
-            );
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   const SnackBar(
+            //     content: Text('Notice saved successfully'),
+            //     backgroundColor: Colors.green,
+            //   ),
+            // );
           } else if (state.formStatus == NoticeFormStatus.error) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.formErrorMessage ?? 'Error occurred'),
-                backgroundColor: Colors.red,
-              ),
-            );
-          } else if (state.errorMessage != null) {
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text(state.formErrorMessage ?? 'Operation failed'),
+            //     backgroundColor: Colors.red,
+            //   ),
+            // );
+          }
+
+          // Handle general error
+          if (state.errorMessage != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
@@ -179,12 +215,13 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
           }
         },
         builder: (context, state) {
-          if (state.status == NoticeStatus.loading && state.notices.isEmpty) {
+          if (state.status == NoticeStatus.loading && _allNotices.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
+          final displayedNotices = _filteredNotices;
+
           return SingleChildScrollView(
-            controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -202,7 +239,6 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                           color: Colors.brown,
                         ),
                       ),
-                      // Add Notice Button
                       Row(
                         children: [
                           IconButton(
@@ -233,6 +269,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
                   const SizedBox(height: 20),
 
+                  // Filter bar
                   Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
@@ -271,20 +308,17 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                             ),
                           ),
                         ),
-
-                        // Vertical divider
                         Container(
                           width: 1,
                           height: 30,
                           color: Colors.grey.shade300,
                         ),
-
-                        // User Type Dropdown
                         Expanded(
                           flex: 1,
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: DropdownButtonHideUnderline(
+                            child: 
+                            DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _selectedUserType,
                                 isExpanded: true,
@@ -302,33 +336,29 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                                   }
                                 },
                                 items: _userTypeOptions
-                                    .map<DropdownMenuItem<String>>((
-                                      String value,
-                                    ) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: const TextStyle(
-                                            color: Colors.black87,
+                                    .map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    })
+                                        );
+                                      },
+                                    )
                                     .toList(),
                               ),
                             ),
                           ),
                         ),
-
-                        // Vertical divider
                         Container(
                           width: 1,
                           height: 30,
                           color: Colors.grey.shade300,
                         ),
-
-                        // Filter Dropdown
                         Expanded(
                           flex: 1,
                           child: Container(
@@ -351,19 +381,19 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                                   }
                                 },
                                 items: _filterOptions
-                                    .map<DropdownMenuItem<String>>((
-                                      String value,
-                                    ) {
-                                      return DropdownMenuItem<String>(
-                                        value: value,
-                                        child: Text(
-                                          value,
-                                          style: const TextStyle(
-                                            color: Colors.black87,
+                                    .map<DropdownMenuItem<String>>(
+                                      (String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(
+                                            value,
+                                            style: const TextStyle(
+                                              color: Colors.black87,
+                                            ),
                                           ),
-                                        ),
-                                      );
-                                    })
+                                        );
+                                      },
+                                    )
                                     .toList(),
                               ),
                             ),
@@ -375,35 +405,32 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
                   const SizedBox(height: 20),
 
-                  // Notices count
+                  // Notices count (based on filtered list)
                   Text(
-                    '${state.totalElements} notices found',
+                    '${displayedNotices.length} notices found',
                     style: const TextStyle(color: Colors.grey, fontSize: 14),
                   ),
 
                   const SizedBox(height: 16),
 
                   // Notices list
-                  state.notices.isEmpty
+                  displayedNotices.isEmpty
                       ? const Center(
                           child: Padding(
                             padding: EdgeInsets.all(32.0),
                             child: Text('No notices found'),
                           ),
                         )
-                      : Column(
-                          children: [
-                            ...state.notices
-                                .map((notice) => _buildNoticeCard(notice))
-                                .toList(),
-                            if (state.isLoadingMore)
-                              const Padding(
-                                padding: EdgeInsets.all(16.0),
-                                child: Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              ),
-                          ],
+                      : ListView.separated(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: displayedNotices.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 12),
+                          itemBuilder: (context, index) {
+                            final notice = displayedNotices[index];
+                            return _buildNoticeCard(notice);
+                          },
                         ),
                 ],
               ),
@@ -415,6 +442,23 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   }
 
   Widget _buildNoticeCard(NoticeResponse notice) {
+    // Use sendTime directly if it's already a DateTime
+    DateTime? sendDateTime;
+    try {
+      sendDateTime = notice.sendTime is String
+          ? DateTime.parse(notice.sendTime as String).toLocal()
+          : (notice.sendTime as DateTime?);
+    } catch (e) {
+      sendDateTime = null;
+    }
+    String formattedDate = sendDateTime != null
+        ? DateFormat('MMM d, y • h:mm a').format(sendDateTime)
+        : 'Invalid date';
+
+    // Audience display and color
+    final audienceDisplay = _getAudienceDisplay(notice.sendTo ?? 'TO_ALL');
+    final audienceColor = _getAudienceColor(notice.sendTo ?? 'TO_ALL');
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -424,12 +468,13 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Title and audience chip
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: Text(
-                    notice.title,
+                     'Title: ${notice.title}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -444,11 +489,11 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                     vertical: 5,
                   ),
                   decoration: BoxDecoration(
-                    color: _getAudienceColor(notice.audience),
+                    color: audienceColor,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
-                    notice.audience,
+                    audienceDisplay,
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 11,
@@ -458,72 +503,47 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                 ),
               ],
             ),
-
             const SizedBox(height: 12),
 
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Text(
-                    notice.message,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromARGB(255, 97, 97, 97),
-                      height: 1.5,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => _viewNoticeDetails(notice),
-                  icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
-                ),
-              ],
+            // Description
+            Text(
+             'Description: ${notice.description}',
+              style: const TextStyle(
+                fontSize: 14,
+                color: Color.fromARGB(255, 97, 97, 97),
+                height: 1.5,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
-
             const SizedBox(height: 12),
 
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Date and time
                 Row(
                   children: [
-                    const Icon(Icons.access_time, size: 14, color: Colors.grey),
-                    const SizedBox(width: 6),
-                    Text(
-                      '${notice.date} • ${notice.time}',
-                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    IconButton(
+                      onPressed: () => _viewNoticeDetails(notice),
+                      icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
+                      iconSize: 40,
+                      color: Colors.orange,
+                    ),
+                    const SizedBox(width: 8),
+                    Row(
+                      children: [
+                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                        const SizedBox(width: 6),
+                        Text(
+                          formattedDate,
+                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-
-                // Action buttons
                 Row(
                   children: [
-                    // View Button
-                    // ElevatedButton.icon(
-                    //   onPressed: () => _viewNoticeDetails(notice),
-                    //   icon: const Icon(Icons.remove_red_eye, size: 14),
-                    //   label: const Text('View'),
-                    //   style: ElevatedButton.styleFrom(
-                    //     backgroundColor: Colors.blue.shade50,
-                    //     foregroundColor: Colors.blue.shade700,
-                    //     padding: const EdgeInsets.symmetric(
-                    //       horizontal: 12,
-                    //       vertical: 6,
-                    //     ),
-                    //     shape: RoundedRectangleBorder(
-                    //       borderRadius: BorderRadius.circular(6),
-                    //     ),
-                    //     elevation: 0,
-                    //     minimumSize: Size.zero,
-                    //   ),
-                    // ),
-                    //const SizedBox(width: 0),
-                    // Edit Button
                     IconButton(
                       onPressed: () {
                         Get.toNamed('/notices', arguments: notice);
@@ -534,17 +554,15 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                       padding: EdgeInsets.zero,
                     ),
                     const SizedBox(width: 8),
-
-                    // Delete Button
-                    // IconButton(
-                    //   onPressed: () {
-                    //     _showDeleteDialog(context, notice.id, notice.title);
-                    //   },
-                    //   icon: const Icon(Icons.delete_outline, size: 18),
-                    //   color: Colors.red,
-                    //   constraints: const BoxConstraints(),
-                    //   padding: EdgeInsets.zero,
-                    // ),
+                    IconButton(
+                      onPressed: () {
+                        _showDeleteDialog(context, notice.id, notice.title);
+                      },
+                      icon: const Icon(Icons.delete_outline, size: 18),
+                      color: Colors.red,
+                      constraints: const BoxConstraints(),
+                      padding: EdgeInsets.zero,
+                    ),
                   ],
                 ),
               ],

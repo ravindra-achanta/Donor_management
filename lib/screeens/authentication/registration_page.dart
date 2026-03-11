@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/bloc_management/profile/profile_event.dart';
+import 'package:vikas_app/screeens/common/backButton.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
@@ -112,13 +114,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
     // return BlocProvider(
     //   create: (_) => AuthBloc(authRepository: AuthRepository()),
     //   child: _RegistrationFormContent(
-          return MultiBlocProvider(
-        providers: [
-          BlocProvider(
-            create: (_) => AuthBloc(authRepository: AuthRepository()),
-          ),
-        ],
-        child: _RegistrationFormContent(
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => AuthBloc(authRepository: AuthRepository())),
+      ],
+      child: _RegistrationFormContent(
         title: widget.title,
         type: widget.type,
         formKey: _formKey,
@@ -199,7 +199,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
   @override
   void initState() {
     super.initState();
-    context.read<AuthBloc>().add(FetchRolesEvent());
+    context.read<AuthBloc>().add(FetchRolesEventByType());
   }
 
   String _formatDate(DateTime date) {
@@ -213,9 +213,10 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     bool lettersOnly = false,
     bool numbersOnly = false,
     bool isLoading = false,
+    IconData? icon,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
@@ -225,63 +226,86 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
           if (numbersOnly) FilteringTextInputFormatter.digitsOnly,
         ],
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: label,
+          hintText: "Enter $label",
+          prefixIcon: icon != null
+              ? Icon(icon, color: Colors.grey.shade600)
+              : null,
+
           filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+          fillColor: const Color(0xffF7F9FC),
+
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 12,
+            vertical: 14,
+          ),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+          ),
+
+          errorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red),
+          ),
+
+          focusedErrorBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.red, width: 1.5),
           ),
         ),
-        // validator: (value) {
-        //   if (value == null || value.trim().isEmpty)
-        //     return '$label is required';
-        //   if (lettersOnly && !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
-        //     return '$label must contain letters only';
-        //   }
-        //   if (numbersOnly && !RegExp(r'^\d+$').hasMatch(value.trim())) {
-        //     return '$label must contain numbers only';
-        //   }
-        //   if (label == "Mobile Number" && value.trim().length != 10) {
-        //     return 'Mobile Number must be 10 digits';
-        //   }
-        //   if (label == "Pincode" && value.trim().length != 6) {
-        //     return 'Pincode must be 6 digits';
-        //   }
-        //   if (label == "Email" &&
-        //       !RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) {
-        //     return 'Enter a valid email';
-        //   }
-        //   return null;
-        // },
+
         validator: (value) {
           if (widget.isEdit) return null;
 
-          if (value == null || value.trim().isEmpty)
-            return '$label is required';
+          if (label == "First Name" ||
+              label == "Last Name" ||
+              label == "Mobile Number") {
+            if (value == null || value.trim().isEmpty) {
+              return '$label is required';
+            }
+          }
 
-          if (lettersOnly && !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
+          if (lettersOnly &&
+              value!.trim().isNotEmpty &&
+              !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
             return '$label must contain letters only';
           }
 
-          if (numbersOnly && !RegExp(r'^\d+$').hasMatch(value.trim())) {
+          if (numbersOnly &&
+              value!.trim().isNotEmpty &&
+              !RegExp(r'^\d+$').hasMatch(value.trim())) {
             return '$label must contain numbers only';
           }
 
-          if (label == "Mobile Number" && value.trim().length != 10) {
+          if (label == "Mobile Number" && value!.trim().length != 10) {
             return 'Mobile Number must be 10 digits';
           }
 
-          if (label == "Pincode" && value.trim().length != 6) {
+          if (label == "Pincode" &&
+              value!.trim().isNotEmpty &&
+              value!.trim().length != 6) {
             return 'Pincode must be 6 digits';
           }
 
           if (label == "Email" &&
+              value!.trim().isNotEmpty &&
               !RegExp(
                 r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-              ).hasMatch(value.trim())) {
+              ).hasMatch(value!.trim())) {
             return 'Enter a valid email';
           }
 
@@ -387,66 +411,65 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
 
   //   context.read<AuthBloc>().add(CreateUserEvent(request: request));
   // }
-void _submit(BuildContext context) {
-  if (!widget.formKey.currentState!.validate()) return;
+  void _submit(BuildContext context) {
+    if (!widget.formKey.currentState!.validate()) return;
 
-  if (widget.isEdit) {
-    final updatedUser = User(
-      id: widget.user!.id,
-      name:
-          "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
-      email: widget.emailCtrl.text.trim(),
-      mobileNumber: widget.mobileCtrl.text.trim(),
-      status: widget.user!.status,
-      userType: widget.user!.userType,
-      uniqueId: widget.user!.uniqueId,
-      pincode: widget.pincodeCtrl.text.trim(),
-      city: widget.cityCtrl.text.trim(),
-      area: widget.areaCtrl.text.trim(),
-      state: widget.stateCtrl.text.trim(),
-      country: widget.countryCtrl.text.trim(),
-      startedDate: widget.startDateCtrl.text.trim(),
-    );
-
-    context.read<ProfileBloc>().add(
-      UpdateProfile(id: widget.user!.id, user: updatedUser),
-    );
-
-    Navigator.pop(context);
-  } else {
-
-    if (widget.selectedRoles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please select at least one role'),
-          backgroundColor: Colors.orange,
-        ),
+    if (widget.isEdit) {
+      final updatedUser = User(
+        id: widget.user!.id,
+        name:
+            "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+        email: widget.emailCtrl.text.trim(),
+        mobileNumber: widget.mobileCtrl.text.trim(),
+        status: widget.user!.status,
+        userType: widget.user!.userType,
+        uniqueId: widget.user!.uniqueId,
+        pincode: widget.pincodeCtrl.text.trim(),
+        city: widget.cityCtrl.text.trim(),
+        area: widget.areaCtrl.text.trim(),
+        state: widget.stateCtrl.text.trim(),
+        country: widget.countryCtrl.text.trim(),
+        startedDate: widget.startDateCtrl.text.trim(),
       );
-      return;
+
+      context.read<ProfileBloc>().add(
+        UpdateProfile(id: widget.user!.id, user: updatedUser),
+      );
+      widget.type == RegistrationType.user
+          ? Get.toNamed('/users')
+          : Get.toNamed('/karyakarthas');
+    } else {
+      if (widget.selectedRoles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Please select at least one role'),
+            backgroundColor: Colors.orange,
+          ),
+        );
+        return;
+      }
+
+      final List<int> roleIds = widget.selectedRoles
+          .map((role) => int.parse(role.id))
+          .toList();
+
+      final request = IdentityRequest(
+        name:
+            "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
+        email: widget.emailCtrl.text.trim(),
+        mobileNumber: widget.mobileCtrl.text.trim(),
+        roles: roleIds,
+        startedDate: widget.startDateCtrl.text.trim(),
+        pincode: widget.pincodeCtrl.text.trim(),
+        city: widget.cityCtrl.text.trim(),
+        area: widget.areaCtrl.text.trim(),
+        state: widget.stateCtrl.text.trim(),
+        country: widget.countryCtrl.text.trim(),
+      );
+
+      context.read<AuthBloc>().add(CreateUserEvent(request: request));
     }
-
-    final List<int> roleIds = widget.selectedRoles
-        .map((role) => int.parse(role.id))
-        .toList();
-
-    final request = IdentityRequest(
-      name:
-          "${widget.firstNameCtrl.text.trim()} ${widget.lastNameCtrl.text.trim()}",
-      email: widget.emailCtrl.text.trim(),
-      mobileNumber: widget.mobileCtrl.text.trim(),
-      roles: roleIds,
-      startedDate: widget.startDateCtrl.text.trim(),
-      pincode: widget.pincodeCtrl.text.trim(),
-      city: widget.cityCtrl.text.trim(),
-      area: widget.areaCtrl.text.trim(),
-      state: widget.stateCtrl.text.trim(),
-      country: widget.countryCtrl.text.trim(),
-    );
-
-    context.read<AuthBloc>().add(CreateUserEvent(request: request));
   }
-}
-
 
   void _cancel(BuildContext context) {
     widget.onClearForm();
@@ -455,20 +478,47 @@ void _submit(BuildContext context) {
 
   Widget _startDateField(bool isLoading, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
         controller: widget.startDateCtrl,
         readOnly: true,
         enabled: !isLoading,
+        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
           labelText: "Start Date",
+          hintText: "Select Start Date",
+          prefixIcon: const Icon(Icons.event, color: Colors.grey),
+
           filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-          suffixIcon: const Icon(Icons.calendar_today, size: 18),
+          fillColor: const Color(0xffF7F9FC),
+
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
-            vertical: 12,
+            vertical: 14,
+          ),
+
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.shade300),
+          ),
+
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+          ),
+
+          suffixIcon: Container(
+            margin: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: Colors.blue.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: const Icon(Icons.calendar_today, size: 18),
           ),
         ),
         onTap: isLoading
@@ -480,6 +530,7 @@ void _submit(BuildContext context) {
                   firstDate: DateTime(2000),
                   lastDate: DateTime(2050),
                 );
+
                 if (pickedDate != null) {
                   widget.startDateCtrl.text = _formatDate(pickedDate);
                 }
@@ -496,109 +547,102 @@ void _submit(BuildContext context) {
     List<Role> allRoles,
   ) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GestureDetector(
-            // onTap: isLoading
-            //     ? null
-            //     : () async {
             onTap: (isLoading || widget.type == RegistrationType.karyakartha)
                 ? null
                 : () async {
                     await showModalBottomSheet(
                       context: context,
                       isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
+                      shape: const RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(20),
+                        ),
+                      ),
                       builder: (context) {
                         return StatefulBuilder(
                           builder: (context, setModalState) {
-                            return Align(
-                              alignment: Alignment.topCenter,
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 24,
-                                  vertical: 8,
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black26,
-                                      blurRadius: 8,
+                            return Padding(
+                              padding: const EdgeInsets.all(20),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text(
+                                    "Select Role(s)",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                  ],
-                                ),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Text(
-                                      "Select Role(s)",
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
+                                  ),
+
+                                  const SizedBox(height: 16),
+
+                                  ...allRoles.map((role) {
+                                    final isSelected = widget.selectedRoles.any(
+                                      (r) => r.id == role.id,
+                                    );
+
+                                    return CheckboxListTile(
+                                      title: Text(
+                                        role.displayName,
+                                        style: const TextStyle(fontSize: 15),
                                       ),
-                                    ),
-                                    const SizedBox(height: 12),
-                                    ...allRoles.map((role) {
-                                      final isSelected = widget.selectedRoles
-                                          .any((r) => r.id == role.id);
-                                      return CheckboxListTile(
-                                        title: Text(role.displayName),
-                                        value: isSelected,
-                                        controlAffinity:
-                                            ListTileControlAffinity.trailing,
-                                        contentPadding: EdgeInsets.zero,
-                                        dense: true,
-                                        onChanged: isLoading
-                                            ? null
-                                            : (val) {
-                                                setModalState(() {
-                                                  if (val == true) {
-                                                    if (!widget.selectedRoles
-                                                        .any(
-                                                          (r) =>
-                                                              r.id == role.id,
-                                                        )) {
-                                                      final updatedList =
-                                                          List<Role>.from(
-                                                            widget
-                                                                .selectedRoles,
-                                                          );
-                                                      updatedList.add(role);
-                                                      widget.onRolesUpdated(
-                                                        updatedList,
-                                                      );
-                                                    }
-                                                  } else {
-                                                    final updatedList =
-                                                        List<Role>.from(
-                                                          widget.selectedRoles,
-                                                        );
-                                                    updatedList.removeWhere(
-                                                      (r) => r.id == role.id,
-                                                    );
-                                                    widget.onRolesUpdated(
-                                                      updatedList,
-                                                    );
-                                                  }
-                                                });
-                                              },
-                                      );
-                                    }).toList(),
-                                    const SizedBox(height: 12),
-                                    Align(
-                                      alignment: Alignment.centerRight,
-                                      child: TextButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text("Done"),
+                                      value: isSelected,
+                                      activeColor: Colors.blue,
+                                      controlAffinity:
+                                          ListTileControlAffinity.trailing,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(8),
                                       ),
+                                      onChanged: isLoading
+                                          ? null
+                                          : (val) {
+                                              setModalState(() {
+                                                final updatedList =
+                                                    List<Role>.from(
+                                                      widget.selectedRoles,
+                                                    );
+
+                                                if (val == true) {
+                                                  updatedList.add(role);
+                                                } else {
+                                                  updatedList.removeWhere(
+                                                    (r) => r.id == role.id,
+                                                  );
+                                                }
+
+                                                widget.onRolesUpdated(
+                                                  updatedList,
+                                                );
+                                              });
+                                            },
+                                    );
+                                  }).toList(),
+
+                                  const SizedBox(height: 10),
+
+                                  SizedBox(
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      style: ElevatedButton.styleFrom(
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 14,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () => Navigator.pop(context),
+                                      child: const Text("Done"),
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             );
                           },
@@ -611,22 +655,26 @@ void _submit(BuildContext context) {
                 enabled: !isLoading,
                 decoration: InputDecoration(
                   labelText: "Role",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                   hintText: "Select Role(s)",
-                  suffixIcon: const Icon(Icons.arrow_drop_down, size: 20),
+                  prefixIcon: const Icon(Icons.badge, color: Colors.grey),
+
+                  filled: true,
+                  fillColor: const Color(0xffF7F9FC),
+
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
-                    vertical: 12,
+                    vertical: 14,
                   ),
+
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+
+                  suffixIcon: const Icon(Icons.keyboard_arrow_down),
                 ),
-                // validator: (value) =>
-                //     widget.selectedRoles.isEmpty ? 'Select at least 1 role' : null,
                 validator: (value) {
                   if (widget.isEdit) return null;
+
                   return widget.selectedRoles.isEmpty
                       ? 'Select at least 1 role'
                       : null;
@@ -634,34 +682,30 @@ void _submit(BuildContext context) {
               ),
             ),
           ),
-          const SizedBox(height: 8),
+
+          const SizedBox(height: 10),
+
           if (widget.selectedRoles.isNotEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey.shade400),
-                borderRadius: BorderRadius.circular(8),
-                color: Colors.grey.shade100,
-              ),
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 4,
-                children: widget.selectedRoles.map((role) {
-                  return Chip(
-                    label: Text(role.displayName),
-                    onDeleted: isLoading
-                        ? null
-                        : () {
-                            final updatedList = List<Role>.from(
-                              widget.selectedRoles,
-                            );
-                            updatedList.removeWhere((r) => r.id == role.id);
-                            widget.onRolesUpdated(updatedList);
-                          },
-                  );
-                }).toList(),
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 6,
+              children: widget.selectedRoles.map((role) {
+                return Chip(
+                  label: Text(role.displayName),
+                  backgroundColor: Colors.blue.shade50,
+                  labelStyle: const TextStyle(fontWeight: FontWeight.w500),
+                  deleteIcon: const Icon(Icons.close, size: 18),
+                  onDeleted: isLoading
+                      ? null
+                      : () {
+                          final updatedList = List<Role>.from(
+                            widget.selectedRoles,
+                          );
+                          updatedList.removeWhere((r) => r.id == role.id);
+                          widget.onRolesUpdated(updatedList);
+                        },
+                );
+              }).toList(),
             ),
         ],
       ),
@@ -682,11 +726,27 @@ void _submit(BuildContext context) {
               duration: const Duration(seconds: 3),
             ),
           );
-          Future.delayed(const Duration(milliseconds: 500), () {
-            widget.onClearForm();
-            context.read<AuthBloc>().add(CheckAuthStatusEvent());
-          });
-        }
+        //   Future.delayed(const Duration(milliseconds: 500), () {
+        //     widget.onClearForm();
+        //     context.read<AuthBloc>().add(CheckAuthStatusEvent());
+        //     print("navigating to users");
+
+        //     Get.toNamed('/users');
+        //   });
+        // }
+        Future.delayed(const Duration(milliseconds: 500), () {
+          widget.onClearForm();
+          context.read<AuthBloc>().add(CheckAuthStatusEvent());
+          
+          if (widget.type == RegistrationType.karyakartha) {
+            print("navigating to karyakarthas list");
+            Get.toNamed('/karyakarthas');
+          } else {
+            print("navigating to users list");
+            Get.toNamed('/users');
+          }
+        });
+      }
         if (state.isError && state.errorMessage != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -701,7 +761,7 @@ void _submit(BuildContext context) {
         builder: (context, state) {
           final isWideScreen = MediaQuery.of(context).size.width > 700;
           final isLoading = state.isCreatingUser || state.isLoadingRoles;
-          final roles = state.roles;
+          final roles = state.typeBasedRoles;
           if (widget.type == RegistrationType.karyakartha &&
               roles.isNotEmpty &&
               widget.selectedRoles.isEmpty) {
@@ -796,13 +856,8 @@ void _submit(BuildContext context) {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // const Text(
-                          //   "Register New User",
-                          //   style: TextStyle(
-                          //     fontSize: 24,
-                          //     fontWeight: FontWeight.bold,
-                          //   ),
-                          // ),
+                          Backbutton().buildBackButton(context, "Users"),
+                          const SizedBox(height: 10),
                           Text(
                             widget.title,
                             style: const TextStyle(

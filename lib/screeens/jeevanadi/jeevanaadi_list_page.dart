@@ -185,15 +185,13 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                               : ListViewScreen(
                                   key: ValueKey('profile'),
                                   //user: state?.jeevanaadiProfile,
-                                  user: _convertJeevanaadiProfileToUser(
-                                    state?.jeevanaadiProfileFull,
-                                  ),
+                                  data: state?.jeevanaadiProfileFull,
                                   onClose: () {
                                     context.read<JeevanaadiBloc>().add(
                                       CloseProfileView(),
                                     );
                                   },
-                                  screenType: "JEEVANADI",
+                                  screenType: "JEEVANAADI_PROFILE",
                                   onDelete: () {},
 
                                   // onViewMore: () {
@@ -237,24 +235,6 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
           // child:
         ),
       ),
-    );
-  }
-
-  User? _convertJeevanaadiProfileToUser(JeevanaadiFullProfile? profile) {
-    if (profile == null) return null;
-
-    return User(
-      id: profile.basicDetails.id.toString(),
-      name: profile.profileDetails.fullName,
-      email: profile.basicDetails.email,
-      mobileNumber: profile.profileDetails.phoneNumber,
-      userType: profile.basicDetails.usertype,
-      status: profile.basicDetails.isActive ? 'active' : 'inactive',
-      city: profile.profileDetails.city,
-      state: profile.profileDetails.state,
-      country: profile.profileDetails.country,
-      pincode: profile.profileDetails.pincode,
-      uniqueId: profile.basicDetails.jeevanadiNo,
     );
   }
 }

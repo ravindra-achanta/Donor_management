@@ -25,9 +25,7 @@ class LoginEvent extends AuthEvent {
 class CreateUserEvent extends AuthEvent {
   final IdentityRequest request;
 
-  CreateUserEvent({
-    required this.request,
-  });
+  CreateUserEvent({required this.request});
 
   @override
   List<Object?> get props => [request];
@@ -47,15 +45,13 @@ class CreateUserEvent extends AuthEvent {
 // }
 class FetchRolesEvent extends AuthEvent {}
 
+class FetchRolesEventByType extends AuthEvent {}
 
 class ChangePasswordEvent extends AuthEvent {
   final String newPassword;
   final String mobileNumber;
 
-  ChangePasswordEvent({
-    required this.newPassword,
-    required this.mobileNumber,
-  });
+  ChangePasswordEvent({required this.newPassword, required this.mobileNumber});
 
   @override
   List<Object?> get props => [newPassword, mobileNumber];

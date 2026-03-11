@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
@@ -15,8 +17,15 @@ import 'package:vikas_app/screeens/models/response/jeevanadi_member.dart';
 
 class EditJeevanadiScreen extends StatefulWidget {
   final String userId;
+  final bool isFromRequest;
+  final String? jeevanadiId;
 
-  const EditJeevanadiScreen({super.key, required this.userId});
+  const EditJeevanadiScreen({
+    super.key,
+    required this.userId,
+    this.isFromRequest = false,
+    this.jeevanadiId,
+  });
 
   @override
   State<EditJeevanadiScreen> createState() => _EditJeevanadiScreenState();
@@ -63,7 +72,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
   bool _sameAsMobile = false;
   List<Map<String, dynamic>> _relationships = [];
-  List<Map<String, dynamic>> _occasions = [];
+  //List<Map<String, dynamic>> _occasions = [];
+  List<Map<String, dynamic>> _occasions = <Map<String, dynamic>>[];
 
   // Getters for controllers
   TextEditingController get _nameCtrl => _controllers['name']!;
@@ -87,9 +97,15 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
   }
 
   void _fetchProfileData() {
-    context.read<JeevanaadiBloc>().add(
-      FetchJeevanaadiProfileFullEvent(widget.userId),
-    );
+    if (widget.isFromRequest && widget.jeevanadiId != null) {
+      context.read<JeevanaadiBloc>().add(
+        FetchJeevanaadiProfileFromRequestEvent(widget.jeevanadiId!),
+      );
+    } else {
+      context.read<JeevanaadiBloc>().add(
+        FetchJeevanaadiProfileFullEvent(widget.userId),
+      );
+    }
   }
 
   // void _fetchMembersForSuggestions() {
@@ -152,34 +168,40 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
       _addressCtrl.text = profile.profileDetails.address ?? '';
 
-      _relationships = profile.relationDetails
-          .map(
-            (rel) => {
-              "id": rel.id?.toString() ?? "",
-              "relation": rel.relation ?? "",
-              "name": rel.name ?? "",
-              "mobile": rel.mobilenum ?? '',
-              "dob": rel.dob ?? '',
-              "nakshatram": _dropdownService.getNakshatraValue(
-                rel.nakshatramRel,
-              ),
-              "rashi": _dropdownService.getRashiNameFromId(rel.rashiRel),
-              "paadam": _dropdownService.getPaadamValueFromNumber(
-                rel.paadamRel,
-              ),
-            },
-          )
-          .toList();
+      _relationships = profile.relationDetails.map((rel) {
+        return {
+          "id": rel.id?.toString() ?? "",
+          "relation": rel.relation ?? "",
+          "name": rel.name ?? "",
+          "mobile": rel.mobilenum ?? "",
+          "dob": rel.dob ?? "",
+          "nakshatram":
+              _dropdownService.getNakshatraValue(rel.nakshatramRel) ?? "",
+          "rashi": _dropdownService.getRashiNameFromId(rel.rashiRel) ?? "",
+          "paadam":
+              _dropdownService.getPaadamValueFromNumber(rel.paadamRel) ?? "",
+        };
+      }).toList();
+      //.cast<Map<String, String>>();
 
-      _occasions = profile.occupationDetails != null
-          ? [
-              {
-                "id": profile.occupationDetails!.id?.toString() ?? "",
-                "name": profile.occupationDetails!.occName ?? "",
-                "date": profile.occupationDetails!.occDate ?? "",
-              },
-            ]
-          : [];
+      // _occasions = profile.occupationDetails != null
+      //     ? [
+      //         {
+      //           "id": profile.occupationDetails.id?.toString() ?? "",
+      //           "name": profile.occupationDetails.occName ?? "",
+      //           "date": profile.occupationDetails.occDate ?? "",
+      //         },
+      //       ]
+      //     : [];
+   _occasions = profile.occasionsDetails
+    .where((occ) => occ != null)  
+    .map((occ) => <String, dynamic>{  
+          "id": occ!.id.toString(),
+          "name": occ.occName,
+          "date": occ.occDate,
+          "uniqueId": occ.id.toString(),  
+        })
+    .toList();
       _isActive = profile.basicDetails.isActive;
       _status = _isActive ? 'ACTIVE' : 'INACTIVE';
 
@@ -206,89 +228,85 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
     setState(() => _isUpdateInProgress = true);
 
+    int referredById = 0;
+    String? referredByCustom;
+
+    if (_selectedReferredBy != null) {
+      if (_selectedReferredBy!['isManual'] == true) {
+        referredByCustom = _selectedReferredBy!['userName'] ?? '';
+      } else {
+        referredById =
+            int.tryParse(_selectedReferredBy!['id']?.toString() ?? '0') ?? 0;
+        referredByCustom = "";
+      }
+    }
+
     final requestData = {
       "fullName": _nameCtrl.text,
-      "dob": _dobCtrl.text,
+
+      "dob": _dobCtrl.text.isEmpty ? null : _dobCtrl.text,
       "gender": _dropdownService.getGenderCodeFromValue(
         _dropdownValues['gender'],
       ),
-      "maritalStatus": _dropdownService.getMaritalStatusCodeFromValue(
-        _dropdownValues['maritalStatus'],
-      ),
-      "profession": _professionCtrl.text,
-      "anvDate": _anniversaryCtrl.text,
-      "joinDate": _dojCtrl.text,
-      "gotram": _gothramCtrl.text,
-      "nakshatram": _dropdownValues['nakshatram'],
-      "rashi": _dropdownService.getRashiIdFromName(_dropdownValues['rashi']),
-      "padam": _dropdownService.getPaadamNumberFromValue(
-        _dropdownValues['paadam'],
-      ),
-      "communicationpreference": _dropdownService
-          .getCommunicationModeCodeFromValue(_dropdownValues['communication']),
-      "panNumber": _panCtrl.text,
 
-      "referredBy": _selectedReferredBy == null
-          ? 0
-          : _selectedReferredBy!['isManual'] == true
-          ? 0
-          : int.tryParse(_selectedReferredBy!['id']?.toString() ?? '0') ?? 0,
-      "referredByCustome": _selectedReferredBy == null
-          ? ''
-          : _selectedReferredBy!['userName'] ?? '',
+      "materialStatus":
+          _dropdownService
+                  .getMaritalStatusCodeFromValue(
+                    _dropdownValues['materialStatus'],
+                  )
+                  ?.isEmpty ==
+              true
+          ? ""
+          : _dropdownService.getMaritalStatusCodeFromValue(
+              _dropdownValues['materialStatus'],
+            ),
+      "profession": _professionCtrl.text.isEmpty ? "" : _professionCtrl.text,
 
-      "mobileNumber": _mobileCtrl.text,
-      "email": _emailCtrl.text,
-      "whatsAppNumber": _whatsappCtrl.text,
-      "address": _addressCtrl.text,
-      "referredByCustome": _referredByCtrl.text,
+      "anvDate": _anniversaryCtrl.text.isEmpty ? null : _anniversaryCtrl.text,
+      "joinDate": _dojCtrl.text.isEmpty ? null : _dojCtrl.text,
+      "gotram": _gothramCtrl.text.isEmpty ? "" : _gothramCtrl.text,
+      "nakshatram": _dropdownValues['nakshatram']?.isEmpty == true
+          ? ""
+          : _dropdownValues['nakshatram'],
 
-      "relations": _relationships
-          .where(
-            (rel) =>
-                rel["relation"]?.isNotEmpty == true &&
-                rel["name"]?.isNotEmpty == true,
-          )
-          .map(
-            (rel) => {
-              // "id": rel["id"] ?? "",
-              "id": (rel["id"] != null && rel["id"].toString().isNotEmpty)
-                  ? int.parse(rel["id"].toString())
-                  : null,
-              "relation": rel["relation"] ?? "",
-              "name": rel["name"] ?? "",
-              "mobileNumber": rel["mobile"] ?? "",
-              "dob": rel["dob"] ?? "",
-              "nakshatram": rel["nakshatram"] ?? "",
-              "rashi": _dropdownService.getRashiIdFromName(rel["rashi"] ?? ""),
-              "padam": _dropdownService.getPaadamNumberFromValue(
-                rel["paadam"] ?? "",
-              ),
-              "status": "ACTIVE",
-            },
-          )
-          .toList(),
-
-      "occassions": _occasions
-          .where((occ) => occ["name"]?.isNotEmpty == true)
-          .map(
-            (occ) => {
-              // "id": occ["id"] ?? "",
-              "id": (occ["id"] != null && occ["id"].toString().isNotEmpty)
-                  ? int.parse(occ["id"].toString())
-                  : null,
-              "occName": occ["name"] ?? "",
-              "occDate": occ["date"] ?? "",
-              "status": "ACTIVE",
-            },
-          )
-          .toList(),
-
-      // "status": "ACTIVE",
+      "rashi":
+          _dropdownValues['rashi'] == null ||
+              _dropdownValues['rashi'].toString().isEmpty
+          ? null
+          : _dropdownService.getRashiIdFromName(_dropdownValues['rashi']) ??
+                null,
+      "padam":
+          _dropdownValues['paadam'] == null ||
+              _dropdownValues['paadam'].toString().isEmpty
+          ? null
+          : _dropdownService.getPaadamNumberFromValue(
+              _dropdownValues['paadam'],
+            ),
+      "communicationpreference":
+          _dropdownService
+                  .getCommunicationModeCodeFromValue(
+                    _dropdownValues['communication'],
+                  )
+                  ?.isEmpty ==
+              true
+          ? ""
+          : _dropdownService.getCommunicationModeCodeFromValue(
+              _dropdownValues['communication'],
+            ),
+      "panNumber": _panCtrl.text.isEmpty ? null : _panCtrl.text,
+      "referredBy": referredById == 0 ? null : referredById,
+      "mobileNumber": _mobileCtrl.text.isEmpty ? null : _mobileCtrl.text,
+      "email": _emailCtrl.text.isEmpty ? "" : _emailCtrl.text,
+      "whatsAppNumber": _whatsappCtrl.text.isEmpty ? "" : _whatsappCtrl.text,
+      "address": _addressCtrl.text.isEmpty ? "" : _addressCtrl.text,
+      "referredByCustome": referredByCustom,
+      "relations": _getFormattedRelations(),
+      "occassions": _getFormattedOccasions(),
       "status": _status,
     };
 
-    print('📤 Updating profile: ${_jeevanadiIdCtrl.text}');
+    print('📤 Sending payload with ALL nulls:');
+    print(jsonEncode(requestData));
 
     showDialog(
       context: context,
@@ -297,12 +315,67 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
           const Center(child: CircularProgressIndicator(color: Colors.brown)),
     );
 
-    context.read<JeevanaadiBloc>().add(
-      UpdateJeevanaadiProfileEvent(
-        userid: _jeevanadiIdCtrl.text,
-        updateData: requestData,
-      ),
-    );
+    if (widget.jeevanadiId != null || widget.userId != null) {
+      context.read<JeevanaadiBloc>().add(
+        UpdateJeevanaadiProfileEvent(
+          userid: widget.jeevanadiId ?? widget.userId,
+          updateData: requestData,
+        ),
+      );
+    }
+  }
+
+  List<Map<String, dynamic>> _getFormattedRelations() {
+    return _relationships
+        .where(
+          (rel) =>
+              rel["relation"]?.isNotEmpty == true ||
+              rel["name"]?.isNotEmpty == true,
+        )
+        .map((rel) {
+          final bool hasValidId =
+              rel.containsKey("id") &&
+              rel["id"] != null &&
+              rel["id"].toString().isNotEmpty &&
+              rel["id"].toString() != "0";
+
+          return {
+            "relationId": hasValidId ? int.tryParse(rel["id"].toString()) : null,
+            "relation": rel["relation"] ?? "",
+            "name": rel["name"] ?? "",
+            "mobileNumber": rel["mobile"]?.toString().isEmpty == true
+                ? null
+                : rel["mobile"],
+            "dob": rel["dob"]?.toString().isEmpty == true ? null : rel["dob"],
+            "nakshatram": rel["nakshatram"] ?? "",
+            "rashi": rel["rashi"] == null || rel["rashi"].toString().isEmpty
+                ? null
+                : _dropdownService.getRashiIdFromName(rel["rashi"]),
+
+            "padam": rel["paadam"] == null || rel["paadam"].toString().isEmpty
+                ? null
+                : _dropdownService.getPaadamNumberFromValue(rel["paadam"]),
+
+            "status": "ACTIVE",
+          };
+        })
+        .toList();
+  }
+
+  List<Map<String, dynamic>> _getFormattedOccasions() {
+    return _occasions
+        .where((occ) => occ["name"]?.isNotEmpty == true)
+        .map(
+          (occ) => {
+            "occassionId": occ["id"] != null && occ["id"].toString().isNotEmpty
+                ? int.tryParse(occ["id"].toString())
+                : null,
+            "occName": occ["name"] ?? "",
+            "occDate": occ["date"]?.isEmpty == true ? null : occ["date"],
+            "status": "ACTIVE",
+          },
+        )
+        .toList();
   }
 
   @override
@@ -327,11 +400,13 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             previous.updateErrorMsg != current.updateErrorMsg,
 
         listener: (context, state) {
+          // Check if we have profile data (either from regular or request)
           if (!(state.profileLoading ?? false) &&
               state.jeevanaadiProfileFull != null) {
             _populateControllers(state.jeevanaadiProfileFull!);
           }
 
+          // Handle update response
           if (!(state.isUpdateLoading ?? true) && _isUpdateInProgress) {
             setState(() => _isUpdateInProgress = false);
             Navigator.of(context).popUntil((route) => route.isFirst);
@@ -352,13 +427,15 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
 
             if (state.updateSuccessMsg != null) {
               Future.delayed(const Duration(milliseconds: 500), () {
-                if (Navigator.canPop(context)) Navigator.pop(context, true);
+                // if (Navigator.canPop(context)) Navigator.pop(context, true);
+                 Get.offAllNamed('/jeevanadi');
               });
             }
           }
         },
 
         builder: (context, state) {
+          // Show loading state
           if (state.profileLoading ?? false) {
             return const Center(
               child: Column(
@@ -372,6 +449,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             );
           }
 
+          // Show error state
           if (state.profileErrorMsg != null) {
             return Center(
               child: Column(
@@ -393,6 +471,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             );
           }
 
+          // Show form when data is available
           if (state.jeevanaadiProfileFull == null) {
             return const Center(child: Text('No profile data available'));
           }
@@ -554,8 +633,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             _dropdownService.getGenderValues(),
           ),
           _dropdownField(
-            "Marital Status",
-            'maritalStatus',
+            "Material Status",
+            'materialStatus',
             _dropdownService.getMaritalStatusValues(),
           ),
         ),
@@ -663,49 +742,62 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
       showAddButton: true,
       onAdd: () {
         setState(() {
-          if (_relationships.isEmpty ||
-              _relationships.last["relation"]?.isNotEmpty == true ||
-              _relationships.last["name"]?.isNotEmpty == true) {
-            _relationships.add({
-              "relation": "",
-              "name": "",
-              "mobile": "",
-              "dob": "",
-              "nakshatram": "",
-              "rashi": "",
-              "paadam": "",
-            });
-          }
+          _relationships.add(
+            {
+                  "id": "",
+                  "relation": "",
+                  "name": "",
+                  "mobile": "",
+                  "dob": "",
+                  "nakshatram": "",
+                  "rashi": "",
+                  "paadam": "",
+                }
+                as Map<String, dynamic>,
+          ); 
         });
       },
-      children: _relationships
-          .asMap()
-          .entries
-          .map((entry) => _buildRelationshipInline(entry.key, entry.value))
-          .toList(),
+      children: [
+        if (_relationships.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: Text('No relationships added yet'),
+          ),
+        ..._relationships.asMap().entries.map((entry) {
+          return _buildRelationshipInline(entry.key, entry.value);
+        }).toList(),
+      ],
     );
   }
 
-  Widget _buildOccasions() {
-    return _buildSection(
-      title: 'Occasions Details',
-      showAddButton: true,
-      onAdd: () {
-        setState(() {
-          if (_occasions.isEmpty ||
-              _occasions.last["name"]?.isNotEmpty == true ||
-              _occasions.last["date"]?.isNotEmpty == true) {
-            _occasions.add({"name": "", "date": ""});
-          }
+Widget _buildOccasions() {
+  return _buildSection(
+    title: 'Occasions Details',
+    showAddButton: true,
+    onAdd: () {
+      setState(() {
+        _occasions.add(<String, dynamic>{  
+          "id": "",
+          "name": "",
+          "date": "",
+          "uniqueId": DateTime.now().millisecondsSinceEpoch.toString(),
+          
         });
-      },
-      children: _occasions
-          .asMap()
-          .entries
-          .map((entry) => _buildOccasionInline(entry.key, entry.value))
-          .toList(),
-    );
-  }
+        print('Added occasion, total: ${_occasions.length}'); 
+      });
+    },
+    children: [
+      if (_occasions.isEmpty)
+        const Padding(
+          padding: EdgeInsets.only(top: 10),
+          child: Text('No occasions added yet'),
+        ),
+      ...List.generate(_occasions.length, (index) {
+        return _buildOccasionInline(index, _occasions[index]);
+      }),
+    ],
+  );
+}
 
   Widget _buildActionButtons() {
     return Row(
@@ -857,103 +949,150 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     ),
   );
 
-  Widget _dropdownField(String label, String key, List<String> items) =>
-      Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: DropdownButtonFormField<String>(
-          value: items.contains(_dropdownValues[key])
-              ? _dropdownValues[key]
-              : null,
-          items: [
-            const DropdownMenuItem(
-              value: null,
-              child: Text("Select", style: TextStyle(color: Colors.grey)),
-            ),
-            ...items.map((e) => DropdownMenuItem(value: e, child: Text(e))),
-          ],
-          onChanged: (v) => setState(() => _dropdownValues[key] = v ?? ''),
-          decoration: _inputDecoration(label),
-          icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-          style: const TextStyle(color: Colors.black, fontSize: 14),
-          dropdownColor: Colors.white,
-        ),
-      );
+  Widget _dropdownField(String label, String key, List<String> items) {
+    // Safely get the current value as String
+    String? currentValue;
 
-  Widget _buildRelationshipInline(int index, Map<String, dynamic> rel) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (index > 0) const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(child: _relationField(rel, index)),
-            const SizedBox(width: 12),
-            Expanded(child: _nameField(rel, index)),
-            const SizedBox(width: 12),
-            Expanded(child: _mobileField(rel, index)),
-            const SizedBox(width: 12),
-            Expanded(child: _relDobField(rel, index)),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(child: _relNakshatramField(rel, index)),
-            const SizedBox(width: 12),
-            Expanded(child: _relRashiField(rel, index)),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(child: _relPaadamField(rel, index)),
-                  if (_relationships.length > 1)
-                    Padding(
-                      padding: const EdgeInsets.only(left: 8.0),
-                      child: IconButton(
-                        icon: const Icon(
-                          Icons.delete,
-                          color: Colors.red,
-                          size: 20,
-                        ),
-                        onPressed: () =>
-                            setState(() => _relationships.removeAt(index)),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-        if (index < _relationships.length - 1)
-          const Divider(height: 24, color: Colors.grey),
-      ],
+    if (_dropdownValues.containsKey(key)) {
+      var value = _dropdownValues[key];
+      if (value is String) {
+        currentValue = items.contains(value) ? value : null;
+      } else if (value != null) {
+        // Convert to String if it's not already
+        String stringValue = value.toString();
+        currentValue = items.contains(stringValue) ? stringValue : null;
+      }
+    }
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: DropdownButtonFormField<String>(
+        value: currentValue,
+        items: [
+          const DropdownMenuItem<String>(
+            value: null,
+            child: Text("Select", style: TextStyle(color: Colors.grey)),
+          ),
+          ...items.map(
+            (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+          ),
+        ],
+        onChanged: (v) {
+          setState(() {
+            _dropdownValues[key] = v ?? '';
+          });
+        },
+        decoration: _inputDecoration(label),
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
+        style: const TextStyle(color: Colors.black, fontSize: 14),
+        dropdownColor: Colors.white,
+      ),
     );
   }
 
-  Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (index > 0) const SizedBox(height: 12),
-        Row(
+  Widget _buildRelationshipInline(int index, Map<String, dynamic> rel) {
+    rel['id'] = rel['id'] ?? '';
+    rel['relation'] = rel['relation'] ?? '';
+    rel['name'] = rel['name'] ?? '';
+    rel['mobile'] = rel['mobile'] ?? '';
+    rel['dob'] = rel['dob'] ?? '';
+    rel['nakshatram'] = rel['nakshatram'] ?? '';
+    rel['rashi'] = rel['rashi'] ?? '';
+    rel['paadam'] = rel['paadam'] ?? '';
+
+    final key = rel['id'].toString().isNotEmpty && rel['id'] != '0'
+        ? ValueKey('relation_${rel['id']}') 
+        : UniqueKey();
+
+    return Container(
+      key: key,
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(child: _relationField(rel, index)),
+              const SizedBox(width: 12),
+              Expanded(child: _nameField(rel, index)),
+              const SizedBox(width: 12),
+              Expanded(child: _mobileField(rel, index)),
+              const SizedBox(width: 12),
+              Expanded(child: _relDobField(rel, index)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(child: _relNakshatramField(rel, index)),
+              const SizedBox(width: 12),
+              Expanded(child: _relRashiField(rel, index)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Row(
+                  children: [
+                    Expanded(child: _relPaadamField(rel, index)),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.delete,
+                        color: Colors.red,
+                        size: 20,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _relationships.removeAt(index);
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+
+Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
+    final key = ValueKey('occasion_${index}_${occ['uniqueId']}');
+  return Column(
+     key: key,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      if (index > 0) const SizedBox(height: 12),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Expanded(
+            SizedBox(
+              width: 250,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
-                  initialValue: occ["name"],
+                  initialValue: occ['name'] ?? '',
                   style: const TextStyle(fontSize: 14),
                   decoration: _inputDecoration("Occasion Name"),
-                  onChanged: (v) => occ["name"] = v,
+                  onChanged: (value) {
+                    _occasions[index]['name'] = value;
+                  },
                 ),
               ),
             ),
             const SizedBox(width: 12),
-            Expanded(
+            SizedBox(
+              width: 200,
               child: Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: TextFormField(
-                  controller: TextEditingController(text: occ["date"]),
+                  initialValue: occ['date'] ?? '',
                   readOnly: true,
                   onTap: () async {
                     final date = await showDatePicker(
@@ -963,18 +1102,15 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
                       initialDate: DateTime.now(),
                     );
                     if (date != null) {
-                      setState(
-                        () =>
-                            occ["date"] = DateFormat("yyyy-MM-dd").format(date),
-                      );
+                      final formattedDate = DateFormat("yyyy-MM-dd").format(date);
+                      setState(() {
+                        _occasions[index]['date'] = formattedDate;
+                      });
                     }
                   },
                   decoration: _inputDecoration(
                     "Occasion Date",
-                    suffixIcon: const Icon(
-                      Icons.calendar_today,
-                      color: Colors.grey,
-                    ),
+                    suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
                   ),
                 ),
               ),
@@ -989,11 +1125,12 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
               ),
           ],
         ),
-        if (index < _occasions.length - 1)
-          const Divider(height: 16, color: Colors.grey),
-      ],
-    );
-  }
+      ),
+      if (index < _occasions.length - 1)
+        const Divider(height: 16, color: Colors.grey),
+    ],
+  );
+}
 
   Widget _relationField(Map<String, dynamic> rel, int index) =>
       _buildRelDropdown(
@@ -1038,22 +1175,45 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     String label,
     List<String> items,
   ) {
+    String? currentValue;
+    if (rel.containsKey(key) && rel[key] != null) {
+      currentValue = rel[key].toString();
+      if (!items.contains(currentValue)) {
+        currentValue = null;
+      }
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: DropdownButtonFormField<String>(
-        value: items.contains(rel[key]) ? rel[key] : null,
+        value: currentValue,
         items: [
-          DropdownMenuItem(
+          DropdownMenuItem<String>(
             value: null,
             child: Text(
               "Select $label",
               style: const TextStyle(color: Colors.grey),
             ),
           ),
-          ...items.map((e) => DropdownMenuItem(value: e, child: Text(e))),
+          ...items.map(
+            (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
+          ),
         ],
-        onChanged: (v) => setState(() => rel[key] = v ?? ''),
-        decoration: _inputDecoration(label),
+        onChanged: (v) {
+          setState(() {
+            rel[key] = v ?? '';
+          });
+        },
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+        ),
         icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
         style: const TextStyle(color: Colors.black, fontSize: 14),
         dropdownColor: Colors.white,
@@ -1062,33 +1222,56 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
   }
 
   Widget _nameField(Map<String, dynamic> rel, int index) =>
-      _buildRelTextField(rel, "name", "Name");
+      _buildRelTextField(rel, index, "name", "Name");
+
   Widget _mobileField(Map<String, dynamic> rel, int index) =>
-      _buildRelTextField(rel, "mobile", "Mobile Number", isPhone: true);
+      _buildRelTextField(rel, index, "mobile", "Mobile Number", isPhone: true);
 
   Widget _buildRelTextField(
     Map<String, dynamic> rel,
+    int index,
     String key,
     String label, {
     bool isPhone = false,
   }) {
+    // Get the current value safely
+    String currentValue = rel[key]?.toString() ?? '';
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
-        initialValue: rel[key],
+        initialValue: currentValue,
         style: const TextStyle(fontSize: 14),
         keyboardType: isPhone ? TextInputType.phone : TextInputType.text,
-        decoration: _inputDecoration(label),
-        onChanged: (v) => rel[key] = v,
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.grey),
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: const BorderSide(color: Colors.grey),
+          ),
+        ),
+        onChanged: (v) {
+          setState(() {
+            _relationships[index][key] = v ?? '';
+          });
+        },
       ),
     );
   }
 
   Widget _relDobField(Map<String, dynamic> rel, int index) {
+    String dateValue = '';
+    if (rel.containsKey("dob") && rel["dob"] != null) {
+      dateValue = rel["dob"].toString();
+    }
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: TextFormField(
-        controller: TextEditingController(text: rel["dob"]),
+        controller: TextEditingController(text: dateValue),
         readOnly: true,
         onTap: () async {
           final date = await showDatePicker(
@@ -1098,7 +1281,9 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             initialDate: DateTime.now(),
           );
           if (date != null) {
-            setState(() => rel["dob"] = DateFormat("yyyy-MM-dd").format(date));
+            setState(() {
+              rel["dob"] = DateFormat("yyyy-MM-dd").format(date);
+            });
           }
         },
         decoration: _inputDecoration(

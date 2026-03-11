@@ -8,8 +8,8 @@ import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
-import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
+import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
 import 'package:vikas_app/screeens/dharmasetu/editDharmasetu.dart';
 import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
@@ -17,16 +17,15 @@ import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
+import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
 import 'package:vikas_app/screeens/users/users_list_page.dart';
-import 'package:vikas_app/screeens/visits/EditVisit.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
 import 'package:vikas_app/screeens/visits/AddVisit.dart';
-import 'package:vikas_app/screeens/visits/ViewVisit.dart';
 
 class AuthMiddleware extends GetMiddleware {
   @override
@@ -43,15 +42,6 @@ class AuthMiddleware extends GetMiddleware {
     // return AuthService.isLoggedIn
     //     ? null
     //     : const RouteSettings(name: '/auth/login');
-  }
-}
-
-onLoginSuccess() {
-  String? redirectRoute = Get.arguments;
-  if (redirectRoute != null) {
-    Get.offNamed(redirectRoute);
-  } else {
-    Get.offNamed('/dashboard'); // Default to dashboard if no specific redirect
   }
 }
 
@@ -106,23 +96,31 @@ getPageRoute() {
     GetPage(name: '/profile', page: () => const MyProfile()),
     GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
     GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
-    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
-    GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
 
-    GetPage(name: '/notices', page: () => const Notices()),
+    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
+    //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
+    //GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
+
+    GetPage(
+      name: '/notices',
+      page: () {
+        final args = Get.arguments;
+        final notice = args is NoticeResponse ? args : null;
+        return Notices(noticeData: notice);
+      },
+    ),
+    // GetPage(
+    //   name: '/view/notice',
+    //   //page: () => NoticeDetailScreen(notice: Get.arguments),
+    // ),
     GetPage(
       name: '/view/notice',
-      page: () => NoticeDetailScreen(notice: Get.arguments),
+      page: () => NoticeDetailPage(notice: Get.arguments as NoticeResponse),
     ),
     GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),
-    //GetPage(name: '/edit/visit', page: () => const EditVisit()),
-    GetPage(
-      name: '/edit/visit',
-      page: () => EditVisit(visitData: Get.arguments),
-    ),
-    GetPage(name: '/view/visit', page: () => const ViewVisit()),
+
     GetPage(name: '/users', page: () => const Users()),
     GetPage(name: '/requests', page: () => const ReviewRequests()),
     GetPage(
@@ -158,13 +156,18 @@ getPageRoute() {
     //   },
     // ),
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
+    //     GetPage(
+    //   name: '/jeevandiview',
+    //   page: () {
+    //     final args = Get.arguments;
+    //     return ViewJeevanadiScreen.fromArguments(args);
+    //   },
+    // ),
     GetPage(
-  name: '/jeevandiview', 
-  page: () {
-    final args = Get.arguments;
-    return ViewJeevanadiScreen.fromArguments(args);
-  },
-),
+      name: '/jeevandiview',
+      page: () =>
+          ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
+    ),
 
     // GetPage(
     //   name: '/dashboard',

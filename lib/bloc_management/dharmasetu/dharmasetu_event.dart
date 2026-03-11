@@ -1,4 +1,4 @@
-// lib/blocs/dharmasetu/dharmasetu_event.dart
+// lib/bloc_management/dharmasetu/dharmasetu_event.dart
 
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/request/dharmasetu_model.dart';
@@ -12,23 +12,29 @@ abstract class DharmasetuEvent extends Equatable {
 
 class LoadDharmasetu extends DharmasetuEvent {
   final int page;
-
-  const LoadDharmasetu({this.page = 0});
-
+  final int size;
+  const LoadDharmasetu({this.page = 0, this.size = 10});
   @override
-  List<Object?> get props => [page];
+  List<Object?> get props => [page, size];
 }
 
-class AddDharmasetu extends DharmasetuEvent {
+class LoadDharmasetuDetails extends DharmasetuEvent {
+  final String id;
+  const LoadDharmasetuDetails(this.id);
+  @override
+  List<Object?> get props => [id];
+}
+
+class AddDharmasetuEvent extends DharmasetuEvent {  
   final DharmasetuModel dharmasetu;
-  const AddDharmasetu(this.dharmasetu);
+  const AddDharmasetuEvent(this.dharmasetu);
   @override
   List<Object?> get props => [dharmasetu];
 }
 
-class UpdateDharmasetu extends DharmasetuEvent {
+class UpdateDharmasetuEvent extends DharmasetuEvent { 
   final DharmasetuModel dharmasetu;
-  const UpdateDharmasetu(this.dharmasetu);
+  const UpdateDharmasetuEvent(this.dharmasetu);
   @override
   List<Object?> get props => [dharmasetu];
 }
@@ -38,4 +44,8 @@ class DeleteDharmasetu extends DharmasetuEvent {
   const DeleteDharmasetu(this.id);
   @override
   List<Object?> get props => [id];
+}
+
+class CloseDharmasetuProfileView extends DharmasetuEvent {
+  const CloseDharmasetuProfileView();
 }

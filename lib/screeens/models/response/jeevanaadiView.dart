@@ -1,12 +1,10 @@
-
-
 class JeevanaadiUser {
   final String id;
   final String fullName;
   final String? email;
   final double? profileCompletionPercentage;
   final String? jeevanaadiNo;
-  final List<dynamic> percentageHistory;
+  // final List<double> percentageHistory;
 
   const JeevanaadiUser({
     required this.id,
@@ -14,21 +12,19 @@ class JeevanaadiUser {
     this.profileCompletionPercentage,
     this.email,
     this.jeevanaadiNo,
-    this.percentageHistory = const [],
+    // required this.percentageHistory,
   });
 
   factory JeevanaadiUser.fromJson(Map<String, dynamic> json) {
     return JeevanaadiUser(
       id: json['id']?.toString() ?? '',
-      fullName: json['fullName']?.toString() ?? '',
-      profileCompletionPercentage: json['profileCompletionPercentage'] != null 
-          ? (json['profileCompletionPercentage'] as num).toDouble() 
+      fullName: json['fullName']?.toString() ?? '-',
+      profileCompletionPercentage: json['profileCompletionPercentage'] != null
+          ? (json['profileCompletionPercentage'] as num).toDouble()
           : null,
       jeevanaadiNo: json['jeevanaadiNo']?.toString(),
       email: json['email']?.toString(),
-      percentageHistory: json['percentageHistory'] != null 
-          ? List<dynamic>.from(json['percentageHistory']) 
-          : [],
+      // percentageHistory: json['percentageHistory'] ?? [],
     );
   }
 
@@ -39,7 +35,7 @@ class JeevanaadiUser {
       'email': email,
       'profileCompletionPercentage': profileCompletionPercentage,
       'jeevanaadiNo': jeevanaadiNo,
-      'percentageHistory': percentageHistory,
+      // 'percentageHistory': percentageHistory,
     };
   }
 }

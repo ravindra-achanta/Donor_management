@@ -1,37 +1,28 @@
-import 'dart:io';
-
 class NoticeRequest {
+  final String? image;
   final String title;
-  final String message;
-  final String audienceType;
-  final String audienceValue;
-  final DateTime date;
-  // new field
-  final String time;
-  final File? attachment;
+  final String description;
+  final DateTime sendDate;
+  final String sendTo;
+  final List<String>? specificUsers;
 
   NoticeRequest({
+    this.image,
     required this.title,
-    required this.message,
-    required this.audienceType,
-    required this.audienceValue,
-    required this.date,
-    required this.time,           // now required
-    this.attachment,
+    required this.description,
+    required this.sendDate,
+    required this.sendTo,
+    this.specificUsers,
   });
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = {
-      'title': title,
-      'message': message,
-      'audience_type': audienceType,
-      'audience_value': audienceValue,
-      'date': date.toIso8601String(),
-      'time': time,
+    return {
+      "image": image,
+      "title": title,
+      "description": description,
+      "sendDate": sendDate.toUtc().toIso8601String(),
+      "sendTo": sendTo,
+      "specificUsers": specificUsers ?? [],
     };
-    if (attachment != null) {
-      data['attachment'] = attachment;
-    }
-    return data;
   }
 }

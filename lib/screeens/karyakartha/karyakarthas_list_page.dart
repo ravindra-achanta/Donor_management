@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_event.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_state.dart';
@@ -62,6 +63,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
+                                if (Vikasdb().getString("USER_TYPE") != "GURUJI")
                                 AddButton().addButton(
                                   context: context,
                                   buttonText: "Add Karyakartha",
@@ -105,7 +107,22 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     );
                                   },
                                   onUpdate: (id) {
-                                    Get.toNamed('/register');
+                                    try {
+                                      final user = state?.karyakarthas
+                                          ?.firstWhere((u) => u.id == id);
+                                      if (user != null) {
+                                        Get.to(
+                                          () => RegistrationPage(
+                                            title: "Edit User",
+                                            type: RegistrationType.karyakartha,
+                                            user: user,
+                                            isEdit: true,
+                                          ),
+                                        );
+                                      }
+                                    } catch (e) {
+                                      debugPrint('User not found with id: $id');
+                                    }
                                   },
                                 ),
                                 // const SizedBox(height: 16),
@@ -205,7 +222,8 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                 )
                               : ListViewScreen(
                                   key: ValueKey('profile'),
-                                  user: state?.karyakarthaProfile,
+                                  data: state?.karyakarthaProfile,
+                                  screenType: "USER_PROFILE",
                                   onClose: () {
                                     context.read<KaryakarthaBloc>().add(
                                       CloseProfileView(),

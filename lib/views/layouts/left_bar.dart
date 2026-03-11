@@ -147,25 +147,22 @@ class _LeftBarState extends State<LeftBar>
                     ),
                     labelWidget("Apps"),
 
-                    if (Vikasdb().getString("USER_TYPE") == "ADMIN" ||
-                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN" ||
-                        Vikasdb().getString("USERTYPE") == "GURUJI")
+                    if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.badgeCheck,
                         title: "Karyakarthas",
                         isCondensed: isCondensed,
                         route: '/karyakarthas',
                       ),
-                    if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF")
-                      NavigationItem(
-                        iconData: LucideIcons.heartHandshake,
-                        title: "Jeevanadi Members",
-                        isCondensed: isCondensed,
-                        route: '/jeevanadi',
-                      ),
-                    if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
-                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN" ||
-                        Vikasdb().getString("USER_TYPE") == "ADMIN")
+                    NavigationItem(
+                      iconData: LucideIcons.heartHandshake,
+                      title: "Jeevanadi Members",
+                      isCondensed: isCondensed,
+                      route: '/jeevanadi',
+                    ),
+                    if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.users,
                         title: "Users",
@@ -192,13 +189,13 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/notices/list',
                     ),
-                    if (Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
-                      NavigationItem(
-                        iconData: LucideIcons.eye,
-                        title: "Visits",
-                        isCondensed: isCondensed,
-                        route: '/visits',
-                      ),
+
+                    NavigationItem(
+                      iconData: LucideIcons.eye,
+                      title: "Visits",
+                      isCondensed: isCondensed,
+                      route: '/visits',
+                    ),
 
                     NavigationItem(
                       iconData: LucideIcons.userCog,

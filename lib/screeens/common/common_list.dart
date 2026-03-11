@@ -1,9 +1,12 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
+import 'package:vikas_app/screeens/models/response/donations.dart';
+import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
+import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/screeens/models/response/review_request.dart';
@@ -39,9 +42,11 @@ class _CommonListState extends State<CommonList> {
   @override
   Widget build(BuildContext context) {
     if (widget.users.isEmpty) {
-      return const NoDataState(
-        title: 'No Records Found',
-        subtitle: 'There is no user data available to display.',
+      return NoDataState(
+        title: widget.screenType == 'DONATION'
+            ? 'No Donations Found'
+            : 'No Records Found',
+        subtitle: 'There is no data available to display.',
       );
     }
     String screenType = widget.screenType ?? "";
@@ -85,30 +90,34 @@ class _CommonListState extends State<CommonList> {
                   //tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'DHARMASETU') ...[
                   //tableHeader('UID'),
-                  tableHeader('Type'),
-                  tableHeader('Name'),
-                  tableHeader('Feedback'),
-                  tableHeader('Date'),
-                  tableHeader('Referred By'),
-                  tableHeader('Status'),
-                  tableHeader('Actions'),
+                  // tableHeader('S.No', flex: 1),
+                  //tableHeader('Type', flex: 1),
+                  tableHeader('Community Name', flex: 2),
+                  tableHeader('POC', flex: 1),
+                  //tableHeader('Feedback', flex: 2),
+                  tableHeader('Date', flex: 1),
+                  tableHeader('Referred By', flex: 1),
+                  tableHeader('Status', flex: 1),
+                  if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" ||
+                      Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
+                    tableHeader('Actions', flex: 2),
                 ] else if (screenType == 'VISIT') ...[
-                  tableHeader('Jeevandi Num'),
-                  tableHeader('Name'),
-                  tableHeader('Phone'),
-                  tableHeader('Visit Purpose'),
-                  tableHeader('Guests'),
-                  tableHeader('Date'),
-                  tableHeader('Status'),
-                  tableHeader('Actions'),
+                  //tableHeader('ID', flex: 1),
+                  tableHeader('Visitor Name', flex: 2),
+                  tableHeader('Phone Number', flex: 2),
+                  //tableHeader('Visit Purpose', flex: 2),
+                  tableHeader('No. of Guests', flex: 1),
+                  if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+                    tableHeader('Actions', flex: 1),
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
+                  tableHeader('Donation date'),
                   const SizedBox.shrink(),
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
-                  tableHeader('Email'),
+                  tableHeader('Role'),
                   tableHeader('Actions'),
                 ],
               ],
@@ -127,7 +136,7 @@ class _CommonListState extends State<CommonList> {
                   Divider(height: 1, color: Colors.grey.shade100),
               itemBuilder: (context, index) {
                 final rowData = widget.users[index];
-                String name = "";
+                String name = "-";
                 String mobile = "";
                 String email = "";
                 String amount = "";
@@ -147,6 +156,10 @@ class _CommonListState extends State<CommonList> {
                   email = rowData.email;
                   mobile = rowData.mobileNumber ?? "";
                   userType = rowData.userType ?? "";
+                } else if (rowData is DonationEvent) {
+                  amount = rowData.amount.toString();
+                  donationType = rowData.eventType;
+                  date = formatDate(rowData.date.toString());
                 }
 
                 final isHovered = hoveredIndex == index;
@@ -197,45 +210,6 @@ class _CommonListState extends State<CommonList> {
                                     rowData.status ?? 'Pending',
                                   ),
                                 ),
-                                // Expanded(
-                                //   flex: 2,
-                                //   child: Row(
-                                //     mainAxisAlignment: MainAxisAlignment.start,
-                                //     children: [
-                                //       if (widget.onApprove != null)
-                                //         // HoverIconButton(
-                                //         //   icon: Icons.check_circle_outline,
-                                //         //   hoverColor: Colors.green.withOpacity(
-                                //         //     0.1,
-                                //         //   ),
-                                //         //   iconColor: Colors.green,
-                                //         //   onTap: () => widget.onApprove!(
-                                //         //     rowData.jeevanadiNo,
-                                //         //   ),
-                                //         // ),
-                                //       const SizedBox(width: 10),
-                                //       HoverIconButton(
-                                //         icon: Icons.remove_red_eye_outlined,
-                                //         hoverColor: Colors.blue.withOpacity(
-                                //           0.1,
-                                //         ),
-                                //         iconColor: Colors.blue,
-                                //         onTap: () => widget.onUpdate(
-                                //           rowData.jeevanadiId.toString(),
-                                //         ),
-                                //       ),
-                                //       // const SizedBox(width: 10),
-                                //       // HoverIconButton(
-                                //       //   icon: Icons.close,
-                                //       //   hoverColor: Colors.red.withOpacity(0.1),
-                                //       //   iconColor: Colors.red,
-                                //       //   onTap: () => widget.onDelete(
-                                //       //     rowData.jeevanadiNo,
-                                //       //   ),
-                                //       // ),
-                                //     ],
-                                //   ),
-                                // ),
                               ] else ...[
                                 tableData('', flex: 3),
                                 tableData('', flex: 2),
@@ -250,95 +224,105 @@ class _CommonListState extends State<CommonList> {
                                 ),
                               ],
                             ] else if (screenType == 'DHARMASETU') ...[
-                              tableData((rowData as dynamic).type ?? ""),
-                              tableData((rowData as dynamic).name ?? ""),
-                              tableData((rowData as dynamic).feedback ?? ""),
-                              tableData((rowData as dynamic).date ?? ""),
-                              tableData((rowData as dynamic).referredBy ?? ""),
-                              Expanded(
-                                child: _buildStatusPill(
-                                  (rowData as dynamic).status ?? 'Unknown',
-                                ),
-                              ),
-                              Expanded(
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    _actionIcon(
-                                      Icons.visibility_outlined,
-                                      Colors.blue,
-                                      () {
-                                        Get.toNamed(
-                                          '/view/dharmasetu',
-                                          arguments: rowData,
-                                        );
-                                      },
-                                    ),
-                                    _actionIcon(
-                                      Icons.edit_outlined,
-                                      Colors.orange,
-                                      () => widget.onUpdate(rowData.id),
-                                    ),
-                                    const SizedBox(width: 5),
-                                    _actionIcon(
-                                      Icons.delete_outline,
-                                      Colors.red,
-                                      () => widget.onDelete(rowData.id),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ] else if (screenType == 'VISIT') ...[
-                              if (rowData is VisitView) ...[
-                                tableData(rowData.jeevandNum),
-                                tableData(rowData.name),
-                                tableData(rowData.phone),
-                                tableData(rowData.visitPurpose),
-                                tableData(rowData.noOfGuests.toString()),
-                                tableData(rowData.date),
+                              if (rowData is DharmasetuView) ...[
+                                // tableData(
+                                //   (widget.currentPage * 10 + (index + 1))
+                                //       .toString(),
+                                //   flex: 1,
+                                // ),
+                                //tableData(rowData.type, flex: 1),
+                                tableData(rowData.communityName, flex: 2),
+                                tableData(rowData.pointOfContact, flex: 1),
+                                // tableData(rowData.feedback, flex: 2),
+                                tableData(rowData.date, flex: 1),
+                                tableData(rowData.referredBy, flex: 1),
                                 Expanded(
-                                  child: _buildStatusPill(rowData.status),
-                                ),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      _actionIcon(
-                                        Icons.visibility_outlined,
-                                        Colors.blue,
-                                        () => Get.toNamed(
-                                          '/view/visit',
-                                          arguments: rowData,
-                                        ),
-                                      ),
-                                      _actionIcon(
-                                        Icons.edit_outlined,
-                                        Colors.orange,
-                                        () => Get.toNamed(
-                                          '/edit/visit',
-                                          arguments: rowData,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 5),
-                                      _actionIcon(
-                                        Icons.delete_outline,
-                                        Colors.red,
-                                        () => widget.onDelete(rowData.id),
-                                      ),
-                                    ],
+                                  flex: 1,
+                                  child: _buildStatusPill(
+                                    rowData.dharmasetuStatus,
                                   ),
                                 ),
+                                const SizedBox(width: 10),
+                                if (Vikasdb().getString("USER_TYPE") ==
+                                        "OFFICE_STAFF" ||
+                                    Vikasdb().getString("USER_TYPE") ==
+                                        "KARYAKARTHA")
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        // _actionIcon(
+                                        //   Icons.visibility_outlined,
+                                        //   Colors.blue,
+                                        //   () {
+                                        //     Get.toNamed(
+                                        //       '/view/dharmasetu',
+                                        //       arguments: rowData,
+                                        //     );
+                                        //   },
+                                        // ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.edit_outlined,
+                                          Colors.orange,
+                                          () => widget.onUpdate(rowData.id),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.delete_outline,
+                                          Colors.red,
+                                          () => widget.onDelete(rowData.id),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                              ],
+                            ] else if (screenType == 'VISIT') ...[
+                              if (rowData is VisitView) ...[
+                                tableData(rowData.visitorName, flex: 2),
+                                tableData(rowData.phoneNumber, flex: 2),
+
+                                tableData(
+                                  rowData.noOfGuests.toString(),
+                                  flex: 1,
+                                ),
+                                //tableHeader('Existing', flex: 1),
+                                //tableData(rowData.existing.toString(), flex: 1),
+                                // Expanded(
+                                //   child: _buildStatusPill(rowData.status),
+                                // ),
+                                if (Vikasdb().getString("USER_TYPE") ==
+                                    "OFFICE_STAFF")
+                                  Expanded(
+                                    child: Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _actionIcon(
+                                          Icons.edit_outlined,
+                                          Colors.orange,
+                                          () => widget.onUpdate(rowData.id),
+                                        ),
+                                        const SizedBox(width: 5),
+                                        _actionIcon(
+                                          Icons.delete_outline,
+                                          Colors.red,
+                                          () => widget.onDelete(rowData.id),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                               ],
                             ] else if (screenType == 'DONATION') ...[
-                              tableData("${(index + 1 * 1000).toString()}/-"),
-                              tableData("Seva"),
-                              const SizedBox.shrink(),
+                              tableData(amount),
+                              tableData(donationType),
+                              tableData(date),
                               const SizedBox.shrink(),
                             ] else ...[
                               // Default case (User)
                               tableData(name),
                               tableData(mobile),
-                              tableData(email),
+                              tableData(userType),
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
@@ -372,6 +356,11 @@ class _CommonListState extends State<CommonList> {
         ],
       ),
     );
+  }
+
+  String formatDate(String date) {
+    DateTime parsedDate = DateTime.parse(date);
+    return DateFormat('dd-MMM-yyyy').format(parsedDate);
   }
 
   Widget _buildProfileProgress(double percentage) {
@@ -452,19 +441,6 @@ class _CommonListState extends State<CommonList> {
     );
   }
 
-  // Widget tableData(String data) {
-  //   return Expanded(
-  //     child: Text(
-  //       data,
-  //       overflow: TextOverflow.ellipsis,
-  //       style: TextStyle(
-  //         color: Colors.grey.shade700,
-  //         fontSize: 14,
-  //         fontWeight: FontWeight.w500,
-  //       ),
-  //     ),
-  //   );
-  // }
   Widget tableData(String data, {int flex = 1}) {
     return Expanded(
       flex: flex,
@@ -537,337 +513,3 @@ class _HoverIconButtonState extends State<HoverIconButton> {
     );
   }
 }
-
-
-
-// import 'package:flutter/material.dart';
-// import 'package:vikas_app/screeens/common/NoDataFound.dart';
-// import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
-// import 'package:vikas_app/screeens/models/response/user.dart';
-
-// class CommonList<T> extends StatefulWidget {
-//   const CommonList({
-//     super.key,
-//     required this.currentPage,
-//     required this.users,
-//     required this.onUserTap,
-//     required this.onDelete,
-//     required this.onUpdate,
-//     this.screenType,
-//   });
-
-//   final List<T> users;
-//   final int currentPage;
-//   final String? screenType;
-//   final Function(String id) onUserTap;
-//   final Function(String id) onDelete;
-//   final Function(String id) onUpdate;
-
-//   @override
-//   State<CommonList> createState() => _CommonListState();
-// }
-
-// class _CommonListState extends State<CommonList> {
-//   int? hoveredIndex;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     if (widget.users.isEmpty) {
-//       return const NoDataState(
-//         title: 'No Records Found',
-//         subtitle: 'There is no user data available to display.',
-//       );
-//     }
-//     String screenType = widget.screenType ?? "";
-
-//     return Container(
-//       decoration: BoxDecoration(
-//         color: Theme.of(context).cardColor,
-//         borderRadius: BorderRadius.circular(14),
-//         border: Border.all(color: Colors.grey.shade200),
-//         boxShadow: [
-//           BoxShadow(
-//             color: Colors.black.withOpacity(0.03),
-//             blurRadius: 8,
-//             offset: const Offset(0, 4),
-//           ),
-//         ],
-//       ),
-//       child: Column(
-//         children: [
-//           // 🟦 HEADER
-//           Container(
-//             padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 30),
-//             decoration: BoxDecoration(
-//               color: Theme.of(context).colorScheme.surfaceVariant,
-//               borderRadius: const BorderRadius.vertical(
-//                 top: Radius.circular(14),
-//               ),
-//             ),
-//             child: Row(
-//               children: [
-//                 tableHeader('#'),
-//                 screenType == 'DONATION'
-//                     ? tableHeader('Amount')
-//                     : tableHeader('Name'),
-//                 screenType == 'DONATION'
-//                     ? tableHeader('Donation type'): screenType == 'JEEVANADI'?tableHeader('Jeevanaadi.No')
-//                     : tableHeader('Mobile'),
-//                 screenType == 'DONATION'
-//                     ? tableHeader('Date'): screenType == 'JEEVANADI'?tableHeader('User type')
-//                     : tableHeader('Email'),
-//                 screenType == 'DONATION'
-//                     ? SizedBox.shrink()
-//                     : tableHeader(
-//                         screenType == 'JEEVANADI'
-//                             ? 'Profile %'
-//                             : 'Actions',
-//                       ),
-//               ],
-//             ),
-//           ),
-
-//           // subtle divider
-//           Divider(height: 1, color: Colors.grey.shade200),
-
-//           // 🟦 LIST
-//           SizedBox(
-//             height: 460,
-//             child: ListView.separated(
-//               physics: const BouncingScrollPhysics(),
-//               itemCount: widget.users.length,
-//               separatorBuilder: (_, __) =>
-//                   Divider(height: 1, color: Colors.grey.shade100),
-//               itemBuilder: (context, index) {
-//                 final rowData = widget.users[index];
-//                 String name = "";
-//                 String mobile = "";
-//                 String email = "";
-//                 String amount = "";
-//                 String JeevanaadiNo = "";
-//                 String userType = "";
-//                 String profilePercent = "";
-//                 String donationType = "";
-//                 String date = "";
-//                 if (rowData is JeevanaadiUser) {
-//                   name = rowData.userName;
-//                   //email = rowData.email ?? "";
-//                   //userType = rowData.userType ?? "";
-//                   JeevanaadiNo = rowData.jeevanaadiNo ?? "";
-//                   profilePercent = rowData.profileCompletionPercentage?.toStringAsFixed(2) ?? "0";
-//                 }else if (rowData is User) {
-//                   name = rowData.name;
-//                   email = rowData.email;
-//                   mobile = rowData.mobileNumber ?? "";
-//                   userType = rowData.userType ?? "";
-
-//                 }
-//                 // else if (rowData is DonationView) {
-//                 //   amount = rowData.amount.toString();
-//                 //   donationType = rowData.donationType ?? "";
-//                 //   date = rowData.date ?? "";
-//                 // }
-//                 final isHovered = hoveredIndex == index;
-
-//                 return MouseRegion(
-//                   cursor: SystemMouseCursors.click,
-//                   onEnter: (_) => setState(() => hoveredIndex = index),
-//                   onExit: (_) => setState(() => hoveredIndex = null),
-//                   child: AnimatedContainer(
-//                     duration: const Duration(milliseconds: 150),
-//                     curve: Curves.easeOut,
-//                     color: isHovered
-//                         ? Theme.of(
-//                             context,
-//                           ).colorScheme.primary.withOpacity(0.06)
-//                         : Colors.transparent,
-//                     child: InkWell(
-//                       onTap: () => widget.onUserTap(rowData.id),
-//                       child: Padding(
-//                         padding: const EdgeInsets.symmetric(
-//                           vertical: 14,
-//                           horizontal: 20,
-//                         ),
-//                         child: Row(
-//                           children: [
-//                             tableData(
-//                               "${ widget.currentPage * 10 + (index + 1)}",
-//                             ),
-//                             screenType == 'DONATION'
-//                                 ? tableData(
-//                                     "${(index + 1 * 1000).toString()}/-",
-//                                   )
-//                                 : tableData(name),
-//                             screenType == 'DONATION'
-//                                 ? tableData("Seva"):screenType=="JEEVANADI"?tableData(JeevanaadiNo)
-//                                 : tableData(mobile),
-//                             screenType == 'DONATION'
-//                                 ? tableData("2025-01-${index + 1}"):screenType=="JEEVANADI"?tableData(userType)
-//                                 : tableData(email),
-//                             // 🟢 Status Pill
-//                             // SizedBox(
-//                             //   width: 120,
-//                             //   child: _StatusPill(status: user.status),
-//                             // ),
-//                             screenType == 'JEEVANADI'
-//                                 ? Expanded(
-//                                     child: Padding(
-//                                       padding: const EdgeInsets.only(right: 16),
-//                                       child: Stack(
-//                                         alignment: Alignment.center,
-//                                         children: [
-//                                           ClipRRect(
-//                                             borderRadius: BorderRadius.circular(
-//                                               8,
-//                                             ),
-//                                             child: LinearProgressIndicator(
-//                                               value:
-//                                                   index * 20 / 100, // 0.0 - 1.0
-//                                               minHeight: 16,
-//                                               backgroundColor:
-//                                                   Colors.grey.shade300,
-//                                               valueColor: index * 20 < 30
-//                                                   ? AlwaysStoppedAnimation<
-//                                                       Color
-//                                                     >(Colors.redAccent)
-//                                                   : index * 20 < 60
-//                                                   ? AlwaysStoppedAnimation<
-//                                                       Color
-//                                                     >(Colors.blue)
-//                                                   : AlwaysStoppedAnimation<
-//                                                       Color
-//                                                     >(Colors.green),
-//                                             ),
-//                                           ),
-//                                           Text(
-//                                             "${index * 20 / 100 * 100}%",
-//                                             style: const TextStyle(
-//                                               fontSize: 12,
-//                                               fontWeight: FontWeight.w700,
-//                                               color: Colors.white,
-//                                             ),
-//                                           ),
-//                                         ],
-//                                       ),
-//                                     ),
-//                                   )
-//                                 : screenType == 'DONATION'
-//                                 ? SizedBox.shrink()
-//                                 : Expanded(
-//                                     child: Row(
-//                                       mainAxisAlignment:
-//                                           MainAxisAlignment.start,
-//                                       children: [
-//                                         HoverIconButton(
-//                                           icon: Icons.delete_outline,
-//                                           hoverColor: Colors.red.withOpacity(
-//                                             0.1,
-//                                           ),
-//                                           iconColor: Colors.red,
-//                                           onTap: () {
-//                                             widget.onDelete(rowData.id);
-//                                           },
-//                                         ),
-//                                         const SizedBox(width: 10),
-//                                         HoverIconButton(
-//                                           icon: Icons.edit_outlined,
-//                                           hoverColor: Colors.blue.withOpacity(
-//                                             0.1,
-//                                           ),
-//                                           iconColor: Colors.blue,
-//                                           onTap: () {
-//                                             widget.onUpdate(rowData.id);
-//                                           },
-//                                         ),
-//                                       ],
-//                                     ),
-//                                   ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                   ),
-//                 );
-//               },
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-
-//   tableHeader(String title) {
-//     return Expanded(
-//       child: Text(
-//         title,
-//         style: TextStyle(
-//           fontWeight: FontWeight.w600,
-//           color: Colors.black87,
-//           fontSize: 14,
-//         ),
-//       ),
-//     );
-//   }
-
-//   tableData(String data) {
-//     return Expanded(
-//       child: Text(
-//         data,
-//         overflow: TextOverflow.ellipsis,
-//         style: TextStyle(
-//           color: Colors.grey.shade700,
-//           fontSize: 14,
-//           fontWeight: FontWeight.w500,
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-// class HoverIconButton extends StatefulWidget {
-//   const HoverIconButton({
-//     super.key,
-//     required this.icon,
-//     required this.onTap,
-//     this.hoverColor = const Color(0xFFE3F2FD), // light blue
-//     this.iconColor,
-//   });
-
-//   final IconData icon;
-//   final VoidCallback onTap;
-//   final Color hoverColor;
-//   final Color? iconColor;
-
-//   @override
-//   State<HoverIconButton> createState() => _HoverIconButtonState();
-// }
-
-// class _HoverIconButtonState extends State<HoverIconButton> {
-//   bool _hovering = false;
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return MouseRegion(
-//       cursor: SystemMouseCursors.click,
-//       onEnter: (_) => setState(() => _hovering = true),
-//       onExit: (_) => setState(() => _hovering = false),
-//       child: GestureDetector(
-//         onTap: widget.onTap,
-//         child: AnimatedContainer(
-//           duration: const Duration(milliseconds: 180),
-//           curve: Curves.easeOut,
-//           padding: const EdgeInsets.all(6),
-//           decoration: BoxDecoration(
-//             color: _hovering ? widget.hoverColor : Colors.transparent,
-//             borderRadius: BorderRadius.circular(6),
-//           ),
-//           child: Icon(
-//             widget.icon,
-//             size: 20,
-//             color: widget.iconColor ?? Theme.of(context).iconTheme.color,
-//           ),
-//         ),
-//       ),
-//     );
-//   }
-// }

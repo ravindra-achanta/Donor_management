@@ -1,17 +1,11 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
 import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_service.dart';
-import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 import 'package:vikas_app/screeens/models/request/allocate_members_request.dart';
-import 'package:vikas_app/screeens/models/request/unassigned_users_response.dart';
-import 'package:vikas_app/screeens/models/response/assigned_karyakartha_response.dart';
+import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadi_paginated_view.dart';
-import 'package:vikas_app/screeens/models/response/user.dart';
 
 class JeevanadiRepo {
   final _api = NetworkService.instance;
@@ -29,6 +23,28 @@ class JeevanadiRepo {
 
     try {
       JeevanaadiPaginatedView data = JeevanaadiPaginatedView.fromJson(
+        result.data,
+      );
+      return ApiResult.success(data);
+    } catch (e) {
+      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+    }
+  }
+
+  Future<ApiResult<JeevanaadiDonationView>> getJeevanaadisDonations(
+    int page,
+    int size,
+    String? id,
+  ) async {
+    final result = await _api.get(
+      "${ApiConstants.VIKAS}/donations/${id}?page=${page}&size=${size}",
+    );
+    if (!result.isSuccess) {
+      return ApiResult.failure(result.error);
+    }
+
+    try {
+      JeevanaadiDonationView data = JeevanaadiDonationView.fromJson(
         result.data,
       );
       return ApiResult.success(data);
@@ -128,7 +144,7 @@ class JeevanadiRepo {
   }
 
   //unassigned jeevandi members
-  Future<ApiResult<UnassignedUsersResponse>> getUnassignedJeevanadiUsers({
+  Future<ApiResult<JeevanaadiPaginatedView>> getUnassignedJeevanadiUsers({
     required int page,
     required int size,
   }) async {
@@ -142,7 +158,7 @@ class JeevanadiRepo {
     }
 
     try {
-      final data = UnassignedUsersResponse.fromJson(result.data);
+      final data = JeevanaadiPaginatedView.fromJson(result.data);
 
       return ApiResult.success(data);
     } catch (e) {
@@ -154,7 +170,7 @@ class JeevanadiRepo {
 
   //assigned jeevandi member list to karyakatha:
 
-  Future<ApiResult<AssignedKaryakarthaResponse>> getAssignedKaryakarthas({
+  Future<ApiResult<JeevanaadiPaginatedView>> getAssignedJeevanaadis({
     required String karyakarthaId,
     required int page,
     required int size,
@@ -167,15 +183,13 @@ class JeevanadiRepo {
     final result = await _api.get(url);
 
     if (!result.isSuccess) {
-      print(
-        '❌ Failed to fetch assigned karyakarthas: ${result.error?.message}',
-      );
+      print('❌ Failed to fetch assigned jeevanaadis: ${result.error?.message}');
       return ApiResult.failure(result.error);
     }
 
     try {
       print('📦 Response data: ${result.data}');
-      final data = AssignedKaryakarthaResponse.fromJson(result.data);
+      final data = JeevanaadiPaginatedView.fromJson(result.data);
       return ApiResult.success(data);
     } catch (e) {
       print('❌ Parsing error: $e');
@@ -235,7 +249,6 @@ class JeevanadiRepo {
   }) async {
     final url = ApiConstants.getJeevanaadiUpdate + jeevanadiId + "/update";
 
-    updateData.removeWhere((key, value) => value == null);
 
     final result = await _api.put(url, body: updateData);
 
@@ -246,34 +259,33 @@ class JeevanadiRepo {
     return ApiResult.success(result.data);
   }
 
+  Future<ApiResult<JeevanaadiFullProfile>> getJeevanaadiProfileFromRequest(
+    String jeevanadiId,
+  ) async {
+    print('🔍 Getting profile for ID: $jeevanadiId'); // DEBUG
+    final url = "${ApiConstants.getrequestviewbyid}/$jeevanadiId";
+    final result = await _api.get(url);
+    print('📡 Full URL: ${ApiConstants.baseUrl}$url'); // DEBUG
 
-Future<ApiResult<JeevanaadiFullProfile>> getJeevanaadiProfileFromRequest(
-  String jeevanadiId,
-  
-) async {
-   print('🔍 Getting profile for ID: $jeevanadiId'); // DEBUG
-  final url = "${ApiConstants.getrequestviewbyid}/$jeevanadiId";
-  final result = await _api.get(url);
-   print('📡 Full URL: ${ApiConstants.baseUrl}$url'); // DEBUG
-  
-  if (!result.isSuccess) {
+    if (!result.isSuccess) {
       print('❌ Error: ${result.error?.message}');
-    return ApiResult.failure(result.error);
-  }
-
-  try {
-    final data = result.data;
-    if (data is! Map<String, dynamic>) {
-      throw FormatException('Unexpected response format: ${data.runtimeType}');
+      return ApiResult.failure(result.error);
     }
 
-    final profile = JeevanaadiFullProfile.fromJson(data);
-    return ApiResult.success(profile);
-  } catch (e) {
-    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
-  }
-}
+    try {
+      final data = result.data;
+      if (data is! Map<String, dynamic>) {
+        throw FormatException(
+          'Unexpected response format: ${data.runtimeType}',
+        );
+      }
 
+      final profile = JeevanaadiFullProfile.fromJson(data);
+      return ApiResult.success(profile);
+    } catch (e) {
+      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+    }
+  }
 
   Future<void> deleteKaryakartha(String id) async {
     await _api.delete("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");

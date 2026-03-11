@@ -42,9 +42,10 @@ class DropdownService {
     "S": "Single", "D": "Divorced", "M": "Married", "W": "Widow"
   };
 
-  Map<String, String> getAllCommunicationModes() => const {
-    "WhatsApp": "WhatsApp", "Phone": "Phone Call", 
-    "Email": "Email", "SMS": "SMS"
+   Map<String, String> getAllCommunicationModes() => const {
+    "W": "WhatsApp", 
+   
+    "E": "Email"
   };
 
   List<Map<String, dynamic>> getAllGenders() => const [

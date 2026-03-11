@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_navigation/src/extension_navigation.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/jeevanadi/edit_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
-import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
-import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class ViewJeevanadiScreen extends StatelessWidget {
@@ -25,17 +26,38 @@ class ViewJeevanadiScreen extends StatelessWidget {
          'Either userId or jeevanadiId must be provided',
        );
 
+  static Widget withArguments() {
+    final args = Get.arguments;
+
+    // Handle null arguments
+    if (args == null) {
+      return const Scaffold(
+        body: Center(child: Text('Error: No arguments provided')),
+      );
+    }
+
+    if (args is Map) {
+      return ViewJeevanadiScreen(
+        userId: args['userId'],
+        jeevanadiId: args['jeevanadiId'],
+        isFromRequest: args['isFromRequest'] ?? false,
+      );
+    } else if (args is String) {
+      return ViewJeevanadiScreen(userId: args, isFromRequest: false);
+    }
+
+    return const SizedBox.shrink();
+  }
+
   factory ViewJeevanadiScreen.fromArguments(dynamic args) {
     if (args is Map) {
       return ViewJeevanadiScreen(
+        userId: args['userId'],
         jeevanadiId: args['jeevanadiId'],
         isFromRequest: args['isFromRequest'] ?? false,
       );
     } else {
-      return ViewJeevanadiScreen(
-        userId: args as String?, // For normal view
-        isFromRequest: false,
-      );
+      return ViewJeevanadiScreen(userId: args as String?, isFromRequest: false);
     }
   }
 
@@ -56,6 +78,11 @@ class ViewJeevanadiScreen extends StatelessWidget {
           FetchJeevanaadiProfileFullEvent(userId!),
         );
       }
+      if (userId != null || jeevanadiId != null) {
+        context.read<JeevanaadiBloc>().add(
+          FetchJeevanaadiDonationEvent(userId ?? jeevanadiId ?? '', 0),
+        );
+      }
     });
 
     return Layout(
@@ -66,7 +93,10 @@ class ViewJeevanadiScreen extends StatelessWidget {
               previous.profileLoading != current.profileLoading ||
               previous.profileErrorMsg != current.profileErrorMsg ||
               previous.isFromRequest != current.isFromRequest ||
-              previous.requestStatus != current.requestStatus;
+              previous.requestStatus != current.requestStatus ||
+              previous.allDonations != current.allDonations ||
+              previous.donationCurrentPage != current.donationCurrentPage ||
+              previous.totalDonationpages != current.totalDonationpages;
         },
         builder: (context, state) {
           if (state.profileLoading == true) {
@@ -132,7 +162,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
               children: [
                 // ---------- HEADER ROW ----------
                 // _buildHeaderRow(context, profileFull),
-                if (state.isFromRequest)
+                if (isFromRequest)
                   _buildRequestHeaderRow(context, profileFull, state)
                 else
                   _buildNormalHeaderRow(context, profileFull),
@@ -155,10 +185,16 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // ---------- SPECIAL OCCASIONS TABLE ----------
+                // _buildOccasionsTable(
+                //   profileFull.occupationDetails != null
+                //       ? [profileFull.occupationDetails!]
+                //       : [],
+                // ),
                 _buildOccasionsTable(
-                  profileFull.occupationDetails != null
-                      ? [profileFull.occupationDetails!]
-                      : [],
+                  profileFull.occasionsDetails
+                      .where((occ) => occ != null)
+                      .map((occ) => occ as OccasionsDetails)
+                      .toList(),
                 ),
 
                 const SizedBox(height: 20),
@@ -173,14 +209,56 @@ class ViewJeevanadiScreen extends StatelessWidget {
                 ),
 
                 CommonList(
-                  users: _getDummyUsers(),
-                  currentPage: 0,
+                  users: state.allDonations,
+                  currentPage: state.donationCurrentPage,
                   onUserTap: (user) {},
                   onDelete: (user) {},
                   onUpdate: (user) {},
                   screenType: "DONATION",
                 ),
-
+                if (state.allDonations.isNotEmpty)
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 50),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        IconButton(
+                          onPressed: () {
+                            if (state.donationCurrentPage > 0) {
+                              context.read<JeevanaadiBloc>().add(
+                                FetchJeevanaadiDonationEvent(
+                                  userId ?? jeevanadiId ?? '',
+                                  (state.donationCurrentPage) - 1,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.skip_previous_outlined),
+                        ),
+                        Text(
+                          "${(state.donationCurrentPage) + 1}/${state.totalDonationpages}",
+                        ),
+                        IconButton(
+                          onPressed: () {
+                            if (state.donationCurrentPage <
+                                state.totalDonationpages - 1) {
+                              print(
+                                "Fetching next page: ${(state.donationCurrentPage) + 1}",
+                              );
+                              context.read<JeevanaadiBloc>().add(
+                                FetchJeevanaadiDonationEvent(
+                                  userId ?? jeevanadiId ?? '',
+                                  (state.donationCurrentPage) + 1,
+                                ),
+                              );
+                            }
+                          },
+                          icon: Icon(Icons.skip_next_outlined),
+                        ),
+                        SizedBox(height: 16),
+                      ],
+                    ),
+                  ),
                 // if (state.isFromRequest && state.requestStatus == 'PENDING')
                 //  // _buildApprovalButtons(context, state),
               ],
@@ -195,8 +273,6 @@ class ViewJeevanadiScreen extends StatelessWidget {
     BuildContext context,
     JeevanaadiFullProfile profileFull,
   ) {
-    final basicDetails = profileFull.basicDetails;
-    final profileDetails = profileFull.profileDetails;
     final demoGraphic = profileFull.jeevanaadiDemoGraphicDetails; // Add this
 
     return Container(
@@ -273,30 +349,35 @@ class ViewJeevanadiScreen extends StatelessWidget {
             ),
           ),
 
-          ElevatedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => EditJeevanadiScreen(
-                    //profile: profileFull,
-                    userId: userId ?? '',
+          if (Vikasdb().getString("USER_TYPE") == 'OFFICE_STAFF' ||
+              (Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA'))
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => EditJeevanadiScreen(
+                      //profile: profileFull,
+                      userId: userId ?? '',
+                    ),
                   ),
+                );
+              },
+              icon: const Icon(Icons.edit, size: 16),
+              label: const Text("Edit"),
+              style: ElevatedButton.styleFrom(
+                elevation: 0,
+                backgroundColor: Colors.brown,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
                 ),
-              );
-            },
-            icon: const Icon(Icons.edit, size: 16),
-            label: const Text("Edit"),
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: Colors.brown,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
               ),
             ),
-          ),
         ],
       ),
     );
@@ -720,7 +801,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOccasionsTable(List<OccupationDetails> occasions) {
+  Widget _buildOccasionsTable(List<OccasionsDetails> occasions) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -878,20 +959,6 @@ class ViewJeevanadiScreen extends StatelessWidget {
     }
   }
 
-  List<User> _getDummyUsers() {
-    return [
-      User(
-        uniqueId: 'UID123',
-        userType: "Admin",
-        status: "ACTIVE",
-        id: '1',
-        name: 'John Doe',
-        mobileNumber: '1234567890',
-        email: 'john.doe@example.com',
-      ),
-    ];
-  }
-
   Widget _buildRequestHeaderRow(
     BuildContext context,
     JeevanaadiFullProfile profileFull,
@@ -969,7 +1036,8 @@ class ViewJeevanadiScreen extends StatelessWidget {
           // Approve button
           if (state.isFromRequest &&
               state.requestStatus == 'PENDING' &&
-              !state.isProcessingRequest)
+              !state.isProcessingRequest &&
+              Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
@@ -996,33 +1064,79 @@ class ViewJeevanadiScreen extends StatelessWidget {
               ),
             ),
 
-          const SizedBox(width: 12),
+          //const SizedBox(width: 12),
 
           // Reject button
+          // if (state.isFromRequest &&
+          //     state.requestStatus == 'PENDING' &&
+          //     !state.isProcessingRequest)
+          //   MouseRegion(
+          //     cursor: SystemMouseCursors.click,
+          //     child: GestureDetector(
+          //       onTap: () =>
+          //           _showApprovalDialog(context, state, isApprove: false),
+          //       child: Container(
+          //         padding: const EdgeInsets.symmetric(
+          //           horizontal: 16,
+          //           vertical: 8,
+          //         ),
+          //         decoration: BoxDecoration(
+          //           color: Colors.red,
+          //           borderRadius: BorderRadius.circular(8),
+          //         ),
+          //         child: const Text(
+          //           'Reject',
+          //           style: TextStyle(
+          //             fontSize: 14,
+          //             fontWeight: FontWeight.w600,
+          //             color: Colors.white,
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ),
+          const SizedBox(width: 12),
           if (state.isFromRequest &&
               state.requestStatus == 'PENDING' &&
-              !state.isProcessingRequest)
+              Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
             MouseRegion(
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
-                onTap: () =>
-                    _showApprovalDialog(context, state, isApprove: false),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditJeevanadiScreen(
+                        userId: userId ?? '',
+                        isFromRequest: true,
+                        jeevanadiId: jeevanadiId,
+                      ),
+                    ),
+                  );
+                },
                 child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 8,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.red,
+                    color: Colors.blue,
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'Reject',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.edit, size: 16, color: Colors.white),
+                      SizedBox(width: 4),
+                      Text(
+                        'Edit',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
