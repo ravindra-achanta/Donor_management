@@ -1,14 +1,19 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
-import 'package:vikas_app/screeens/models/request/notice_request.dart';
+import 'package:vikas_app/screeens/models/enum/user_type.dart';
+import 'package:vikas_app/screeens/models/request/notice_request.dart';          // for create
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
+import 'package:vikas_app/screeens/models/response/user_view.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class Notices extends StatefulWidget {
@@ -25,14 +30,14 @@ class _NoticesState extends State<Notices> {
 
   /// Audience selection
   String _selectedSpecificOption = 'User Type';
-  String? _selectedUserType;
-  List<String> _selectedUsers = [];
+  String? _selectedUserType; // Stores display name (e.g., "Admin", "All Users")
+  List<String> _selectedUsers = []; // Will store user IDs when integrated
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
 
   /// Controllers
   final TextEditingController _titleController = TextEditingController();
-  final TextEditingController _messageController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _timeController = TextEditingController();
 
@@ -43,18 +48,26 @@ class _NoticesState extends State<Notices> {
   bool _isSubmitting = false;
   bool _isLoading = true;
 
-  final List<String> _userTypes = ['All Users', 'Admin', 'Karyakatha', 'Staff'];
-  final Map<String, List<String>> _usersByType = {
-    'all': ['All Users'],
-    'Admin': ['Reddy Srinu', 'Suresh Kumar', 'Anitha Rao'],
-    'Karyakatha': ['Ramesh', 'Lakshmi', 'Narayan', 'Padma'],
-    'Staff': ['Prakash', 'Sunitha', 'Mahesh', 'Kavya'],
-  };
+
+  //List<UserView> _allUsers = [];
+  List<String> _allUsers = [];
+  bool _isLoadingUsers = false;
+
+  final List<String> _userTypeOptions = [
+    'All Users',
+    UserType.admin.displayName,
+    UserType.karyakartha.displayName,
+    UserType.officeStaff.displayName,
+    UserType.superAdmin.displayName,
+  ];
+
+
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _fetchUsers();
   }
 
   void _initializeData() {
@@ -62,58 +75,75 @@ class _NoticesState extends State<Notices> {
       _populateFields();
     }
     setState(() => _isLoading = false);
+    
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_selectedTime != null) {
+        _timeController.text = _selectedTime!.format(context);
+      }
+    });
   }
 
+  void _fetchUsers() async {
+  setState(() => _isLoadingUsers = true);
+  final authRepo = AuthRepository();
+  final result = await authRepo.getAllUsers(page: 0, size: 1000); 
+  
+  if (result.isSuccess && result.data != null) {
+    setState(() {
+      _allUsers = result.data!.content
+          .map((user) => user.name ?? 'Unknown User')
+          .where((name) => name.isNotEmpty) 
+          .toList();
+      _isLoadingUsers = false;
+      
+      print('Loaded ${_allUsers.length} users: $_allUsers');
+    });
+  } else {
+    print('Failed to load users: ${result.error?.message}');
+    setState(() => _isLoadingUsers = false);
+  }
+}
+
   void _populateFields() {
-    final notice = widget.noticeData!;
+    final notice = widget.noticeData;
+    if (notice == null) return; 
+    
     _titleController.text = notice.title;
-    _messageController.text = notice.message;
+    _descriptionController.text = notice.description;
 
-    // Parse audience
-    if (_userTypes.contains(notice.audience)) {
-      _selectedSpecificOption = 'User Type';
-      _selectedUserType = notice.audience;
-    } else {
-      _selectedSpecificOption = 'User';
-      _selectedUsers = notice.audience.contains(',')
-          ? notice.audience.split(',').map((e) => e.trim()).toList()
-          : [notice.audience];
+    // Map sendTo to UI
+    if (notice.sendTo != null) {
+      if (notice.sendTo == 'TO_ALL') {
+  _selectedUserType = 'All Users';
+}
+else if (notice.sendTo == 'TO_ADMINS') {
+  _selectedUserType = UserType.admin.displayName;
+}
+else if (notice.sendTo == 'TO_KARYAKARTHAS') {
+  _selectedUserType = UserType.karyakartha.displayName;
+}
+else if (notice.sendTo == 'TO_OFFICESTAFF') {
+  _selectedUserType = UserType.officeStaff.displayName;
+}
+else if (notice.sendTo == 'TO_SPECIFIC') {
+  _selectedSpecificOption = 'User';
+}
     }
 
-    _dateController.text = notice.date;
-    _timeController.text = notice.time;
-
-    // Parse date
-    try {
-      final dateParts = notice.date.split('-');
-      if (dateParts.length == 3) {
-        _selectedDate = DateTime(
-          int.parse(dateParts[0]),
-          int.parse(dateParts[1]),
-          int.parse(dateParts[2]),
-        );
-      }
-    } catch (e) {
-      debugPrint('Error parsing date: $e');
+    if (notice.sendTime != null) {
+      _selectedDate = notice.sendTime;
+      _selectedTime = TimeOfDay.fromDateTime(notice.sendTime!);
+      _dateController.text = DateFormat('yyyy-MM-dd').format(notice.sendTime!);
+      // Time formatting moved to addPostFrameCallback in _initializeData()
     }
 
-    // Parse time
-    try {
-      final timeParts = notice.time.split(':');
-      if (timeParts.length == 2) {
-        int hour = int.parse(timeParts[0].trim());
-        int minute = int.parse(timeParts[1].split(' ')[0].trim());
-        _selectedTime = TimeOfDay(hour: hour, minute: minute);
-      }
-    } catch (e) {
-      debugPrint('Error parsing time: $e');
-    }
+    // TODO: Load existing image if any (requires handling base64/URL)
   }
 
   @override
   void dispose() {
     _titleController.dispose();
-    _messageController.dispose();
+    _descriptionController.dispose();
     _dateController.dispose();
     _timeController.dispose();
     super.dispose();
@@ -141,83 +171,102 @@ class _NoticesState extends State<Notices> {
         }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to select image: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      _showError('Failed to select image: $e');
     }
   }
 
-  void _submitNotice() {
-    if (_formKey.currentState!.validate()) {
-      if (_selectedDate == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a date'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      if (_selectedTime == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Please select a time'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        return;
-      }
-
-      setState(() => _isSubmitting = true);
-
-      String audienceType = '';
-      String audienceValue = '';
-
-      if (_selectedSpecificOption == 'User Type') {
-        audienceType = 'User Type';
-        audienceValue = _selectedUserType ?? 'All Users';
-      } else {
-        audienceType = 'Specific Users';
-        audienceValue = _selectedUsers.isEmpty
-            ? 'No users selected'
-            : _selectedUsers.join(', ');
-      }
-
-      final isEditing = widget.noticeData != null;
-
-      // Format time properly
-      final String formattedTime =
-          _selectedTime!.hour.toString().padLeft(2, '0') +
-          ':' +
-          _selectedTime!.minute.toString().padLeft(2, '0');
-
-      final noticeRequest = NoticeRequest(
-        title: _titleController.text,
-        message: _messageController.text,
-        audienceType: audienceType,
-        audienceValue: audienceValue,
-        date: _selectedDate!,
-        time: formattedTime,
-        attachment: _selectedFile,
-      );
-
-      if (isEditing) {
-        context.read<NoticeBloc>().add(
-          UpdateNoticeEvent(widget.noticeData!.id, noticeRequest),
-        );
-      } else {
-        context.read<NoticeBloc>().add(CreateNoticeEvent(noticeRequest));
-      }
+  /// Convert selected image to base64
+  Future<String?> _imageToBase64() async {
+    if (kIsWeb && _selectedFileBytes != null) {
+      return base64Encode(_selectedFileBytes!);
+    } else if (_selectedFile != null) {
+      final bytes = await _selectedFile!.readAsBytes();
+      return base64Encode(bytes);
     }
+    return null;
+  }
+
+  /// Map selected display name to API sendTo value
+ String _mapDisplayNameToSendTo(String? displayName) {
+  if (displayName == null || displayName == 'All Users') return 'TO_ALL';
+  if (displayName == UserType.admin.displayName) return 'TO_ADMINS';
+  if (displayName == UserType.karyakartha.displayName) return 'TO_KARYAKARTHAS';
+  if (displayName == UserType.officeStaff.displayName) return 'TO_OFFICESTAFF';
+  return 'TO_ALL';
+}
+
+  /// Main submit method
+  void _submitNotice() async {
+  final formState = _formKey.currentState;
+  if (formState == null || !formState.validate()) return;
+
+  final isEditing = widget.noticeData != null;
+
+  if (!isEditing) {
+    if (_selectedDate == null) {
+      _showError('Please select a date');
+      return;
+    }
+
+    if (_selectedTime == null) {
+      _showError('Please select a time');
+      return;
+    }
+  }
+
+  setState(() => _isSubmitting = true);
+
+  final imageBase64 = await _imageToBase64();
+
+  final sendDateTime = DateTime(
+    _selectedDate!.year,
+    _selectedDate!.month,
+    _selectedDate!.day,
+    _selectedTime!.hour,
+    _selectedTime!.minute,
+  );
+
+  String sendTo;
+  List<String>? specificUsers;
+
+  if (_selectedSpecificOption == 'User Type') {
+    sendTo = _mapDisplayNameToSendTo(_selectedUserType);
+    specificUsers = [];
+  } else {
+    sendTo = "TO_SPECIFIC";
+    specificUsers = _selectedUsers;
+  }
+
+  final request = NoticeRequest(
+    title: _titleController.text,
+    message: _descriptionController.text,
+    audienceType: _selectedSpecificOption == 'User Type' ? 'USER_TYPE' : 'SPECIFIC_USERS',
+    audienceValue: _selectedSpecificOption == 'User Type' ? sendTo : _selectedUsers.join(','),
+    date: sendDateTime,
+    time: _selectedTime!.format(context),
+    attachment: _selectedFile,
+  );
+
+  if (isEditing) {
+    context.read<NoticeBloc>().add(
+      UpdateNoticeEvent(widget.noticeData!.id, request),
+    );
+  } else {
+    context.read<NoticeBloc>().add(
+      CreateNoticeEvent(request),
+    );
+  }
+}
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
   }
 
   void _clearForm() {
     _titleController.clear();
-    _messageController.clear();
+    _descriptionController.clear();
     _dateController.clear();
     _timeController.clear();
     setState(() {
@@ -233,10 +282,11 @@ class _NoticesState extends State<Notices> {
   }
 
   void _showUserSelectionDialog() {
+    // Use fetched users if available, otherwise show loading or empty state
     List<String> allUsers = [];
-    _usersByType.forEach((key, value) {
-      allUsers.addAll(value);
-    });
+    if (_allUsers.isNotEmpty) {
+      allUsers = _allUsers.map((user) => user ?? 'Unknown User').toList();
+    }
 
     List<String> tempSelectedUsers = List.from(_selectedUsers);
 
@@ -267,33 +317,37 @@ class _NoticesState extends State<Notices> {
                       ),
                       const SizedBox(height: 12),
                       Expanded(
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: allUsers.length,
-                          itemBuilder: (context, index) {
-                            final user = allUsers[index];
-                            final isSelected = tempSelectedUsers.contains(user);
-                            return CheckboxListTile(
-                              value: isSelected,
-                              title: Text(
-                                user,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                              onChanged: (checked) {
-                                setStateDialog(() {
-                                  if (checked == true) {
-                                    if (!tempSelectedUsers.contains(user)) {
-                                      tempSelectedUsers.add(user);
-                                    }
-                                  } else {
-                                    tempSelectedUsers.remove(user);
-                                  }
-                                });
-                              },
-                              dense: true,
-                            );
-                          },
-                        ),
+                        child: _isLoadingUsers
+                            ? const Center(child: CircularProgressIndicator())
+                            : allUsers.isEmpty
+                                ? const Center(child: Text('No users available'))
+                                : ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: allUsers.length,
+                                    itemBuilder: (context, index) {
+                                      final user = allUsers[index];
+                                      final isSelected = tempSelectedUsers.contains(user);
+                                      return CheckboxListTile(
+                                        value: isSelected,
+                                        title: Text(
+                                          user,
+                                          style: const TextStyle(fontSize: 14),
+                                        ),
+                                        onChanged: (checked) {
+                                          setStateDialog(() {
+                                            if (checked == true) {
+                                              if (!tempSelectedUsers.contains(user)) {
+                                                tempSelectedUsers.add(user);
+                                              }
+                                            } else {
+                                              tempSelectedUsers.remove(user);
+                                            }
+                                          });
+                                        },
+                                        dense: true,
+                                      );
+                                    },
+                                  ),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -362,29 +416,28 @@ class _NoticesState extends State<Notices> {
     final isEditing = widget.noticeData != null;
 
     if (_isLoading) {
-      return Layout(child: Center(child: CircularProgressIndicator()));
+      return Layout(child: const Center(child: CircularProgressIndicator()));
     }
 
     return Layout(
       child: BlocConsumer<NoticeBloc, NoticeState>(
         listener: (context, state) {
           if (state.formStatus == NoticeFormStatus.success) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  isEditing
-                      ? 'Notice updated successfully'
-                      : 'Notice sent successfully',
-                ),
-                backgroundColor: Colors.green,
-              ),
-            );
-            Future.delayed(const Duration(milliseconds: 500), () {
-              if (mounted) {
-                Navigator.pop(context);
-                context.read<NoticeBloc>().refreshNotices();
-              }
-            });
+            // ScaffoldMessenger.of(context).showSnackBar(
+            //   SnackBar(
+            //     content: Text(
+            //       isEditing
+            //           ? 'Notice updated successfully'
+            //           : 'Notice sent successfully',
+            //     ),
+            //     backgroundColor: Colors.green,
+            //   ),
+            // );
+           Future.delayed(const Duration(milliseconds: 500), () {
+  if (mounted) {
+    Get.offNamed('/notices/list');
+  }
+});
           } else if (state.formStatus == NoticeFormStatus.error) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -403,15 +456,14 @@ class _NoticesState extends State<Notices> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Header with back button
                   Row(
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back, size: 22),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                       ),
                       const SizedBox(width: 10),
                       Text(
@@ -427,160 +479,159 @@ class _NoticesState extends State<Notices> {
 
                   const SizedBox(height: 10),
 
-                  Row(
-                    children: [
-                      Radio<String>(
-                        value: 'User Type',
-                        groupValue: _selectedSpecificOption,
-                        onChanged: (v) {
-                          setState(() {
-                            _selectedSpecificOption = v!;
-                            _selectedUserType = null;
-                            _selectedUsers.clear();
-                          });
-                        },
-                      ),
-                      const Text('User Type'),
-                      const SizedBox(width: 24),
-                      Radio<String>(
-                        value: 'User',
-                        groupValue: _selectedSpecificOption,
-                        onChanged: (v) {
-                          setState(() {
-                            _selectedSpecificOption = v!;
-                            _selectedUserType = null;
-                            _selectedUsers.clear();
-                          });
-                        },
-                      ),
-                      const Text('User'),
-                    ],
-                  ),
-
-                  const SizedBox(height: 16),
-
-                  if (_selectedSpecificOption == 'User Type')
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  // Audience selection – only show when creating
+                  if (!isEditing) ...[
+                    Row(
                       children: [
-                        const Text(
-                          'Select User Type',
-                          style: TextStyle(fontSize: 14, color: Colors.black),
+                        Radio<String>(
+                          value: 'User Type',
+                          groupValue: _selectedSpecificOption,
+                          onChanged: (v) {
+                            setState(() {
+                              _selectedSpecificOption = v!;
+                              _selectedUserType = null;
+                              _selectedUsers.clear();
+                            });
+                          },
                         ),
-                        const SizedBox(height: 6),
-                        SizedBox(
-                          width: 700,
-                          child: _buildDropdown(
-                            hint: 'Choose user type',
-                            value: _selectedUserType,
-                            items: _userTypes,
-                            onChanged: (value) {
-                              setState(() {
-                                _selectedUserType = value;
-                              });
-                            },
-                          ),
+                        const Text('User Type'),
+                        const SizedBox(width: 24),
+                        Radio<String>(
+                          value: 'User',
+                          groupValue: _selectedSpecificOption,
+                          onChanged: (v) {
+                            setState(() {
+                              _selectedSpecificOption = v!;
+                              _selectedUserType = null;
+                              _selectedUsers.clear();
+                            });
+                          },
                         ),
+                        const Text('User'),
                       ],
                     ),
 
-                  if (_selectedSpecificOption == 'User')
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          'Select Users',
-                          style: TextStyle(fontSize: 14, color: Colors.black),
-                        ),
-                        const SizedBox(height: 6),
+                    const SizedBox(height: 16),
 
-                        // User selection field
-                        SizedBox(
-                          width: 700,
-                          child: GestureDetector(
-                            onTap: _showUserSelectionDialog,
-                            child: Container(
-                              height: 48,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.grey.shade400),
-                                borderRadius: BorderRadius.circular(8),
-                                color: Colors.white,
-                              ),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _selectedUsers.isEmpty
-                                          ? 'Select users'
-                                          : '${_selectedUsers.length} user(s) selected',
-                                      style: TextStyle(
-                                        color: _selectedUsers.isEmpty
-                                            ? Colors.grey
-                                            : Colors.black,
-                                      ),
-                                    ),
-                                  ),
-                                  const Icon(
-                                    Icons.arrow_drop_down,
-                                    color: Colors.grey,
-                                  ),
-                                ],
-                              ),
+                    if (_selectedSpecificOption == 'User Type')
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Select User Type',
+                            style: TextStyle(fontSize: 14, color: Colors.black),
+                          ),
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            width: 700,
+                            child: _buildDropdown(
+                              hint: 'Choose user type',
+                              value: _selectedUserType,
+                              items: _userTypeOptions,
+                              onChanged: (value) {
+                                setState(() {
+                                  _selectedUserType = value;
+                                });
+                              },
                             ),
                           ),
-                        ),
+                        ],
+                      ),
 
-                        // Display selected users below (like chips)
-                        if (_selectedUsers.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          Wrap(
-                            spacing: 8,
-                            runSpacing: 8,
-                            children: _selectedUsers.map((user) {
-                              return Container(
+                    if (_selectedSpecificOption == 'User')
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Select Users',
+                            style: TextStyle(fontSize: 14, color: Colors.black),
+                          ),
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            width: 700,
+                            child: GestureDetector(
+                              onTap: _showUserSelectionDialog,
+                              child: Container(
+                                height: 48,
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 12,
-                                  vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.shade50,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(
-                                    color: Colors.blue.shade200,
-                                  ),
+                                  border: Border.all(color: Colors.grey.shade400),
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: Colors.white,
                                 ),
                                 child: Row(
-                                  mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Text(user),
-                                    const SizedBox(width: 6),
-                                    GestureDetector(
-                                      onTap: () {
-                                        setState(() {
-                                          _selectedUsers.remove(user);
-                                        });
-                                      },
-                                      child: const Icon(
-                                        Icons.close,
-                                        size: 16,
-                                        color: Colors.grey,
+                                    Expanded(
+                                      child: Text(
+                                        _selectedUsers.isEmpty
+                                            ? 'Select users'
+                                            : '${_selectedUsers.length} user(s) selected',
+                                        style: TextStyle(
+                                          color: _selectedUsers.isEmpty
+                                              ? Colors.grey
+                                              : Colors.black,
+                                        ),
                                       ),
+                                    ),
+                                    const Icon(
+                                      Icons.arrow_drop_down,
+                                      color: Colors.grey,
                                     ),
                                   ],
                                 ),
-                              );
-                            }).toList(),
+                              ),
+                            ),
                           ),
+                          if (_selectedUsers.isNotEmpty) ...[
+                            const SizedBox(height: 12),
+                            Wrap(
+                              spacing: 8,
+                              runSpacing: 8,
+                              children: _selectedUsers.map((user) {
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    borderRadius: BorderRadius.circular(16),
+                                    border: Border.all(
+                                      color: Colors.blue.shade200,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(user),
+                                      const SizedBox(width: 6),
+                                      GestureDetector(
+                                        onTap: () {
+                                          setState(() {
+                                            _selectedUsers.remove(user);
+                                          });
+                                        },
+                                        child: const Icon(
+                                          Icons.close,
+                                          size: 16,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ],
                         ],
-                      ],
-                    ),
+                      ),
 
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ], // end !isEditing
 
-                  // Title field
+                  // Title field (always visible)
                   const Text(
                     'Title',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -593,148 +644,149 @@ class _NoticesState extends State<Notices> {
 
                   const SizedBox(height: 20),
 
-                  // Message field
+                  // Description field
                   const Text(
-                    'Message Content',
+                    'Description',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
                   ),
                   const SizedBox(height: 6),
                   _buildTextField(
-                    controller: _messageController,
-                    hint: 'Enter your message',
+                    controller: _descriptionController,
+                    hint: 'Enter notice description',
                     maxLines: 4,
                   ),
 
                   const SizedBox(height: 20),
 
-                  SizedBox(
-                    width: 700,
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Date',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-
-                              Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  border: Border.all(
-                                    color: Colors.grey.shade400,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: TextFormField(
-                                  controller: _dateController,
-                                  readOnly: true,
-                                  validator: (v) => v == null || v.isEmpty
-                                      ? 'Please select a date'
-                                      : null,
-                                  decoration: InputDecoration(
-                                    hintText: 'Select date',
-                                    filled: true,
-                                    fillColor: Colors.transparent,
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 14,
-                                    ),
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.calendar_today,
-                                        size: 20,
-                                      ),
-                                      onPressed: _selectDate,
-                                      padding: EdgeInsets.zero,
-                                    ),
-                                  ),
+                  // Date & Time pickers – only show when creating
+                  if (!isEditing) ...[
+                    SizedBox(
+                      width: 700,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Date',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: _dateController.text.isEmpty
-                                        ? Colors.grey
-                                        : Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ),
-
-                        const SizedBox(width: 20),
-
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Time',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                              const SizedBox(height: 6),
-
-                              Container(
-                                height: 48,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  border: Border.all(
-                                    color: Colors.grey.shade400,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: TextFormField(
-                                  controller: _timeController,
-                                  readOnly: true,
-                                  validator: (v) => v == null || v.isEmpty
-                                      ? 'Please select a time'
-                                      : null,
-                                  decoration: InputDecoration(
-                                    hintText: 'Select time',
-                                    filled: true,
-                                    fillColor: Colors.transparent,
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 14,
+                                const SizedBox(height: 6),
+                                Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
                                     ),
-                                    suffixIcon: IconButton(
-                                      icon: const Icon(
-                                        Icons.access_time,
-                                        size: 20,
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: TextFormField(
+                                    controller: _dateController,
+                                    readOnly: true,
+                                    validator: (v) => v == null || v.isEmpty
+                                        ? 'Please select a date'
+                                        : null,
+                                    decoration: InputDecoration(
+                                      hintText: 'Select date',
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 14,
                                       ),
-                                      onPressed: _selectTime,
-                                      padding: EdgeInsets.zero,
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(
+                                          Icons.calendar_today,
+                                          size: 20,
+                                        ),
+                                        onPressed: _selectDate,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: _dateController.text.isEmpty
+                                          ? Colors.grey
+                                          : Colors.black,
                                     ),
                                   ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 20),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Time',
                                   style: TextStyle(
-                                    fontSize: 14,
-                                    color: _timeController.text.isEmpty
-                                        ? Colors.grey
-                                        : Colors.black,
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(height: 6),
+                                Container(
+                                  height: 48,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    border: Border.all(
+                                      color: Colors.grey.shade400,
+                                    ),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: TextFormField(
+                                    controller: _timeController,
+                                    readOnly: true,
+                                    validator: (v) => v == null || v.isEmpty
+                                        ? 'Please select a time'
+                                        : null,
+                                    decoration: InputDecoration(
+                                      hintText: 'Select time',
+                                      filled: true,
+                                      fillColor: Colors.transparent,
+                                      border: InputBorder.none,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        horizontal: 12,
+                                        vertical: 14,
+                                      ),
+                                      suffixIcon: IconButton(
+                                        icon: const Icon(
+                                          Icons.access_time,
+                                          size: 20,
+                                        ),
+                                        onPressed: _selectTime,
+                                        padding: EdgeInsets.zero,
+                                      ),
+                                    ),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: _timeController.text.isEmpty
+                                          ? Colors.grey
+                                          : Colors.black,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                  ],
 
-                  const SizedBox(height: 20),
-
+                  // Image attachment (always visible)
                   SizedBox(
                     width: 700,
                     child: Column(
@@ -771,9 +823,7 @@ class _NoticesState extends State<Notices> {
                                     _selectedFile != null ||
                                             _selectedFileName != null
                                         ? _selectedFileName ??
-                                              _selectedFile!.path
-                                                  .split('/')
-                                                  .last
+                                            _selectedFile!.path.split('/').last
                                         : 'Choose image',
                                     overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(fontSize: 14),
@@ -783,10 +833,7 @@ class _NoticesState extends State<Notices> {
                             ),
                           ),
                         ),
-
-                        // Show image preview if selected
-                        if (_selectedFile != null ||
-                            _selectedFileBytes != null) ...[
+                        if (_selectedFile != null || _selectedFileBytes != null) ...[
                           const SizedBox(height: 12),
                           Container(
                             width: double.infinity,
@@ -803,23 +850,23 @@ class _NoticesState extends State<Notices> {
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) {
-                                            return Container(
-                                              color: Colors.grey[200],
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.error_outline,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            );
-                                          },
+                                        return Container(
+                                          color: Colors.grey[200],
+                                          child: const Center(
+                                            child: Icon(
+                                              Icons.error_outline,
+                                              color: Colors.red,
+                                            ),
+                                          ),
+                                        );
+                                      },
                                     )
                                   : _selectedFile != null
-                                  ? Image.file(
-                                      _selectedFile!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
+                                      ? Image.file(
+                                          _selectedFile!,
+                                          fit: BoxFit.cover,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
                                             return Container(
                                               color: Colors.grey[200],
                                               child: const Center(
@@ -830,8 +877,8 @@ class _NoticesState extends State<Notices> {
                                               ),
                                             );
                                           },
-                                    )
-                                  : Container(),
+                                        )
+                                      : Container(),
                             ),
                           ),
                         ],
@@ -841,6 +888,7 @@ class _NoticesState extends State<Notices> {
 
                   const SizedBox(height: 30),
 
+                  // Buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [

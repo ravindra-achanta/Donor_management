@@ -21,21 +21,20 @@ class UsersResponse extends Equatable {
     required this.last,
     required this.numberOfElements,
   });
-
-  factory UsersResponse.fromJson(Map<String, dynamic> json) {
-    return UsersResponse(
-      content: (json['content'] as List)
-          .map((e) => UserView.fromJson(e))
-          .toList(),
-      totalPages: json['totalPages'] as int,
-      totalElements: json['totalElements'] as int,
-      size: json['size'] as int,
-      number: json['number'] as int,
-      first: json['first'] as bool,
-      last: json['last'] as bool,
-      numberOfElements: json['numberOfElements'] as int,
-    );
-  }
+factory UsersResponse.fromJson(Map<String, dynamic> json) {
+  return UsersResponse(
+    content: (json['content'] as List?)
+        ?.map((e) => UserView.fromJson(e as Map<String, dynamic>))
+        .toList() ?? [],
+    totalPages: (json['totalPages'] as int?) ?? 0,
+    totalElements: (json['totalElements'] as int?) ?? 0,
+    size: (json['size'] as int?) ?? 0,
+    number: (json['number'] as int?) ?? 0,
+    first: (json['first'] as bool?) ?? false,
+    last: (json['last'] as bool?) ?? false,
+    numberOfElements: (json['numberOfElements'] as int?) ?? 0,
+  );
+}
 
   @override
   List<Object?> get props => [
