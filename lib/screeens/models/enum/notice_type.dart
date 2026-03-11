@@ -2,6 +2,7 @@ enum NoticeType {
   toAll('TO_ALL'),
   toSpecific('TO_SPECIFIC'),
   toAdmins('TO_ADMINS'),
+  tosuperadmins('TO_SUPERADMINS'),
   toKaryakarthas('TO_KARYAKARTHAS'),
   toOfficeStaff('TO_OFFICESTAFF');
 
@@ -17,6 +18,8 @@ enum NoticeType {
         return NoticeType.toSpecific;
       case 'TO_ADMINS':
         return NoticeType.toAdmins;
+      case 'TO_SUPERADMINS':
+        return NoticeType.tosuperadmins;
       case 'TO_KARYAKARTHAS':
         return NoticeType.toKaryakarthas;
       case 'TO_OFFICESTAFF':
@@ -34,6 +37,8 @@ enum NoticeType {
         return 'Specific';
       case NoticeType.toAdmins:
         return 'Admins';
+      case NoticeType.tosuperadmins:
+        return 'Super Admins';
       case NoticeType.toKaryakarthas:
         return 'Karyakartha';
       case NoticeType.toOfficeStaff:
