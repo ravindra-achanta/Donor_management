@@ -17,21 +17,60 @@ class NoticeRequest {
     required this.audienceValue,
     required this.date,
     required this.time,           // now required
-    this.attachment,
+    this.attachment, String? image,
   });
 
   Map<String, dynamic> toJson() {
+    // Combine date and time into sendDate (ISO format with Z)
+    final DateTime sendDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+    );
+    
+    // Format as ISO 8601 with Z suffix (UTC)
+    final String sendDateString = sendDateTime.toIso8601String() + 'Z';
+    
+    // Parse audienceValue based on audienceType
+    List<String>? specificUsers;
+    String sendTo;
+
+    if (audienceType == 'USER_TYPE') {
+      // Map to correct backend enum values
+      switch (audienceValue) {
+        case 'TO_ADMIN':
+          sendTo = 'TO_ADMINS';
+          break;
+        case 'TO_KARYAKATHA':
+          sendTo = 'TO_KARYAKARTHAS';
+          break;
+        case 'TO_STAFF':
+          sendTo = 'TO_OFFICESTAFF';
+          break;
+        case 'TO_ALL':
+        default:
+          sendTo = 'TO_ALL';
+          break;
+      }
+      specificUsers = null;
+    } else if (audienceType == 'SPECIFIC_USERS') {
+      sendTo = 'TO_SPECIFIC';
+      specificUsers = audienceValue.split(',').map((s) => s.trim()).toList();
+    } else {
+      sendTo = 'TO_ALL';
+    }
+
     final Map<String, dynamic> data = {
       'title': title,
-      'message': message,
-      'audience_type': audienceType,
-      'audience_value': audienceValue,
-      'date': date.toIso8601String(),
-      'time': time,
+      'description': message, // API expects 'description', not 'message'
+      'sendDate': sendDateString,
+      'sendTo': sendTo,
     };
-    if (attachment != null) {
-      data['attachment'] = attachment;
+
+    if (specificUsers != null && specificUsers.isNotEmpty) {
+      data['specificUsers'] = specificUsers;
     }
+
     return data;
   }
 }
