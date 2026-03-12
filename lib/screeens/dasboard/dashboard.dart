@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:vikas_app/api_services/network_repos/notice_repo.dart';
 import 'package:vikas_app/screeens/common/notice_dilouge.dart';
 import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
+import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 class Dashboard extends StatefulWidget {
@@ -15,6 +17,12 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   String selectedRange = "Week";
   bool _showAllChanges = false;
+
+  // ── NEW: notices queue ──────────────────────────────────────────────────────
+  final NoticeRepo _noticeRepo = NoticeRepo();
+  List<NoticeResponse> _pendingNotices = [];
+  int _currentNoticeIndex = 0;
+  // ────────────────────────────────────────────────────────────────────────────
 
   // Sample data for recent profile changes
   final List<ProfileChange> recentChanges = [
@@ -68,24 +76,60 @@ class _DashboardState extends State<Dashboard> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      callNotices();
+      //_showMaintenancePopup();
+      _fetchAndShowNotices();
     });
   }
 
-  callNotices() {
+  // void _showMaintenancePopup() {
+  //   NoticePopup.show(
+  //     context: context,
+  //     imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
+  //     title: "Scheduled System Maintenance",
+  //     description:
+  //         "Our platform will undergo scheduled maintenance today from 12:00 AM to 2:00 AM.\n"
+  //         "During this time, some features may be temporarily unavailable.\n"
+  //         "Thank you for your patience.",
+  //     onClosed: _fetchAndShowNotices, 
+  //   );
+  // }
+
+  Future<void> _fetchAndShowNotices() async {
+    if (!mounted) return;
+
+    final result = await _noticeRepo.getNotices();
+
+    if (!mounted) return;
+
+    if (result.isSuccess && result.data != null && result.data!.isNotEmpty) {
+      _pendingNotices = result.data!;
+      _currentNoticeIndex = 0;
+      _showNextNotice();
+    }
+  }
+
+  void _showNextNotice() {
+    if (_currentNoticeIndex >= _pendingNotices.length) return;
+
+    if (!mounted) return;
+
+    final notice = _pendingNotices[_currentNoticeIndex];
+
     NoticePopup.show(
       context: context,
-      imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c",
-      title: "Scheduled System Maintenance",
-      description:
-          "Our platform will undergo scheduled maintenance today from 12:00 AM to 2:00 AM.\n"
-          "During this time, some features may be temporarily unavailable.\n"
-          "Thank you for your patience.",
+      imageUrl: notice.image ?? '',
+      title: notice.title,
+      description: notice.description,
+      cancelText: "OK",
+      onClosed: () {
+        _currentNoticeIndex++;
+        _showNextNotice(); 
+      },
     );
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +140,6 @@ class _DashboardState extends State<Dashboard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ================= HEADER =================
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -109,15 +152,12 @@ class _DashboardState extends State<Dashboard> {
               ),
               const SizedBox(height: 24),
 
-              // ================= TOP STATS (8 CARDS) =================
               _buildStatsGrid(),
               const SizedBox(height: 24),
 
-              // ================= MEMBERS GRID =================
               _buildMembersGrid(),
               const SizedBox(height: 32),
 
-              // ================= RECENT PROFILE CHANGES SECTION =================
               _buildRecentChangesSection(),
             ],
           ),
@@ -126,12 +166,10 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ================= RECENT PROFILE CHANGES SECTION =================
   Widget _buildRecentChangesSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Section Header
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -161,7 +199,6 @@ class _DashboardState extends State<Dashboard> {
         ),
         const SizedBox(height: 12),
 
-        // Table-like container
         Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -177,7 +214,6 @@ class _DashboardState extends State<Dashboard> {
           ),
           child: Column(
             children: [
-              // Table Header
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
@@ -266,7 +302,6 @@ class _DashboardState extends State<Dashboard> {
                 ),
               ),
 
-              // Table Rows
               ...displayedChanges.map((change) {
                 return Container(
                   padding: const EdgeInsets.symmetric(
@@ -280,7 +315,6 @@ class _DashboardState extends State<Dashboard> {
                   ),
                   child: Row(
                     children: [
-                      // Karyakartha Name
                       Expanded(
                         flex: 2,
                         child: Padding(
@@ -296,7 +330,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
 
-                      // Jeevandi ID
                       Expanded(
                         flex: 2,
                         child: Center(
@@ -325,7 +358,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
 
-                      // Jeevandi Name
                       Expanded(
                         flex: 2,
                         child: Padding(
@@ -341,7 +373,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
 
-                      // Percentage of Change
                       Expanded(
                         flex: 2,
                         child: Center(
@@ -383,7 +414,6 @@ class _DashboardState extends State<Dashboard> {
                         ),
                       ),
 
-                      // Action Icon
                       Expanded(
                         flex: 2,
                         child: Center(
@@ -411,7 +441,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // Function to show profile details
   void _showProfileDetails(ProfileChange change) {
     showDialog(
       context: context,
@@ -463,7 +492,6 @@ class _DashboardState extends State<Dashboard> {
           ElevatedButton(
             onPressed: () {
               Navigator.pop(context);
-              // Navigate to full profile view
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.blue,
@@ -516,7 +544,6 @@ class _DashboardState extends State<Dashboard> {
     return Colors.red;
   }
 
-  // ================= RANGE SELECTOR =================
   Widget _buildRangeSelector() {
     return Container(
       padding: const EdgeInsets.all(4),
@@ -550,7 +577,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ================= TOP STATS GRID =================
   Widget _buildStatsGrid() {
     return GridView(
       shrinkWrap: true,
@@ -562,7 +588,6 @@ class _DashboardState extends State<Dashboard> {
         childAspectRatio: 1.35,
       ),
       children: [
-        // -------- FIRST 4 (NO VIEW ICON) --------
         _statCard(
           title: "Total Donations",
           value: "₹12,53,978",
@@ -596,7 +621,6 @@ class _DashboardState extends State<Dashboard> {
           color: Colors.orange,
         ),
 
-        // -------- NEXT 4 (WITH VIEW ICON) --------
         _statCard(
           title: "Total Karyakarthas",
           value: "24",
@@ -662,7 +686,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ================= MEMBER GRID =================
   Widget _buildMembersGrid() {
     return GridView(
       shrinkWrap: true,
@@ -673,18 +696,10 @@ class _DashboardState extends State<Dashboard> {
         mainAxisSpacing: 16,
         childAspectRatio: 1.6,
       ),
-      children: [
-        // Uncomment if you want to show these cards
-        // _memberCard("Active Members", "4636", Colors.green, Icons.people),
-        // _memberCard(
-        //     "Inactive Members", "19", Colors.orange, Icons.people_outline),
-        // _memberCard("Deleted Members", "0", Colors.red, Icons.delete),
-        // _memberCard("Total Members", "4655", Colors.blue, Icons.groups),
-      ],
+      children: const [],
     );
   }
 
-  // ================= STAT CARD =================
   Widget _statCard({
     required String title,
     required String value,
@@ -753,7 +768,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  // ================= MEMBER CARD =================
   Widget _memberCard(String title, String value, Color color, IconData icon) {
     return Card(
       elevation: 3,

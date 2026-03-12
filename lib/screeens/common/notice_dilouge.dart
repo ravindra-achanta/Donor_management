@@ -5,10 +5,11 @@ class NoticePopup {
 
   static void show({
     required BuildContext context,
-    required String imageUrl, // asset or network
+    required String imageUrl,
     required String title,
     required String description,
     String cancelText = "Close",
+    VoidCallback? onClosed,
   }) {
     showGeneralDialog(
       context: context,
@@ -21,7 +22,6 @@ class NoticePopup {
       },
       transitionBuilder: (context, animation, _, __) {
         final curvedValue = Curves.easeOutBack.transform(animation.value);
-
         return Opacity(
           opacity: animation.value,
           child: Transform.scale(
@@ -37,7 +37,9 @@ class NoticePopup {
           ),
         );
       },
-    );
+    ).then((_) {
+      onClosed?.call();
+    });
   }
 }
 
@@ -78,7 +80,7 @@ class _NoticeDialogContent extends StatelessWidget {
           ),
           child: Stack(
             children: [
-              // ❌ Close Button (Top Right)
+          
               Positioned(
                 right: 8,
                 top: 8,
@@ -92,7 +94,7 @@ class _NoticeDialogContent extends StatelessWidget {
               Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // 🖼 Image Header
+            
                   ClipRRect(
                     borderRadius: const BorderRadius.vertical(
                       top: Radius.circular(16),
@@ -114,7 +116,7 @@ class _NoticeDialogContent extends StatelessWidget {
                     padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
                     child: Column(
                       children: [
-                        // 🏷 Title
+                      
                         Text(
                           title,
                           textAlign: TextAlign.center,
@@ -126,7 +128,7 @@ class _NoticeDialogContent extends StatelessWidget {
 
                         const SizedBox(height: 12),
 
-                        // 📝 Description
+                    
                         Text(
                           description,
                           textAlign: TextAlign.center,
@@ -139,7 +141,7 @@ class _NoticeDialogContent extends StatelessWidget {
 
                         const SizedBox(height: 22),
 
-                        // 🔘 Cancel Button
+                      
                         SizedBox(
                           width: 120,
                           child: OutlinedButton(
