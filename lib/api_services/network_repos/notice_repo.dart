@@ -48,26 +48,36 @@ class NoticeRepo {
   }
 
   /// UPDATE NOTICE
-  Future<ApiResult<NoticeResponse>> updateNotice(
-      String id, NoticeRequest request) async {
-    final url = ApiConstants.noticesUpdate.replaceAll("{id}", id);
-    final result = await _api.put(
-      url,
-      body: request.toJson(),
-    );
+Future<ApiResult<NoticeResponse>> updateNotice(
+    String id, NoticeRequest request) async {
+  
+  final updatePayload = {
+    'image': request.image,         
+    'title': request.title,
+    'description': request.description,
+    'status': 'ACTIVE',             
+  };
 
-    if (!result.isSuccess) {
-      return ApiResult.failure(result.error);
-    }
+ 
+  final url = '${ApiConstants.noticesUpdate}?id=$id';
 
-    try {
-      final notice = NoticeResponse.fromJson(result.data);
-      return ApiResult.success(notice);
-    } catch (e) {
-      print("Error parsing updated notice: $e");
-      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
-    }
+  final result = await _api.put(
+    url,
+    body: updatePayload,              
+  );
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
   }
+
+  try {
+    final notice = NoticeResponse.fromJson(result.data);
+    return ApiResult.success(notice);
+  } catch (e) {
+    print("Error parsing updated notice: $e");
+    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  }
+}
 
  
   /// MARK NOTICE AS READ

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
@@ -60,53 +61,56 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   //   }).toList();
   // }
   List<NoticeResponse> get _filteredNotices {
-  return _allNotices.where((notice) {
-    // 1. search title/description
-    if (_searchQuery.isNotEmpty) {
-      final q = _searchQuery.toLowerCase();
-      if (!notice.title.toLowerCase().contains(q) &&
-          !notice.description.toLowerCase().contains(q)) {
-        return false;
+    return _allNotices.where((notice) {
+      // 1. search title/description
+      if (_searchQuery.isNotEmpty) {
+        final q = _searchQuery.toLowerCase();
+        if (!notice.title.toLowerCase().contains(q) &&
+            !notice.description.toLowerCase().contains(q)) {
+          return false;
+        }
       }
-    }
 
-    // 2. audience type dropdown
-    if (_selectedUserType != 'All Users') {
-      final aud = notice.sendTo ?? '';
-      if (_selectedUserType == 'Admin' && aud != 'TO_ADMINS') return false;
-      if (_selectedUserType == 'Karyakatha' && aud != 'TO_KARYAKARTHAS')
-        return false;
-      if (_selectedUserType == 'Staff' && aud != 'TO_OFFICESTAFF') return false;
-    }
-
-    // 3. date filter
-    if (_selectedFilter != 'All') {
-      final dt = notice.sendTime;
-      if (dt == null) return false;
-      final now = DateTime.now();
-      switch (_selectedFilter) {
-        case 'Today':
-          if (!(dt.year == now.year &&
-              dt.month == now.month &&
-              dt.day == now.day)) return false;
-          break;
-        case 'This Week':
-          final weekStart =
-              now.subtract(Duration(days: now.weekday - 1)); // Mon
-          if (dt.isBefore(weekStart)) return false;
-          break;
-        case 'This Month':
-          if (dt.year != now.year || dt.month != now.month) return false;
-          break;
-        case 'This Year':
-          if (dt.year != now.year) return false;
-          break;
+      // 2. audience type dropdown
+      if (_selectedUserType != 'All Users') {
+        final aud = notice.sendTo ?? '';
+        if (_selectedUserType == 'Admin' && aud != 'TO_ADMINS') return false;
+        if (_selectedUserType == 'Karyakatha' && aud != 'TO_KARYAKARTHAS')
+          return false;
+        if (_selectedUserType == 'Staff' && aud != 'TO_OFFICESTAFF')
+          return false;
       }
-    }
 
-    return true;
-  }).toList();
-}
+      // 3. date filter
+      if (_selectedFilter != 'All') {
+        final dt = notice.sendTime;
+        if (dt == null) return false;
+        final now = DateTime.now();
+        switch (_selectedFilter) {
+          case 'Today':
+            if (!(dt.year == now.year &&
+                dt.month == now.month &&
+                dt.day == now.day))
+              return false;
+            break;
+          case 'This Week':
+            final weekStart = now.subtract(
+              Duration(days: now.weekday - 1),
+            ); // Mon
+            if (dt.isBefore(weekStart)) return false;
+            break;
+          case 'This Month':
+            if (dt.year != now.year || dt.month != now.month) return false;
+            break;
+          case 'This Year':
+            if (dt.year != now.year) return false;
+            break;
+        }
+      }
+
+      return true;
+    }).toList();
+  }
 
   void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce!.cancel();
@@ -118,7 +122,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   }
 
   void _onFilterChanged() {
-    setState(() {}); 
+    setState(() {});
   }
 
   @override
@@ -157,8 +161,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
     }
   }
 
-void _addNewNotice() {
-    // Clear arguments to ensure fresh form (no stale NoticeResponse)
+  void _addNewNotice() {
     Get.toNamed('/notices', arguments: null);
   }
 
@@ -167,15 +170,15 @@ void _addNewNotice() {
   }
 
   void _showDeleteDialog(BuildContext context, String id, String title) {
-  DeletionPopup.showDeleteConfirmation(
-    context: context,
-    title: 'Delete Notice',
-    message: 'Are you sure you want to delete "$title"?',
-    onConfirm: () {
-      context.read<NoticeBloc>().add(DeleteNoticeEvent(id));
-    },
-  );
-}
+    DeletionPopup.showDeleteConfirmation(
+      context: context,
+      title: 'Delete Notice',
+      message: 'Are you sure you want to delete "$title"?',
+      onConfirm: () {
+        context.read<NoticeBloc>().add(DeleteNoticeEvent(id));
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -246,22 +249,26 @@ void _addNewNotice() {
                             onPressed: _loadNotices,
                           ),
                           const SizedBox(width: 8),
-                          ElevatedButton.icon(
-                            onPressed: _addNewNotice,
-                            icon: const Icon(Icons.add, size: 18),
-                            label: const Text('Add Notice'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.brown,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+
+                      
+                                if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
+                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN")
+                            ElevatedButton.icon(
+                              onPressed: _addNewNotice,
+                              icon: const Icon(Icons.add, size: 18),
+                              label: const Text('Add Notice'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.brown,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                     ],
@@ -317,8 +324,7 @@ void _addNewNotice() {
                           flex: 1,
                           child: Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
-                            child: 
-                            DropdownButtonHideUnderline(
+                            child: DropdownButtonHideUnderline(
                               child: DropdownButton<String>(
                                 value: _selectedUserType,
                                 isExpanded: true,
@@ -336,19 +342,19 @@ void _addNewNotice() {
                                   }
                                 },
                                 items: _userTypeOptions
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                            ),
+                                    .map<DropdownMenuItem<String>>((
+                                      String value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
                                           ),
-                                        );
-                                      },
-                                    )
+                                        ),
+                                      );
+                                    })
                                     .toList(),
                               ),
                             ),
@@ -381,19 +387,19 @@ void _addNewNotice() {
                                   }
                                 },
                                 items: _filterOptions
-                                    .map<DropdownMenuItem<String>>(
-                                      (String value) {
-                                        return DropdownMenuItem<String>(
-                                          value: value,
-                                          child: Text(
-                                            value,
-                                            style: const TextStyle(
-                                              color: Colors.black87,
-                                            ),
+                                    .map<DropdownMenuItem<String>>((
+                                      String value,
+                                    ) {
+                                      return DropdownMenuItem<String>(
+                                        value: value,
+                                        child: Text(
+                                          value,
+                                          style: const TextStyle(
+                                            color: Colors.black87,
                                           ),
-                                        );
-                                      },
-                                    )
+                                        ),
+                                      );
+                                    })
                                     .toList(),
                               ),
                             ),
@@ -474,7 +480,7 @@ void _addNewNotice() {
               children: [
                 Expanded(
                   child: Text(
-                     'Title: ${notice.title}',
+                    'Title: ${notice.title}',
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -507,7 +513,7 @@ void _addNewNotice() {
 
             // Description
             Text(
-             'Description: ${notice.description}',
+              'Description: ${notice.description}',
               style: const TextStyle(
                 fontSize: 14,
                 color: Color.fromARGB(255, 97, 97, 97),
@@ -532,11 +538,18 @@ void _addNewNotice() {
                     const SizedBox(width: 8),
                     Row(
                       children: [
-                        const Icon(Icons.access_time, size: 14, color: Colors.grey),
+                        const Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           formattedDate,
-                          style: const TextStyle(fontSize: 12, color: Colors.grey),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
                         ),
                       ],
                     ),

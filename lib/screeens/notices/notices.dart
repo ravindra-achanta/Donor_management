@@ -31,7 +31,8 @@ class _NoticesState extends State<Notices> {
   /// Audience selection
   String _selectedSpecificOption = 'User Type';
   NoticeType? _selectedAudienceType;
-  List<String> _selectedUserIds = []; // Store user IDs, not names
+  List<UserView> _selectedUsers = [];
+  List<UserView> _allUsers = [];
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   late List<NoticeType> _audienceTypes;
@@ -48,10 +49,15 @@ class _NoticesState extends State<Notices> {
 
   bool _isSubmitting = false;
   bool _isLoading = true;
+  static const List<String> _allowedUserTypes = [
+    'GURUJI',
+    'SUPER_ADMIN',
+    'KARYAKARTHA',
+    'ADMIN',
+    'OFFICE_STAFF',
+  ];
 
-  // Store full user objects and a map for name lookup
-  List<UserView> _allUsers = [];
-  Map<String, String> _userIdToName = {};
+  //Map<String, String> _userIdToName = {};
   bool _isLoadingUsers = false;
 
   @override
@@ -101,8 +107,10 @@ class _NoticesState extends State<Notices> {
         items: items.map((type) {
           return DropdownMenuItem(
             value: type,
-            child: Text(type.displayName,
-                style: const TextStyle(color: Colors.black)),
+            child: Text(
+              type.displayName,
+              style: const TextStyle(color: Colors.black),
+            ),
           );
         }).toList(),
       ),
@@ -117,9 +125,10 @@ class _NoticesState extends State<Notices> {
     if (result.isSuccess && result.data != null) {
       setState(() {
         _allUsers = result.data!.content;
-        _userIdToName = {
-          for (var user in _allUsers) user.id: user.name ?? 'Unknown'
-        };
+        for (var user in _allUsers) {
+          final type = user.userType ?? 'NO_TYPE';
+          print('User: ${user.id}, type: $type');
+        }
         _isLoadingUsers = false;
         print('Loaded ${_allUsers.length} users');
       });
@@ -139,7 +148,6 @@ class _NoticesState extends State<Notices> {
     if (notice.sendTo != null) {
       if (notice.sendTo == 'TO_SPECIFIC') {
         _selectedSpecificOption = 'User';
-
       } else {
         _selectedSpecificOption = 'User Type';
         try {
@@ -177,17 +185,12 @@ class _NoticesState extends State<Notices> {
       );
 
       if (pickedFile != null) {
+        final bytes = await pickedFile.readAsBytes();
         setState(() {
-          _selectedFile = File(pickedFile.path);
+          _selectedFileBytes = bytes;
+          _selectedFileName = pickedFile.name;
+          _selectedFile = null;
         });
-
-        if (kIsWeb) {
-          final bytes = await pickedFile.readAsBytes();
-          setState(() {
-            _selectedFileBytes = bytes;
-            _selectedFileName = pickedFile.name;
-          });
-        }
       }
     } catch (e) {
       _showError('Failed to select image: $e');
@@ -225,7 +228,6 @@ class _NoticesState extends State<Notices> {
 
     final imageBase64 = await _imageToBase64();
 
-
     final sendDateTime = DateTime(
       _selectedDate!.year,
       _selectedDate!.month,
@@ -235,7 +237,7 @@ class _NoticesState extends State<Notices> {
     ).toUtc().toIso8601String();
 
     String sendTo;
-    List<String>? specificUsers;
+    List<Map<String, String>>? specificUsers;
 
     if (_selectedSpecificOption == 'User Type') {
       if (_selectedAudienceType == null) {
@@ -244,10 +246,29 @@ class _NoticesState extends State<Notices> {
         return;
       }
       sendTo = _selectedAudienceType!.value;
-      specificUsers = []; 
+      specificUsers = [];
     } else {
       sendTo = "TO_SPECIFIC";
-      specificUsers = _selectedUserIds; 
+
+      final validUsers = _selectedUsers.where((user) {
+        return user.userType != null &&
+            _allowedUserTypes.contains(user.userType);
+      }).toList();
+
+      if (validUsers.isEmpty) {
+        _showError(
+          'No users with a valid type selected. Allowed types: ${_allowedUserTypes.join(', ')}',
+        );
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
+      specificUsers = validUsers.map((user) {
+        return {
+          'id': user.id,
+          'type': user.userType!,
+        }; // safe because we filtered
+      }).toList();
     }
 
     final request = NoticeRequest(
@@ -263,9 +284,9 @@ class _NoticesState extends State<Notices> {
     print('Sending request: ${jsonEncode(request.toJson())}');
 
     if (isEditing) {
-      context
-          .read<NoticeBloc>()
-          .add(UpdateNoticeEvent(widget.noticeData!.id, request));
+      context.read<NoticeBloc>().add(
+        UpdateNoticeEvent(widget.noticeData!.id, request),
+      );
     } else {
       context.read<NoticeBloc>().add(CreateNoticeEvent(request));
     }
@@ -285,7 +306,7 @@ class _NoticesState extends State<Notices> {
     setState(() {
       _selectedSpecificOption = 'User Type';
       _selectedAudienceType = null;
-      _selectedUserIds.clear();
+      _selectedUsers.clear();
       _selectedFile = null;
       _selectedFileBytes = null;
       _selectedFileName = null;
@@ -295,7 +316,7 @@ class _NoticesState extends State<Notices> {
   }
 
   void _showUserSelectionDialog() {
-    List<String> tempSelectedIds = List.from(_selectedUserIds);
+    List<UserView> tempSelected = List.from(_selectedUsers);
 
     showDialog(
       context: context,
@@ -327,36 +348,68 @@ class _NoticesState extends State<Notices> {
                         child: _isLoadingUsers
                             ? const Center(child: CircularProgressIndicator())
                             : _allUsers.isEmpty
-                                ? const Center(child: Text('No users available'))
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: _allUsers.length,
-                                    itemBuilder: (context, index) {
-                                      final user = _allUsers[index];
-                                      final isSelected =
-                                          tempSelectedIds.contains(user.id);
-                                      return CheckboxListTile(
-                                        value: isSelected,
-                                        title: Text(
-                                          user.name ?? 'Unknown',
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                        onChanged: (checked) {
-                                          setStateDialog(() {
-                                            if (checked == true) {
-                                              if (!tempSelectedIds
-                                                  .contains(user.id)) {
-                                                tempSelectedIds.add(user.id);
+                            ? const Center(child: Text('No users available'))
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: _allUsers.length,
+                                itemBuilder: (context, index) {
+                                  final user = _allUsers[index];
+                                  // final hasValidType =
+                                  //     user.userType.isNotEmpty &&
+                                  //     _allowedUserTypes.contains(
+                                  //       user.userType,
+                                  //     );
+                                  // final isSelected = tempSelected.any(
+                                  //   (u) => u.id == user.id,
+                                  // );
+                                  final hasValidType =
+                                      user.userType != null &&
+                                      _allowedUserTypes.contains(user.userType);
+                                  final isSelected = tempSelected.any(
+                                    (u) => u.id == user.id,
+                                  );
+                                  return CheckboxListTile(
+                                    value: isSelected && hasValidType,
+                                    title: Text(
+                                      user.name ?? 'Unknown',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: hasValidType
+                                            ? Colors.black
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      hasValidType
+                                          ? user.userType!
+                                          : 'Invalid type',
+                                      style: TextStyle(
+                                        color: hasValidType
+                                            ? Colors.grey
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    onChanged: hasValidType
+                                        ? (checked) {
+                                            setStateDialog(() {
+                                              if (checked == true) {
+                                                if (!tempSelected.any(
+                                                  (u) => u.id == user.id,
+                                                )) {
+                                                  tempSelected.add(user);
+                                                }
+                                              } else {
+                                                tempSelected.removeWhere(
+                                                  (u) => u.id == user.id,
+                                                );
                                               }
-                                            } else {
-                                              tempSelectedIds.remove(user.id);
-                                            }
-                                          });
-                                        },
-                                        dense: true,
-                                      );
-                                    },
-                                  ),
+                                            });
+                                          }
+                                        : null,
+                                    dense: true,
+                                  );
+                                },
+                              ),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -370,7 +423,7 @@ class _NoticesState extends State<Notices> {
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _selectedUserIds = List.from(tempSelectedIds);
+                                _selectedUsers = List.from(tempSelected);
                               });
                               Navigator.pop(context);
                             },
@@ -487,7 +540,7 @@ class _NoticesState extends State<Notices> {
                             setState(() {
                               _selectedSpecificOption = v!;
                               _selectedAudienceType = null;
-                              _selectedUserIds.clear();
+                              _selectedUsers.clear();
                             });
                           },
                         ),
@@ -500,7 +553,7 @@ class _NoticesState extends State<Notices> {
                             setState(() {
                               _selectedSpecificOption = v!;
                               _selectedAudienceType = null;
-                              _selectedUserIds.clear();
+                              _selectedUsers.clear();
                             });
                           },
                         ),
@@ -554,7 +607,9 @@ class _NoticesState extends State<Notices> {
                                   horizontal: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade400),
+                                  border: Border.all(
+                                    color: Colors.grey.shade400,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.white,
                                 ),
@@ -562,14 +617,9 @@ class _NoticesState extends State<Notices> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        _selectedUserIds.isEmpty
+                                        _selectedUsers.isEmpty
                                             ? 'Select users'
-                                            : '${_selectedUserIds.length} user(s) selected',
-                                        style: TextStyle(
-                                          color: _selectedUserIds.isEmpty
-                                              ? Colors.grey
-                                              : Colors.black,
-                                        ),
+                                            : '${_selectedUsers.length} user(s) selected',
                                       ),
                                     ),
                                     const Icon(
@@ -581,13 +631,12 @@ class _NoticesState extends State<Notices> {
                               ),
                             ),
                           ),
-                          if (_selectedUserIds.isNotEmpty) ...[
+                          if (_selectedUsers.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: _selectedUserIds.map((id) {
-                                final name = _userIdToName[id] ?? id;
+                              children: _selectedUsers.map((user) {
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -603,12 +652,12 @@ class _NoticesState extends State<Notices> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(name),
+                                      Text(user.name ?? 'Unknown'),
                                       const SizedBox(width: 6),
                                       GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            _selectedUserIds.remove(id);
+                                            _selectedUsers.remove(user);
                                           });
                                         },
                                         child: const Icon(
@@ -628,7 +677,6 @@ class _NoticesState extends State<Notices> {
 
                     const SizedBox(height: 24),
                   ], // end !isEditing
-
                   // Title field (always visible)
                   const Text(
                     'Title',
@@ -697,9 +745,9 @@ class _NoticesState extends State<Notices> {
                                       border: InputBorder.none,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       suffixIcon: IconButton(
                                         icon: const Icon(
                                           Icons.calendar_today,
@@ -755,9 +803,9 @@ class _NoticesState extends State<Notices> {
                                       border: InputBorder.none,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       suffixIcon: IconButton(
                                         icon: const Icon(
                                           Icons.access_time,
@@ -817,67 +865,105 @@ class _NoticesState extends State<Notices> {
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    _selectedFile != null ||
-                                            _selectedFileName != null
-                                        ? _selectedFileName ??
-                                            _selectedFile!.path.split('/').last
-                                        : 'Choose image',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
+                                  child:
+                                      //
+                                      Text(
+                                        _selectedFileName ?? 'Choose image',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        if (_selectedFile != null || _selectedFileBytes != null) ...[
+
+                        if (_selectedFileBytes != null) ...[
                           const SizedBox(height: 12),
-                          Container(
-                            width: double.infinity,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: kIsWeb && _selectedFileBytes != null
-                                  ? Image.memory(
-                                      _selectedFileBytes!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.error_outline,
-                                              color: Colors.red,
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.memory(
+                                    _selectedFileBytes!,
+                                    fit: BoxFit.cover,
+                                    frameBuilder:
+                                        (
+                                          context,
+                                          child,
+                                          frame,
+                                          wasSynchronouslyLoaded,
+                                        ) {
+                                          if (wasSynchronouslyLoaded)
+                                            return child;
+                                          return AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 300,
                                             ),
+                                            child: frame == null
+                                                ? const Center(
+                                                    child: SizedBox(
+                                                      width: 30,
+                                                      height: 30,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    ),
+                                                  )
+                                                : child,
+                                          );
+                                        },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            color: Colors.red,
+                                            size: 40,
                                           ),
-                                        );
-                                      },
-                                    )
-                                  : _selectedFile != null
-                                      ? Image.file(
-                                          _selectedFile!,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Container(
-                                              color: Colors.grey[200],
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.error_outline,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        )
-                                      : Container(),
-                            ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedFileBytes = null;
+                                      _selectedFileName = null;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ],

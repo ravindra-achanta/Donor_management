@@ -58,7 +58,8 @@ class ApiConstants {
 
 static const String noticesList = "$VIKAS/notice/all";
 static const String noticesCreate = "$VIKAS/notice/create";
-static const String noticesUpdate = "$VIKAS/notice/{id}/update"; 
+//static const String noticesUpdate = "$VIKAS/notice/{id}/update"; 
+static const String noticesUpdate = "$VIKAS/notice/{id}/update";
 static const String noticesRead = "$VIKAS/notice/{id}/read";
 
 

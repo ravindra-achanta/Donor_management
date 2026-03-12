@@ -198,11 +198,21 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                   //   Get.toNamed('/jeevandiview');
                                   // },
                                   onViewMore: () {
-                                    final String? jeevanadiId = state
-                                        ?.jeevanaadiProfileFull
+                                     String jeevanadiId = "";
+                                    if(state
+                                        .jeevanaadiProfileFull
                                         ?.basicDetails
-                                        .id
-                                        ?.toString();
+                                        .id is String){
+                                      jeevanadiId = state
+                                          .jeevanaadiProfileFull
+                                          ?.profileDetails
+                                          .userId.toString() ?? "";
+                                        }else{
+                                      jeevanadiId = state
+                                          .jeevanaadiProfileFull
+                                          ?.basicDetails
+                                          .id.toString() ?? "";
+                                        }
 
                                     if (jeevanadiId != null &&
                                         jeevanadiId.isNotEmpty) {
