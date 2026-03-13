@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
@@ -28,15 +30,16 @@ class Notices extends StatefulWidget {
 class _NoticesState extends State<Notices> {
   final _formKey = GlobalKey<FormState>();
 
-  /// Audience selection
+ 
   String _selectedSpecificOption = 'User Type';
   NoticeType? _selectedAudienceType;
-  List<String> _selectedUserIds = []; // Store user IDs, not names
+  List<UserView> _selectedUsers = [];
+  List<UserView> _allUsers = [];
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   late List<NoticeType> _audienceTypes;
 
-  /// Controllers
+  
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -45,13 +48,19 @@ class _NoticesState extends State<Notices> {
   File? _selectedFile;
   Uint8List? _selectedFileBytes;
   String? _selectedFileName;
+  String? _uploadedImageUrl;
 
   bool _isSubmitting = false;
   bool _isLoading = true;
+  static const List<String> _allowedUserTypes = [
+    'GURUJI',
+    'SUPER_ADMIN',
+    'KARYAKARTHA',
+    'ADMIN',
+    'OFFICE_STAFF',
+  ];
 
-  // Store full user objects and a map for name lookup
-  List<UserView> _allUsers = [];
-  Map<String, String> _userIdToName = {};
+  //Map<String, String> _userIdToName = {};
   bool _isLoadingUsers = false;
 
   @override
@@ -101,8 +110,10 @@ class _NoticesState extends State<Notices> {
         items: items.map((type) {
           return DropdownMenuItem(
             value: type,
-            child: Text(type.displayName,
-                style: const TextStyle(color: Colors.black)),
+            child: Text(
+              type.displayName,
+              style: const TextStyle(color: Colors.black),
+            ),
           );
         }).toList(),
       ),
@@ -117,9 +128,10 @@ class _NoticesState extends State<Notices> {
     if (result.isSuccess && result.data != null) {
       setState(() {
         _allUsers = result.data!.content;
-        _userIdToName = {
-          for (var user in _allUsers) user.id: user.name ?? 'Unknown'
-        };
+        for (var user in _allUsers) {
+          final type = user.userType ?? 'NO_TYPE';
+          print('User: ${user.id}, type: $type');
+        }
         _isLoadingUsers = false;
         print('Loaded ${_allUsers.length} users');
       });
@@ -139,7 +151,6 @@ class _NoticesState extends State<Notices> {
     if (notice.sendTo != null) {
       if (notice.sendTo == 'TO_SPECIFIC') {
         _selectedSpecificOption = 'User';
-
       } else {
         _selectedSpecificOption = 'User Type';
         try {
@@ -156,7 +167,7 @@ class _NoticesState extends State<Notices> {
       _dateController.text = DateFormat('yyyy-MM-dd').format(notice.sendTime!);
     }
 
-    // TODO: Load existing image if any (requires handling base64/URL)
+   
   }
 
   @override
@@ -168,41 +179,61 @@ class _NoticesState extends State<Notices> {
     super.dispose();
   }
 
-  void _handleFileSelection() async {
-    try {
-      final XFile? pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 1200,
-      );
+  // void _handleFileSelection() async {
+  //   try {
+  //     final XFile? pickedFile = await ImagePicker().pickImage(
+  //       source: ImageSource.gallery,
+  //       imageQuality: 85,
+  //       maxWidth: 1200,
+  //     );
 
-      if (pickedFile != null) {
-        setState(() {
-          _selectedFile = File(pickedFile.path);
-        });
+  //     if (pickedFile != null) {
+  //       final bytes = await pickedFile.readAsBytes();
+  //       setState(() {
+  //         _selectedFileBytes = bytes;
+  //         _selectedFileName = pickedFile.name;
+  //         _selectedFile = null;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     _showError('Failed to select image: $e');
+  //   }
+  // }
 
-        if (kIsWeb) {
-          final bytes = await pickedFile.readAsBytes();
-          setState(() {
-            _selectedFileBytes = bytes;
-            _selectedFileName = pickedFile.name;
-          });
-        }
+  final NetworkService _api = NetworkService.instance;
+ void _handleFileSelection() async {
+  try {
+    final XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1200,
+    );
+
+    if (pickedFile != null) {
+      setState(() => _isSubmitting = true);
+     final response =  await _api.fileUpload(ApiConstants.uploadimage,pickedFile );
+       setState(() => _isSubmitting = false);
+      if(response != null && response.isNotEmpty){
+         setState(() => _uploadedImageUrl = response);
+      }else{
+        _showError('Image upload failed: Empty response');
       }
-    } catch (e) {
-      _showError('Failed to select image: $e');
-    }
+     
+  }} catch (e) {
+    _showError('Failed to select/upload image: $e');
+    setState(() => _isSubmitting = false);
   }
+}
 
-  Future<String?> _imageToBase64() async {
-    if (kIsWeb && _selectedFileBytes != null) {
-      return base64Encode(_selectedFileBytes!);
-    } else if (_selectedFile != null) {
-      final bytes = await _selectedFile!.readAsBytes();
-      return base64Encode(bytes);
-    }
-    return null;
-  }
+  // Future<String?> _imageToBase64() async {
+  //   if (kIsWeb && _selectedFileBytes != null) {
+  //     return base64Encode(_selectedFileBytes!);
+  //   } else if (_selectedFile != null) {
+  //     final bytes = await _selectedFile!.readAsBytes();
+  //     return base64Encode(bytes);
+  //   }
+  //   return null;
+  // }
 
   void _submitNotice() async {
     final formState = _formKey.currentState;
@@ -223,8 +254,7 @@ class _NoticesState extends State<Notices> {
 
     setState(() => _isSubmitting = true);
 
-    final imageBase64 = await _imageToBase64();
-
+    //final imageBase64 = await _imageToBase64();
 
     final sendDateTime = DateTime(
       _selectedDate!.year,
@@ -235,7 +265,7 @@ class _NoticesState extends State<Notices> {
     ).toUtc().toIso8601String();
 
     String sendTo;
-    List<String>? specificUsers;
+    List<Map<String, String>>? specificUsers;
 
     if (_selectedSpecificOption == 'User Type') {
       if (_selectedAudienceType == null) {
@@ -244,14 +274,33 @@ class _NoticesState extends State<Notices> {
         return;
       }
       sendTo = _selectedAudienceType!.value;
-      specificUsers = []; 
+      specificUsers = [];
     } else {
       sendTo = "TO_SPECIFIC";
-      specificUsers = _selectedUserIds; 
+
+      final validUsers = _selectedUsers.where((user) {
+        return user.userType != null &&
+            _allowedUserTypes.contains(user.userType);
+      }).toList();
+
+      if (validUsers.isEmpty) {
+        _showError(
+          'No users with a valid type selected. Allowed types: ${_allowedUserTypes.join(', ')}',
+        );
+        setState(() => _isSubmitting = false);
+        return;
+      }
+
+      specificUsers = validUsers.map((user) {
+        return {
+          'id': user.id,
+          'type': user.userType!,
+        };
+      }).toList();
     }
 
     final request = NoticeRequest(
-      image: imageBase64,
+      image:  _uploadedImageUrl,
       title: _titleController.text,
       description: _descriptionController.text,
       sendDate: DateTime.parse(sendDateTime),
@@ -259,13 +308,13 @@ class _NoticesState extends State<Notices> {
       specificUsers: specificUsers,
     );
 
-    // Debug print
+ 
     print('Sending request: ${jsonEncode(request.toJson())}');
 
     if (isEditing) {
-      context
-          .read<NoticeBloc>()
-          .add(UpdateNoticeEvent(widget.noticeData!.id, request));
+      context.read<NoticeBloc>().add(
+        UpdateNoticeEvent(widget.noticeData!.id, request),
+      );
     } else {
       context.read<NoticeBloc>().add(CreateNoticeEvent(request));
     }
@@ -285,7 +334,7 @@ class _NoticesState extends State<Notices> {
     setState(() {
       _selectedSpecificOption = 'User Type';
       _selectedAudienceType = null;
-      _selectedUserIds.clear();
+      _selectedUsers.clear();
       _selectedFile = null;
       _selectedFileBytes = null;
       _selectedFileName = null;
@@ -295,7 +344,7 @@ class _NoticesState extends State<Notices> {
   }
 
   void _showUserSelectionDialog() {
-    List<String> tempSelectedIds = List.from(_selectedUserIds);
+    List<UserView> tempSelected = List.from(_selectedUsers);
 
     showDialog(
       context: context,
@@ -327,36 +376,68 @@ class _NoticesState extends State<Notices> {
                         child: _isLoadingUsers
                             ? const Center(child: CircularProgressIndicator())
                             : _allUsers.isEmpty
-                                ? const Center(child: Text('No users available'))
-                                : ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: _allUsers.length,
-                                    itemBuilder: (context, index) {
-                                      final user = _allUsers[index];
-                                      final isSelected =
-                                          tempSelectedIds.contains(user.id);
-                                      return CheckboxListTile(
-                                        value: isSelected,
-                                        title: Text(
-                                          user.name ?? 'Unknown',
-                                          style: const TextStyle(fontSize: 14),
-                                        ),
-                                        onChanged: (checked) {
-                                          setStateDialog(() {
-                                            if (checked == true) {
-                                              if (!tempSelectedIds
-                                                  .contains(user.id)) {
-                                                tempSelectedIds.add(user.id);
+                            ? const Center(child: Text('No users available'))
+                            : ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: _allUsers.length,
+                                itemBuilder: (context, index) {
+                                  final user = _allUsers[index];
+                                  // final hasValidType =
+                                  //     user.userType.isNotEmpty &&
+                                  //     _allowedUserTypes.contains(
+                                  //       user.userType,
+                                  //     );
+                                  // final isSelected = tempSelected.any(
+                                  //   (u) => u.id == user.id,
+                                  // );
+                                  final hasValidType =
+                                      user.userType != null &&
+                                      _allowedUserTypes.contains(user.userType);
+                                  final isSelected = tempSelected.any(
+                                    (u) => u.id == user.id,
+                                  );
+                                  return CheckboxListTile(
+                                    value: isSelected && hasValidType,
+                                    title: Text(
+                                      user.name ?? 'Unknown',
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: hasValidType
+                                            ? Colors.black
+                                            : Colors.grey,
+                                      ),
+                                    ),
+                                    subtitle: Text(
+                                      hasValidType
+                                          ? user.userType!
+                                          : 'Invalid type',
+                                      style: TextStyle(
+                                        color: hasValidType
+                                            ? Colors.grey
+                                            : Colors.red,
+                                      ),
+                                    ),
+                                    onChanged: hasValidType
+                                        ? (checked) {
+                                            setStateDialog(() {
+                                              if (checked == true) {
+                                                if (!tempSelected.any(
+                                                  (u) => u.id == user.id,
+                                                )) {
+                                                  tempSelected.add(user);
+                                                }
+                                              } else {
+                                                tempSelected.removeWhere(
+                                                  (u) => u.id == user.id,
+                                                );
                                               }
-                                            } else {
-                                              tempSelectedIds.remove(user.id);
-                                            }
-                                          });
-                                        },
-                                        dense: true,
-                                      );
-                                    },
-                                  ),
+                                            });
+                                          }
+                                        : null,
+                                    dense: true,
+                                  );
+                                },
+                              ),
                       ),
                       const SizedBox(height: 16),
                       Row(
@@ -370,7 +451,7 @@ class _NoticesState extends State<Notices> {
                           ElevatedButton(
                             onPressed: () {
                               setState(() {
-                                _selectedUserIds = List.from(tempSelectedIds);
+                                _selectedUsers = List.from(tempSelected);
                               });
                               Navigator.pop(context);
                             },
@@ -487,7 +568,7 @@ class _NoticesState extends State<Notices> {
                             setState(() {
                               _selectedSpecificOption = v!;
                               _selectedAudienceType = null;
-                              _selectedUserIds.clear();
+                              _selectedUsers.clear();
                             });
                           },
                         ),
@@ -500,7 +581,7 @@ class _NoticesState extends State<Notices> {
                             setState(() {
                               _selectedSpecificOption = v!;
                               _selectedAudienceType = null;
-                              _selectedUserIds.clear();
+                              _selectedUsers.clear();
                             });
                           },
                         ),
@@ -554,7 +635,9 @@ class _NoticesState extends State<Notices> {
                                   horizontal: 12,
                                 ),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade400),
+                                  border: Border.all(
+                                    color: Colors.grey.shade400,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   color: Colors.white,
                                 ),
@@ -562,14 +645,9 @@ class _NoticesState extends State<Notices> {
                                   children: [
                                     Expanded(
                                       child: Text(
-                                        _selectedUserIds.isEmpty
+                                        _selectedUsers.isEmpty
                                             ? 'Select users'
-                                            : '${_selectedUserIds.length} user(s) selected',
-                                        style: TextStyle(
-                                          color: _selectedUserIds.isEmpty
-                                              ? Colors.grey
-                                              : Colors.black,
-                                        ),
+                                            : '${_selectedUsers.length} user(s) selected',
                                       ),
                                     ),
                                     const Icon(
@@ -581,13 +659,12 @@ class _NoticesState extends State<Notices> {
                               ),
                             ),
                           ),
-                          if (_selectedUserIds.isNotEmpty) ...[
+                          if (_selectedUsers.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: _selectedUserIds.map((id) {
-                                final name = _userIdToName[id] ?? id;
+                              children: _selectedUsers.map((user) {
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -603,12 +680,12 @@ class _NoticesState extends State<Notices> {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(name),
+                                      Text(user.name ?? 'Unknown'),
                                       const SizedBox(width: 6),
                                       GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            _selectedUserIds.remove(id);
+                                            _selectedUsers.remove(user);
                                           });
                                         },
                                         child: const Icon(
@@ -628,8 +705,7 @@ class _NoticesState extends State<Notices> {
 
                     const SizedBox(height: 24),
                   ], // end !isEditing
-
-                  // Title field (always visible)
+                 
                   const Text(
                     'Title',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -697,9 +773,9 @@ class _NoticesState extends State<Notices> {
                                       border: InputBorder.none,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       suffixIcon: IconButton(
                                         icon: const Icon(
                                           Icons.calendar_today,
@@ -755,9 +831,9 @@ class _NoticesState extends State<Notices> {
                                       border: InputBorder.none,
                                       contentPadding:
                                           const EdgeInsets.symmetric(
-                                        horizontal: 12,
-                                        vertical: 14,
-                                      ),
+                                            horizontal: 12,
+                                            vertical: 14,
+                                          ),
                                       suffixIcon: IconButton(
                                         icon: const Icon(
                                           Icons.access_time,
@@ -784,7 +860,7 @@ class _NoticesState extends State<Notices> {
                     const SizedBox(height: 20),
                   ],
 
-                  // Image attachment (always visible)
+                 
                   SizedBox(
                     width: 700,
                     child: Column(
@@ -817,67 +893,105 @@ class _NoticesState extends State<Notices> {
                                 ),
                                 const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(
-                                    _selectedFile != null ||
-                                            _selectedFileName != null
-                                        ? _selectedFileName ??
-                                            _selectedFile!.path.split('/').last
-                                        : 'Choose image',
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
+                                  child:
+                                      //
+                                      Text(
+                                        _selectedFileName ?? 'Choose image',
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
                                 ),
                               ],
                             ),
                           ),
                         ),
-                        if (_selectedFile != null || _selectedFileBytes != null) ...[
+
+                        if (_uploadedImageUrl != null || _uploadedImageUrl?.isNotEmpty == true) ...[
                           const SizedBox(height: 12),
-                          Container(
-                            width: double.infinity,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              border: Border.all(color: Colors.grey.shade300),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: kIsWeb && _selectedFileBytes != null
-                                  ? Image.memory(
-                                      _selectedFileBytes!,
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: Colors.grey[200],
-                                          child: const Center(
-                                            child: Icon(
-                                              Icons.error_outline,
-                                              color: Colors.red,
+                          Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              Container(
+                                width: double.infinity,
+                                height: 120,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.network(
+                                    _uploadedImageUrl!,
+                                    fit: BoxFit.cover,
+                                    frameBuilder:
+                                        (
+                                          context,
+                                          child,
+                                          frame,
+                                          wasSynchronouslyLoaded,
+                                        ) {
+                                          if (wasSynchronouslyLoaded)
+                                            return child;
+                                          return AnimatedSwitcher(
+                                            duration: const Duration(
+                                              milliseconds: 300,
                                             ),
+                                            child: frame == null
+                                                ? const Center(
+                                                    child: SizedBox(
+                                                      width: 30,
+                                                      height: 30,
+                                                      child:
+                                                          CircularProgressIndicator(
+                                                            strokeWidth: 2,
+                                                          ),
+                                                    ),
+                                                  )
+                                                : child,
+                                          );
+                                        },
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey[200],
+                                        child: const Center(
+                                          child: Icon(
+                                            Icons.broken_image,
+                                            color: Colors.red,
+                                            size: 40,
                                           ),
-                                        );
-                                      },
-                                    )
-                                  : _selectedFile != null
-                                      ? Image.file(
-                                          _selectedFile!,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) {
-                                            return Container(
-                                              color: Colors.grey[200],
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.error_outline,
-                                                  color: Colors.red,
-                                                ),
-                                              ),
-                                            );
-                                          },
-                                        )
-                                      : Container(),
-                            ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 4,
+                                right: 4,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedFileBytes = null;
+                                      _selectedFileName = null;
+                                    });
+                                  },
+                                  child: Container(
+                                    decoration: const BoxDecoration(
+                                      color: Colors.black54,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    padding: const EdgeInsets.all(4),
+                                    child: const Icon(
+                                      Icons.close,
+                                      size: 16,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ],

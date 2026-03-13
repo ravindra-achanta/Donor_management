@@ -1,152 +1,177 @@
 import 'package:flutter/material.dart';
 
 class NoticePopup {
-  NoticePopup._();
-
   static void show({
     required BuildContext context,
     required String imageUrl,
     required String title,
     required String description,
-    String cancelText = "Close",
+    String cancelText = "OK",
     VoidCallback? onClosed,
   }) {
-    showGeneralDialog(
+    showDialog(
       context: context,
       barrierDismissible: true,
-      barrierLabel: "Notice",
-      barrierColor: Colors.black.withOpacity(0.5),
-      transitionDuration: const Duration(seconds: 2),
-      pageBuilder: (_, __, ___) {
-        return const SizedBox.shrink();
-      },
-      transitionBuilder: (context, animation, _, __) {
-        final curvedValue = Curves.easeOutBack.transform(animation.value);
-        return Opacity(
-          opacity: animation.value,
-          child: Transform.scale(
-            scale: curvedValue,
-            child: Center(
-              child: _NoticeDialogContent(
-                imageUrl: imageUrl,
-                title: title,
-                description: description,
-                cancelText: cancelText,
-              ),
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.9,
+            constraints: const BoxConstraints(maxWidth: 400),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(22),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 25,
+                  offset: Offset(0, 10),
+                )
+              ],
             ),
-          ),
-        );
-      },
-    ).then((_) {
-      onClosed?.call();
-    });
-  }
-}
-
-class _NoticeDialogContent extends StatelessWidget {
-  final String imageUrl;
-  final String title;
-  final String description;
-  final String cancelText;
-
-  const _NoticeDialogContent({
-    required this.imageUrl,
-    required this.title,
-    required this.description,
-    required this.cancelText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-
-    return Material(
-      color: Colors.transparent,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          maxWidth: screenWidth < 600 ? screenWidth * 0.9 : 480,
-        ),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 20,
-                offset: Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Stack(
-            children: [
-          
-              Positioned(
-                right: 8,
-                top: 8,
-                child: IconButton(
-                  icon: const Icon(Icons.close),
-                  splashRadius: 18,
-                  onPressed: () => Navigator.pop(context),
-                ),
-              ),
-
-              Column(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(22),
+              child: Column(
                 mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-            
-                  ClipRRect(
-                    borderRadius: const BorderRadius.vertical(
-                      top: Radius.circular(16),
-                    ),
-                    child: Image.network(
-                      imageUrl,
-                      height: 180,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        height: 180,
-                        color: Colors.grey.shade200,
-                        child: const Icon(Icons.image, size: 60),
-                      ),
-                    ),
-                  ),
 
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(24, 20, 24, 24),
-                    child: Column(
+                  /// IMAGE SECTION
+                  if (imageUrl.isNotEmpty)
+                    Stack(
                       children: [
-                      
+                        Image.network(
+                          imageUrl,
+                          height: 180,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              height: 180,
+                              color: Colors.grey.shade300,
+                              child: const Center(
+                                child: Icon(
+                                  Icons.image_not_supported,
+                                  size: 50,
+                                  color: Colors.grey,
+                                ),
+                              ),
+                            );
+                          },
+
+                          loadingBuilder:
+                              (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+
+                            return Container(
+                              height: 180,
+                              color: Colors.grey.shade200,
+                              child: const Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          },
+                        ),
+
+                        /// GRADIENT OVERLAY
+                        Positioned.fill(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                colors: [
+                                  Colors.black.withOpacity(0.35),
+                                  Colors.transparent
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        /// CLOSE BUTTON
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.pop(context);
+                              onClosed?.call();
+                            },
+                            child: Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.close,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  /// CONTENT
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+
+                        /// TITLE
                         Text(
                           title,
-                          textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.w700,
+                            letterSpacing: 0.3,
                           ),
                         ),
 
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 10),
 
-                    
+                        /// DESCRIPTION
                         Text(
                           description,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: TextStyle(
+                            fontSize: 15,
+                            color: Colors.grey.shade700,
                             height: 1.5,
-                            color: Colors.black87,
                           ),
                         ),
 
-                        const SizedBox(height: 22),
+                        const SizedBox(height: 24),
 
-                      
+                        /// BUTTON
                         SizedBox(
-                          width: 120,
-                          child: OutlinedButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: Text(cancelText),
+                          width: double.infinity,
+                          height: 48,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              onClosed?.call();
+                            },
+                            style: ElevatedButton.styleFrom(
+                              elevation: 0,
+                              backgroundColor: Colors.blue.shade600,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: Text(
+                              cancelText,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
                           ),
                         ),
                       ],
@@ -154,10 +179,10 @@ class _NoticeDialogContent extends StatelessWidget {
                   ),
                 ],
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }

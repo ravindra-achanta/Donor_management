@@ -167,12 +167,22 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                "Dharmasetu Records",
-                                style: TextStyle(
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  const Text(
+                                    "Dharmasetu Records :",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Chip(
+                                    label: Text('${state!.totalElements}'),
+                                    avatar: const Icon(Icons.people, size: 18),
+                                    backgroundColor: Colors.grey.shade200,
+                                  ),
+                                ],
                               ),
                               Row(
                                 children: [
@@ -247,19 +257,16 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     );
                                   }
                                 },
-                               onUpdate: (id) {
-  final item = state.dharmasetuList.firstWhere(
-    (d) => d.id == id,
-  );
-  final model = DharmasetuModel.fromView(item);
-  Get.toNamed(
-    '/add/dharmasetu',
-    arguments: {
-      'model': model,
-      'isEdit': true,  
-    },
-  );
-},
+                                onUpdate: (id) {
+                                  final item = state.dharmasetuList.firstWhere(
+                                    (d) => d.id == id,
+                                  );
+                                  final model = DharmasetuModel.fromView(item);
+                                  Get.toNamed(
+                                    '/add/dharmasetu',
+                                    arguments: {'model': model, 'isEdit': true},
+                                  );
+                                },
                               ),
 
                               // Pagination

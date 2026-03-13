@@ -400,47 +400,32 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           .profileCompletionPercentage,
                     ],
             ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Text(
-                "40%",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              LinearProgressBar(
-                maxSteps: 6,
-                progressType: ProgressType.linear,
-                currentStep: 3,
-                progressColor: Colors.black,
-                backgroundColor: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(10),
-                minHeight: 12,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                "60%",
-                style: const TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              LinearProgressBar(
-                maxSteps: 6,
-                progressType: ProgressType.linear,
-                currentStep: 4,
-                progressColor: Colors.red,
-                backgroundColor: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(10),
-                minHeight: 12,
-              ),
-              const SizedBox(height: 20),
-              buildDotContainer(
-                Colors.black,
-                screenType == "JEEVANAADI_PROFILE"
-                    ? "Donation amount Frequency"
-                    : "User Activity",
-              ),
-              const SizedBox(width: 12),
-              buildDotContainer(Colors.red, "Donation Frequency"),
-            ],
-          ),
+          _sectionTitle('Donation Details'),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: _infoTile(
+                          Icons.feedback_outlined,
+                          'Donation Frequency',
+                         "5 times/monthly ",
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _infoTile(
+                          Icons.calendar_today,
+                          'Donation Amount',
+                          "₹ 5000/monthly",
+                        ),
+                      ),
+                    ],
+                  ),
+                  _infoTile(
+                          Icons.feedback_outlined,
+                          'Total Donation Amount',
+                         "₹ 5000 ",
+                        ),
         ],
       ),
     );

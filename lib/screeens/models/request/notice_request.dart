@@ -4,7 +4,8 @@ class NoticeRequest {
   final String description;
   final DateTime sendDate;
   final String sendTo;
-  final List<String>? specificUsers;
+  //final List<String>? specificUsers;
+  final List<Map<String, String>>? specificUsers;
 
   NoticeRequest({
     this.image,

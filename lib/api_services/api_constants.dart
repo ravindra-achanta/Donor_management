@@ -56,10 +56,20 @@ class ApiConstants {
 
   // Notices APIs
 
-static const String noticesList = "$VIKAS/notice/all";
+static const String unReadNoticesList = "$VIKAS/notice/unread";
+static const String allNotices = "$VIKAS/notice/all";
 static const String noticesCreate = "$VIKAS/notice/create";
-static const String noticesUpdate = "$VIKAS/notice/{id}/update"; 
+//static const String noticesUpdate = "$VIKAS/notice/{id}/update"; 
+static const String noticesUpdate = "$VIKAS/notice/{id}/update";
 static const String noticesRead = "$VIKAS/notice/{id}/read";
+
+
+//
+static const String metrics = "$IDM_URI/metrics/user";
+
+static const String uploadimage = "$IDM_URI/image";
+
+
 
 
 

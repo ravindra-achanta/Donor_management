@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
@@ -9,8 +11,8 @@ class NoticeRepo {
   final NetworkService _api = NetworkService.instance;
 
 
-  Future<ApiResult<List<NoticeResponse>>> getNotices() async {
-    final result = await _api.get(ApiConstants.noticesList);
+  Future<ApiResult<List<NoticeResponse>>> getNotices(endpoint) async {
+    final result = await _api.get(endpoint);
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -48,26 +50,36 @@ class NoticeRepo {
   }
 
   /// UPDATE NOTICE
-  Future<ApiResult<NoticeResponse>> updateNotice(
-      String id, NoticeRequest request) async {
-    final url = ApiConstants.noticesUpdate.replaceAll("{id}", id);
-    final result = await _api.put(
-      url,
-      body: request.toJson(),
-    );
+Future<ApiResult<NoticeResponse>> updateNotice(
+    String id, NoticeRequest request) async {
+  
+  final updatePayload = {
+    'image': request.image,         
+    'title': request.title,
+    'description': request.description,
+    'status': 'ACTIVE',             
+  };
 
-    if (!result.isSuccess) {
-      return ApiResult.failure(result.error);
-    }
+ 
+  final url = '${ApiConstants.noticesUpdate}?id=$id';
 
-    try {
-      final notice = NoticeResponse.fromJson(result.data);
-      return ApiResult.success(notice);
-    } catch (e) {
-      print("Error parsing updated notice: $e");
-      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
-    }
+  final result = await _api.put(
+    url,
+    body: updatePayload,              
+  );
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
   }
+
+  try {
+    final notice = NoticeResponse.fromJson(result.data);
+    return ApiResult.success(notice);
+  } catch (e) {
+    print("Error parsing updated notice: $e");
+    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  }
+}
 
  
   /// MARK NOTICE AS READ
@@ -86,6 +98,7 @@ Future<ApiResult<bool>> markNoticeAsRead(String id) async {
 
   return ApiResult.success(true);
 }
+
 
   /// DELETE NOTICE
   /// Assumes you have defined `noticesDelete` in `ApiConstants` as:
