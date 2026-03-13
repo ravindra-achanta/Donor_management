@@ -58,6 +58,9 @@ class JeevanaadiState extends Equatable {
   final int totalDonationElements;
   final int donationCurrentPage;
   final int totalDonationpages;
+  final bool isApproving;
+final String? approveSuccessMsg;
+final String? approveErrorMsg;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -106,6 +109,12 @@ class JeevanaadiState extends Equatable {
     this.requestStatus,
     this.isFromRequest = false,
     this.isProcessingRequest = false,
+    this.isApproving = false,
+    this.approveSuccessMsg,
+    this.approveErrorMsg,
+
+
+
   });
 
   JeevanaadiState copyWith({
@@ -155,6 +164,10 @@ class JeevanaadiState extends Equatable {
     String? requestStatus,
     bool? isFromRequest,
     bool? isProcessingRequest,
+    bool? isApproving,
+    String? approveSuccessMsg,
+    String? approveErrorMsg,
+
   }) {
     return JeevanaadiState(
       delLoading: delLoading ?? this.delLoading,
@@ -212,6 +225,9 @@ class JeevanaadiState extends Equatable {
       requestStatus: requestStatus ?? this.requestStatus,
       isFromRequest: isFromRequest ?? this.isFromRequest,
       isProcessingRequest: isProcessingRequest ?? this.isProcessingRequest,
+      isApproving: isApproving ?? this.isApproving,
+      approveSuccessMsg: approveSuccessMsg ?? this.approveSuccessMsg,
+      approveErrorMsg: approveErrorMsg ?? this.approveErrorMsg,
     );
   }
 
@@ -263,5 +279,8 @@ class JeevanaadiState extends Equatable {
     requestStatus,
     isFromRequest,
     isProcessingRequest,
+    isApproving,
+    approveSuccessMsg,
+    approveErrorMsg,
   ];
 }

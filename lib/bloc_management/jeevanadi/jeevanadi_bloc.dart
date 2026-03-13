@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_repos/jeevanadi_repo.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
@@ -25,6 +26,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     on<ToggleAssignedSelectionEvent>(_onToggleAssignedSelection);
     on<ClearAssignedSelectionEvent>(_onClearAssignedSelection);
     on<RemoveSelectedAssignedMembersEvent>(_onRemoveSelectedAssignedMembers);
+    on<ApproveJeevanaadiEvent>(_onApproveJeevanaadi);
   }
   final JeevanaadiRepo = JeevanadiRepo();
 
@@ -584,4 +586,40 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       );
     }
   }
+
+Future<void> _onApproveJeevanaadi(
+  ApproveJeevanaadiEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(
+    isApproving: true,
+    approveSuccessMsg: null,
+    approveErrorMsg: null,
+  ));
+
+  try {
+    final result = await JeevanaadiRepo.approveJeevanaadi(event.jeevanadiId);
+
+    if (result.isSuccess) {
+      final message = result.data?['message'] ?? 'Approved successfully';
+      emit(state.copyWith(
+        isApproving: false,
+        approveSuccessMsg: message,
+        requestStatus: 'APPROVED',
+        approveErrorMsg: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        isApproving: false,
+        approveErrorMsg: result.error?.message ?? 'Approval failed',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isApproving: false,
+      approveErrorMsg: 'Error: ${e.toString()}',
+    ));
+  }
+}
+  
 }
