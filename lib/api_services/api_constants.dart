@@ -37,6 +37,7 @@ class ApiConstants {
   static String getJeevanaadiUpdate = "$VIKAS/vikas/jeevanaadi/";
   static String getrequestview = "$VIKAS/vikas/jeevanaadi/staff/requests";
   static String getrequestviewbyid = "$VIKAS/vikas/jeevanaadi/staff/requests";
+ static String approverequest = "$VIKAS/vikas/jeevanaadi/";
 
   //notices
   static const String NOTICES_BASE = "${IDM_URI}/notices";

@@ -249,7 +249,6 @@ class JeevanadiRepo {
   }) async {
     final url = ApiConstants.getJeevanaadiUpdate + jeevanadiId + "/update";
 
-
     final result = await _api.put(url, body: updateData);
 
     if (!result.isSuccess) {
@@ -290,4 +289,19 @@ class JeevanadiRepo {
   Future<void> deleteKaryakartha(String id) async {
     await _api.delete("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
   }
+
+Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) async {
+  final url = ApiConstants.approverequest + "/$jeevanadiId/approve";
+  
+
+  final result = await _api.put(url,body: {}); 
+
+  if (!result.isSuccess) {
+    print('❌ Approval failed: ${result.error?.message}');
+    return ApiResult.failure(result.error);
+  }
+
+  print('✅ Jeevanaadi approved successfully');
+  return ApiResult.success(result.data);
+}
 }
