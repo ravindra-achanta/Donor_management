@@ -40,20 +40,35 @@ class AuthLayout extends StatelessWidget {
     );
   }
 
-  Widget largeScreen(BuildContext context) {
+ Widget largeScreen(BuildContext context) {
     return Scaffold(
-        key: controller.scaffoldKey,
-        backgroundColor: Colors.blue,
-        body: Stack(
-          children: [
-            const Center(
-              child: Opacity(
-                  opacity: 0.8,
-                  child: BlurHash(hash: "LDLz?TMI00%N00I=M{%M00Rj~qRP")),
+      key: controller.scaffoldKey,
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                 
+                  Color.fromARGB(255, 244, 235, 235).withOpacity(0.6),
+                   Color.fromARGB(255, 75, 16, 16).withOpacity(0.6),
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
             ),
-            Container(
-              margin: FxSpacing.top(100),
-              width: MediaQuery.of(context).size.width,
+            child: const Center(
+              child: Opacity(
+                opacity: 0.2,
+                child: BlurHash(hash: "LDLz?TMI00%N00I=M{%M00Rj~qRP"),
+              ),
+            ),
+          ),
+          Container(
+            margin: FxSpacing.only(top: 40),
+            width: MediaQuery.of(context).size.width,
+            child: SingleChildScrollView(
               child: FxFlex(
                 wrapAlignment: WrapAlignment.center,
                 wrapCrossAlignment: WrapCrossAlignment.start,
@@ -63,18 +78,17 @@ class AuthLayout extends StatelessWidget {
                 children: [
                   FxFlexItem(
                     sizes: "xxl-8 lg-8 md-9 sm-10",
-                    // sizes: "xxl-3 lg-4 md-6 sm-8",
                     child: FxContainer(
-                      paddingAll: 0,
-                      color: AdminTheme.theme.contentTheme.background
-                          .withAlpha(230),
+                      color: AdminTheme.theme.contentTheme.background.withAlpha(230),
                       child: child ?? Container(),
                     ),
                   ),
                 ],
               ),
             ),
-          ],
-        ));
+          ),
+        ],
+      ),
+    );
   }
 }
