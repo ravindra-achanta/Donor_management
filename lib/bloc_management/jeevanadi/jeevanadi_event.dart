@@ -147,3 +147,16 @@ class FetchJeevanaadiProfileFromRequestEvent extends JeevanaadiEvent {
   @override
   List<Object?> get props => [jeevanadiId];
 }
+
+class ApproveJeevanaadiEvent extends JeevanaadiEvent {
+  final String jeevanadiId;
+  
+
+  ApproveJeevanaadiEvent(this.jeevanadiId);
+
+  @override
+  List<Object?> get props => [jeevanadiId];
+}
+
+
+
