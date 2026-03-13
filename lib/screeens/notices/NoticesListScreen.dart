@@ -49,7 +49,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   }
 
   void _loadNotices() {
-    context.read<NoticeBloc>().add(FetchNoticesEvent());
+    context.read<NoticeBloc>().add(FetchNoticesNewEvent());
   }
 
   // List<NoticeResponse> get _filteredNotices {
@@ -187,7 +187,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
         listener: (context, state) {
           // Update local list when new data arrives
           if (state.status == NoticeStatus.success) {
-            _allNotices = state.notices;
+            _allNotices = state.allnotices;
           }
 
           // Handle create/update form status
@@ -250,9 +250,8 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                           ),
                           const SizedBox(width: 8),
 
-                      
-                                if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
-                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN")
+                          if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
+                              Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN")
                             ElevatedButton.icon(
                               onPressed: _addNewNotice,
                               icon: const Icon(Icons.add, size: 18),

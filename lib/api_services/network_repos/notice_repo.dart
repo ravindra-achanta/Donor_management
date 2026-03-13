@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
@@ -9,8 +11,8 @@ class NoticeRepo {
   final NetworkService _api = NetworkService.instance;
 
 
-  Future<ApiResult<List<NoticeResponse>>> getNotices() async {
-    final result = await _api.get(ApiConstants.noticesList);
+  Future<ApiResult<List<NoticeResponse>>> getNotices(endpoint) async {
+    final result = await _api.get(endpoint);
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -96,6 +98,7 @@ Future<ApiResult<bool>> markNoticeAsRead(String id) async {
 
   return ApiResult.success(true);
 }
+
 
   /// DELETE NOTICE
   /// Assumes you have defined `noticesDelete` in `ApiConstants` as:

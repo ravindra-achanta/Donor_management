@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:http/http.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
@@ -86,6 +88,68 @@ class NetworkService {
       return ApiResult.failure(ApiError(message: "Unexpected Error: $e"));
     }
   }
+  // -------------------- MULTIPART UPLOAD --------------------
+
+  Future<String> fileUpload(
+  final String endpoint,   // Changed from 'url' to 'endpoint'
+  XFile imageFile,
+) async {
+  final headers = await _defaultHeaders();
+  final uri = Uri.parse("${ApiConstants.baseUrl}$endpoint");  // Build full URL
+  var request = MultipartRequest('POST', uri);
+  request.headers.addAll(headers);
+  var fileBytes = await imageFile.readAsBytes();
+  request.files.add(MultipartFile.fromBytes(
+    'file',
+    fileBytes,
+    filename: imageFile.name,
+  ));
+
+  var response = await request.send().timeout(
+    const Duration(seconds: 30),
+    onTimeout: () {
+      throw "Request timed out. Please try again.";
+    },
+  );
+
+  var responseBody = await response.stream.bytesToString();
+  var finalResponse = Response(responseBody, response.statusCode,
+      headers: response.headers);
+
+  return finalResponse.body; // Return the response body directly, or you can handle it as needed
+}
+// Future<ApiResult<dynamic>> fileUpload(
+//     final String url,
+//     XFile imageFile,
+//   ) async {
+//     final headers = await _defaultHeaders();
+//     var request =
+//         MultipartRequest('POST', Uri.parse(url)); 
+//     request.headers.addAll(headers); // Attach the headers
+//     var fileBytes = await imageFile.readAsBytes(); // Attach the file
+//     request.files.add(MultipartFile.fromBytes(
+//       'file', // The field name for the file in the form-data
+//       fileBytes,
+//       filename: imageFile.name,
+//     ));
+
+//     // Send the request
+//     var response = await request.send().timeout(
+//       const Duration(seconds:30 ),
+//       onTimeout: () {
+//         throw "Request timed out. Please try again.";
+//       },
+//     );
+
+//     var responseBody = await response.stream
+//         .bytesToString(); // Get the response body as a string
+
+//     var finalResponse = Response(responseBody, response.statusCode,
+//         headers: response
+//             .headers); // Create a Response object to handle status and response body
+
+//      return _handleResponse(finalResponse);
+//   }
 
   // -------------------- DELETE --------------------
   Future<ApiResult<dynamic>> delete(String endpoint) async {

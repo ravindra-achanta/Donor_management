@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/network_repos/notice_repo.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
@@ -12,6 +13,8 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     on<CreateNoticeEvent>(_onCreateNotice);
     on<UpdateNoticeEvent>(_onUpdateNotice);
     on<MarkNoticeReadEvent>(_onMarkNoticeRead);
+    on<FetchNoticesNewEvent> (fetchNoticesNewEvent);
+    // on<UploadNoticeImageEvent>(_onUploadNoticeImage);
     //on<DeleteNoticeEvent>(_onDeleteNotice);
     //on<ClearDeleteStatusEvent>(_onClearDeleteStatus);
   }
@@ -21,7 +24,7 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     Emitter<NoticeState> emit,
   ) async {
     emit(state.copyWith(status: NoticeStatus.loading));
-    final result = await noticeRepo.getNotices();
+    final result = await noticeRepo.getNotices(ApiConstants.unReadNoticesList);
     if (result.isSuccess) {
       emit(state.copyWith(
         status: NoticeStatus.success,
@@ -82,6 +85,49 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
     print("Failed to mark notice as read: ${result.error?.message}");
   }
 }
+
+  Future<void> fetchNoticesNewEvent(
+    FetchNoticesNewEvent event,
+    Emitter<NoticeState> emit,
+  ) async {
+    emit(state.copyWith(status: NoticeStatus.loading));
+    final result = await noticeRepo.getNotices(ApiConstants.allNotices);
+    if (result.isSuccess) {
+      emit(state.copyWith(
+        status: NoticeStatus.success,
+        allnotices: result.data ?? [],
+      ));
+    } else {
+      emit(state.copyWith(
+        status: NoticeStatus.failure,
+        errorMessage: result.error?.message ?? 'Failed to load notices',
+      ));
+    }
+  }
+
+// Future<void> _onUploadNoticeImage(
+//   UploadNoticeImageEvent event,
+//   Emitter<NoticeState> emit,
+// ) async {
+
+//   emit(state.copyWith(
+//     imageUploadStatus: NoticeImageUploadStatus.uploading,
+//   ));
+
+//   final result = await noticeRepo.uploadImage(event.file);
+
+//   if (result.isSuccess) {
+//     emit(state.copyWith(
+//       imageUploadStatus: NoticeImageUploadStatus.success,
+//       uploadedImageUrl: result.data,
+//     ));
+//   } else {
+//     emit(state.copyWith(
+//       imageUploadStatus: NoticeImageUploadStatus.failure,
+//       errorMessage: result.error?.message ?? "Image upload failed",
+//     ));
+//   }
+// }
 
   // Future<void> _onDeleteNotice(
   //   DeleteNoticeEvent event,

@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
+import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
+import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
@@ -28,7 +30,7 @@ class Notices extends StatefulWidget {
 class _NoticesState extends State<Notices> {
   final _formKey = GlobalKey<FormState>();
 
-  /// Audience selection
+ 
   String _selectedSpecificOption = 'User Type';
   NoticeType? _selectedAudienceType;
   List<UserView> _selectedUsers = [];
@@ -37,7 +39,7 @@ class _NoticesState extends State<Notices> {
   TimeOfDay? _selectedTime;
   late List<NoticeType> _audienceTypes;
 
-  /// Controllers
+  
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -46,6 +48,7 @@ class _NoticesState extends State<Notices> {
   File? _selectedFile;
   Uint8List? _selectedFileBytes;
   String? _selectedFileName;
+  String? _uploadedImageUrl;
 
   bool _isSubmitting = false;
   bool _isLoading = true;
@@ -164,7 +167,7 @@ class _NoticesState extends State<Notices> {
       _dateController.text = DateFormat('yyyy-MM-dd').format(notice.sendTime!);
     }
 
-    // TODO: Load existing image if any (requires handling base64/URL)
+   
   }
 
   @override
@@ -176,36 +179,61 @@ class _NoticesState extends State<Notices> {
     super.dispose();
   }
 
-  void _handleFileSelection() async {
-    try {
-      final XFile? pickedFile = await ImagePicker().pickImage(
-        source: ImageSource.gallery,
-        imageQuality: 85,
-        maxWidth: 1200,
-      );
+  // void _handleFileSelection() async {
+  //   try {
+  //     final XFile? pickedFile = await ImagePicker().pickImage(
+  //       source: ImageSource.gallery,
+  //       imageQuality: 85,
+  //       maxWidth: 1200,
+  //     );
 
-      if (pickedFile != null) {
-        final bytes = await pickedFile.readAsBytes();
-        setState(() {
-          _selectedFileBytes = bytes;
-          _selectedFileName = pickedFile.name;
-          _selectedFile = null;
-        });
+  //     if (pickedFile != null) {
+  //       final bytes = await pickedFile.readAsBytes();
+  //       setState(() {
+  //         _selectedFileBytes = bytes;
+  //         _selectedFileName = pickedFile.name;
+  //         _selectedFile = null;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     _showError('Failed to select image: $e');
+  //   }
+  // }
+
+  final NetworkService _api = NetworkService.instance;
+ void _handleFileSelection() async {
+  try {
+    final XFile? pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1200,
+    );
+
+    if (pickedFile != null) {
+      setState(() => _isSubmitting = true);
+     final response =  await _api.fileUpload(ApiConstants.uploadimage,pickedFile );
+       setState(() => _isSubmitting = false);
+      if(response != null && response.isNotEmpty){
+         setState(() => _uploadedImageUrl = response);
+      }else{
+        _showError('Image upload failed: Empty response');
       }
-    } catch (e) {
-      _showError('Failed to select image: $e');
-    }
+     
+  }} catch (e) {
+    _showError('Failed to select/upload image: $e');
+    setState(() => _isSubmitting = false);
   }
+}
 
-  Future<String?> _imageToBase64() async {
-    if (kIsWeb && _selectedFileBytes != null) {
-      return base64Encode(_selectedFileBytes!);
-    } else if (_selectedFile != null) {
-      final bytes = await _selectedFile!.readAsBytes();
-      return base64Encode(bytes);
-    }
-    return null;
-  }
+  // Future<String?> _imageToBase64() async {
+  //   if (kIsWeb && _selectedFileBytes != null) {
+  //     return base64Encode(_selectedFileBytes!);
+  //   } else if (_selectedFile != null) {
+  //     final bytes = await _selectedFile!.readAsBytes();
+  //     return base64Encode(bytes);
+  //   }
+  //   return null;
+  // }
 
   void _submitNotice() async {
     final formState = _formKey.currentState;
@@ -226,7 +254,7 @@ class _NoticesState extends State<Notices> {
 
     setState(() => _isSubmitting = true);
 
-    final imageBase64 = await _imageToBase64();
+    //final imageBase64 = await _imageToBase64();
 
     final sendDateTime = DateTime(
       _selectedDate!.year,
@@ -267,12 +295,12 @@ class _NoticesState extends State<Notices> {
         return {
           'id': user.id,
           'type': user.userType!,
-        }; // safe because we filtered
+        };
       }).toList();
     }
 
     final request = NoticeRequest(
-      image: imageBase64,
+      image:  _uploadedImageUrl,
       title: _titleController.text,
       description: _descriptionController.text,
       sendDate: DateTime.parse(sendDateTime),
@@ -280,7 +308,7 @@ class _NoticesState extends State<Notices> {
       specificUsers: specificUsers,
     );
 
-    // Debug print
+ 
     print('Sending request: ${jsonEncode(request.toJson())}');
 
     if (isEditing) {
@@ -677,7 +705,7 @@ class _NoticesState extends State<Notices> {
 
                     const SizedBox(height: 24),
                   ], // end !isEditing
-                  // Title field (always visible)
+                 
                   const Text(
                     'Title',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
@@ -832,7 +860,7 @@ class _NoticesState extends State<Notices> {
                     const SizedBox(height: 20),
                   ],
 
-                  // Image attachment (always visible)
+                 
                   SizedBox(
                     width: 700,
                     child: Column(
@@ -878,7 +906,7 @@ class _NoticesState extends State<Notices> {
                           ),
                         ),
 
-                        if (_selectedFileBytes != null) ...[
+                        if (_uploadedImageUrl != null || _uploadedImageUrl?.isNotEmpty == true) ...[
                           const SizedBox(height: 12),
                           Stack(
                             clipBehavior: Clip.none,
@@ -894,8 +922,8 @@ class _NoticesState extends State<Notices> {
                                 ),
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.memory(
-                                    _selectedFileBytes!,
+                                  child: Image.network(
+                                    _uploadedImageUrl!,
                                     fit: BoxFit.cover,
                                     frameBuilder:
                                         (
