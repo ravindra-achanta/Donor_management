@@ -1,23 +1,28 @@
-class Notice {
-  final String id;
-  final String title;
-  final String message;
-  final String audience;
-  final String date;
-  final String time;
-  final String sender;
-  final bool hasAttachment;
-  final String? attachmentUrl;
+// class NoticeRequest {
+//   final String? image;
+//   final String title;
+//   final String description;
+//   final DateTime sendDate;
+//   final String sendTo;
+//   final List<String>? specificUsers;
 
-  Notice({
-    required this.id,
-    required this.title,
-    required this.message,
-    required this.audience,
-    required this.date,
-    required this.time,
-    required this.sender,
-    this.hasAttachment = false,
-    this.attachmentUrl,
-  });
-}
+//   NoticeRequest({
+//     this.image,
+//     required this.title,
+//     required this.description,
+//     required this.sendDate,
+//     required this.sendTo,
+//     this.specificUsers,
+//   });
+
+//   Map<String, dynamic> toJson() {
+//     return {
+//       "image": image,
+//       "title": title,
+//       "description": description,
+//       "sendDate": sendDate.toUtc().toIso8601String(),
+//       "sendTo": sendTo,
+//       "specificUsers": specificUsers ?? [],
+//     };
+//   }
+// }

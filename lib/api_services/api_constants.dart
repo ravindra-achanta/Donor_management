@@ -1,6 +1,6 @@
 class ApiConstants {
-  //static const String baseUrl = "http://172.235.18.48:8050";
-   static const String baseUrl = "https://vikas.vidyaranyam.in";
+  static const String baseUrl = "http://172.235.18.48:8050";
+   //static const String baseUrl = "https://vikas.vidyaranyam.in";
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -52,6 +52,26 @@ class ApiConstants {
   static const String DHARMASETU_CREATE = "$VIKAS/dharmasetu";
   static const String DHARMASETU_UPDATE = "$VIKAS/dharmasetu/{id}";
   static const String DHARMASETU_DELETE = "$VIKAS/dharmasetu/{id}/delete";
+
+
+  // Notices APIs
+
+static const String unReadNoticesList = "$VIKAS/notice/unread";
+static const String allNotices = "$VIKAS/notice/all";
+static const String noticesCreate = "$VIKAS/notice/create";
+//static const String noticesUpdate = "$VIKAS/notice/{id}/update"; 
+static const String noticesUpdate = "$VIKAS/notice/{id}/update";
+static const String noticesRead = "$VIKAS/notice/{id}/read";
+
+
+//
+static const String metrics = "$IDM_URI/metrics/user";
+
+static const String uploadimage = "$IDM_URI/image";
+
+
+
+
 
   //review
   //static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";

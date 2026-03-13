@@ -1,62 +1,64 @@
 class NoticeResponse {
   final String id;
+  final String? image;
   final String title;
-  final String message;
-  final String audience;
-  final String date;
-  final String time;
-  final String sender;
-  final String? attachmentUrl;
-  final DateTime createdAt;
+  final String description;
+  final DateTime? sendTime;
+  final String? sendTo;
+  final DateTime? createdTime;
+  final DateTime? updatedTime;
+  final String? createdUserID;
+  final String? updatedUserID;
+  final String? status;
 
   NoticeResponse({
     required this.id,
+    this.image,
     required this.title,
-    required this.message,
-    required this.audience,
-    required this.date,
-    required this.time,
-    required this.sender,
-    this.attachmentUrl,
-    required this.createdAt,
+    required this.description,
+    this.sendTime,
+    this.sendTo,
+    this.createdTime,
+    this.updatedTime,
+    this.createdUserID,
+    this.updatedUserID,
+    this.status,
   });
 
   factory NoticeResponse.fromJson(Map<String, dynamic> json) {
     return NoticeResponse(
       id: json['id'] ?? '',
+      image: json['image'],
       title: json['title'] ?? '',
-      message: json['message'] ?? '',
-      audience: json['audience'] ?? 'All Users',
-      date: json['date'] ?? '',
-      time: json['time'] ?? '',
-      sender: json['sender'] ?? 'Admin',
-      attachmentUrl: json['attachmentUrl'],
-      createdAt: DateTime.parse(json['createdAt'] ?? DateTime.now().toIso8601String()),
+      description: json['description'] ?? '',
+      sendTime:
+          json['sendTime'] != null ? DateTime.parse(json['sendTime']) : null,
+      sendTo: json['sendTo'],
+      createdTime: json['createdTime'] != null
+          ? DateTime.parse(json['createdTime'])
+          : null,
+      updatedTime: json['updatedTime'] != null
+          ? DateTime.parse(json['updatedTime'])
+          : null,
+      createdUserID: json['createdUserID'],
+      updatedUserID: json['updatedUserID'],
+      status: json['status'],
     );
   }
-}
 
-class PaginatedNotices {
-  final List<NoticeResponse> content;
-  final int totalElements;
-  final int totalPages;
-  final int currentPage;
-
-  PaginatedNotices({
-    required this.content,
-    required this.totalElements,
-    required this.totalPages,
-    required this.currentPage,
-  });
-
-  factory PaginatedNotices.fromJson(Map<String, dynamic> json) {
-    return PaginatedNotices(
-      content: (json['content'] as List)
-          .map((item) => NoticeResponse.fromJson(item))
-          .toList(),
-      totalElements: json['totalElements'] ?? 0,
-      totalPages: json['totalPages'] ?? 0,
-      currentPage: json['currentPage'] ?? 0,
-    );
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "image": image,
+      "title": title,
+      "description": description,
+      "sendTime": sendTime?.toIso8601String(),
+      "sendTo": sendTo,
+      "createdTime": createdTime?.toIso8601String(),
+      "updatedTime": updatedTime?.toIso8601String(),
+      "createdUserID": createdUserID,
+      "updatedUserID": updatedUserID,
+      "status": status,
+    };
   }
 }

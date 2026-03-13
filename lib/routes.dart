@@ -17,6 +17,7 @@ import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
+import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
@@ -98,11 +99,24 @@ getPageRoute() {
 
     GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
     //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
-    GetPage(name: '/notices', page: () => const Notices()),
+    //GetPage(name: '/notices', page: () => const Notices()),
     GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
+
+    GetPage(
+      name: '/notices',
+      page: () {
+        final args = Get.arguments;
+        final notice = args is NoticeResponse ? args : null;
+        return Notices(noticeData: notice);
+      },
+    ),
+    // GetPage(
+    //   name: '/view/notice',
+    //   //page: () => NoticeDetailScreen(notice: Get.arguments),
+    // ),
     GetPage(
       name: '/view/notice',
-      page: () => NoticeDetailScreen(notice: Get.arguments),
+      page: () => NoticeDetailPage(notice: Get.arguments as NoticeResponse),
     ),
     GetPage(name: '/visits', page: () => const VisitsListScreen()),
     GetPage(name: '/add/visit', page: () => const AddVisit()),

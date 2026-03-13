@@ -8,6 +8,7 @@ import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
+import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
@@ -41,6 +42,9 @@ Future<void> main() async {
         providers: [
           // 🔹 Karyakartha Bloc
           BlocProvider<KaryakarthaBloc>(create: (_) => KaryakarthaBloc()),
+           BlocProvider<DashboardBloc>(
+      create: (_) => DashboardBloc(),
+    ),
 
           // 🔹 Jeevanadi Bloc
           BlocProvider<JeevanaadiBloc>(create: (_) => JeevanaadiBloc()),
@@ -53,6 +57,7 @@ Future<void> main() async {
 
           BlocProvider<VisitBloc>(
             create: (_) => VisitBloc(visitRepository: VisitRepository()),
+            
           ),
           BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
 
