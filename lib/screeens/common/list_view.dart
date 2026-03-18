@@ -1,7 +1,11 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:linear_progress_bar/linear_progress_bar.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
+import 'package:vikas_app/bloc_management/dashboard/dashboard_event.dart';
+import 'package:vikas_app/bloc_management/dashboard/dashboard_state.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
 import 'package:vikas_app/screeens/models/response/Dharmasetu_view.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
@@ -55,34 +59,33 @@ class _ListViewScreenState extends State<ListViewScreen> {
     DharmasetuView? _dharmasetu = data is DharmasetuView ? data : null;
     User? _user = data is User ? data : null;
 
-    JeevanaadiFullProfile? _jeevanaadiUser = data is JeevanaadiFullProfile
-        ? data
-        : null;
+    JeevanaadiFullProfile? _jeevanaadiUser =
+        data is JeevanaadiFullProfile ? data : null;
     String name = _user != null
         ? _user.name
         : _jeevanaadiUser != null
-        ? _jeevanaadiUser.profileDetails.fullName
-        : _visit != null
-        ? _visit.visitorName
-        : _dharmasetu != null
-        ? _dharmasetu.communityName
-        : "N/A";
+            ? _jeevanaadiUser.profileDetails.fullName
+            : _visit != null
+                ? _visit.visitorName
+                : _dharmasetu != null
+                    ? _dharmasetu.communityName
+                    : "N/A";
 
     String email = _user != null
         ? _user.email
         : _jeevanaadiUser != null
-        ? _jeevanaadiUser.basicDetails.email
-        : _visit != null
-        ? _visit.email
-        : "N/A";
+            ? _jeevanaadiUser.basicDetails.email
+            : _visit != null
+                ? _visit.email
+                : "N/A";
 
     String phoneNumber = _user != null
         ? _user.mobileNumber.toString()
         : _jeevanaadiUser != null
-        ? _jeevanaadiUser.profileDetails.phoneNumber
-        : _visit != null
-        ? _visit.phoneNumber
-        : "N/A";
+            ? _jeevanaadiUser.profileDetails.phoneNumber
+            : _visit != null
+                ? _visit.phoneNumber
+                : "N/A";
 
     return Container(
       height: 600,
@@ -105,8 +108,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                             screenType == "VISITS"
                                 ? Icons.calendar_today
                                 : screenType == "DHARMASETU"
-                                ? Icons.volunteer_activism
-                                : Icons.person,
+                                    ? Icons.volunteer_activism
+                                    : Icons.person,
                             size: 28,
                           ),
                           const SizedBox(width: 8),
@@ -115,8 +118,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                               screenType == "VISITS"
                                   ? name
                                   : screenType == "DHARMASETU"
-                                  ? name
-                                  : "${name} Demographic Info",
+                                      ? name
+                                      : "${name} Demographic Info",
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -199,7 +202,6 @@ class _ListViewScreenState extends State<ListViewScreen> {
 
                 if (screenType == "DHARMASETU" && _dharmasetu != null) ...[
                   _sectionTitle('Dharmasetu Information'),
-
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -207,12 +209,11 @@ class _ListViewScreenState extends State<ListViewScreen> {
                         child: _infoTile(
                           Icons.category,
                           'Type',
-                          _dharmasetu.type?? 'N/A',
+                          _dharmasetu.type ?? 'N/A',
                         ),
                       ),
                     ],
                   ),
-
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -233,13 +234,11 @@ class _ListViewScreenState extends State<ListViewScreen> {
                       ),
                     ],
                   ),
-
                   _infoTile(
                     Icons.person,
                     'Referred By',
                     _dharmasetu.referredBy,
                   ),
-
                   const SizedBox(height: 16),
                 ],
 
@@ -254,7 +253,6 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           _jeevanaadiUser?.basicDetails.jeevanadiNo ?? "N/A",
                         ),
                       ),
-
                       Expanded(
                         child: _infoTile(
                           Icons.person_outline,
@@ -264,7 +262,6 @@ class _ListViewScreenState extends State<ListViewScreen> {
                       ),
                     ],
                   ),
-
                   const SizedBox(height: 16),
                 ],
 
@@ -304,144 +301,84 @@ class _ListViewScreenState extends State<ListViewScreen> {
                 const SizedBox(height: 16),
 
                 // Actions - Show for all screen types
-                _sectionTitle('Actions'),
+                if (screenType != "DARMASETU" && screenType != "VISITS")
+                  _sectionTitle('Actions'),
                 const SizedBox(height: 4),
                 if (screenType != "DARMASETU" && screenType != "VISITS")
-                Row(
-                  children: [
-                    FutureBuilder<bool>(
-                      future: isDeleteButtonVisible(),
-                      builder: (context, snapshot) {
-                        if (!snapshot.hasData || snapshot.data == false) {
-                          return const SizedBox();
-                        }
+                  Row(
+                    children: [
+                      FutureBuilder<bool>(
+                        future: isDeleteButtonVisible(),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == false) {
+                            return const SizedBox();
+                          }
 
-                        return Expanded(
-                          child: OutlinedButton.icon(
-                            onPressed: () {
-                              widget.onDelete();
-                            },
-                            icon: const Icon(
-                              Icons.delete_outline,
-                              color: Colors.white,
-                            ),
-                            label: Text(
-                              screenType == "VISIT" ? 'Delete Visit' : 'Delete',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                            style: OutlinedButton.styleFrom(
-                              backgroundColor: const Color.fromARGB(
-                                255,
-                                255,
-                                103,
-                                92,
+                          return Expanded(
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                widget.onDelete();
+                              },
+                              icon: const Icon(
+                                Icons.delete_outline,
+                                color: Colors.white,
                               ),
-                              shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.all(
-                                  Radius.circular(8),
+                              label: Text(
+                                screenType == "VISIT"
+                                    ? 'Delete Visit'
+                                    : 'Delete',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                backgroundColor: const Color.fromARGB(
+                                  255,
+                                  255,
+                                  103,
+                                  92,
                                 ),
+                                shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(8),
+                                  ),
+                                ),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
                               ),
-                              padding: const EdgeInsets.symmetric(vertical: 14),
                             ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          widget.onViewMore();
+                          );
                         },
-                        icon: const Icon(Icons.more_horiz, color: Colors.white),
-                        label: Text(
-                          screenType == "VISIT"
-                              ? 'View Full Details'
-                              : 'View more',
-                          style: const TextStyle(color: Colors.white),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue, // background color
-                          shape: const RoundedRectangleBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            widget.onViewMore();
+                          },
+                          icon:
+                              const Icon(Icons.more_horiz, color: Colors.white),
+                          label: Text(
+                            screenType == "VISIT"
+                                ? 'View Full Details'
+                                : 'View more',
+                            style: const TextStyle(color: Colors.white),
                           ),
-                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue, // background color
+                            shape: const RoundedRectangleBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(8)),
+                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
               ],
             ),
           ),
         ),
       ),
-    );
-  }
-
-  Widget buildDemoGrphs(dynamic jeevanaadiUser) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      child: Column(
-        children: [
-          if (screenType == "JEEVANAADI_PROFILE")
-            ProfileScoreCard(
-              scores:
-                  jeevanaadiUser
-                      .jeevanaadiDemoGraphicDetails
-                      .percentageHistory
-                      .isNotEmpty
-                  ? jeevanaadiUser
-                        .jeevanaadiDemoGraphicDetails
-                        .percentageHistory
-                  : [
-                      jeevanaadiUser
-                          .jeevanaadiDemoGraphicDetails
-                          .profileCompletionPercentage,
-                    ],
-            ),
-          _sectionTitle('Donation Details'),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _infoTile(
-                          Icons.feedback_outlined,
-                          'Donation Frequency',
-                         "5 times/monthly ",
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: _infoTile(
-                          Icons.calendar_today,
-                          'Donation Amount',
-                          "₹ 5000/monthly",
-                        ),
-                      ),
-                    ],
-                  ),
-                  _infoTile(
-                          Icons.feedback_outlined,
-                          'Total Donation Amount',
-                         "₹ 5000 ",
-                        ),
-        ],
-      ),
-    );
-  }
-
-  Widget buildDotContainer(Color color, String text) {
-    return Row(
-      children: [
-        Container(
-          decoration: BoxDecoration(shape: BoxShape.circle, color: color),
-          height: 12,
-          width: 12,
-        ),
-        const SizedBox(width: 6),
-        Text(text, style: TextStyle(color: Colors.black), maxLines: 1),
-      ],
     );
   }
 
@@ -460,57 +397,140 @@ class _ListViewScreenState extends State<ListViewScreen> {
         .join(', ');
   }
 
-  Widget _sectionTitle(String title) {
+  Widget buildDemoGrphs(dynamic jeevanaadiUser) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Text(
-        title,
-        style: const TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 14,
-          color: Colors.blueGrey,
-        ),
-      ),
-    );
-  }
-
-  Widget _infoTile(
-    IconData icon,
-    String label,
-    String value, {
-    Color? valueColor,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: screenType == "JEEVANAADI_PROFILE"
+          ? buildJeevandiDemographs(jeevanaadiUser)
+          : Column(
+            mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: valueColor,
-                  ),
+                Text("User Activity"),
+                LinearProgressIndicator(
+                  value: 0.5,
+                  
+                  backgroundColor: Colors.grey[300],
+                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                 ),
               ],
             ),
-          ),
-        ],
-      ),
     );
   }
+
+  Widget buildJeevandiDemographs(dynamic jeevanaadiUser) {
+    context
+        .read<DashboardBloc>()
+        .add(FetchDonationMetricsEvent(id: jeevanaadiUser.profileDetails.userId));
+    return BlocBuilder<DashboardBloc, DashboardState?>(
+        builder: (context, state) {
+        
+      return Column(
+        children: [
+          ProfileScoreCard(
+            scores: jeevanaadiUser
+                    .jeevanaadiDemoGraphicDetails.percentageHistory.isNotEmpty
+                ? jeevanaadiUser.jeevanaadiDemoGraphicDetails.percentageHistory
+                : [
+                    jeevanaadiUser.jeevanaadiDemoGraphicDetails
+                        .profileCompletionPercentage,
+                  ],
+          ),
+          _sectionTitle('Donation Metrics'),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: _infoTile(
+                  Icons.feedback_outlined,
+                  'Avg Donation Frequency',
+                  "${state?.donationMetrics?.monthyAvgFrequency ?? "N/A"} times/monthly ",
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _infoTile(
+                  Icons.calendar_today,
+                  'Avg Donation Amount',
+                  "₹${state?.donationMetrics?.monthyAmountAvgFrequency.floor() ?? "N/A"}/monthly",
+                ),
+              ),
+            ],
+          ),
+          _infoTile(
+            Icons.feedback_outlined,
+            'Total Donation Amount',
+            "₹ ${state?.donationMetrics?.totalContributions ?? "N/A"} ",
+          ),
+        ],
+      );
+    });
+  }
+}
+
+Widget buildDotContainer(Color color, String text) {
+  return Row(
+    children: [
+      Container(
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+        height: 12,
+        width: 12,
+      ),
+      const SizedBox(width: 6),
+      Text(text, style: TextStyle(color: Colors.black), maxLines: 1),
+    ],
+  );
+}
+
+Widget _sectionTitle(String title) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 8),
+    child: Text(
+      title,
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+        color: Colors.blueGrey,
+      ),
+    ),
+  );
+}
+
+Widget _infoTile(
+  IconData icon,
+  String label,
+  String value, {
+  Color? valueColor,
+}) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 6),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Icon(icon, size: 20, color: Colors.grey[700]),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: const TextStyle(fontSize: 12, color: Colors.grey),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: valueColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
 }
 
 class ProfileScoreCard extends StatelessWidget {
@@ -545,9 +565,7 @@ class ProfileScoreCard extends StatelessWidget {
               ),
               child: const Icon(Icons.person, color: Colors.blue),
             ),
-
             const SizedBox(width: 12),
-
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -556,9 +574,7 @@ class ProfileScoreCard extends StatelessWidget {
                     "Profile Score",
                     style: TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-
                   const SizedBox(height: 4),
-
                   Row(
                     children: [
                       Text(
@@ -568,7 +584,6 @@ class ProfileScoreCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
                       if (scores.length >= 2) ...[
                         const SizedBox(width: 6),
                         Icon(
@@ -584,7 +599,6 @@ class ProfileScoreCard extends StatelessWidget {
                 ],
               ),
             ),
-
             SizedBox(
               width: 100,
               height: 50,
