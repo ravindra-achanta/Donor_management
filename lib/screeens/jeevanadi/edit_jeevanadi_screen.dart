@@ -193,15 +193,17 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
       //         },
       //       ]
       //     : [];
-   _occasions = profile.occasionsDetails
-    .where((occ) => occ != null)  
-    .map((occ) => <String, dynamic>{  
-          "id": occ!.id.toString(),
-          "name": occ.occName,
-          "date": occ.occDate,
-          "uniqueId": occ.id.toString(),  
-        })
-    .toList();
+      _occasions = profile.occasionsDetails
+          .where((occ) => occ != null)
+          .map(
+            (occ) => <String, dynamic>{
+              "id": occ!.id.toString(),
+              "name": occ.occName,
+              "date": occ.occDate,
+              "uniqueId": occ.id.toString(),
+            },
+          )
+          .toList();
       _isActive = profile.basicDetails.isActive;
       _status = _isActive ? 'ACTIVE' : 'INACTIVE';
 
@@ -340,7 +342,9 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
               rel["id"].toString() != "0";
 
           return {
-            "relationId": hasValidId ? int.tryParse(rel["id"].toString()) : null,
+            "relationId": hasValidId
+                ? int.tryParse(rel["id"].toString())
+                : null,
             "relation": rel["relation"] ?? "",
             "name": rel["name"] ?? "",
             "mobileNumber": rel["mobile"]?.toString().isEmpty == true
@@ -428,7 +432,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             if (state.updateSuccessMsg != null) {
               Future.delayed(const Duration(milliseconds: 500), () {
                 // if (Navigator.canPop(context)) Navigator.pop(context, true);
-                 Get.offAllNamed('/jeevanadi');
+                Get.offAllNamed('/jeevanadi');
               });
             }
           }
@@ -754,7 +758,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
                   "paadam": "",
                 }
                 as Map<String, dynamic>,
-          ); 
+          );
         });
       },
       children: [
@@ -770,34 +774,33 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     );
   }
 
-Widget _buildOccasions() {
-  return _buildSection(
-    title: 'Occasions Details',
-    showAddButton: true,
-    onAdd: () {
-      setState(() {
-        _occasions.add(<String, dynamic>{  
-          "id": "",
-          "name": "",
-          "date": "",
-          "uniqueId": DateTime.now().millisecondsSinceEpoch.toString(),
-          
+  Widget _buildOccasions() {
+    return _buildSection(
+      title: 'Occasions Details',
+      showAddButton: true,
+      onAdd: () {
+        setState(() {
+          _occasions.add(<String, dynamic>{
+            "id": "",
+            "name": "",
+            "date": "",
+            "uniqueId": DateTime.now().millisecondsSinceEpoch.toString(),
+          });
+          print('Added occasion, total: ${_occasions.length}');
         });
-        print('Added occasion, total: ${_occasions.length}'); 
-      });
-    },
-    children: [
-      if (_occasions.isEmpty)
-        const Padding(
-          padding: EdgeInsets.only(top: 10),
-          child: Text('No occasions added yet'),
-        ),
-      ...List.generate(_occasions.length, (index) {
-        return _buildOccasionInline(index, _occasions[index]);
-      }),
-    ],
-  );
-}
+      },
+      children: [
+        if (_occasions.isEmpty)
+          const Padding(
+            padding: EdgeInsets.only(top: 10),
+            child: Text('No occasions added yet'),
+          ),
+        ...List.generate(_occasions.length, (index) {
+          return _buildOccasionInline(index, _occasions[index]);
+        }),
+      ],
+    );
+  }
 
   Widget _buildActionButtons() {
     return Row(
@@ -1001,7 +1004,7 @@ Widget _buildOccasions() {
     rel['paadam'] = rel['paadam'] ?? '';
 
     final key = rel['id'].toString().isNotEmpty && rel['id'] != '0'
-        ? ValueKey('relation_${rel['id']}') 
+        ? ValueKey('relation_${rel['id']}')
         : UniqueKey();
 
     return Container(
@@ -1059,78 +1062,82 @@ Widget _buildOccasions() {
     );
   }
 
-
-Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
+  Widget _buildOccasionInline(int index, Map<String, dynamic> occ) {
     final key = ValueKey('occasion_${index}_${occ['uniqueId']}');
-  return Column(
-     key: key,
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      if (index > 0) const SizedBox(height: 12),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            SizedBox(
-              width: 250,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextFormField(
-                  initialValue: occ['name'] ?? '',
-                  style: const TextStyle(fontSize: 14),
-                  decoration: _inputDecoration("Occasion Name"),
-                  onChanged: (value) {
-                    _occasions[index]['name'] = value;
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            SizedBox(
-              width: 200,
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: TextFormField(
-                  initialValue: occ['date'] ?? '',
-                  readOnly: true,
-                  onTap: () async {
-                    final date = await showDatePicker(
-                      context: context,
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime(2100),
-                      initialDate: DateTime.now(),
-                    );
-                    if (date != null) {
-                      final formattedDate = DateFormat("yyyy-MM-dd").format(date);
-                      setState(() {
-                        _occasions[index]['date'] = formattedDate;
-                      });
-                    }
-                  },
-                  decoration: _inputDecoration(
-                    "Occasion Date",
-                    suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
+    return Column(
+      key: key,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (index > 0) const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 250,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: TextFormField(
+                    initialValue: occ['name'] ?? '',
+                    style: const TextStyle(fontSize: 14),
+                    decoration: _inputDecoration("Occasion Name"),
+                    onChanged: (value) {
+                      _occasions[index]['name'] = value;
+                    },
                   ),
                 ),
               ),
-            ),
-            if (_occasions.length > 1)
-              Padding(
-                padding: const EdgeInsets.only(left: 8.0, bottom: 12),
-                child: IconButton(
-                  icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                  onPressed: () => setState(() => _occasions.removeAt(index)),
+              const SizedBox(width: 12),
+              SizedBox(
+                width: 200,
+                child: Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: TextFormField(
+                    initialValue: occ['date'] ?? '',
+                    readOnly: true,
+                    onTap: () async {
+                      final date = await showDatePicker(
+                        context: context,
+                        firstDate: DateTime(1900),
+                        lastDate: DateTime(2100),
+                        initialDate: DateTime.now(),
+                      );
+                      if (date != null) {
+                        final formattedDate = DateFormat(
+                          "yyyy-MM-dd",
+                        ).format(date);
+                        setState(() {
+                          _occasions[index]['date'] = formattedDate;
+                        });
+                      }
+                    },
+                    decoration: _inputDecoration(
+                      "Occasion Date",
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ),
                 ),
               ),
-          ],
+              if (_occasions.length > 1)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0, bottom: 12),
+                  child: IconButton(
+                    icon: const Icon(Icons.delete, color: Colors.red, size: 20),
+                    onPressed: () => setState(() => _occasions.removeAt(index)),
+                  ),
+                ),
+            ],
+          ),
         ),
-      ),
-      if (index < _occasions.length - 1)
-        const Divider(height: 16, color: Colors.grey),
-    ],
-  );
-}
+        if (index < _occasions.length - 1)
+          const Divider(height: 16, color: Colors.grey),
+      ],
+    );
+  }
 
   Widget _relationField(Map<String, dynamic> rel, int index) =>
       _buildRelDropdown(

@@ -84,6 +84,7 @@ dependencies:
   # Editors & HTML
   quill_html_editor: ^2.1.9
   html: ^0.15.0
+  
   universal_html: ^2.0.11
   dropdown_button2: ^2.3.9
 

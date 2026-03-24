@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vikas_app/screeens/models/request/VisitMetrics.dart';
 import 'package:vikas_app/screeens/models/request/visit_model.dart';
 import 'package:vikas_app/screeens/models/response/visit_view.dart';
 
@@ -12,13 +13,17 @@ class VisitState extends Equatable {
   final int totalElements;
   final String? errorMessage;
   final String? successMessage;
-  
+  final List<VisitMetrics> metrics;
+  final bool metricsLoading;
+  final bool showMonthlyChart;
+  final int? selectedMonthIndex;
+
   // Profile view states
   final bool isProfileViewVisible;
   final bool? profileLoading;
   final String? profileErrorMsg;
   final VisitModel? selectedVisit;
-  
+
   // Operation states
   final bool isSubmitting;
   final bool isDeleting;
@@ -37,6 +42,10 @@ class VisitState extends Equatable {
     this.selectedVisit,
     this.isSubmitting = false,
     this.isDeleting = false,
+    this.metrics = const [],
+    this.metricsLoading = false,
+    this.showMonthlyChart = true,
+    this.selectedMonthIndex,
   });
 
   VisitState copyWith({
@@ -53,6 +62,10 @@ class VisitState extends Equatable {
     VisitModel? selectedVisit,
     bool? isSubmitting,
     bool? isDeleting,
+    List<VisitMetrics>? metrics,
+    bool? metricsLoading,
+    bool? showMonthlyChart,
+    int? selectedMonthIndex,
   }) {
     return VisitState(
       status: status ?? this.status,
@@ -68,6 +81,10 @@ class VisitState extends Equatable {
       selectedVisit: selectedVisit ?? this.selectedVisit,
       isSubmitting: isSubmitting ?? this.isSubmitting,
       isDeleting: isDeleting ?? this.isDeleting,
+      metrics: metrics ?? this.metrics,
+      showMonthlyChart: showMonthlyChart ?? this.showMonthlyChart,
+      metricsLoading: metricsLoading ?? this.metricsLoading,
+      selectedMonthIndex: selectedMonthIndex ?? this.selectedMonthIndex,
     );
   }
 
@@ -86,5 +103,9 @@ class VisitState extends Equatable {
     selectedVisit,
     isSubmitting,
     isDeleting,
+    metrics,
+    metricsLoading,
+    showMonthlyChart,
+    selectedMonthIndex,
   ];
 }

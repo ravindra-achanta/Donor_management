@@ -214,13 +214,14 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     bool numbersOnly = false,
     bool isLoading = false,
     IconData? icon,
+    bool enabled = true, 
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
-        enabled: !isLoading,
+        enabled:  enabled && !isLoading,
         inputFormatters: [
           if (lettersOnly)
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
@@ -235,7 +236,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
               : null,
 
           filled: true,
-          fillColor: const Color(0xffF7F9FC),
+          fillColor: !enabled ? Colors.grey[200] : const Color(0xffF7F9FC),
 
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -904,6 +905,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                               keyboardType: TextInputType.phone,
                               numbersOnly: true,
                               isLoading: isLoading,
+                              enabled: !widget.isEdit,
+                              
                             ),
                           ),
                           rowFields(

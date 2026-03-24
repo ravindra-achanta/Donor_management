@@ -61,6 +61,9 @@ class JeevanaadiState extends Equatable {
   final bool isApproving;
 final String? approveSuccessMsg;
 final String? approveErrorMsg;
+ final List<JeevanaadiUser> searchResults;
+  final bool searchLoading;
+  final String? searchError;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -112,6 +115,9 @@ final String? approveErrorMsg;
     this.isApproving = false,
     this.approveSuccessMsg,
     this.approveErrorMsg,
+     this.searchResults = const [],
+    this.searchLoading = false,
+    this.searchError,
 
 
 
@@ -167,6 +173,9 @@ final String? approveErrorMsg;
     bool? isApproving,
     String? approveSuccessMsg,
     String? approveErrorMsg,
+     List<JeevanaadiUser>? searchResults,
+    bool? searchLoading,
+    String? searchError,
 
   }) {
     return JeevanaadiState(
@@ -228,6 +237,9 @@ final String? approveErrorMsg;
       isApproving: isApproving ?? this.isApproving,
       approveSuccessMsg: approveSuccessMsg ?? this.approveSuccessMsg,
       approveErrorMsg: approveErrorMsg ?? this.approveErrorMsg,
+      searchResults: searchResults ?? this.searchResults,
+      searchLoading: searchLoading ?? this.searchLoading,
+      searchError: searchError ?? this.searchError,
     );
   }
 
@@ -282,5 +294,8 @@ final String? approveErrorMsg;
     isApproving,
     approveSuccessMsg,
     approveErrorMsg,
+    searchResults,
+    searchLoading,
+    searchError,
   ];
 }

@@ -27,6 +27,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     on<ClearAssignedSelectionEvent>(_onClearAssignedSelection);
     on<RemoveSelectedAssignedMembersEvent>(_onRemoveSelectedAssignedMembers);
     on<ApproveJeevanaadiEvent>(_onApproveJeevanaadi);
+    on<SearchJeevanaadiUsersEvent>(_onSearchJeevanaadiUsers);
   }
   final JeevanaadiRepo = JeevanadiRepo();
 
@@ -622,4 +623,43 @@ Future<void> _onApproveJeevanaadi(
   }
 }
   
+
+ Future<void> _onSearchJeevanaadiUsers(
+  SearchJeevanaadiUsersEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  if (event.query.trim().isEmpty) {
+    emit(state.copyWith(
+      searchResults: const [],
+      searchLoading: false,
+      searchError: null,
+    ));
+    return;
+  }
+
+  emit(state.copyWith(searchLoading: true, searchError: null));
+
+  try {
+    final result = await JeevanaadiRepo.searchJeevanaadiUsers(event.query);
+    if (result.isSuccess) {
+      emit(state.copyWith(
+        searchLoading: false,
+        searchResults: result.data ?? [],
+        searchError: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        searchLoading: false,
+        searchError: result.error?.message ?? 'Search failed',
+        searchResults: const [],
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      searchLoading: false,
+      searchError: 'Error: ${e.toString()}',
+      searchResults: const [],
+    ));
+  }
+}
 }

@@ -8,7 +8,7 @@ class VisitView {
   final String visitPurpose;
   final String comments;        
   final int noOfGuests;
-  final bool existVisitor;       
+ // final bool existVisitor;       
  
 
   VisitView({
@@ -19,7 +19,7 @@ class VisitView {
     required this.visitPurpose,
     required this.comments,
     required this.noOfGuests,
-    required this.existVisitor,
+   // required this.existVisitor,
   });
 
   factory VisitView.fromJson(Map<String, dynamic> json) {
@@ -31,7 +31,7 @@ class VisitView {
       visitPurpose: json['visitPurpose'] ?? '',
       comments: json['comments'] ?? '',
       noOfGuests: json['noOfGuests'] ?? 0,
-      existVisitor: json['existVisitor'] ?? false,
+      //existVisitor: json['existVisitor'] ?? false,
     );
   }
 
@@ -45,7 +45,7 @@ class VisitView {
       visitPurpose: model.visitPurpose ?? '',
       comments: model.comments ?? '',
       noOfGuests: model.noOfGuests ?? 0,
-      existVisitor: model.existVisitor ?? false,
+     // existVisitor: model.existVisitor ?? false,
     );
   }
 
@@ -58,7 +58,7 @@ class VisitView {
       'visitPurpose': visitPurpose,
       'comments': comments,
       'noOfGuests': noOfGuests,
-      'existVisitor': existVisitor,
+     // 'existVisitor': existVisitor,
     };
   }
 }
