@@ -200,13 +200,17 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     },
                                   ),
                                   const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Get.toNamed('/add/dharmasetu');
-                                    },
-                                    icon: const Icon(Icons.add),
-                                    label: const Text("Add Dharmasetu"),
-                                  ),
+                                  if (Vikasdb().getString("USER_TYPE") ==
+                                          "OFFICE_STAFF" ||
+                                      Vikasdb().getString("USER_TYPE") ==
+                                          "KARYAKARTHA")
+                                    ElevatedButton.icon(
+                                      onPressed: () {
+                                        Get.toNamed('/add/dharmasetu');
+                                      },
+                                      icon: const Icon(Icons.add),
+                                      label: const Text("Add Dharmasetu"),
+                                    ),
                                 ],
                               ),
                             ],

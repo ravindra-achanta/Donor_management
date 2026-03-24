@@ -4,7 +4,7 @@ class JeevanaadiUser {
   final String? email;
   final double? profileCompletionPercentage;
   final String? jeevanaadiNo;
-  // final List<double> percentageHistory;
+   //final List<double> percentageHistory;
 
   const JeevanaadiUser({
     required this.id,

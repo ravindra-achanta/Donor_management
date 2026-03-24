@@ -59,33 +59,34 @@ class _ListViewScreenState extends State<ListViewScreen> {
     DharmasetuView? _dharmasetu = data is DharmasetuView ? data : null;
     User? _user = data is User ? data : null;
 
-    JeevanaadiFullProfile? _jeevanaadiUser =
-        data is JeevanaadiFullProfile ? data : null;
+    JeevanaadiFullProfile? _jeevanaadiUser = data is JeevanaadiFullProfile
+        ? data
+        : null;
     String name = _user != null
         ? _user.name
         : _jeevanaadiUser != null
-            ? _jeevanaadiUser.profileDetails.fullName
-            : _visit != null
-                ? _visit.visitorName
-                : _dharmasetu != null
-                    ? _dharmasetu.communityName
-                    : "N/A";
+        ? _jeevanaadiUser.profileDetails.fullName
+        : _visit != null
+        ? _visit.visitorName
+        : _dharmasetu != null
+        ? _dharmasetu.communityName
+        : "N/A";
 
     String email = _user != null
         ? _user.email
         : _jeevanaadiUser != null
-            ? _jeevanaadiUser.basicDetails.email
-            : _visit != null
-                ? _visit.email
-                : "N/A";
+        ? _jeevanaadiUser.basicDetails.email
+        : _visit != null
+        ? _visit.email
+        : "N/A";
 
     String phoneNumber = _user != null
         ? _user.mobileNumber.toString()
         : _jeevanaadiUser != null
-            ? _jeevanaadiUser.profileDetails.phoneNumber
-            : _visit != null
-                ? _visit.phoneNumber
-                : "N/A";
+        ? _jeevanaadiUser.profileDetails.phoneNumber
+        : _visit != null
+        ? _visit.phoneNumber
+        : "N/A";
 
     return Container(
       height: 600,
@@ -108,8 +109,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                             screenType == "VISITS"
                                 ? Icons.calendar_today
                                 : screenType == "DHARMASETU"
-                                    ? Icons.volunteer_activism
-                                    : Icons.person,
+                                ? Icons.volunteer_activism
+                                : Icons.person,
                             size: 28,
                           ),
                           const SizedBox(width: 8),
@@ -118,8 +119,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                               screenType == "VISITS"
                                   ? name
                                   : screenType == "DHARMASETU"
-                                      ? name
-                                      : "${name} Demographic Info",
+                                  ? name
+                                  : "${name} Demographic Info",
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -181,15 +182,15 @@ class _ListViewScreenState extends State<ListViewScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      Expanded(
-                        child: _infoTile(
-                          Icons.check_circle_outline,
-                          'Existing Visitor',
-                          _visit.existVisitor ? 'Yes' : 'No',
+                      // Expanded(
+                      //   child: _infoTile(
+                      //     Icons.check_circle_outline,
+                      //     'Existing Visitor',
+                      //     _visit.existVisitor ? 'Yes' : 'No',
 
-                          //valueColor: Colors.green,
-                        ),
-                      ),
+                      //     //valueColor: Colors.green,
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -341,8 +342,9 @@ class _ListViewScreenState extends State<ListViewScreen> {
                                     Radius.circular(8),
                                   ),
                                 ),
-                                padding:
-                                    const EdgeInsets.symmetric(vertical: 14),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
                               ),
                             ),
                           );
@@ -354,19 +356,22 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           onPressed: () {
                             widget.onViewMore();
                           },
-                          icon:
-                              const Icon(Icons.more_horiz, color: Colors.white),
+                          icon: const Icon(
+                            Icons.more_horiz,
+                            color: Colors.white,
+                          ),
                           label: Text(
                             screenType == "VISIT"
                                 ? 'View Full Details'
-                                : 'View more',
+                                : 'click to view more actions',
                             style: const TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue, // background color
                             shape: const RoundedRectangleBorder(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(8)),
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(8),
+                              ),
                             ),
                             padding: const EdgeInsets.symmetric(vertical: 14),
                           ),
@@ -403,12 +408,65 @@ class _ListViewScreenState extends State<ListViewScreen> {
       child: screenType == "JEEVANAADI_PROFILE"
           ? buildJeevandiDemographs(jeevanaadiUser)
           : Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
+                if (screenType == "USER_PROFILE") ...[
+                  Card(
+                    elevation: 2,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(10),
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade50,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.assignment_ind,
+                              color: Colors.orange,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: RichText(
+                              softWrap: true,
+                              text: TextSpan(
+                                style: DefaultTextStyle.of(context).style,
+                                children: [
+                                  const TextSpan(
+                                    text: "Karyakartha Assignments: ",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text:
+                                        "${jeevanaadiUser.karyakarthaAssignCount}",
+                                    style: const TextStyle(
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+
                 Text("User Activity"),
                 LinearProgressIndicator(
                   value: 0.5,
-                  
+
                   backgroundColor: Colors.grey[300],
                   valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
                 ),
@@ -418,52 +476,61 @@ class _ListViewScreenState extends State<ListViewScreen> {
   }
 
   Widget buildJeevandiDemographs(dynamic jeevanaadiUser) {
-    context
-        .read<DashboardBloc>()
-        .add(FetchDonationMetricsEvent(id: jeevanaadiUser.profileDetails.userId));
+    context.read<DashboardBloc>().add(
+      FetchDonationMetricsEvent(id: jeevanaadiUser.profileDetails.userId),
+    );
     return BlocBuilder<DashboardBloc, DashboardState?>(
-        builder: (context, state) {
-        
-      return Column(
-        children: [
-          ProfileScoreCard(
-            scores: jeevanaadiUser
-                    .jeevanaadiDemoGraphicDetails.percentageHistory.isNotEmpty
-                ? jeevanaadiUser.jeevanaadiDemoGraphicDetails.percentageHistory
-                : [
-                    jeevanaadiUser.jeevanaadiDemoGraphicDetails
-                        .profileCompletionPercentage,
-                  ],
-          ),
-          _sectionTitle('Donation Metrics'),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _infoTile(
-                  Icons.feedback_outlined,
-                  'Avg Donation Frequency',
-                  "${state?.donationMetrics?.monthyAvgFrequency ?? "N/A"} times/monthly ",
+      builder: (context, state) {
+        return Column(
+          children: [
+            ProfileScoreCard(
+              scores:
+                  jeevanaadiUser
+                      .jeevanaadiDemoGraphicDetails
+                      .percentageHistory
+                      .isNotEmpty
+                  ? jeevanaadiUser
+                        .jeevanaadiDemoGraphicDetails
+                        .percentageHistory
+                  : [
+                      jeevanaadiUser
+                          .jeevanaadiDemoGraphicDetails
+                          .profileCompletionPercentage,
+                    ],
+            ),
+            _sectionTitle('Donation Metrics'),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: 
+                  _infoTile(
+                    Icons.feedback_outlined,
+                    'Avg Donation Frequency',
+                    "${state?.donationMetrics?.monthlyAvgFrequency ?? "N/A"} times/monthly ",
+                  ),
+                  
                 ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: _infoTile(
-                  Icons.calendar_today,
-                  'Avg Donation Amount',
-                  "₹${state?.donationMetrics?.monthyAmountAvgFrequency.floor() ?? "N/A"}/monthly",
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _infoTile(
+                    Icons.calendar_today,
+                    'Avg Donation Amount',
+                    "₹${state?.donationMetrics?.monthlyAmountAvgFrequency?.toStringAsFixed(2) ?? "N/A"}",
+                    
+                  ),
                 ),
-              ),
-            ],
-          ),
-          _infoTile(
-            Icons.feedback_outlined,
-            'Total Donation Amount',
-            "₹ ${state?.donationMetrics?.totalContributions ?? "N/A"} ",
-          ),
-        ],
-      );
-    });
+              ],
+            ),
+            _infoTile(
+              Icons.feedback_outlined,
+              'Total Donation Amount',
+              "₹ ${state?.donationMetrics?.totalContributions?.toStringAsFixed(2) ?? "N/A"} ",
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 

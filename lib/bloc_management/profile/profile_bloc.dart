@@ -17,13 +17,10 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ) async {
     emit(state.copyWith(status: ProfileStatus.loading, profileErrorMsg: null));
     await Future.delayed(const Duration(seconds: 1), () {
-      // Code to execute after a 3-second delay
-      // print("3 seconds have passed!");
+    
     });
 
-    // final response = await profileRepo.getProfile(
-    //   "6457b959-7d6b-44d8-afd8-1fbcbcd639aa",
-    // );
+   
     final response = await profileRepo.getProfile(event.id);
 
     if (response.isSuccess) {

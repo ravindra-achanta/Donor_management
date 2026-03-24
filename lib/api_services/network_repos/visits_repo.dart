@@ -7,6 +7,7 @@ import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_service.dart';
+import 'package:vikas_app/screeens/models/request/VisitMetrics.dart';
 import 'package:vikas_app/screeens/models/response/visit_view.dart';
 
 class VisitRepository {
@@ -130,5 +131,21 @@ Future<ApiResult<void>> deleteVisit(String id) async {
   }
 
   return ApiResult.success(null);
+}
+Future<ApiResult<List<VisitMetrics>>> getVisitMetrics() async {
+  final result = await _api.get(ApiConstants.visitMetrics);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final List list = result.data;
+    return ApiResult.success(
+      list.map((e) => VisitMetrics.fromJson(e)).toList(),
+    );
+  } catch (e) {
+    return ApiResult.failure(ApiError(message: "Parsing error: $e"));
+  }
 }
 }

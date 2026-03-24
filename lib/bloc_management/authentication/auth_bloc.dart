@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
@@ -9,80 +11,103 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AuthRepository authRepository;
 
   AuthBloc({required this.authRepository}) : super(const AuthState()) {
-    on<LoginEvent>(_onLogin);
+    on<CheckLoginEvent>(_onCheckLogin);               // new
+    on<LoginWithRoleEvent>(_onLoginWithRole); 
+    // on<LoginWithRoleEvent>(_onLoginWithRole);
     on<FetchRolesEventByType>(_onFetchRolesBytype);
     on<CheckAuthStatusEvent>(_onCheckAuthStatus);
     on<CreateUserEvent>(_onCreateUser);
     //on<FetchAllUsersEvent>(_onFetchAllUsers);
     on<FetchRolesEvent>(_onFetchRoles);
     on<ChangePasswordEvent>(_onChangePassword);
+    on<ResetAuthEvent>((event, emit) => emit(const AuthState()));
   }
-
-  Future<void> _onLogin(LoginEvent event, Emitter<AuthState> emit) async {
-    emit(state.copyWith(status: AuthStatus.loading, errorMessage: ''));
-
-    final response = await authRepository.login(
-      event.mobileNumber,
-      event.password,
-      event.roleName,
-    );
-
-    if (response.isSuccess) {
-      final loginResponse = response.data!;
-
-      // Check if password needs to be changed
-      if (loginResponse.isPasswordChanged == false ||
-          loginResponse.isPasswordChanged == null) {
-        // Store login data temporarily and emit password change required state
-        emit(
-          state.copyWith(
-            status: AuthStatus.passwordChangeRequired,
-            userId: loginResponse.id,
-            token: loginResponse.token,
-            userType: UserType.values.firstWhere(
-              (type) =>
-                  type.toString().split('.').last == loginResponse.userType,
-              orElse: () => UserType.karyakartha,
-            ),
-            errorMessage: '',
-          ),
-        );
-        // Note: Token will be saved after successful password change
-      } else {
-        // Normal login flow - save credentials and navigate
-        emit(
-          state.copyWith(
-            status: AuthStatus.authenticated,
-            userId: loginResponse.id,
-            token: loginResponse.token,
-            userType: UserType.values.firstWhere(
-              (type) =>
-                  type.toString().split('.').last == loginResponse.userType,
-              orElse: () => UserType.karyakartha,
-            ),
-            errorMessage: '',
-          ),
-        );
-        print("saving token in login screen");
-        print(state.token);
-        print(state.userId);
-        print(state.userId);
-        await Vikasdb().setString("TOKEN", loginResponse.token);
-        await Vikasdb().setString("USER_ID", loginResponse.id.toString());
-        await Vikasdb().setUserType(
-          "USER_TYPE",
-          loginResponse.userType.toString(),
-        );
-      }
-    } else {
-      emit(
-        state.copyWith(
-          status: AuthStatus.error,
-          errorMessage: response.error?.message ?? "Login failed",
-        ),
-      );
-    }
+  Future<void> _onCheckLogin(CheckLoginEvent event, Emitter<AuthState> emit) async {
+  emit(state.copyWith(status: AuthStatus.loading, errorMessage: ''));
+  final response = await authRepository.checkLogin(
+    event.mobileNumber,
+    event.password,
+  );
+  if (response.isSuccess) {
+    emit(state.copyWith(
+      status: AuthStatus.loginChecked,
+      availableRoles: response.data,    
+      tempMobileNumber: event.mobileNumber,
+      errorMessage: '',
+    ));
+  } else {
+    emit(state.copyWith(
+      status: AuthStatus.error,
+      errorMessage: response.error?.message ?? 'Login check failed',
+    ));
   }
+}
+
+  // Future<void> _onCheckLogin(CheckLoginEvent event, Emitter<AuthState> emit) async {
+  //   emit(state.copyWith(status: AuthStatus.loading, errorMessage: ''));
+
+  //   final response = await authRepository.checkLogin(
+  //     event.mobileNumber,
+  //     event.password,
+  //    // event.roleName,
+  //   );
+
+  //   if (response.isSuccess) {
+  //     final loginResponse = response.data!;
+
+  //     // Check if password needs to be changed
+  //     if (loginResponse.isPasswordChanged == false ||
+  //         loginResponse.isPasswordChanged == null) {
+  //       // Store login data temporarily and emit password change required state
+  //       emit(
+  //         state.copyWith(
+  //           status: AuthStatus.passwordChangeRequired,
+  //           userId: loginResponse.id,
+  //           token: loginResponse.token,
+  //           userType: UserType.values.firstWhere(
+  //             (type) =>
+  //                 type.toString().split('.').last == loginResponse.userType,
+  //             orElse: () => UserType.karyakartha,
+  //           ),
+  //           errorMessage: '',
+  //         ),
+  //       );
+  //       // Note: Token will be saved after successful password change
+  //     } else {
+  //       // Normal login flow - save credentials and navigate
+  //       emit(
+  //         state.copyWith(
+  //           status: AuthStatus.authenticated,
+  //           userId: loginResponse.id,
+  //           token: loginResponse.token,
+  //           userType: UserType.values.firstWhere(
+  //             (type) =>
+  //                 type.toString().split('.').last == loginResponse.userType,
+  //             orElse: () => UserType.karyakartha,
+  //           ),
+  //           errorMessage: '',
+  //         ),
+  //       );
+  //       print("saving token in login screen");
+  //       print(state.token);
+  //       print(state.userId);
+  //       print(state.userId);
+  //       await Vikasdb().setString("TOKEN", loginResponse.token);
+  //       await Vikasdb().setString("USER_ID", loginResponse.id.toString());
+  //       await Vikasdb().setUserType(
+  //         "USER_TYPE",
+  //         loginResponse.userType.toString(),
+  //       );
+  //     }
+  //   } else {
+  //     emit(
+  //       state.copyWith(
+  //         status: AuthStatus.error,
+  //         errorMessage: response.error?.message ?? "Login failed",
+  //       ),
+  //     );
+  //   }
+  // }
 
   Future<void> _onCreateUser(
     CreateUserEvent event,
@@ -245,4 +270,51 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       emit(state.copyWith(status: AuthStatus.unauthenticated));
     }
   }
+
+ Future<void> _onLoginWithRole(LoginWithRoleEvent event, Emitter<AuthState> emit) async {
+  // 🛡️ Prevent multiple simultaneous requests
+  if (state.isLoading) return;
+
+  emit(state.copyWith(status: AuthStatus.loading, errorMessage: ''));
+  final response = await authRepository.loginWithRole(
+    event.mobileNumber,
+    event.roleName,
+  );
+  if (response.isSuccess) {
+    final loginResponse = response.data!;
+    if (loginResponse.isPasswordChanged == false ||
+        loginResponse.isPasswordChanged == null) {
+      emit(state.copyWith(
+        status: AuthStatus.passwordChangeRequired,
+        userId: loginResponse.id,
+        token: loginResponse.token,
+        userType: _mapUserType(loginResponse.userType),
+      ));
+    } else {
+      emit(state.copyWith(
+        status: AuthStatus.authenticated,
+        userId: loginResponse.id,
+        token: loginResponse.token,
+        userType: _mapUserType(loginResponse.userType),
+      ));
+      // Save credentials
+      await Vikasdb().setString("TOKEN", loginResponse.token);
+      await Vikasdb().setString("USER_ID", loginResponse.id.toString());
+      await Vikasdb().setUserType("USER_TYPE", loginResponse.userType.toString());
+      await Vikasdb().setString("USER_NAME", loginResponse.userNmae);
+    }
+  } else {
+    emit(state.copyWith(
+      status: AuthStatus.error,
+      errorMessage: response.error?.message ?? 'Login failed',
+    ));
+  }
 }
+
+ UserType _mapUserType(String? type) {
+  if (type == null) return UserType.karyakartha;
+  return UserType.values.firstWhere(
+    (e) => e.toString().split('.').last == type,
+    orElse: () => UserType.karyakartha,
+  );
+}}

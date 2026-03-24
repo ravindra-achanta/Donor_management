@@ -15,6 +15,17 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
     on<UpdateVisit>(_onUpdateVisit);
     on<DeleteVisit>(_onDeleteVisit);
     on<CloseVisitProfileView>(_onCloseProfileView);
+    on<LoadVisitMetrics>(_onLoadVisitMetrics);
+      on<ToggleChartView>((event, emit) {
+    emit(state.copyWith(showMonthlyChart: event.showMonthly));
+  });
+    on<SelectMonth>((event, emit) {
+    emit(state.copyWith(selectedMonthIndex: event.index));
+  });
+  on<ClearMonthSelection>((event, emit) {
+    emit(state.copyWith(selectedMonthIndex: null));
+  });
+
   }
 
   /// Fetch paginated visits list
@@ -98,7 +109,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         visitPurpose: visitView.visitPurpose,
         comments: visitView.comments,
         noOfGuests: visitView.noOfGuests,
-        existVisitor: visitView.existVisitor,
+       // existVisitor: visitView.existVisitor,
       );
 
       emit(state.copyWith(
@@ -129,7 +140,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         'visitPurpose': event.visit.visitPurpose,
         'comments': event.visit.comments,
         'noOfGuests': event.visit.noOfGuests,
-        'existVisitor': event.visit.existVisitor,
+        //'existVisitor': event.visit.existVisitor,
       };
 
       final result = await visitRepository.createVisit(visitJson);
@@ -171,7 +182,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
         'visitPurpose': event.visit.visitPurpose,
         'comments': event.visit.comments,
         'noOfGuests': event.visit.noOfGuests,
-        'existVisitor': event.visit.existVisitor,
+        //'existVisitor': event.visit.existVisitor,
       };
 
       final result = await visitRepository.updateVisit(
@@ -252,4 +263,27 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
       selectedVisit: null,
     ));
   }
+  Future<void> _onLoadVisitMetrics(
+  LoadVisitMetrics event,
+  Emitter<VisitState> emit,
+) async {
+  emit(state.copyWith(metricsLoading: true));
+
+  try {
+    final result = await visitRepository.getVisitMetrics();
+
+    if (!result.isSuccess || result.data == null) {
+      emit(state.copyWith(metricsLoading: false));
+      return;
+    }
+
+    emit(state.copyWith(
+      metrics: result.data!,
+      metricsLoading: false,
+    ));
+  } catch (e) {
+    emit(state.copyWith(metricsLoading: false));
+  }
+}
+
 }

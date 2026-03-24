@@ -147,7 +147,6 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
 
-                    _buildRangeSelector(),
 
                   ],
                 ),
@@ -167,56 +166,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  /// RANGE SELECTOR
-  Widget _buildRangeSelector() {
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(30),
-      ),
-
-      child: Row(
-
-        children: ["Week", "Month", "Year"].map((item) {
-
-          final isSelected = selectedRange == item;
-
-          return GestureDetector(
-
-            onTap: () => setState(() => selectedRange = item),
-
-            child: Container(
-
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 8,
-              ),
-
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.blue : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-
-              child: Text(
-                item,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.grey.shade700,
-                ),
-              ),
-            ),
-          );
-
-        }).toList(),
-      ),
-    );
-  }
 
  Widget _buildStatsGrid() {
   return  StatsGrid();

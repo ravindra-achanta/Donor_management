@@ -28,16 +28,16 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController passwordController = TextEditingController();
   bool showPassword = false;
   UserType? selectedUserType;
-  List<Role> roles = []; // ← store fetched roles
-  bool isLoadingRoles = false; // ← loading indicator for dropdown
-  Role? selectedRole;
+  List<Role> roles = [];
+
+  String? selectedRole;
 
   @override
   void initState() {
     super.initState();
     emailController.addListener(_resetErrorMessage);
     passwordController.addListener(_resetErrorMessage);
-    _fetchRoles();
+    //_fetchRoles();
   }
 
   @override
@@ -57,24 +57,28 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void _handleLogin(BuildContext context) {
+  void _handleCheckLogin(BuildContext context) {
     if (!_formKey.currentState!.validate()) return;
 
+    final mobileNumber = emailController.text.trim();
+    final password = passwordController.text;
+
+    context.read<AuthBloc>().add(
+      CheckLoginEvent(mobileNumber: mobileNumber, password: password),
+    );
+  }
+
+  void _handleLoginWithRole(BuildContext context) {
     if (selectedRole == null) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text('Please select a role')));
       return;
     }
-
-    final mobileNumber = emailController.text.trim();
-    final password = passwordController.text;
-
     context.read<AuthBloc>().add(
-      LoginEvent(
-        mobileNumber: mobileNumber,
-        password: password,
-        roleName: selectedRole!.roleName,
+      LoginWithRoleEvent(
+        mobileNumber: emailController.text.trim(),
+        roleName: selectedRole!,
       ),
     );
   }
@@ -106,23 +110,6 @@ class _LoginPageState extends State<LoginPage> {
               child: FxFlex(
                 contentPadding: false,
                 children: [
-                  // FxFlexItem(
-                  //   sizes: "lg-6",
-                  //   child: Center(
-                  //     child: LayoutBuilder(
-                  //       builder: (context, constraints) {
-                  //         double imageHeight = constraints.maxWidth > 1200
-                  //             ? 520
-                  //             : 380;
-                  //         return Image.asset(
-                  //           'assets/images/student.png',
-                  //           height: imageHeight,
-                  //           fit: BoxFit.contain,
-                  //         );
-                  //       },
-                  //     ),
-                  //   ),
-                  // ),
                   FxFlexItem(
                     sizes: "lg-6",
                     child: FxResponsive(
@@ -312,118 +299,87 @@ class _LoginPageState extends State<LoginPage> {
 
                             FxSpacing.height(16),
 
-                            // Role Dropdown
-                            if (isLoadingRoles)
-                              const Center(
-                                child: Padding(
-                                  padding: EdgeInsets.all(16.0),
-                                  child: CircularProgressIndicator(),
-                                ),
-                              )
-                            else if (roles.isEmpty)
-                              Center(
-                                child: Padding(
-                                  padding: const EdgeInsets.all(16.0),
-                                  child: FxText.bodySmall(
-                                    'No roles available',
-                                    color: Colors.red,
-                                  ),
-                                ),
-                              )
-                            else
+                            if (state.isLoginChecked &&
+                                state.availableRoles != null) ...[
                               FxText.labelMedium("Select Role"),
-                            FxSpacing.height(10),
-
-                            DropdownButtonFormField<Role>(
-                              value: selectedRole,
-                              isExpanded: true,
-                              decoration: InputDecoration(
-                                // labelText: "Select Role",
-                                labelStyle: FxTextStyle.bodySmall(xMuted: true),
-                                filled: true,
-                                fillColor: Colors.grey.shade100,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 18,
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(
-                                    color: Colors.brown.shade300,
-                                    width: 1,
+                              FxSpacing.height(10),
+                              DropdownButtonFormField<String>(
+                                value: selectedRole,
+                                isExpanded: true,
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  fillColor: Colors.grey.shade100,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 18,
                                   ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: const BorderSide(
-                                    color: Colors.brown,
-                                    width: 1.5,
-                                  ),
-                                ),
-                              ),
-                              dropdownColor: Colors.grey.shade100,
-                              style: const TextStyle(
-                                color: Colors.brown,
-                                fontSize: 16,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              icon: const Icon(
-                                LucideIcons.chevronDown,
-                                color: Colors.brown,
-                              ),
-                              validator: (value) =>
-                                  value == null ? 'Please select a role' : null,
-                              items: roles.map((Role role) {
-                                return DropdownMenuItem<Role>(
-                                  value: role,
-                                  child: Text(
-                                    role.displayName,
-                                    style: const TextStyle(
-                                      color: Colors.brown,
-                                      fontSize: 16,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: BorderSide(
+                                      color: Colors.brown.shade300,
+                                      width: 1,
                                     ),
                                   ),
-                                );
-                              }).toList(),
-                              onChanged: (Role? value) {
-                                setState(() => selectedRole = value);
-                              },
-                              selectedItemBuilder: (context) {
-                                return roles.map((Role role) {
-                                  return Text(
-                                    role.displayName,
-                                    style: const TextStyle(
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                    borderSide: const BorderSide(
                                       color: Colors.brown,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
+                                      width: 1.5,
                                     ),
+                                  ),
+                                ),
+                                dropdownColor: Colors.grey.shade100,
+                                style: const TextStyle(
+                                  color: Colors.brown,
+                                  fontSize: 16,
+                                ),
+                                icon: const Icon(
+                                  LucideIcons.chevronDown,
+                                  color: Colors.brown,
+                                ),
+                                items: state.availableRoles!.map((role) {
+                                  return DropdownMenuItem<String>(
+                                    value: role,
+                                    child: Text(role),
                                   );
-                                }).toList();
-                              },
-                            ),
+                                }).toList(),
+                                onChanged: (value) =>
+                                    setState(() => selectedRole = value),
+                                hint: const Text('Choose role'),
+                              ),
+                              FxSpacing.height(8),
 
+                              // Optional "Change user" button to reset
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: [
+                                  TextButton(
+                                    onPressed: () => _resetLogin(context),
+                                    child: const Text('Change user'),
+                                  ),
+                                ],
+                              ),
+                            ],
+
+                            // Error message (keep as is)
                             if (state.isError && state.errorMessage != null)
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10),
                                 child: FxText(
                                   state.errorMessage!,
-                                  style: const TextStyle(
-                                    color: Colors.red,
-                                    fontSize: 16,
-                                  ),
+                                  style: const TextStyle(color: Colors.red),
                                 ),
                               ),
 
                             FxSpacing.height(10),
-
                             // Login Button
                             Center(
                               child: FxButton.rounded(
                                 onPressed: state.isLoading
                                     ? null
-                                    : () {
-                                        _handleLogin(context);
-                                      },
+                                    : state.isLoginChecked
+                                    ? () => _handleLoginWithRole(context)
+                                    : () => _handleCheckLogin(context),
                                 elevation: 0,
                                 padding: FxSpacing.xy(20, 16),
                                 backgroundColor: Colors.brown,
@@ -431,19 +387,20 @@ class _LoginPageState extends State<LoginPage> {
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     if (state.isLoading)
-                                      SizedBox(
+                                      const SizedBox(
                                         height: 14,
                                         width: 14,
                                         child: CircularProgressIndicator(
-                                          color: Theme.of(
-                                            context,
-                                          ).colorScheme.onPrimary,
                                           strokeWidth: 1.2,
                                         ),
                                       ),
                                     if (state.isLoading) FxSpacing.width(16),
                                     FxText.bodySmall(
-                                      'Login',
+                                      state.isLoginChecked
+                                          ? (selectedRole == null
+                                                ? 'Select a role'
+                                                : 'Login as $selectedRole')
+                                          : 'Login',
                                       color: Colors.white,
                                     ),
                                   ],
@@ -463,21 +420,9 @@ class _LoginPageState extends State<LoginPage> {
       },
     );
   }
-
-  Future<void> _fetchRoles() async {
-    setState(() => isLoadingRoles = true);
-    final result = await AuthRepository().getRoles("");
-    setState(() {
-      if (result.isSuccess) {
-        roles = result.data ?? [];
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to load roles: ${result.error?.message}'),
-          ),
-        );
-      }
-      isLoadingRoles = false;
-    });
-  }
+  
+ void _resetLogin(BuildContext context) {
+  context.read<AuthBloc>().add(ResetAuthEvent());
+  setState(() => selectedRole = null);
+}
 }

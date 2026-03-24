@@ -7,19 +7,35 @@ abstract class AuthEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class LoginEvent extends AuthEvent {
+// class LoginEvent extends AuthEvent {
+//   final String mobileNumber;
+//   final String password;
+//   //final String roleName;
+
+//   LoginEvent({
+//     required this.mobileNumber,
+//     required this.password,
+//     //required this.roleName,
+//   });
+
+//   @override
+//   List<Object?> get props => [mobileNumber, password];
+// }
+
+class CheckLoginEvent extends AuthEvent {
   final String mobileNumber;
   final String password;
-  final String roleName;
-
-  LoginEvent({
-    required this.mobileNumber,
-    required this.password,
-    required this.roleName,
-  });
-
+   CheckLoginEvent({required this.mobileNumber, required this.password});
   @override
   List<Object?> get props => [mobileNumber, password];
+}
+class ResetAuthEvent extends AuthEvent {}
+class LoginWithRoleEvent extends AuthEvent {
+  final String mobileNumber;
+  final String roleName;
+   LoginWithRoleEvent({required this.mobileNumber, required this.roleName});
+  @override
+  List<Object?> get props => [mobileNumber, roleName];
 }
 
 class CreateUserEvent extends AuthEvent {

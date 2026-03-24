@@ -8,7 +8,7 @@ class VisitModel {
   final String visitPurpose;
   final String comments;
   final int noOfGuests;
-  final bool existVisitor;
+  final String? jeevanaadiId; 
 
   VisitModel({
     required this.id,
@@ -18,7 +18,7 @@ class VisitModel {
     required this.visitPurpose,
     required this.comments,
     required this.noOfGuests,
-    required this.existVisitor,
+    this.jeevanaadiId,
   });
 
   factory VisitModel.fromJson(Map<String, dynamic> json) {
@@ -30,7 +30,7 @@ class VisitModel {
       visitPurpose: json['visitPurpose'] ?? '',
       comments: json['comments'] ?? '',
       noOfGuests: json['noOfGuests'] ?? 0,
-      existVisitor: json['existVisitor'] ?? false,
+      jeevanaadiId: json['jeevanaadiId']?.toString(),
     );
   }
 
@@ -43,7 +43,7 @@ class VisitModel {
       'visitPurpose': visitPurpose,
       'comments': comments,
       'noOfGuests': noOfGuests,
-      'existVisitor': existVisitor,
+      'jeevanaadiId': jeevanaadiId,
     };
   }
 }

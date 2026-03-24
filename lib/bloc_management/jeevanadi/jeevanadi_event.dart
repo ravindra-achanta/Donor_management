@@ -158,5 +158,12 @@ class ApproveJeevanaadiEvent extends JeevanaadiEvent {
   List<Object?> get props => [jeevanadiId];
 }
 
+class SearchJeevanaadiUsersEvent extends JeevanaadiEvent {
+  final String query;
+  SearchJeevanaadiUsersEvent(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}
 
 

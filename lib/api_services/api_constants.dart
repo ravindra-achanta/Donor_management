@@ -1,6 +1,6 @@
 class ApiConstants {
-  // static const String baseUrl = "http://172.235.18.48:8050";
-   static const String baseUrl = "https://vikas.vidyaranyam.in";
+   static const String baseUrl = "http://172.235.18.48:8050";
+   //static const String baseUrl = "https://vikas.vidyaranyam.in";
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -22,6 +22,9 @@ class ApiConstants {
   static const String UPDATE_PROFILE = "$IDM_URI/user";
   //roles
   static const String GET_ROLES = "${role_URI}/roles";
+   static const String CHECK_LOGIN = "$IDM_URI/user";
+  static const String LOGIN_WITH_ROLE = "$IDM_URI/user";
+static const String jeevandi_search = "${JEEVANADI_URI}/users/";
 
   //jeevanadi
   static const String GET_JEEVANAADIS = "${JEEVANADI_URI}/users";
@@ -47,6 +50,7 @@ class ApiConstants {
   static const String visitsUpdate = "$VIKAS/visits";
   static const String visitsDetails = "$VIKAS/visits";
   static const String visitsDelete = "$VIKAS/visits";
+   static const String visitMetrics = "$VIKAS/visits/charts/metric";
 
   static const String DHARMASETU_LIST = "$VIKAS/dharmasetu/list";
   static const String DHARMASETU_GET_BY_ID = "$VIKAS/dharmasetu";

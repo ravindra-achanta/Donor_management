@@ -88,7 +88,7 @@ class StatsGrid extends StatelessWidget {
                   StatCard(
                     title: "Total Vikas Users",
                     value: "${metrics.activeKaryakarthas+metrics.activeStaff+metrics.activeAdmins}",
-                    icon: Icons.groups_rounded,
+                    icon: Icons.people_alt_rounded,
                     color: Colors.indigo,
                     screenWidth: constraints.maxWidth,
                   ),
@@ -142,7 +142,7 @@ class StatsGrid extends StatelessWidget {
                   StatCard(
                     title: "InProgress Requests",
                     value: "${metrics.inProgressRequests}",
-                    icon: Icons.pending_actions,
+                    icon: Icons.hourglass_top,
                     color: Colors.orange,
                     screenWidth: constraints.maxWidth,
                   ),

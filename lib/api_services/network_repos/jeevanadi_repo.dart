@@ -3,8 +3,10 @@ import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
+import 'package:vikas_app/screeens/models/request/VisitMetrics.dart';
 import 'package:vikas_app/screeens/models/request/allocate_members_request.dart';
 import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadi_paginated_view.dart';
 
 class JeevanadiRepo {
@@ -291,7 +293,7 @@ class JeevanadiRepo {
   }
 
 Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) async {
-  final url = ApiConstants.approverequest + "/$jeevanadiId/approve";
+  final url = ApiConstants.approverequest + "$jeevanadiId/approve";
   
 
   final result = await _api.put(url,body: {}); 
@@ -304,4 +306,24 @@ Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) as
   print('✅ Jeevanaadi approved successfully');
   return ApiResult.success(result.data);
 }
+
+
+Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(String query) async {
+  final url = "${ApiConstants.jeevandi_search}search/$query";
+  final result = await _api.get(url);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final List<dynamic> data = result.data;
+    final users = data.map((json) => JeevanaadiUser.fromJson(json)).toList();
+    return ApiResult.success(users);
+  } catch (e) {
+    return ApiResult.failure(ApiError(message: "Parsing error: $e"));
+  }
+}
+
+
 }
