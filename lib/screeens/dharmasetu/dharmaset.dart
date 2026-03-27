@@ -6,6 +6,7 @@ import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
@@ -200,13 +201,17 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                                     },
                                   ),
                                   const SizedBox(width: 8),
-                                  ElevatedButton.icon(
-                                    onPressed: () {
-                                      Get.toNamed('/add/dharmasetu');
-                                    },
-                                    icon: const Icon(Icons.add),
-                                    label: const Text("Add Dharmasetu"),
-                                  ),
+                                  if (Vikasdb().getString("USER_TYPE") ==
+                                          "OFFICE_STAFF" ||
+                                      Vikasdb().getString("USER_TYPE") ==
+                                          "KARYAKARTHA")
+                                    AddButton().addButton(
+                                      context: context,
+                                      buttonText: "Add Dharmasetu",
+                                      onClicked: () {
+                                        Get.toNamed('/add/dharmasetu');
+                                      },
+                                    ),
                                 ],
                               ),
                             ],

@@ -8,6 +8,7 @@ import 'package:vikas_app/images.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/localizations/language.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
+import 'package:vikas_app/screeens/models/enum/user_type.dart';
 import 'package:vikas_app/themes/app_notifier.dart';
 import 'package:vikas_app/themes/app_style.dart';
 import 'package:vikas_app/themes/theme_customizer.dart';
@@ -343,6 +344,57 @@ class _TopBarState extends State<TopBar>
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
+                            FxSpacing.width(8),
+                            Text.rich(
+                              TextSpan(
+                                children: [
+                                  const TextSpan(
+                                    text: "Welcome  ",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+
+                                  TextSpan(
+                                    text:
+                                        (Vikasdb()
+                                                .getString("USER_NAME")
+                                                ?.isNotEmpty ==
+                                            true)
+                                        ? Vikasdb().getString("USER_NAME")!
+                                        : "User",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const TextSpan(text: " "),
+                                  const TextSpan(
+                                    text: "(",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: _getUserDisplayName(),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: ")",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            FxSpacing.width(8),
                             FxContainer.rounded(
                               paddingAll: 0,
                               child: Image.network(
@@ -353,10 +405,6 @@ class _TopBarState extends State<TopBar>
                                 errorBuilder: (context, error, stackTrace) =>
                                     const Icon(Icons.person, size: 28),
                               ),
-                            ),
-                            FxSpacing.width(8),
-                            FxText.labelLarge(
-                              Vikasdb().getString("USER_NAME"),
                             ),
                           ],
                         ),
@@ -636,5 +684,19 @@ class _TopBarState extends State<TopBar>
         ],
       ),
     );
+  }
+
+  String _getUserDisplayName() {
+    final String? typeStr = Vikasdb().getString("USER_TYPE");
+    if (typeStr == null || typeStr.isEmpty) {
+      return "User"; // fallback
+    }
+
+    try {
+      final UserType userType = UserType.fromString(typeStr);
+      return userType.displayName;
+    } catch (e) {
+      return "User";
+    }
   }
 }

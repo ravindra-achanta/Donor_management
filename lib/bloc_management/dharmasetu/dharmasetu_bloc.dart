@@ -160,7 +160,7 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
       emit(
         state.copyWith(
           isSubmitting: false,
-          successMessage: 'Dharmasetu added successfully',
+          //successMessage: 'Dharmasetu added successfully',
         ),
       );
     } catch (e) {
@@ -218,7 +218,7 @@ class DharmasetuBloc extends Bloc<DharmasetuEvent, DharmasetuState> {
       emit(
         state.copyWith(
           isSubmitting: false,
-          //successMessage: 'Dharmasetu updated successfully',
+          successMessage: 'Dharmasetu updated successfully',
         ),
       );
     } catch (e) {

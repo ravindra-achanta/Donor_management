@@ -8,6 +8,7 @@ import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/common_search_bar.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/screeens/common/stats_grid.dart';
@@ -22,11 +23,29 @@ class Users extends StatefulWidget {
 }
 
 class _UsersState extends State<Users> {
+  final TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    context.read<UserBloc>().add(FetchUsersEvent(page: 0));
+    context.read<UserBloc>().add(FetchUsersEvent(page: 0, size: 10));
+  }
+
+  void _callSearchApi() {
+    final query = _searchController.text.trim();
+    context.read<UserBloc>().add(
+      FetchUsersEvent(
+        page: 0,
+        size: 10,
+        searchQuery: query.isNotEmpty ? query : null,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -41,7 +60,7 @@ class _UsersState extends State<Users> {
               builder: (context, state) {
                 switch (state?.status) {
                   case UserScreenState.loading:
-                    return ScreenLoader();
+                    return const ScreenLoader();
                   case UserScreenState.error:
                     return Center(
                       child: ErrorCard(message: state?.errorMessage ?? ""),
@@ -54,36 +73,57 @@ class _UsersState extends State<Users> {
                           child: Column(
                             children: [
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
-                                    // const Text(
-                                    //   "All Users",
-                                    //   style: TextStyle(
-                                    //     fontSize: 18,
-                                    //     fontWeight: FontWeight.bold,
-                                    //   ),
-                                    // ),
-                                               Row(
-            children: [
-              const Text(
-                "All Users :",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(width: 8),
-              Chip(
-                label: Text('${state!.totalElements}'),
-                avatar: const Icon(Icons.people, size: 18),
-                backgroundColor: Colors.grey.shade200,
-              ),
-            ],
-                  ),
+                                    // Count chip
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          "All Users :",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Chip(
+                                          label: Text(
+                                            '${state!.totalElements}',
+                                          ),
+                                          avatar: const Icon(
+                                            Icons.people,
+                                            size: 18,
+                                          ),
+                                          backgroundColor: Colors.grey.shade200,
+                                        ),
+                                      ],
+                                    ),
+                                    // Search bar
+                                    CommonSearchBar(
+                                      controller: _searchController,
+                                      hintText: "Search users...",
+                                      onSearch: (value) {
+                                        context.read<UserBloc>().add(
+                                          FetchUsersEvent(
+                                            page: 0,
+                                            size: 10,
+                                            searchQuery: value.isNotEmpty
+                                                ? value
+                                                : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                    // Add button
                                     AddButton().addButton(
                                       context: context,
                                       buttonText: "Add New User",
                                       onClicked: () {
-                                        //Get.toNamed('/register');
                                         Get.to(
                                           () => RegistrationPage(
                                             title: "Add New User",
@@ -111,7 +151,6 @@ class _UsersState extends State<Users> {
                                         );
                                       },
                                       onDelete: (id) {},
-                                      // onUpdate: (id) {},
                                       onUpdate: (id) {
                                         try {
                                           final user = state?.users?.firstWhere(
@@ -128,27 +167,39 @@ class _UsersState extends State<Users> {
                                             );
                                           }
                                         } catch (e) {
-                                          debugPrint('User not found with id: $id');
+                                          debugPrint(
+                                            'User not found with id: $id',
+                                          );
                                         }
                                       },
                                     ),
-                                    // const SizedBox(height: 16),
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 50),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 50,
+                                      ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             onPressed: () {
                                               if (state!.currentPage > 0) {
+                                                final query = _searchController
+                                                    .text
+                                                    .trim();
                                                 context.read<UserBloc>().add(
                                                   FetchUsersEvent(
                                                     page: state.currentPage - 1,
+                                                    size: 10,
+                                                    searchQuery:
+                                                        query.isNotEmpty
+                                                        ? query
+                                                        : null,
                                                   ),
                                                 );
                                               }
                                             },
-                                            icon: Icon(
+                                            icon: const Icon(
                                               Icons.skip_previous_outlined,
                                             ),
                                           ),
@@ -159,16 +210,26 @@ class _UsersState extends State<Users> {
                                             onPressed: () {
                                               if (state!.currentPage <
                                                   state!.totalpages - 1) {
+                                                final query = _searchController
+                                                    .text
+                                                    .trim();
                                                 context.read<UserBloc>().add(
                                                   FetchUsersEvent(
                                                     page: state.currentPage + 1,
+                                                    size: 10,
+                                                    searchQuery:
+                                                        query.isNotEmpty
+                                                        ? query
+                                                        : null,
                                                   ),
                                                 );
                                               }
                                             },
-                                            icon: Icon(Icons.skip_next_outlined),
+                                            icon: const Icon(
+                                              Icons.skip_next_outlined,
+                                            ),
                                           ),
-                                          SizedBox(height: 16),
+                                          const SizedBox(height: 16),
                                         ],
                                       ),
                                     ),
@@ -181,12 +242,11 @@ class _UsersState extends State<Users> {
                         if (state?.isProfileViewVisible == true &&
                             state?.profileLoading != null)
                           Expanded(
-                            flex: 3, // 30%
+                            flex: 3,
                             child: AnimatedSwitcher(
                               duration: const Duration(seconds: 1),
                               switchInCurve: Curves.easeOutCubic,
                               switchOutCurve: Curves.easeInCubic,
-            
                               layoutBuilder: (currentChild, previousChildren) {
                                 return Stack(
                                   alignment: Alignment.center,
@@ -196,21 +256,15 @@ class _UsersState extends State<Users> {
                                   ],
                                 );
                               },
-            
                               transitionBuilder: (child, animation) {
                                 final slideAnimation = Tween<Offset>(
-                                  begin: const Offset(
-                                    0.05,
-                                    0,
-                                  ), // slight slide from right
+                                  begin: const Offset(0.05, 0),
                                   end: Offset.zero,
                                 ).animate(animation);
-            
                                 final fadeAnimation = Tween<double>(
                                   begin: 0.0,
                                   end: 1.0,
                                 ).animate(animation);
-            
                                 return FadeTransition(
                                   opacity: fadeAnimation,
                                   child: SlideTransition(
@@ -219,16 +273,15 @@ class _UsersState extends State<Users> {
                                   ),
                                 );
                               },
-            
                               child: state?.profileLoading ?? false
-                                  ? ScreenLoader(key: ValueKey('loader'))
+                                  ? const ScreenLoader(key: ValueKey('loader'))
                                   : state?.profileErrorMsg != null
                                   ? ErrorCard(
-                                      key: ValueKey('error'),
+                                      key: const ValueKey('error'),
                                       message: state?.profileErrorMsg ?? "",
                                     )
                                   : ListViewScreen(
-                                      key: ValueKey('profile'),
+                                      key: const ValueKey('profile'),
                                       data: state?.user,
                                       screenType: "USER_PROFILE",
                                       onClose: () {
@@ -244,7 +297,7 @@ class _UsersState extends State<Users> {
                       ],
                     );
                   default:
-                    return ScreenLoader();
+                    return const ScreenLoader();
                 }
               },
             ),

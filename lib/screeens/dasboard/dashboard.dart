@@ -51,18 +51,25 @@ class _DashboardState extends State<Dashboard> {
   }
 
   /// START NOTICE QUEUE
-  void _startNoticeQueue(List<NoticeResponse> notices) {
+void _startNoticeQueue(List<NoticeResponse> notices) {
+  if (notices.isEmpty || _isShowing) return;
 
-    if (notices.isEmpty || _isShowing) return;
-
-    _pendingNotices.clear();
-    _pendingNotices.addAll(notices);
-
-    _currentNoticeIndex = 0;
-    _isShowing = true;
-
-    _showNextNotice();
+  /// ✅ prevent re-trigger for same data
+  //if (_pendingNotices.isNotEmpty) return;
+   final uniqueNotices = <int, NoticeResponse>{};
+  for (var notice in notices) {
+    
+    
   }
+
+  _pendingNotices.clear();
+  _pendingNotices.addAll(notices);
+
+  _currentNoticeIndex = 0;
+  _isShowing = true;
+
+  _showNextNotice();
+}
 
   /// SHOW NEXT NOTICE
   void _showNextNotice() {
@@ -73,6 +80,7 @@ class _DashboardState extends State<Dashboard> {
     }
 
     final notice = _pendingNotices[_currentNoticeIndex];
+     bool closed = false;
 
     NoticePopup.show(
       context: context,
@@ -107,21 +115,17 @@ class _DashboardState extends State<Dashboard> {
 
         listeners: [
 
-          /// NOTICE LISTENER
           BlocListener<NoticeBloc, NoticeState>(
-            listener: (context, state) {
-
-              if (state.status == NoticeStatus.success &&
-                  state.notices.isNotEmpty) {
-
-                _startNoticeQueue(state.notices);
-              }
-
-              if (state.status == NoticeStatus.failure) {
-                debugPrint("Notice Error: ${state.errorMessage}");
-              }
-            },
-          ),
+  listenWhen: (previous, current) {
+    return previous.status != current.status &&
+           current.status == NoticeStatus.success;
+  },
+  listener: (context, state) {
+    if (state.notices.isNotEmpty) {
+      _startNoticeQueue(state.notices);
+    }
+  },
+),
 
         ],
 
@@ -147,7 +151,6 @@ class _DashboardState extends State<Dashboard> {
                       ),
                     ),
 
-                    _buildRangeSelector(),
 
                   ],
                 ),
@@ -167,56 +170,6 @@ class _DashboardState extends State<Dashboard> {
     );
   }
 
-  /// RANGE SELECTOR
-  Widget _buildRangeSelector() {
-
-    return Container(
-      padding: const EdgeInsets.all(4),
-
-      decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(30),
-      ),
-
-      child: Row(
-
-        children: ["Week", "Month", "Year"].map((item) {
-
-          final isSelected = selectedRange == item;
-
-          return GestureDetector(
-
-            onTap: () => setState(() => selectedRange = item),
-
-            child: Container(
-
-              padding: const EdgeInsets.symmetric(
-                horizontal: 18,
-                vertical: 8,
-              ),
-
-              decoration: BoxDecoration(
-                color: isSelected ? Colors.blue : Colors.transparent,
-                borderRadius: BorderRadius.circular(20),
-              ),
-
-              child: Text(
-                item,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: isSelected
-                      ? Colors.white
-                      : Colors.grey.shade700,
-                ),
-              ),
-            ),
-          );
-
-        }).toList(),
-      ),
-    );
-  }
 
  Widget _buildStatsGrid() {
   return  StatsGrid();

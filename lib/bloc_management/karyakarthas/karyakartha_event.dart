@@ -7,7 +7,9 @@ abstract class KaryakarthaEvent extends Equatable {
 
 class FetchKaryakattasEvent extends KaryakarthaEvent {
   final int page;
-  FetchKaryakattasEvent(this.page);
+  final String? searchQuery;
+
+  FetchKaryakattasEvent(this.page, [this.searchQuery]);
 }
 
 class CloseProfileView extends KaryakarthaEvent {}

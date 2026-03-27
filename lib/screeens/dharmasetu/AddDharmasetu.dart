@@ -5,6 +5,7 @@ import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
+import 'package:vikas_app/screeens/common/referred_by_dropdown.dart';
 import 'package:vikas_app/screeens/models/request/dharmasetu_model.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
@@ -50,9 +51,11 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   final _feedbackController = TextEditingController();
   final _dateController = TextEditingController();
   final _referredByController = TextEditingController();
+  
 
   DharmasetuType? _selectedType;
   DharmasetuStatus? _selectedStatus;
+  Map<String, dynamic>? _selectedReferredBy; 
 
   bool _isSubmitting = false;
   bool _isLoading = false;
@@ -266,12 +269,14 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
                   child: CircularProgressIndicator(),
                 )
               : Card(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: SingleChildScrollView(
+  elevation: 4,
+  shadowColor: Colors.blueGrey.withOpacity(0.2),
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.all(32),
+    child: SingleChildScrollView(
                 child: Form(
                   key: _formKey,
                   child: Column(
@@ -284,16 +289,16 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (isUpdate) ...[
-                        const SizedBox(height: 8),
-                        Text(
-                          'ID: ${widget.dharmasetu?.dharmasetuId ?? widget.dharmasetu?.id ?? model?.dharmasetuId ?? model?.id}',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ],
+                      // if (isUpdate) ...[
+                      //   const SizedBox(height: 8),
+                      //   Text(
+                      //     'ID: ${widget.dharmasetu?.dharmasetuId ?? widget.dharmasetu?.id ?? model?.dharmasetuId ?? model?.id}',
+                      //     style: TextStyle(
+                      //       fontSize: 14,
+                      //       color: Colors.grey[600],
+                      //     ),
+                      //   ),
+                      // ],
                       const SizedBox(height: 24),
 
                       // Type Selection
@@ -305,25 +310,13 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
 
                       const SizedBox(height: 24),
 
-                      // Common fields for all types
-                      const Text(
-                        'Common Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
+                      
 
                       // Date and Referred By
-                      _twoFieldRow(
-                        _dateField(),
-                        _textField(
-                          'Referred By',
-                          _referredByController,
-                          required: true,
-                        ),
-                      ),
+                     _twoFieldRow(
+  _dateField(),
+  _buildReferredByField(),   // <-- new widget
+),
 
                       const SizedBox(height: 16),
 
@@ -503,94 +496,120 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   }
 
   Widget _typeDropdown(bool isUpdate) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Select Type *',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          children: DharmasetuType.values.map((type) {
-            return ChoiceChip(
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Type *',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 12),
+      SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: SegmentedButton<DharmasetuType>(
+          segments: DharmasetuType.values.map((type) {
+            return ButtonSegment<DharmasetuType>(
+              value: type,
               label: Text(type.name),
-              selected: _selectedType == type,
-              onSelected: _isSubmitting || isUpdate
-                  ? null // Disable type change during update
-                  : (selected) {
-                      setState(() {
-                        _selectedType = type;
-                        // Clear type-specific fields when type changes
-                        _communityNameController.clear();
-                        _pointOfContactController.clear();
-                        _addressController.clear();
-                        _cityController.clear();
-                        _stateController.clear();
-                        _countryController.clear();
-                        _pincodeController.clear();
-                        _meetingLinkController.clear();
-                      });
-                    },
-              selectedColor: _getTypeColor(type),
+              icon: Icon(_getTypeIcon(type)),
             );
           }).toList(),
-        ),
-        if (isUpdate)
-          Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Text(
-              'Type cannot be changed during update',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
-                fontStyle: FontStyle.italic,
-              ),
-            ),
+          selected: _selectedType != null ? {_selectedType!} : {},
+          onSelectionChanged: _isSubmitting || isUpdate
+              ? null
+              : (Set<DharmasetuType> newSelection) {
+                  setState(() {
+                    _selectedType = newSelection.first;
+                    // Clear type-specific fields when type changes
+                    _communityNameController.clear();
+                    _pointOfContactController.clear();
+                    _addressController.clear();
+                    _cityController.clear();
+                    _stateController.clear();
+                    _countryController.clear();
+                    _pincodeController.clear();
+                    _meetingLinkController.clear();
+                  });
+                },
+          style: SegmentedButton.styleFrom(
+            foregroundColor: Colors.grey[700],
+            selectedForegroundColor: Colors.white,
+            selectedBackgroundColor: _getTypeColor(_selectedType),
+            backgroundColor: Colors.grey[100],
+            side: BorderSide.none,
           ),
-      ],
-    );
-  }
+        ),
+      ),
+      if (isUpdate) const SizedBox(height: 8),
+      if (isUpdate)
+        Text(
+          'Type cannot be changed during update',
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.grey[600],
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+    ],
+  );
+}
 
-  Color _getTypeColor(DharmasetuType type) {
-    switch (type) {
-      case DharmasetuType.COMMUNITY:
-        return Colors.orange.shade100;
-      case DharmasetuType.HOME:
-        return Colors.teal.shade100;
-      case DharmasetuType.ONLINE:
-        return Colors.purple.shade100;
-      default:
-        return Colors.grey.shade100;
-    }
+IconData _getTypeIcon(DharmasetuType type) {
+  switch (type) {
+    case DharmasetuType.COMMUNITY:
+      return Icons.group;
+    case DharmasetuType.HOME:
+      return Icons.home;
+    case DharmasetuType.ONLINE:
+      return Icons.videocam;
   }
+}
+
+Color _getTypeColor(DharmasetuType? type) {
+  switch (type) {
+    case DharmasetuType.COMMUNITY:
+      return Colors.orange;
+    case DharmasetuType.HOME:
+      return Colors.teal;
+    case DharmasetuType.ONLINE:
+      return Colors.purple;
+    default:
+      return Colors.blue;
+  }
+}
 
   Widget _statusDropdown() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Status *',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-        ),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 12,
-          children: DharmasetuStatus.values.map((status) {
-            return ChoiceChip(
-              label: Text(status.name),
-              selected: _selectedStatus == status,
-              onSelected: _isSubmitting 
-                  ? null 
-                  : (selected) => setState(() => _selectedStatus = status),
-              selectedColor: _getStatusColor(status),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      const Text(
+        'Status *',
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+      const SizedBox(height: 12),
+      Wrap(
+        spacing: 12,
+        runSpacing: 8,
+        children: DharmasetuStatus.values.map((status) {
+          return FilterChip(
+            label: Text(status.name),
+            selected: _selectedStatus == status,
+            onSelected: _isSubmitting ? null : (selected) {
+              setState(() => _selectedStatus = status);
+            },
+            selectedColor: _getStatusColor(status).withOpacity(0.3),
+            checkmarkColor: _getStatusColor(status),
+            backgroundColor: Colors.grey[100],
+            side: BorderSide(color: _getStatusColor(status).withOpacity(0.5)),
+            labelStyle: TextStyle(
+              fontWeight: _selectedStatus == status ? FontWeight.w600 : FontWeight.normal,
+            ),
+          );
+        }).toList(),
+      ),
+    ],
+  );
+}
 
   Color _getStatusColor(DharmasetuStatus status) {
     switch (status) {
@@ -629,39 +648,75 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
     },
   );
 
-  Widget _actionButtons(bool isUpdate) => Row(
+  // 
+  Widget _actionButtons(bool isUpdate) => Padding(
+  padding: const EdgeInsets.only(top: 24),
+  child: Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
-      OutlinedButton.icon(
+      OutlinedButton(
         style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          side: BorderSide(color: Colors.grey.shade400),
         ),
         onPressed: _isSubmitting ? null : () => Get.back(),
-        icon: const Icon(Icons.close),
-        label: const Text('Cancel'),
+        child: const Text('Cancel', style: TextStyle(fontSize: 16)),
       ),
       const SizedBox(width: 16),
-      ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-          backgroundColor: isUpdate ? Colors.orange : null,
+      Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(12),
+          gradient: LinearGradient(
+            colors: isUpdate
+                ? [Colors.orange, Colors.deepOrange]
+                : [Colors.blue, Colors.lightBlue],
+          ),
         ),
-        onPressed: _isSubmitting ? null : _submitForm,
-        icon: _isSubmitting 
-            ? const SizedBox(
-                width: 20, 
-                height: 20, 
-                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white)
-              )
-            : Icon(isUpdate ? Icons.update : Icons.check_circle),
-        label: Text(
-          _isSubmitting 
-              ? (isUpdate ? 'Updating...' : 'Saving...')
-              : (isUpdate ? 'Update Dharmasetu' : 'Save Dharmasetu')
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+          ),
+          onPressed: _isSubmitting ? null : _submitForm,
+          child: _isSubmitting
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(isUpdate ? Icons.update : Icons.check_circle, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      isUpdate ? 'Update' : 'Save',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                    ),
+                  ],
+                ),
         ),
       ),
     ],
+  ),
+);
+
+  Widget _buildReferredByField() {
+  return ReferredByDropdown(
+    controller: _referredByController,
+    initialValue: _selectedReferredBy,
+    onSelected: (value) {
+      setState(() {
+        _selectedReferredBy = value;
+        _referredByController.text = value?['userName'] ?? '';
+      });
+    },
   );
+}
 }

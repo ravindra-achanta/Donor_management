@@ -41,13 +41,16 @@ class User {
   final String? mobileNumber;
   final String? password;
   final String? userType;
+  final List<String> userTypes;
   final String status;
   final String? pincode;
   final String? city;
   final String? area;
   final String? state;
   final String? country;
+  final String? joinedDate;
   final String? startedDate;
+   final int karyakarthaAssignCount;
 
   User({
     required this.id,
@@ -66,6 +69,9 @@ class User {
     this.state,
     this.country,
       this.startedDate,
+      this.karyakarthaAssignCount = 0,
+      this.userTypes = const [],
+      this.joinedDate,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -77,13 +83,16 @@ class User {
       mobileNumber: json['mobileNumber'],
       password: json['password'] ?? "",
       userType: json['userType'],
+      joinedDate: json['joinedDate'] as String?,
       status: json['status'],
       pincode: json['pincode'],
       city: json['city'],
       area: json['area'],
       state: json['state'],
       country: json['country'],
-      startedDate: json['startedDate']
+      startedDate: json['startedDate'],
+      karyakarthaAssignCount: json['karyakarthaAssignCount']?.toInt() ?? 0,
+      userTypes: (json['userTypes'] as List?)?.map((x) => x.toString()).toList() ?? const [],
     );
   }
 
@@ -96,12 +105,17 @@ class User {
       'mobileNumber': mobileNumber,
       'password': password,
       'userType': userType,
+      'joinedDate': joinedDate,
       'status': status,
       'pincode': pincode,
+
       'city': city,
       'area': area,
       'state': state,
       'country': country,
+      'startedDate': startedDate,
+      'karyakarthaAssignCount': karyakarthaAssignCount,
+      'userTypes': userTypes,
     };
   }
 }

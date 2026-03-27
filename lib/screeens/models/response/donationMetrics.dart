@@ -1,22 +1,22 @@
 class ContributionResponse {
   final double totalContributions;
-  final double monthyAvgFrequency;
-  final double monthyAmountAvgFrequency;
+  final double monthlyAvgFrequency;
+  final double monthlyAmountAvgFrequency;
   final List<DonationFrequency> donationFrequency;
 
   ContributionResponse({
     required this.totalContributions,
-    required this.monthyAvgFrequency,
-    required this.monthyAmountAvgFrequency,
+    required this.monthlyAvgFrequency,
+    required this.monthlyAmountAvgFrequency,
     required this.donationFrequency,
   });
 
   factory ContributionResponse.fromJson(Map<String, dynamic> json) {
     return ContributionResponse(
       totalContributions: (json['totalContributions'] ?? 0).toDouble(),
-      monthyAvgFrequency: (json['monthyAvgFrequency'] ?? 0).toDouble(),
-      monthyAmountAvgFrequency:
-          (json['monthyAmountAvgFrequency'] ?? 0).toDouble(),
+      monthlyAvgFrequency: (json['monthlyAvgFrequency'] ?? 0).toDouble(),
+      monthlyAmountAvgFrequency:
+          (json['monthlyAmountAvgFrequency'] ?? 0).toDouble(),
       donationFrequency: (json['donationFrequency'] as List)
           .map((e) => DonationFrequency.fromJson(e))
           .toList(),
@@ -26,8 +26,8 @@ class ContributionResponse {
   Map<String, dynamic> toJson() {
     return {
       "totalContributions": totalContributions,
-      "monthyAvgFrequency": monthyAvgFrequency,
-      "monthyAmountAvgFrequency": monthyAmountAvgFrequency,
+      "monthlyAvgFrequency": monthlyAvgFrequency,
+      "monthlyAmountAvgFrequency": monthlyAmountAvgFrequency,
       "donationFrequency": donationFrequency.map((e) => e.toJson()).toList(),
     };
   }

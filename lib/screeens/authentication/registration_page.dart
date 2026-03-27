@@ -214,13 +214,14 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     bool numbersOnly = false,
     bool isLoading = false,
     IconData? icon,
+    bool enabled = true, 
   }) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 18),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
-        enabled: !isLoading,
+        enabled:  enabled && !isLoading,
         inputFormatters: [
           if (lettersOnly)
             FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z\s]')),
@@ -235,7 +236,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
               : null,
 
           filled: true,
-          fillColor: const Color(0xffF7F9FC),
+          fillColor: !enabled ? Colors.grey[200] : const Color(0xffF7F9FC),
 
           contentPadding: const EdgeInsets.symmetric(
             horizontal: 16,
@@ -541,176 +542,145 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     );
   }
 
-  Widget _multiSelectRoleField(
-    bool isLoading,
-    BuildContext context,
-    List<Role> allRoles,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: (isLoading || widget.type == RegistrationType.karyakartha)
-                ? null
-                : () async {
-                    await showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.vertical(
-                          top: Radius.circular(20),
-                        ),
+ Widget _multiSelectRoleField(
+  bool isLoading,
+  BuildContext context,
+  List<Role> allRoles,
+) {
+  final isKaryakartha = widget.type == RegistrationType.karyakartha;
+
+  String selectedText = widget.selectedRoles.isNotEmpty
+      ? widget.selectedRoles.map((e) => e.displayName).join(", ")
+      : "";
+
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 18),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: (isLoading || isKaryakartha)
+              ? null // ❌ Disable for karyakartha
+              : () async {
+                  await showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(20),
                       ),
-                      builder: (context) {
-                        return StatefulBuilder(
-                          builder: (context, setModalState) {
-                            return Padding(
-                              padding: const EdgeInsets.all(20),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Text(
-                                    "Select Role(s)",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                    ),
+                    builder: (context) {
+                      return StatefulBuilder(
+                        builder: (context, setModalState) {
+                          return Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  "Select Role(s)",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
+                                ),
+                                const SizedBox(height: 16),
 
-                                  const SizedBox(height: 16),
+                                ...allRoles.map((role) {
+                                  final isSelected = widget.selectedRoles.any(
+                                    (r) => r.id == role.id,
+                                  );
 
-                                  ...allRoles.map((role) {
-                                    final isSelected = widget.selectedRoles.any(
-                                      (r) => r.id == role.id,
-                                    );
+                                  return CheckboxListTile(
+                                    title: Text(role.displayName),
+                                    value: isSelected,
+                                    onChanged: (val) {
+                                      setModalState(() {
+                                        final updatedList =
+                                            List<Role>.from(
+                                                widget.selectedRoles);
 
-                                    return CheckboxListTile(
-                                      title: Text(
-                                        role.displayName,
-                                        style: const TextStyle(fontSize: 15),
-                                      ),
-                                      value: isSelected,
-                                      activeColor: Colors.blue,
-                                      controlAffinity:
-                                          ListTileControlAffinity.trailing,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      onChanged: isLoading
-                                          ? null
-                                          : (val) {
-                                              setModalState(() {
-                                                final updatedList =
-                                                    List<Role>.from(
-                                                      widget.selectedRoles,
-                                                    );
+                                        if (val == true) {
+                                          updatedList.add(role);
+                                        } else {
+                                          updatedList.removeWhere(
+                                              (r) => r.id == role.id);
+                                        }
 
-                                                if (val == true) {
-                                                  updatedList.add(role);
-                                                } else {
-                                                  updatedList.removeWhere(
-                                                    (r) => r.id == role.id,
-                                                  );
-                                                }
+                                        widget.onRolesUpdated(updatedList);
+                                      });
+                                    },
+                                  );
+                                }).toList(),
 
-                                                widget.onRolesUpdated(
-                                                  updatedList,
-                                                );
-                                              });
-                                            },
-                                    );
-                                  }).toList(),
-
-                                  const SizedBox(height: 10),
-
-                                  SizedBox(
-                                    width: double.infinity,
-                                    child: ElevatedButton(
-                                      style: ElevatedButton.styleFrom(
-                                        padding: const EdgeInsets.symmetric(
-                                          vertical: 14,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
-                                      ),
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text("Done"),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-            child: AbsorbPointer(
-              child: TextFormField(
-                enabled: !isLoading,
-                decoration: InputDecoration(
-                  labelText: "Role",
-                  hintText: "Select Role(s)",
-                  prefixIcon: const Icon(Icons.badge, color: Colors.grey),
-
-                  filled: true,
-                  fillColor: const Color(0xffF7F9FC),
-
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-
-                  suffixIcon: const Icon(Icons.keyboard_arrow_down),
-                ),
-                validator: (value) {
-                  if (widget.isEdit) return null;
-
-                  return widget.selectedRoles.isEmpty
-                      ? 'Select at least 1 role'
-                      : null;
+                                const SizedBox(height: 10),
+                                ElevatedButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: const Text("Done"),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      );
+                    },
+                  );
                 },
+          child: AbsorbPointer(
+            child: TextFormField(
+              enabled: !isLoading,
+              controller: TextEditingController(text: selectedText),
+              decoration: InputDecoration(
+                labelText: "Role",
+                hintText: "Select Role(s)",
+                prefixIcon: const Icon(Icons.badge, color: Colors.grey),
+
+                filled: true,
+                fillColor: isKaryakartha
+                    ? Colors.grey[200] 
+                    : const Color(0xffF7F9FC),
+
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+
+                suffixIcon: isKaryakartha
+                    ? const Icon(Icons.lock, size: 18)
+                    : const Icon(Icons.keyboard_arrow_down),
               ),
+              validator: (value) {
+                if (widget.isEdit) return null;
+                return widget.selectedRoles.isEmpty
+                    ? 'Select at least 1 role'
+                    : null;
+              },
             ),
           ),
+        ),
 
-          const SizedBox(height: 10),
-
-          if (widget.selectedRoles.isNotEmpty)
-            Wrap(
-              spacing: 8,
-              runSpacing: 6,
-              children: widget.selectedRoles.map((role) {
-                return Chip(
-                  label: Text(role.displayName),
-                  backgroundColor: Colors.blue.shade50,
-                  labelStyle: const TextStyle(fontWeight: FontWeight.w500),
-                  deleteIcon: const Icon(Icons.close, size: 18),
-                  onDeleted: isLoading
-                      ? null
-                      : () {
-                          final updatedList = List<Role>.from(
-                            widget.selectedRoles,
-                          );
-                          updatedList.removeWhere((r) => r.id == role.id);
-                          widget.onRolesUpdated(updatedList);
-                        },
-                );
-              }).toList(),
-            ),
-        ],
-      ),
-    );
-  }
+       
+        // if (!isKaryakartha && widget.selectedRoles.isNotEmpty)
+        //   Wrap(
+        //     spacing: 8,
+        //     runSpacing: 6,
+        //     children: widget.selectedRoles.map((role) {
+        //       return Chip(
+        //         label: Text(role.displayName),
+        //         deleteIcon: const Icon(Icons.close, size: 18),
+        //         onDeleted: () {
+        //           final updatedList =
+        //               List<Role>.from(widget.selectedRoles);
+        //           updatedList.removeWhere((r) => r.id == role.id);
+        //           widget.onRolesUpdated(updatedList);
+        //         },
+        //       );
+        //     }).toList(),
+        //   ),
+      ],
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -904,6 +874,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                               keyboardType: TextInputType.phone,
                               numbersOnly: true,
                               isLoading: isLoading,
+                              enabled: !widget.isEdit,
+                              
                             ),
                           ),
                           rowFields(

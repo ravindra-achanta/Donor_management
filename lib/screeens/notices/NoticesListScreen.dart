@@ -7,6 +7,7 @@ import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
+import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
@@ -83,7 +84,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
       // 3. date filter
       if (_selectedFilter != 'All') {
-        final dt = notice.sendTime;
+        final dt = notice.sendDateTime;
         if (dt == null) return false;
         final now = DateTime.now();
         switch (_selectedFilter) {
@@ -94,9 +95,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
               return false;
             break;
           case 'This Week':
-            final weekStart = now.subtract(
-              Duration(days: now.weekday - 1),
-            ); // Mon
+            final weekStart = now.subtract(Duration(days: now.weekday - 1));
             if (dt.isBefore(weekStart)) return false;
             break;
           case 'This Month':
@@ -252,21 +251,10 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
 
                           if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
                               Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN")
-                            ElevatedButton.icon(
-                              onPressed: _addNewNotice,
-                              icon: const Icon(Icons.add, size: 18),
-                              label: const Text('Add Notice'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.brown,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 10,
-                                ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
+                            AddButton().addButton(
+                              context: context,
+                              buttonText: "Add Notice",
+                              onClicked: _addNewNotice,
                             ),
                         ],
                       ),
@@ -447,15 +435,7 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
   }
 
   Widget _buildNoticeCard(NoticeResponse notice) {
-    // Use sendTime directly if it's already a DateTime
-    DateTime? sendDateTime;
-    try {
-      sendDateTime = notice.sendTime is String
-          ? DateTime.parse(notice.sendTime as String).toLocal()
-          : (notice.sendTime as DateTime?);
-    } catch (e) {
-      sendDateTime = null;
-    }
+    final sendDateTime = notice.sendDateTime;
     String formattedDate = sendDateTime != null
         ? DateFormat('MMM d, y • h:mm a').format(sendDateTime)
         : 'Invalid date';
@@ -528,13 +508,13 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
               children: [
                 Row(
                   children: [
-                    IconButton(
-                      onPressed: () => _viewNoticeDetails(notice),
-                      icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
-                      iconSize: 40,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(width: 8),
+                    // IconButton(
+                    //   onPressed: () => _viewNoticeDetails(notice),
+                    //   icon: const Icon(Icons.remove_red_eye_outlined, size: 20),
+                    //   iconSize: 40,
+                    //   color: Colors.orange,
+                    // ),
+                    //const SizedBox(width: 8),
                     Row(
                       children: [
                         const Icon(
@@ -554,29 +534,29 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        Get.toNamed('/notices', arguments: notice);
-                      },
-                      icon: const Icon(Icons.edit_outlined, size: 18),
-                      color: Colors.orange,
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
-                    ),
-                    const SizedBox(width: 8),
-                    IconButton(
-                      onPressed: () {
-                        _showDeleteDialog(context, notice.id, notice.title);
-                      },
-                      icon: const Icon(Icons.delete_outline, size: 18),
-                      color: Colors.red,
-                      constraints: const BoxConstraints(),
-                      padding: EdgeInsets.zero,
-                    ),
-                  ],
-                ),
+                // Row(
+                //   children: [
+                //     IconButton(
+                //       onPressed: () {
+                //         Get.toNamed('/notices', arguments: notice);
+                //       },
+                //       icon: const Icon(Icons.edit_outlined, size: 18),
+                //       color: Colors.orange,
+                //       constraints: const BoxConstraints(),
+                //       padding: EdgeInsets.zero,
+                //     ),
+                //     const SizedBox(width: 8),
+                //     IconButton(
+                //       onPressed: () {
+                //         _showDeleteDialog(context, notice.id, notice.title);
+                //       },
+                //       icon: const Icon(Icons.delete_outline, size: 18),
+                //       color: Colors.red,
+                //       constraints: const BoxConstraints(),
+                //       padding: EdgeInsets.zero,
+                //     ),
+                //   ],
+                // ),
               ],
             ),
           ],

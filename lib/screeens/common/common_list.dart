@@ -416,16 +416,22 @@ class _CommonListState extends State<CommonList> {
     );
   }
 
+
   Color _getStatusColor(String status) {
-    switch (status) {
-      case "Approved":
-        return Colors.green;
-      case "Rejected":
-        return Colors.red;
-      default:
-        return Colors.orange;
-    }
+  switch (status) {
+    case "Approved":
+    case "COMPLETED":
+      return Colors.green;
+    case "Rejected":
+    case "CANCELLED":
+      return Colors.red;
+    case "WIP":
+    case "Work In Progress":
+      return Colors.orange;
+    default:
+      return Colors.orange;
   }
+}
 
   Widget tableHeader(String title, {int flex = 1}) {
     return Expanded(

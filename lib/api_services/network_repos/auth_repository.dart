@@ -18,32 +18,55 @@ import 'package:vikas_app/screeens/models/response/users_response.dart';
 class AuthRepository {
   final _api = NetworkService.instance;
 
-  Future<ApiResult<LoginResponse>> login(
+ Future<ApiResult<List<String>>> checkLogin(
+  String mobileNumber,
+  String password,
+) async {
+  final request = LoginRequest(
+    mobileNumber: mobileNumber,
+    password: password,
+  );
+
+  final result = await _api.post(
+    '${ApiConstants.CHECK_LOGIN}/checklogin',
+    body: request.toJson(),
+  );
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final List<dynamic> data = result.data is List ? result.data : [];
+    final roles = data.map((e) => e.toString()).toList();
+    return ApiResult.success(roles); 
+  } catch (e) {
+    return ApiResult.failure(
+      ApiError(message: 'Error parsing checkLogin response: $e'),
+    );
+  }
+}
+  
+    //
+  Future<ApiResult<LoginResponse>> loginWithRole(
     String mobileNumber,
-    String password,
     String roleName,
   ) async {
-    final request = LoginRequest(
-      mobileNumber: mobileNumber,
-      password: password,
-    );
-
     final result = await _api.post(
-      "${ApiConstants.IDM_URI}/user/login/$roleName", // ← use rolePath
-      body: request.toJson(),
+      '${ApiConstants.LOGIN_WITH_ROLE}/login/$mobileNumber/$roleName',
+      body: {}, 
     );
-
-    if (!result.isSuccess) {
-      return ApiResult.failure(result.error);
-    }
-
+    if (!result.isSuccess) return ApiResult.failure(result.error);
     try {
-      LoginResponse data = LoginResponse.fromJson(result.data);
+      final LoginResponse data = LoginResponse.fromJson(result.data);
       return ApiResult.success(data);
     } catch (e) {
-      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+      return ApiResult.failure(
+        ApiError(message: 'Error parsing loginWithRole response: $e'),
+      );
     }
   }
+
 
   Future<ApiResult<LoginResponse>> createUser(IdentityRequest request) async {
     final result = await _api.post(
@@ -62,6 +85,7 @@ class AuthRepository {
       return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
+
 
   Future<ApiResult<UsersResponse>> getAllUsers({
     int page = 0,
@@ -158,6 +182,8 @@ class AuthRepository {
       return {};
     }
   }
+
+  
 
 
 }

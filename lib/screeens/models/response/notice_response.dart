@@ -3,7 +3,8 @@ class NoticeResponse {
   final String? image;
   final String title;
   final String description;
-  final DateTime? sendTime;
+  final String sendDate;         
+  final String sendTime;
   final String? sendTo;
   final DateTime? createdTime;
   final DateTime? updatedTime;
@@ -16,7 +17,8 @@ class NoticeResponse {
     this.image,
     required this.title,
     required this.description,
-    this.sendTime,
+    required this.sendDate,
+    required this.sendTime,
     this.sendTo,
     this.createdTime,
     this.updatedTime,
@@ -31,8 +33,8 @@ class NoticeResponse {
       image: json['image'],
       title: json['title'] ?? '',
       description: json['description'] ?? '',
-      sendTime:
-          json['sendTime'] != null ? DateTime.parse(json['sendTime']) : null,
+      sendDate: json['sendDate'] ?? '',
+      sendTime: json['sendTime'] ?? '',
       sendTo: json['sendTo'],
       createdTime: json['createdTime'] != null
           ? DateTime.parse(json['createdTime'])
@@ -52,7 +54,8 @@ class NoticeResponse {
       "image": image,
       "title": title,
       "description": description,
-      "sendTime": sendTime?.toIso8601String(),
+      "sendDate": sendDate,
+      "sendTime": sendTime,
       "sendTo": sendTo,
       "createdTime": createdTime?.toIso8601String(),
       "updatedTime": updatedTime?.toIso8601String(),
@@ -61,4 +64,24 @@ class NoticeResponse {
       "status": status,
     };
   }
+  
+ DateTime? get sendDateTime {
+  try {
+    final dateParts = sendDate.split('-');   // "DD-MM-YYYY"
+    if (dateParts.length != 3) return null;
+    final day = int.parse(dateParts[0]);
+    final month = int.parse(dateParts[1]);
+    final year = int.parse(dateParts[2]);
+
+    final timeParts = sendTime.split(':');  
+    if (timeParts.length < 2) return null;
+    final hour = int.parse(timeParts[0]);
+    final minute = int.parse(timeParts[1]);
+    final second = timeParts.length > 2 ? int.parse(timeParts[2]) : 0;
+
+    return DateTime(year, month, day, hour, minute, second);
+  } catch (e) {
+    return null;
+  }
+}
 }

@@ -3,8 +3,10 @@ import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/screeens/models/request/JeevanaadiFullProfile.dart';
+import 'package:vikas_app/screeens/models/request/VisitMetrics.dart';
 import 'package:vikas_app/screeens/models/request/allocate_members_request.dart';
 import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
+import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 import 'package:vikas_app/screeens/models/response/jeevanaadi_paginated_view.dart';
 
 class JeevanadiRepo {
@@ -13,10 +15,24 @@ class JeevanadiRepo {
   Future<ApiResult<JeevanaadiPaginatedView>> getJeevanaadisMems(
     int page,
     int size,
+    String? searchQuery,
+      String? orderedBy,
   ) async {
-    final result = await _api.get(
-      "${ApiConstants.GET_JEEVANAADIS}?page=${page}&size=${size}",
-    );
+  final queryParams = {
+  'page': page.toString(),
+  'size': size.toString(),
+};
+
+if (searchQuery != null && searchQuery.isNotEmpty) {
+  queryParams['searchValue'] = searchQuery;
+}
+ if (orderedBy != null && orderedBy.isNotEmpty) {
+    queryParams['orderedBy'] = orderedBy; 
+  }
+
+final uri = Uri.parse(ApiConstants.GET_JEEVANAADIS)
+    .replace(queryParameters: queryParams);
+    final result = await _api.get(uri.toString());
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }
@@ -147,11 +163,30 @@ class JeevanadiRepo {
   Future<ApiResult<JeevanaadiPaginatedView>> getUnassignedJeevanadiUsers({
     required int page,
     required int size,
-  }) async {
-    final url =
-        "${ApiConstants.jeevanadi_nonallocated_users}?page=$page&size=$size";
+     String? searchQuery,
+        String? orderedBy,
 
-    final result = await _api.get(url);
+  }) async {
+    // final url =
+    //     "${ApiConstants.jeevanadi_nonallocated_users}?page=$page&size=$size";
+
+    // final result = await _api.get(url);
+     final baseUrl = ApiConstants.jeevanadi_nonallocated_users;
+
+
+  final queryParams = {
+    'page': page.toString(),
+    'size': size.toString(),
+  };
+  if (searchQuery != null && searchQuery.isNotEmpty) {
+    queryParams['searchValue'] = searchQuery;  
+  }
+    if (orderedBy != null && orderedBy.isNotEmpty) {   // ← add
+    queryParams['orderedBy'] = orderedBy;
+  }
+
+  final uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
+  final result = await _api.get(uri.toString());
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -174,13 +209,26 @@ class JeevanadiRepo {
     required String karyakarthaId,
     required int page,
     required int size,
+      String? searchQuery,
+        String? orderedBy,
   }) async {
-    final url =
-        "${ApiConstants.jeevanadi_allocate_user}/karyakartha/$karyakarthaId?page=$page&size=$size";
+    final queryParams = {
+    'page': page.toString(),
+    'size': size.toString(),
+  };
+  if (searchQuery != null && searchQuery.isNotEmpty) {
+    queryParams['searchValue'] = searchQuery;
+  }
+  if (orderedBy != null && orderedBy.isNotEmpty) {   // ← add
+    queryParams['orderedBy'] = orderedBy;
+  }
+     final url = Uri.parse(
+    '${ApiConstants.jeevanadi_allocate_user}/karyakartha/$karyakarthaId',
+  ).replace(queryParameters: queryParams);
 
     print('📡 Fetching assigned karyakarthas from: $url');
 
-    final result = await _api.get(url);
+    final result = await _api.get(url.toString());
 
     if (!result.isSuccess) {
       print('❌ Failed to fetch assigned jeevanaadis: ${result.error?.message}');
@@ -291,7 +339,7 @@ class JeevanadiRepo {
   }
 
 Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) async {
-  final url = ApiConstants.approverequest + "/$jeevanadiId/approve";
+  final url = ApiConstants.approverequest + "$jeevanadiId/approve";
   
 
   final result = await _api.put(url,body: {}); 
@@ -304,4 +352,24 @@ Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) as
   print('✅ Jeevanaadi approved successfully');
   return ApiResult.success(result.data);
 }
+
+
+Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(String query) async {
+  final url = "${ApiConstants.jeevandi_search}search/$query";
+  final result = await _api.get(url);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final List<dynamic> data = result.data;
+    final users = data.map((json) => JeevanaadiUser.fromJson(json)).toList();
+    return ApiResult.success(users);
+  } catch (e) {
+    return ApiResult.failure(ApiError(message: "Parsing error: $e"));
+  }
+}
+
+
 }

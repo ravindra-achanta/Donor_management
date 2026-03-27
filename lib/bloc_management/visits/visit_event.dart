@@ -47,3 +47,14 @@ class DeleteVisit extends VisitEvent {
 class CloseVisitProfileView extends VisitEvent {
   const CloseVisitProfileView();
 }
+class LoadVisitMetrics extends VisitEvent {}
+class ToggleChartView extends VisitEvent {
+  final bool showMonthly;
+  const ToggleChartView(this.showMonthly);
+}
+class SelectMonth extends VisitEvent {
+  final int index;
+  const SelectMonth(this.index);
+}
+
+class ClearMonthSelection extends VisitEvent {}

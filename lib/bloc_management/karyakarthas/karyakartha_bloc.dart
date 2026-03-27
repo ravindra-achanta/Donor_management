@@ -33,7 +33,11 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
     });
     int size = 10;
 
-    final response = await karyakattaRepo.getKaryakarthas(event.page, size);
+   final response = await karyakattaRepo.getKaryakarthas(
+  event.page,
+  size,
+  event.searchQuery,
+);
 
     if (response.isSuccess) {
       final List<User> users = response.data?.content ?? [];

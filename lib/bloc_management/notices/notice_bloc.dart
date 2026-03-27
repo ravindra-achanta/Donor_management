@@ -79,8 +79,10 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
   final result = await noticeRepo.markNoticeAsRead(event.id);
 
   if (result.isSuccess) {
-    // Optional: refresh notices list to update read status
-    add(FetchNoticesEvent());
+    emit(state.copyWith(
+      notices: state.notices.where((n) => n.id != event.id).toList(),
+    ));
+   // add(FetchNoticesEvent());
   } else {
     print("Failed to mark notice as read: ${result.error?.message}");
   }

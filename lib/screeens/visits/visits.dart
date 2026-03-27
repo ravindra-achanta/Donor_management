@@ -1,14 +1,18 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/visits/visit_bloc.dart';
 import 'package:vikas_app/bloc_management/visits/visit_event.dart';
 import 'package:vikas_app/bloc_management/visits/visit_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
+import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
+import 'package:vikas_app/screeens/models/request/VisitMetrics.dart';
 import 'package:vikas_app/screeens/models/request/visit_model.dart';
 import 'package:vikas_app/screeens/models/response/user.dart';
 import 'package:vikas_app/screeens/models/response/visit_view.dart';
@@ -24,33 +28,35 @@ class VisitsListScreen extends StatefulWidget {
 class _VisitsListScreenState extends State<VisitsListScreen> {
   static const _flexValues = [6, 3, 7];
   static const _animationDuration = Duration(milliseconds: 300);
+  bool _showMetrics = true;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) context.read<VisitBloc>().add(const LoadVisits(page: 0));
+      context.read<VisitBloc>().add(LoadVisitMetrics());
     });
   }
 
- void _showDeleteDialog(String id, String visitorName) {
-  DeletionPopup.showDeleteConfirmation(
-    context: context,
-    title: 'Delete Visit',
-    message: 'Are you sure you want to delete the visit for "$visitorName"?',
-    confirmText: 'Delete',
-    cancelText: 'Cancel',
-    onConfirm: () {
-      context.read<VisitBloc>().add(DeleteVisit(id));
-      Get.showSnackbar(
-        const GetSnackBar(
-          message: 'Deleting visit...',
-          duration: Duration(seconds: 1),
-        ),
-      );
-    },
-  );
-}
+  void _showDeleteDialog(String id, String visitorName) {
+    DeletionPopup.showDeleteConfirmation(
+      context: context,
+      title: 'Delete Visit',
+      message: 'Are you sure you want to delete the visit for "$visitorName"?',
+      confirmText: 'Delete',
+      cancelText: 'Cancel',
+      onConfirm: () {
+        context.read<VisitBloc>().add(DeleteVisit(id));
+        Get.showSnackbar(
+          const GetSnackBar(
+            message: 'Deleting visit...',
+            duration: Duration(seconds: 1),
+          ),
+        );
+      },
+    );
+  }
 
   void _onVisitTap(String id) =>
       context.read<VisitBloc>().add(LoadVisitDetails(id));
@@ -85,24 +91,31 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
   }
 
   Widget _buildContent(VisitState state) {
-    return Row(
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        if (_showMetrics) ...[
+          _buildMetricsChart(state),
+          const SizedBox(height: 10),
+        ],
         Expanded(
-          flex: state.isProfileViewVisible ? _flexValues[0] : _flexValues[2],
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height - 100,
-            child: _buildListSection(state),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: state.isProfileViewVisible
+                    ? _flexValues[0]
+                    : _flexValues[2],
+                child: _buildListSection(state),
+              ),
+              if (state.isProfileViewVisible)
+                Expanded(
+                  flex: _flexValues[1],
+                  child: _buildProfileSection(state),
+                ),
+            ],
           ),
         ),
-        if (state.isProfileViewVisible)
-          Expanded(
-            flex: _flexValues[1],
-            child: SizedBox(
-              height: MediaQuery.of(context).size.height - 100,
-              child: _buildProfileSection(state),
-            ),
-          ),
       ],
     );
   }
@@ -111,7 +124,11 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildHeader(),
+        const SizedBox(height: 10),
+        // _buildMetricsChart(state),
+        const SizedBox(height: 10),
+        _buildHeader(context, state),
+
         const SizedBox(height: 8),
         Expanded(
           child: Card(
@@ -151,7 +168,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
                               visitPurpose: item.visitPurpose,
                               comments: item.comments,
                               noOfGuests: item.noOfGuests,
-                              existVisitor: item.existVisitor,
+                              // existVisitor: item.existVisitor,
                             ),
                           );
                         },
@@ -168,30 +185,125 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(context, state) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "Visits",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
+          // const Text(
+          //   "Visits",
+          //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          // ),
           Row(
             children: [
-              IconButton(
-                icon: const Icon(Icons.refresh),
-                onPressed: () {
-                  context.read<VisitBloc>().add(const LoadVisits(page: 0));
-                },
+              const Text(
+                "Visits :",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),
-              ElevatedButton.icon(
-                onPressed: () => Get.toNamed('/add/visit'),
-                icon: const Icon(Icons.add),
-                label: const Text("Add Visit"),
+              Chip(
+                label: Text('${state!.totalElements}'),
+                avatar: const Icon(Icons.people, size: 18),
+                backgroundColor: Colors.grey.shade200,
               ),
+            ],
+          ),
+
+          Row(
+            children: [
+              // IconButton(
+              //   icon: const Icon(Icons.refresh),
+              //   onPressed: () {
+              //     context.read<VisitBloc>().add(const LoadVisits(page: 0));
+              //   },
+              // ),
+              InkWell(
+                onTap: () {
+                  setState(() {
+                    _showMetrics = !_showMetrics;
+                  });
+                },
+                borderRadius: BorderRadius.circular(30),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: Colors.grey.shade400),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _showMetrics
+                            ? Icons.visibility_off
+                            : Icons.insert_chart,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        _showMetrics ? 'Hide metrics' : 'Show metrics',
+                        style: const TextStyle(fontWeight: FontWeight.w500),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+                // ElevatedButton.icon(
+                //   onPressed: () => Get.toNamed('/add/visit'),
+                //   icon: const Icon(Icons.add),
+                //   label: const Text("Add Visit"),
+                // ),
+                // if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+                //   InkWell(
+                //     onTap: () => Get.toNamed('/add/visit'),
+                //     borderRadius: BorderRadius.circular(30),
+                //     child: Container(
+                //       padding: const EdgeInsets.symmetric(
+                //         horizontal: 18,
+                //         vertical: 10,
+                //       ),
+                //       decoration: BoxDecoration(
+                //         borderRadius: BorderRadius.circular(30),
+                //         /// 🔥 Gradient style
+                //         gradient: const LinearGradient(
+                //           colors: [Color(0xFF2196F3), Color(0xFF21CBF3)],
+                //         ),
+                //         boxShadow: [
+                //           BoxShadow(
+                //             color: Colors.blue.withOpacity(0.3),
+                //             blurRadius: 8,
+                //             offset: const Offset(0, 4),
+                //           ),
+                //         ],
+                //       ),
+                //       child: Row(
+                //         mainAxisSize: MainAxisSize.min,
+                //         children: const [
+                //           Icon(Icons.add, color: Colors.white, size: 18),
+                //           SizedBox(width: 6),
+                //           Text(
+                //             "Add Visit",
+                //             style: TextStyle(
+                //               color: Colors.white,
+                //               fontWeight: FontWeight.w600,
+                //             ),
+                //           ),
+                //         ],
+                //       ),
+                //     ),
+                //   ),
+                if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+                  AddButton().addButton(
+                    context: context,
+                    buttonText: "Add Visit",
+                    onClicked: () => Get.toNamed('/add/visit'),
+                  ),
             ],
           ),
         ],
@@ -269,7 +381,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
       visitPurpose: visit.visitPurpose,
       comments: visit.comments,
       noOfGuests: visit.noOfGuests,
-      existVisitor: visit.existVisitor,
+      // existVisitor: visit.existVisitor,
     );
 
     return ListViewScreen(
@@ -281,6 +393,435 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
       screenType: "VISITS",
       onDelete: () => _showDeleteDialog(visit.id, visit.visitorName),
       onViewMore: () => Get.toNamed('/view/visit', arguments: visitView),
+    );
+  }
+
+  Widget _buildMetricsChart(VisitState state) {
+    if (state.metricsLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (state.metrics.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: state.showMonthlyChart
+            ? _buildMonthlyChart(state)
+            : _buildSummaryChart(state),
+      ),
+    );
+  }
+
+  double _getMaxY(List<VisitMetrics> data) {
+    double max = 0;
+    for (var e in data) {
+      if (e.totalVisits > max) max = e.totalVisits.toDouble();
+      if (e.totalVisitors > max) max = e.totalVisitors.toDouble();
+    }
+    return max + 10;
+  }
+
+  Widget _buildSummaryChart(VisitState state) {
+    double totalVisits = 0;
+    double totalVisitors = 0;
+
+    for (var e in state.metrics) {
+      totalVisits += e.totalVisits;
+      totalVisitors += e.totalVisitors;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Overview",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+
+              Row(
+                children: const [
+                  _Legend(color: Color(0xFF4FACFE), text: "Visits"),
+                  SizedBox(width: 12),
+                  _Legend(color: Color(0xFF43E97B), text: "Visitors"),
+                ],
+              ),
+
+              TextButton(
+                onPressed: () {
+                  context.read<VisitBloc>().add(const ToggleChartView(true));
+                },
+                child: const Text("View"),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          SizedBox(
+            height: 110,
+            child: BarChart(
+              BarChartData(
+                alignment: BarChartAlignment.spaceAround,
+                maxY:
+                    (totalVisits > totalVisitors
+                        ? totalVisits
+                        : totalVisitors) *
+                    1.2,
+
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipBgColor: Colors.black87,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final value = rod.toY.toInt();
+                      final label = rodIndex == 0 ? "Visits" : "Visitors";
+                      return BarTooltipItem(
+                        '$label: $value',
+                        const TextStyle(color: Colors.white),
+                      );
+                    },
+                  ),
+                ),
+
+                gridData: const FlGridData(show: false),
+                borderData: FlBorderData(show: false),
+
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            value == 0 ? "Visits" : "Visitors",
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                 leftTitles: AxisTitles(
+  sideTitles: SideTitles(
+    showTitles: true,
+    interval: _getMaxY(state.metrics) / 4,
+    getTitlesWidget: (value, meta) {
+      return Text(
+        _formatNumber(value),
+        style: const TextStyle(fontSize: 10, color: Colors.grey),
+      );
+    },
+  ),
+),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+
+                barGroups: [
+                  BarChartGroupData(
+                    x: 0,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalVisits,
+                        width: 30,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(8),
+                        ),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
+                  ),
+                  BarChartGroupData(
+                    x: 1,
+                    barRods: [
+                      BarChartRodData(
+                        toY: totalVisitors,
+                        width: 30,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(8),
+                        ),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF43E97B), Color(0xFF38F9D7)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+              swapAnimationDuration: const Duration(milliseconds: 400),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMonthlyChart(VisitState state) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                "Last 12 Months",
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [
+                  _Legend(color: Color(0xFF4FACFE), text: "Visits"),
+                  SizedBox(width: 16),
+                  _Legend(color: Color(0xFF43E97B), text: "Visitors"),
+                ],
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<VisitBloc>().add(const ToggleChartView(false));
+                },
+                child: const Text("Back"),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 10),
+
+          SizedBox(
+            height: 110,
+            child: BarChart(
+              BarChartData(
+                //maxY: _getMaxY(state.metrics) * 1.2,
+                maxY: _getMaxY(state.metrics) == 0
+                    ? 10
+                    : _getMaxY(state.metrics) * 1.1,
+                barTouchData: BarTouchData(
+                  enabled: true,
+                  touchTooltipData: BarTouchTooltipData(
+                    tooltipBgColor: Colors.black87,
+                    getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                      final value = rod.toY.toInt();
+                      final label = rodIndex == 0 ? "Visits" : "Visitors";
+                      final month = _getMonthName(
+                        state.metrics[group.x.toInt()].month,
+                      );
+
+                      return BarTooltipItem(
+                        '$month\n$label: $value',
+                        const TextStyle(color: Colors.white),
+                      );
+                    },
+                  ),
+                ),
+
+                // gridData: FlGridData(
+                //   show: true,
+                //   drawHorizontalLine: true,
+                //   horizontalInterval: _getMaxY(state.metrics) / 4,
+                //   getDrawingHorizontalLine: (value) => FlLine(
+                //     color: Colors.grey.withOpacity(0.1),
+                //     strokeWidth: 1,
+                //   ),
+                // ),
+                gridData: const FlGridData(show: false),
+
+                borderData: FlBorderData(show: false),
+
+                titlesData: FlTitlesData(
+                  bottomTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: true,
+                      getTitlesWidget: (value, meta) {
+                        int i = value.toInt();
+                        if (i >= state.metrics.length) {
+                          return const SizedBox();
+                        }
+
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            _getMonthShort(state.metrics[i].month),
+                            style: const TextStyle(
+                              fontSize: 10,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  leftTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  topTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                  rightTitles: const AxisTitles(
+                    sideTitles: SideTitles(showTitles: false),
+                  ),
+                ),
+
+                barGroups: List.generate(state.metrics.length, (i) {
+                  final item = state.metrics[i];
+
+                  return BarChartGroupData(
+                    x: i,
+                    barsSpace: 6,
+                    barRods: [
+                      BarChartRodData(
+                        toY: item.totalVisits.toDouble(),
+                        width: 8,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(6),
+                        ),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF4FACFE), Color(0xFF00F2FE)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                      BarChartRodData(
+                        toY: item.totalVisitors.toDouble(),
+                        width: 8,
+                        borderRadius: const BorderRadius.vertical(
+                          top: Radius.circular(6),
+                        ),
+                        gradient: const LinearGradient(
+                          colors: [Color(0xFF43E97B), Color(0xFF38F9D7)],
+                          begin: Alignment.bottomCenter,
+                          end: Alignment.topCenter,
+                        ),
+                      ),
+                    ],
+                  );
+                }),
+              ),
+              swapAnimationDuration: const Duration(milliseconds: 400),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  double _getSafeY(double value, double maxY) {
+  if (value == 0) return 0; // don't show bar for 0
+
+  double minHeight = maxY * 0.08; // 8% minimum height
+  return value < minHeight ? minHeight : value;
+}
+
+  String _getMonthName(String month) {
+    final parts = month.split("-");
+    int m = int.parse(parts[1]);
+    const months = [
+      "",
+      "January",
+      "February",
+      "March",
+      "April",
+      "May",
+      "June",
+      "July",
+      "August",
+      "September",
+      "October",
+      "November",
+      "December",
+    ];
+    return months[m];
+  }
+
+  String _getMonthShort(String month) {
+    final parts = month.split("-");
+    int m = int.parse(parts[1]);
+
+    const months = [
+      "", // index 0 not used
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+
+    return months[m];
+  }
+  
+  String _formatNumber(double value) {
+  if (value >= 1000) {
+    return '${(value / 1000).toStringAsFixed(1)}K';
+  }
+  return value.toInt().toString();
+}
+}
+
+class _Legend extends StatelessWidget {
+  final Color color;
+  final String text;
+
+  const _Legend({required this.color, required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(3),
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          text,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+        ),
+      ],
     );
   }
 }
