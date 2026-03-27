@@ -6,7 +6,9 @@ class UserEvent extends Equatable {
 
 class FetchUsersEvent extends UserEvent {
   final int page;
-  FetchUsersEvent({required this.page});
+  final int size;
+  final String? searchQuery;
+  FetchUsersEvent({required this.page, required this.size, this.searchQuery});
 }
 
 class FetchUsersProfileEvent extends UserEvent {

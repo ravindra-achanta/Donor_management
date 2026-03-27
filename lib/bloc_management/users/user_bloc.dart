@@ -28,7 +28,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
       // print("3 seconds have passed!");
     });
     int size = 10;
-    final response = await userRepo.getUsers(event.page, size);
+    final response = await userRepo.getUsers(event.page, size,searchQuery: event.searchQuery,);
 
     if (response.isSuccess) {
       final List<User> users = response.data?.content ?? [];

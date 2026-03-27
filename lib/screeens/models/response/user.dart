@@ -48,6 +48,7 @@ class User {
   final String? area;
   final String? state;
   final String? country;
+  final String? joinedDate;
   final String? startedDate;
    final int karyakarthaAssignCount;
 
@@ -70,6 +71,7 @@ class User {
       this.startedDate,
       this.karyakarthaAssignCount = 0,
       this.userTypes = const [],
+      this.joinedDate,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -81,6 +83,7 @@ class User {
       mobileNumber: json['mobileNumber'],
       password: json['password'] ?? "",
       userType: json['userType'],
+      joinedDate: json['joinedDate'] as String?,
       status: json['status'],
       pincode: json['pincode'],
       city: json['city'],
@@ -102,8 +105,10 @@ class User {
       'mobileNumber': mobileNumber,
       'password': password,
       'userType': userType,
+      'joinedDate': joinedDate,
       'status': status,
       'pincode': pincode,
+
       'city': city,
       'area': area,
       'state': state,

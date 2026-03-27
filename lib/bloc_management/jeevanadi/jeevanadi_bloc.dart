@@ -83,13 +83,15 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       state.copyWith(
         status: JeevanaadiApiStatus.loading,
         isProfileViewVisible: false,
+       orderedBy: event.orderedBy ?? state.orderedBy,
       ),
     );
     try {
-      final response = await JeevanaadiRepo.getJeevanaadisMems(event.page, 10);
+      final response = await JeevanaadiRepo.getJeevanaadisMems(event.page,  event.size, event.searchQuery, event.orderedBy);
       if (response.isSuccess) {
         final data = response.data;
         final members = data?.content ?? [];
+
 
         emit(
           state.copyWith(
@@ -98,6 +100,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
             totalElements: response.data?.totalElements ?? 0,
             totalpages: response.data?.totalPages ?? 0,
             currentPage: response.data?.currentPage ?? 0,
+            orderedBy: event.orderedBy, 
           ),
         );
       } else {
@@ -186,6 +189,8 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       karyakarthaId: event.memberId,
       page: event.page,
       size: 10,
+       searchQuery: event.searchQuery,
+         orderedBy: event.order,
     );
 
     if (response.isSuccess) {
@@ -244,6 +249,8 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     final response = await JeevanaadiRepo.getUnassignedJeevanadiUsers(
       page: event.page,
       size: 10,
+      searchQuery: event.searchQuery, 
+      orderedBy: event.orderedBy,
     );
 
     if (response.isSuccess) {
@@ -316,7 +323,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
         emit(state.copyWith(isAssigning: false, selectedUnassignedIds: []));
 
         add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
-        add(FetchUnassignedKaryakarthasEvent(0));
+        add(FetchUnassignedKaryakarthasEvent(0, 10, null, null));
       } else {
         emit(
           state.copyWith(
@@ -352,7 +359,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
         emit(state.copyWith(isRemoving: false));
 
         add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
-        add(FetchUnassignedKaryakarthasEvent(0));
+        add(FetchUnassignedKaryakarthasEvent(0, 10, null, null));
       } else {
         emit(
           state.copyWith(
@@ -518,7 +525,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
         );
 
         add(FetchAssignedKaryakarthasEvent(event.karyakarthaId, 0, 10));
-        add(FetchUnassignedKaryakarthasEvent(0));
+        add(FetchUnassignedKaryakarthasEvent(0, 10, null,null));
       } else {
         emit(
           state.copyWith(

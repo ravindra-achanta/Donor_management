@@ -51,18 +51,25 @@ class _DashboardState extends State<Dashboard> {
   }
 
   /// START NOTICE QUEUE
-  void _startNoticeQueue(List<NoticeResponse> notices) {
+void _startNoticeQueue(List<NoticeResponse> notices) {
+  if (notices.isEmpty || _isShowing) return;
 
-    if (notices.isEmpty || _isShowing) return;
-
-    _pendingNotices.clear();
-    _pendingNotices.addAll(notices);
-
-    _currentNoticeIndex = 0;
-    _isShowing = true;
-
-    _showNextNotice();
+  /// ✅ prevent re-trigger for same data
+  //if (_pendingNotices.isNotEmpty) return;
+   final uniqueNotices = <int, NoticeResponse>{};
+  for (var notice in notices) {
+    
+    
   }
+
+  _pendingNotices.clear();
+  _pendingNotices.addAll(notices);
+
+  _currentNoticeIndex = 0;
+  _isShowing = true;
+
+  _showNextNotice();
+}
 
   /// SHOW NEXT NOTICE
   void _showNextNotice() {
@@ -73,6 +80,7 @@ class _DashboardState extends State<Dashboard> {
     }
 
     final notice = _pendingNotices[_currentNoticeIndex];
+     bool closed = false;
 
     NoticePopup.show(
       context: context,
@@ -107,21 +115,17 @@ class _DashboardState extends State<Dashboard> {
 
         listeners: [
 
-          /// NOTICE LISTENER
           BlocListener<NoticeBloc, NoticeState>(
-            listener: (context, state) {
-
-              if (state.status == NoticeStatus.success &&
-                  state.notices.isNotEmpty) {
-
-                _startNoticeQueue(state.notices);
-              }
-
-              if (state.status == NoticeStatus.failure) {
-                debugPrint("Notice Error: ${state.errorMessage}");
-              }
-            },
-          ),
+  listenWhen: (previous, current) {
+    return previous.status != current.status &&
+           current.status == NoticeStatus.success;
+  },
+  listener: (context, state) {
+    if (state.notices.isNotEmpty) {
+      _startNoticeQueue(state.notices);
+    }
+  },
+),
 
         ],
 

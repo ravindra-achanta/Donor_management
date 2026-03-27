@@ -8,6 +8,8 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(ProfileState()) {
     on<FetchProfile>(_fetchPrfile);
      on<UpdateProfile>(_updateProfile);
+     on<LogoutEvent>(_logout);
+     
   }
 
   final profileRepo = ProfileRepo();
@@ -66,6 +68,17 @@ Future<void> _updateProfile(
       profileErrorMsg: response.error?.message,
     ));
   }
+}
+Future<void> _logout(
+  LogoutEvent event,
+  Emitter<ProfileState> emit,
+) async {
+  emit(const ProfileState(
+    status: ProfileStatus.initial,
+    user: null,
+    profileErrorMsg: null,
+    successMessage: null,
+  ));
 }
 
 }

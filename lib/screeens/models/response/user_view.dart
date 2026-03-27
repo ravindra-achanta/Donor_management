@@ -13,6 +13,7 @@ class UserView extends Equatable {
   final String? area;
   final String? state;
   final String? country;
+  final String? joinedDate;
 
   const UserView({
     required this.id,
@@ -27,6 +28,7 @@ class UserView extends Equatable {
     this.area,
     this.state,
     this.country,
+    this.joinedDate,
   });
 
   factory UserView.fromJson(Map<String, dynamic> json) {
@@ -43,6 +45,7 @@ class UserView extends Equatable {
       area: json['area'] as String?,
       state: json['state'] as String?,
       country: json['country'] as String?,
+      joinedDate: json['joinedDate'] as String?,
     );
   }
 
@@ -60,6 +63,7 @@ class UserView extends Equatable {
       'area': area,
       'state': state,
       'country': country,
+      'joinedDate': joinedDate,
     };
   }
 
@@ -77,5 +81,6 @@ class UserView extends Equatable {
     area,
     state,
     country,
+    joinedDate,
   ];
 }

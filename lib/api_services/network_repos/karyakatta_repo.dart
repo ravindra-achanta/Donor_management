@@ -7,21 +7,48 @@ import 'package:vikas_app/screeens/models/response/user.dart';
 class KaryakattaRepo {
   final _api = NetworkService.instance;
 
-  Future<ApiResult<PaginatedView>> getKaryakarthas(int page, int size) async {
-    final result = await _api.get(
-      "${ApiConstants.GET_KARYAKARTHAS}?userType=KARYAKARTHA&page=${page}&size=${size}",
-    );
-    if (!result.isSuccess) {
-      return ApiResult.failure(result.error);
-    }
+  // Future<ApiResult<PaginatedView>> getKaryakarthas(int page, int size) async {
+  //   final result = await _api.get(
+  //     "${ApiConstants.GET_KARYAKARTHAS}?userType=KARYAKARTHA&page=${page}&size=${size} ",
+      
+  //   );
+  //   if (!result.isSuccess) {
+  //     return ApiResult.failure(result.error);
+  //   }
 
-    try {
-      PaginatedView data = PaginatedView.fromJson(result.data);
-      return ApiResult.success(data);
-    } catch (e) {
-      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
-    }
+  //   try {
+  //     PaginatedView data = PaginatedView.fromJson(result.data);
+  //     return ApiResult.success(data);
+  //   } catch (e) {
+  //     return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  //   }
+  // }
+  Future<ApiResult<PaginatedView>> getKaryakarthas(
+  int page,
+  int size,
+  String? search,
+) async {
+  String url =
+      "${ApiConstants.GET_KARYAKARTHAS}?userType=KARYAKARTHA&page=$page&size=$size";
+
+  if (search != null && search.isNotEmpty) {
+    url += "&searchValue=$search"; 
   }
+
+  final result = await _api.get(url);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    PaginatedView data = PaginatedView.fromJson(result.data);
+    return ApiResult.success(data);
+  } catch (e) {
+    return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  }
+}
+
 
   Future<ApiResult<User>> getKaryakarthaProfile(String id) async {
     final result = await _api.get("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
