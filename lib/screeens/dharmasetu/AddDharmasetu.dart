@@ -5,6 +5,7 @@ import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_event.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_state.dart';
+import 'package:vikas_app/screeens/common/referred_by_dropdown.dart';
 import 'package:vikas_app/screeens/models/request/dharmasetu_model.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
@@ -50,9 +51,11 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   final _feedbackController = TextEditingController();
   final _dateController = TextEditingController();
   final _referredByController = TextEditingController();
+  
 
   DharmasetuType? _selectedType;
   DharmasetuStatus? _selectedStatus;
+  Map<String, dynamic>? _selectedReferredBy; 
 
   bool _isSubmitting = false;
   bool _isLoading = false;
@@ -310,14 +313,10 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
                       
 
                       // Date and Referred By
-                      _twoFieldRow(
-                        _dateField(),
-                        _textField(
-                          'Referred By',
-                          _referredByController,
-                          required: true,
-                        ),
-                      ),
+                     _twoFieldRow(
+  _dateField(),
+  _buildReferredByField(),   // <-- new widget
+),
 
                       const SizedBox(height: 16),
 
@@ -707,4 +706,17 @@ Color _getTypeColor(DharmasetuType? type) {
     ],
   ),
 );
+
+  Widget _buildReferredByField() {
+  return ReferredByDropdown(
+    controller: _referredByController,
+    initialValue: _selectedReferredBy,
+    onSelected: (value) {
+      setState(() {
+        _selectedReferredBy = value;
+        _referredByController.text = value?['userName'] ?? '';
+      });
+    },
+  );
+}
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_event.dart';
@@ -10,7 +11,9 @@ import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_event.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_state.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
+import 'package:vikas_app/screeens/common/common_filter.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/common_search_bar.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/screeens/common/stats_grid.dart';
@@ -27,10 +30,14 @@ class JeevanaadiListPage extends StatefulWidget {
 }
 
 class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
+  TextEditingController _searchController = TextEditingController();
+  String? _selectedOrder;
   @override
   void initState() {
     super.initState();
-    context.read<JeevanaadiBloc>().add(FetchJeevanaadisEvent(0));
+    context.read<JeevanaadiBloc>().add(
+      FetchJeevanaadisEvent(0, 10, null, null),
+    );
     context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
   }
 
@@ -40,7 +47,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-              StatsGrid(visibleType: "JEEVANAADI"),
+            StatsGrid(visibleType: "JEEVANAADI"),
             BlocBuilder<JeevanaadiBloc, JeevanaadiState?>(
               builder: (context, state) {
                 switch (state?.status) {
@@ -57,12 +64,14 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                           flex: 6,
                           child: Column(
                             children: [
-                             
                               const SizedBox(height: 16),
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Row(
                                       children: [
@@ -74,25 +83,75 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                           ),
                                         ),
                                         const SizedBox(width: 8),
+
                                         Chip(
-                                          label: Text('${state!.totalElements}'),
+                                          label: Text(
+                                            '${state!.totalElements}',
+                                          ),
                                           avatar: const Icon(
                                             Icons.people,
                                             size: 18,
                                           ),
                                           backgroundColor: Colors.grey.shade200,
                                         ),
+
+                                        const SizedBox(width: 8),
+
+                                        // ✅ Filter just after chip
+                                        CommonFilter(
+                                          selectedValue: _selectedOrder,
+                                          onChanged: (value) {
+                                            setState(
+                                              () => _selectedOrder = value,
+                                            );
+
+                                            context.read<JeevanaadiBloc>().add(
+                                              FetchJeevanaadisEvent(
+                                                0,
+                                                10,
+                                                _searchController
+                                                        .text
+                                                        .isNotEmpty
+                                                    ? _searchController.text
+                                                    : null,
+                                                value,
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       ],
                                     ),
-                                    // AddButton().addButton(
-                                    //   context: context,
-                                    //   buttonText: "Add Karyakartha",
-                                    //   onClicked: () {
-                                    //     Get.toNamed('/register');
-                                    //   },
-                                    // ),
+
+                                    // 🔹 RIGHT SIDE (Search)
+                                    SizedBox(
+                                      width: 250, // control width
+                                      child: CommonSearchBar(
+                                        controller: _searchController,
+                                        hintText: "Search members...",
+                                        onSearch: (value) {
+                                          context.read<JeevanaadiBloc>().add(
+                                            FetchJeevanaadisEvent(
+                                              0,
+                                              10,
+                                              value.isNotEmpty ? value : null,
+                                              _selectedOrder,
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
                                   ],
                                 ),
+
+                                // AddButton().addButton(
+                                //   context: context,
+                                //   buttonText: "Add Karyakartha",
+                                //   onClicked: () {
+                                //     Get.toNamed('/register');
+                                //   },
+                                // ),
+                                ////  ],
+                                //  ),
                               ),
                               Card(
                                 shape: RoundedRectangleBorder(
@@ -114,18 +173,34 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                     ),
                                     // const SizedBox(height: 16),
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 50),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 50,
+                                      ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             onPressed: () {
                                               if (state!.currentPage > 0) {
-                                                context.read<JeevanaadiBloc>().add(
-                                                  FetchJeevanaadisEvent(
-                                                    (state.currentPage ?? 0) - 1,
-                                                  ),
-                                                );
+                                                context
+                                                    .read<JeevanaadiBloc>()
+                                                    .add(
+                                                      FetchJeevanaadisEvent(
+                                                        (state.currentPage ??
+                                                                0) -
+                                                            1,
+                                                        10,
+
+                                                        _searchController
+                                                                .text
+                                                                .isNotEmpty
+                                                            ? _searchController
+                                                                  .text
+                                                            : null,
+                                                        state.orderedBy,
+                                                      ),
+                                                    );
                                               }
                                             },
                                             icon: Icon(
@@ -139,14 +214,28 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                             onPressed: () {
                                               if (state!.currentPage <
                                                   state!.totalpages - 1) {
-                                                context.read<JeevanaadiBloc>().add(
-                                                  FetchJeevanaadisEvent(
-                                                    (state.currentPage ?? 0) + 1,
-                                                  ),
-                                                );
+                                                context
+                                                    .read<JeevanaadiBloc>()
+                                                    .add(
+                                                      FetchJeevanaadisEvent(
+                                                        (state.currentPage ??
+                                                                0) +
+                                                            1,
+                                                        10,
+                                                        _searchController
+                                                                .text
+                                                                .isNotEmpty
+                                                            ? _searchController
+                                                                  .text
+                                                            : null,
+                                                        state.orderedBy,
+                                                      ),
+                                                    );
                                               }
                                             },
-                                            icon: Icon(Icons.skip_next_outlined),
+                                            icon: Icon(
+                                              Icons.skip_next_outlined,
+                                            ),
                                           ),
                                           SizedBox(height: 16),
                                         ],
@@ -167,7 +256,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                               duration: const Duration(seconds: 1),
                               switchInCurve: Curves.easeOutCubic,
                               switchOutCurve: Curves.easeInCubic,
-            
+
                               layoutBuilder: (currentChild, previousChildren) {
                                 return Stack(
                                   alignment: Alignment.center,
@@ -177,18 +266,18 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                   ],
                                 );
                               },
-            
+
                               transitionBuilder: (child, animation) {
                                 final slideAnimation = Tween<Offset>(
                                   begin: const Offset(0.05, 0),
                                   end: Offset.zero,
                                 ).animate(animation);
-            
+
                                 final fadeAnimation = Tween<double>(
                                   begin: 0.0,
                                   end: 1.0,
                                 ).animate(animation);
-            
+
                                 return FadeTransition(
                                   opacity: fadeAnimation,
                                   child: SlideTransition(
@@ -197,7 +286,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                   ),
                                 );
                               },
-            
+
                               child: state.profileLoading ?? false
                                   ? ScreenLoader(key: ValueKey('loader'))
                                   : state.profileErrorMsg != null
@@ -216,7 +305,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                       },
                                       screenType: "JEEVANAADI_PROFILE",
                                       onDelete: () {},
-            
+
                                       // onViewMore: () {
                                       //   Get.toNamed('/jeevandiview');
                                       // },
@@ -243,7 +332,7 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
                                                   .toString() ??
                                               "";
                                         }
-            
+
                                         if (jeevanadiId != null &&
                                             jeevanadiId.isNotEmpty) {
                                           Get.toNamed(
@@ -277,6 +366,14 @@ class _JeevanaadiListPageState extends State<JeevanaadiListPage> {
           ],
         ),
       ),
+    );
+  }
+
+  void _callSearchApi() {
+    final query = _searchController.text.trim();
+
+    context.read<JeevanaadiBloc>().add(
+      FetchJeevanaadisEvent(0, 10, query.isNotEmpty ? query : null, null),
     );
   }
 }

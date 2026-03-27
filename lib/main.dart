@@ -60,6 +60,8 @@ Future<void> main() async {
             
           ),
           BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
+          
+          
 
           BlocProvider<UserBloc>(create: (_) => UserBloc()),
           BlocProvider<AuthBloc>(

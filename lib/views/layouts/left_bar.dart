@@ -203,6 +203,14 @@ class _LeftBarState extends State<LeftBar>
                       route: '/profile',
                     ),
 
+                    NavigationItem(
+                      iconData: LucideIcons.logOut,
+                      title: "Logout",
+                      isCondensed: isCondensed,
+                      route: '/logout',
+                    ),
+
+
                     // NavigationItem(
                     //   iconData: LucideIcons.userCog,
                     //   title: "jeevandi view",

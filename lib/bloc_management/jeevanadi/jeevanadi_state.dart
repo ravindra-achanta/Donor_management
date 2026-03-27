@@ -64,6 +64,7 @@ final String? approveErrorMsg;
  final List<JeevanaadiUser> searchResults;
   final bool searchLoading;
   final String? searchError;
+  final String? orderedBy;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -118,6 +119,7 @@ final String? approveErrorMsg;
      this.searchResults = const [],
     this.searchLoading = false,
     this.searchError,
+      this.orderedBy,
 
 
 
@@ -176,6 +178,7 @@ final String? approveErrorMsg;
      List<JeevanaadiUser>? searchResults,
     bool? searchLoading,
     String? searchError,
+    String? orderedBy,
 
   }) {
     return JeevanaadiState(
@@ -240,6 +243,7 @@ final String? approveErrorMsg;
       searchResults: searchResults ?? this.searchResults,
       searchLoading: searchLoading ?? this.searchLoading,
       searchError: searchError ?? this.searchError,
+      orderedBy: orderedBy ?? this.orderedBy,
     );
   }
 
@@ -297,5 +301,6 @@ final String? approveErrorMsg;
     searchResults,
     searchLoading,
     searchError,
+    orderedBy,
   ];
 }

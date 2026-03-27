@@ -6,10 +6,21 @@ import 'package:vikas_app/api_services/api_error.dart';
 
 class UserRepo {
   final _api = NetworkService.instance;
-  Future<ApiResult<PaginatedView>> getUsers(int page, int size) async {
-    final result = await _api.get(
-      "${ApiConstants.GET_USERS}?page=${page}&size=${size}",
-    );
+  
+  Future<ApiResult<PaginatedView>> getUsers(int page, int size, {String? searchQuery}) async {
+
+    final queryParams = {
+    'page': page.toString(),
+    'size': size.toString(),
+  };
+  if (searchQuery != null && searchQuery.isNotEmpty) {
+    queryParams['searchValue'] = searchQuery;
+  }
+    // final result = await _api.get(
+    //   "${ApiConstants.GET_USERS}?page=${page}&size=${size}",
+    // );
+     final uri = Uri.parse(ApiConstants.GET_USERS).replace(queryParameters: queryParams);
+  final result = await _api.get(uri.toString());
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
     }

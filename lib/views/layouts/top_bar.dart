@@ -346,47 +346,54 @@ class _TopBarState extends State<TopBar>
                           children: [
                             FxSpacing.width(8),
                             Text.rich(
-  TextSpan(
-    children: [
-      const TextSpan(
-                text: "Welcome  ",
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.normal),
-              ),
-      
-      TextSpan(
-        text: (Vikasdb().getString("USER_NAME")?.isNotEmpty == true)
-            ? Vikasdb().getString("USER_NAME")!
-            : "User",
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      const TextSpan(text: " "),
-      const TextSpan(
-        text: "(",
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      TextSpan(
-        text: _getUserDisplayName(),
-        style: const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-      const TextSpan(
-        text: ")",
-        style: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.normal,
-        ),
-      ),
-    ],
-  ),
-),
+                              TextSpan(
+                                children: [
+                                  const TextSpan(
+                                    text: "Welcome  ",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+
+                                  TextSpan(
+                                    text:
+                                        (Vikasdb()
+                                                .getString("USER_NAME")
+                                                ?.isNotEmpty ==
+                                            true)
+                                        ? Vikasdb().getString("USER_NAME")!
+                                        : "User",
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const TextSpan(text: " "),
+                                  const TextSpan(
+                                    text: "(",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                  TextSpan(
+                                    text: _getUserDisplayName(),
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                    text: ")",
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.normal,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             FxSpacing.width(8),
                             FxContainer.rounded(
                               paddingAll: 0,

@@ -11,6 +11,7 @@ import 'package:vikas_app/screeens/authentication/registration_page.dart';
 import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
+import 'package:vikas_app/screeens/common/common_search_bar.dart';
 import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
@@ -26,6 +27,8 @@ class KaryakarthasListPage extends StatefulWidget {
 }
 
 class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
+  TextEditingController _searchController = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -33,6 +36,14 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
     context.read<KaryakarthaBloc>().add(FetchKaryakattasEvent(0));
 
     context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
+  }
+
+  void _callSearchApi() {
+    final query = _searchController.text.trim();
+
+    context.read<KaryakarthaBloc>().add(
+      FetchKaryakattasEvent(0, query.isNotEmpty ? query : null),
+    );
   }
 
   @override
@@ -62,12 +73,14 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                               // if (Vikasdb().getString("USER_TYPE") ==
                               //         "OFFICE_STAFF" ||
                               //     Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
-                              
                               const SizedBox(height: 16),
                               Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 8.0,
+                                ),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     // const Text(
                                     //   "All Karyakarthas",
@@ -76,26 +89,74 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     //     fontWeight: FontWeight.bold,
                                     //   ),
                                     // ),
-                                    Row(
-                                      children: [
-                                        const Text(
-                                          "All Karyakarthas :",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Chip(
-                                          label: Text('${state!.totalElements}'),
-                                          avatar: const Icon(
-                                            Icons.people,
-                                            size: 18,
-                                          ),
-                                          backgroundColor: Colors.grey.shade200,
-                                        ),
-                                      ],
-                                    ),
+                                    Row( children: [ const Text( "All Karyakarthas :", style: TextStyle( fontSize: 18, fontWeight: FontWeight.bold, ), ), const SizedBox(width: 8), Chip( label: Text('${state!.totalElements}'), avatar: const Icon( Icons.people, size: 18, ), backgroundColor: Colors.grey.shade200, ), ], ),
+                                    // SizedBox(
+                                    //   width: 250,
+                                    //   child: TextFormField(
+                                    //     controller: _searchController,
+
+                                    //     onFieldSubmitted: (_) =>
+                                    //         _callSearchApi(),
+
+                                    //     onChanged: (_) {
+                                    //       setState(() {});
+                                    //     },
+
+                                    //     decoration: InputDecoration(
+                                    //       hintText: 'Search...',
+
+                                    //       prefixIcon: IconButton(
+                                    //         icon: Icon(Icons.search),
+                                    //         onPressed: _callSearchApi,
+                                    //       ),
+
+                                    //       suffixIcon:
+                                    //           _searchController.text.isNotEmpty
+                                    //           ? IconButton(
+                                    //               icon: Icon(
+                                    //                 Icons.close,
+                                    //                 size: 18,
+                                    //               ),
+                                    //               onPressed: () {
+                                    //                 _searchController.clear();
+
+                                    //                 context
+                                    //                     .read<KaryakarthaBloc>()
+                                    //                     .add(
+                                    //                       FetchKaryakattasEvent(
+                                    //                         0,
+                                    //                         null,
+                                    //                       ),
+                                    //                     );
+
+                                    //                 setState(() {});
+                                    //               },
+                                    //             )
+                                    //           : null,
+
+                                    //       filled: true,
+                                    //       fillColor: Colors.white,
+
+                                    //       border: OutlineInputBorder(
+                                    //         borderRadius: BorderRadius.circular(
+                                    //           40,
+                                    //         ),
+                                    //       ),
+                                    //     ),
+                                    //   ),
+                                    // ),
+                                    CommonSearchBar(
+  controller: _searchController,
+  hintText: "Search karyakarthas...",
+  onSearch: (value) {
+    context.read<KaryakarthaBloc>().add(
+      FetchKaryakattasEvent(
+        0,
+        value.isNotEmpty ? value : null,
+      ),
+    );
+  },
+),
                                     if (Vikasdb().getString("USER_TYPE") !=
                                         "GURUJI")
                                       AddButton().addButton(
@@ -106,7 +167,8 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                           Get.to(
                                             () => RegistrationPage(
                                               title: "Add Karyakartha",
-                                              type: RegistrationType.karyakartha,
+                                              type:
+                                                  RegistrationType.karyakartha,
                                               user: null,
                                             ),
                                           );
@@ -125,6 +187,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                       users: state?.karyakarthas ?? [],
                                       currentPage: state?.currentPage ?? 0,
                                       onUserTap: (id) {
+                                        if (state?.profileLoading == true) return;
                                         context.read<KaryakarthaBloc>().add(
                                           FetchKaryakarthaProfileEvent(id),
                                         );
@@ -148,31 +211,45 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                             Get.to(
                                               () => RegistrationPage(
                                                 title: "Edit User",
-                                                type: RegistrationType.karyakartha,
+                                                type: RegistrationType
+                                                    .karyakartha,
                                                 user: user,
                                                 isEdit: true,
                                               ),
                                             );
                                           }
                                         } catch (e) {
-                                          debugPrint('User not found with id: $id');
+                                          debugPrint(
+                                            'User not found with id: $id',
+                                          );
                                         }
                                       },
                                     ),
                                     // const SizedBox(height: 16),
                                     Padding(
-                                      padding: EdgeInsets.symmetric(horizontal: 50),
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 50,
+                                      ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.end,
                                         children: [
                                           IconButton(
                                             onPressed: () {
                                               if (state!.currentPage > 0) {
-                                                context.read<KaryakarthaBloc>().add(
-                                                  FetchKaryakattasEvent(
-                                                    state.currentPage - 1,
-                                                  ),
-                                                );
+                                                context
+                                                    .read<KaryakarthaBloc>()
+                                                    .add(
+                                                      FetchKaryakattasEvent(
+                                                        state.currentPage - 1,
+                                                        _searchController
+                                                                .text
+                                                                .isNotEmpty
+                                                            ? _searchController
+                                                                  .text
+                                                            : null,
+                                                      ),
+                                                    );
                                               }
                                             },
                                             icon: Icon(
@@ -186,14 +263,24 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                             onPressed: () {
                                               if (state!.currentPage <
                                                   state!.totalpages - 1) {
-                                                context.read<KaryakarthaBloc>().add(
-                                                  FetchKaryakattasEvent(
-                                                    state.currentPage + 1,
-                                                  ),
-                                                );
+                                                context
+                                                    .read<KaryakarthaBloc>()
+                                                    .add(
+                                                      FetchKaryakattasEvent(
+                                                        state.currentPage + 1,
+                                                        _searchController
+                                                                .text
+                                                                .isNotEmpty
+                                                            ? _searchController
+                                                                  .text
+                                                            : null,
+                                                      ),
+                                                    );
                                               }
                                             },
-                                            icon: Icon(Icons.skip_next_outlined),
+                                            icon: Icon(
+                                              Icons.skip_next_outlined,
+                                            ),
                                           ),
                                           SizedBox(height: 16),
                                         ],
@@ -213,7 +300,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                               duration: const Duration(seconds: 1),
                               switchInCurve: Curves.easeOutCubic,
                               switchOutCurve: Curves.easeInCubic,
-                      
+
                               layoutBuilder: (currentChild, previousChildren) {
                                 return Stack(
                                   alignment: Alignment.center,
@@ -223,7 +310,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   ],
                                 );
                               },
-                      
+
                               transitionBuilder: (child, animation) {
                                 final slideAnimation = Tween<Offset>(
                                   begin: const Offset(
@@ -232,12 +319,12 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   ), // slight slide from right
                                   end: Offset.zero,
                                 ).animate(animation);
-                      
+
                                 final fadeAnimation = Tween<double>(
                                   begin: 0.0,
                                   end: 1.0,
                                 ).animate(animation);
-                      
+
                                 return FadeTransition(
                                   opacity: fadeAnimation,
                                   child: SlideTransition(
@@ -246,7 +333,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                   ),
                                 );
                               },
-                      
+
                               child: state?.profileLoading ?? false
                                   ? ScreenLoader(key: ValueKey('loader'))
                                   : state?.profileErrorMsg != null
@@ -276,7 +363,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                       onViewMore: () {
                                         final String? karyakarthaId =
                                             state?.karyakarthaProfile?.id;
-                      
+
                                         if (karyakarthaId != null &&
                                             karyakarthaId.isNotEmpty) {
                                           print(
@@ -287,7 +374,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                             arguments: karyakarthaId,
                                           );
                                         }
-                      
+
                                         //Get.toNamed('/karyakartha-view');
                                       },
                                     ),

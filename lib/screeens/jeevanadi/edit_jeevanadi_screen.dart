@@ -1093,33 +1093,64 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
                 width: 200,
                 child: Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: TextFormField(
-                    initialValue: occ['date'] ?? '',
-                    readOnly: true,
-                    onTap: () async {
-                      final date = await showDatePicker(
-                        context: context,
-                        firstDate: DateTime(1900),
-                        lastDate: DateTime(2100),
-                        initialDate: DateTime.now(),
-                      );
-                      if (date != null) {
-                        final formattedDate = DateFormat(
-                          "yyyy-MM-dd",
-                        ).format(date);
-                        setState(() {
-                          _occasions[index]['date'] = formattedDate;
-                        });
-                      }
-                    },
-                    decoration: _inputDecoration(
-                      "Occasion Date",
-                      suffixIcon: const Icon(
-                        Icons.calendar_today,
-                        color: Colors.grey,
+                  child:
+                      // TextFormField(
+                      //   initialValue: occ['date'] ?? '',
+                      //   readOnly: true,
+                      //   onTap: () async {
+                      //     final date = await showDatePicker(
+                      //       context: context,
+                      //       firstDate: DateTime(1900),
+                      //       lastDate: DateTime(2100),
+                      //       initialDate: DateTime.now(),
+                      //     );
+                      //     if (date != null) {
+                      //       final formattedDate = DateFormat(
+                      //         "yyyy-MM-dd",
+                      //       ).format(date);
+                      //       setState(() {
+                      //         _occasions[index]['date'] = formattedDate;
+                      //       });
+                      //     }
+                      //   },
+                      //   decoration: _inputDecoration(
+                      //     "Occasion Date",
+                      //     suffixIcon: const Icon(
+                      //       Icons.calendar_today,
+                      //       color: Colors.grey,
+                      //     ),
+                      //   ),
+                      // ),
+                      TextFormField(
+                        key: ValueKey('occasion_date_${occ['uniqueId']}'),
+                        controller: TextEditingController(
+                          text: occ['date'] ?? '',
+                        ),
+                        readOnly: true,
+                        onTap: () async {
+                          final date = await showDatePicker(
+                            context: context,
+                            firstDate: DateTime(2000),
+                            lastDate: DateTime(2100),
+                            initialDate: DateTime.now(),
+                          );
+                          if (date != null) {
+                            final formattedDate = DateFormat(
+                              "yyyy-MM-dd",
+                            ).format(date);
+                            setState(() {
+                              _occasions[index]['date'] = formattedDate;
+                            });
+                          }
+                        },
+                        decoration: _inputDecoration(
+                          "Occasion Date",
+                          suffixIcon: const Icon(
+                            Icons.calendar_today,
+                            color: Colors.grey,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
                 ),
               ),
               if (_occasions.length > 1)

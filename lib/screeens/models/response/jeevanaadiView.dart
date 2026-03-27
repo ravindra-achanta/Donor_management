@@ -4,6 +4,7 @@ class JeevanaadiUser {
   final String? email;
   final double? profileCompletionPercentage;
   final String? jeevanaadiNo;
+  final String? joinedDate;
    //final List<double> percentageHistory;
 
   const JeevanaadiUser({
@@ -12,6 +13,7 @@ class JeevanaadiUser {
     this.profileCompletionPercentage,
     this.email,
     this.jeevanaadiNo,
+    this.joinedDate,
     // required this.percentageHistory,
   });
 
@@ -24,6 +26,7 @@ class JeevanaadiUser {
           : null,
       jeevanaadiNo: json['jeevanaadiNo']?.toString(),
       email: json['email']?.toString(),
+      joinedDate: json['joinedDate']?.toString(),
       // percentageHistory: json['percentageHistory'] ?? [],
     );
   }
@@ -35,6 +38,7 @@ class JeevanaadiUser {
       'email': email,
       'profileCompletionPercentage': profileCompletionPercentage,
       'jeevanaadiNo': jeevanaadiNo,
+      'joinedDate': joinedDate,
       // 'percentageHistory': percentageHistory,
     };
   }

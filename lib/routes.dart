@@ -16,6 +16,7 @@ import 'package:vikas_app/screeens/jeevanadi/jeevanaadi_list_page.dart';
 import 'package:vikas_app/screeens/jeevanadi/view_jeevanadi_screen.dart';
 import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
+import 'package:vikas_app/screeens/logout/LogoutScreen.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
@@ -146,6 +147,7 @@ getPageRoute() {
       name: '/profile-analytics',
       page: () => const DonationsReportScreen(),
     ),
+    GetPage(name: '/logout', page: () => const LogoutScreen()),
 
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
     // GetPage(
