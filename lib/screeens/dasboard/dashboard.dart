@@ -45,7 +45,11 @@ class _DashboardState extends State<Dashboard> {
       context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
 
       /// FETCH NOTICES
+     // context.read<NoticeBloc>().add(FetchNoticesEvent());
+      if (Vikasdb().getString("USER_TYPE") != "GURUJI") {
       context.read<NoticeBloc>().add(FetchNoticesEvent());
+    }
+
 
     });
   }
@@ -121,6 +125,7 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
            current.status == NoticeStatus.success;
   },
   listener: (context, state) {
+     if (Vikasdb().getString("USER_TYPE") == "GURUJI") return;
     if (state.notices.isNotEmpty) {
       _startNoticeQueue(state.notices);
     }

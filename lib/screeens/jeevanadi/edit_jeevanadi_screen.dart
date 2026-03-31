@@ -144,18 +144,35 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
       _panCtrl.text = profile.profileDetails.panNumber ?? '';
       _dropdownValues['role'] = profile.profileDetails.userType;
 
-      _referredByCtrl.text = profile.profileDetails.referredByCustom ?? '';
       if (profile.profileDetails.referredByCustom?.isNotEmpty == true) {
-        bool isManual = profile.profileDetails.referredById == 0;
-
-        _selectedReferredBy = {
-          'id': profile.profileDetails.referredById?.toString() ?? '0',
-          'userName': profile.profileDetails.referredByCustom,
-          'jeevanaadiNo': '',
-          'isManual': isManual,
-        };
+        // Case 1: Manual custom entry
+        _referredByCtrl.text = profile.profileDetails.referredByCustom ?? '';
         _referredBySearchController.text =
             profile.profileDetails.referredByCustom ?? '';
+
+        _selectedReferredBy = {
+          'id': '0',
+          'userName': profile.profileDetails.referredByCustom,
+          'jeevanaadiNo': '',
+          'isManual': true,
+        };
+      } else if (profile.profileDetails.referredById != null &&
+          profile.profileDetails.referredById != 0) {
+        _selectedReferredBy = {
+          'id': profile.profileDetails.referredById.toString(),
+          'userName': profile.profileDetails.referredById
+              .toString(), // The member ID
+          'jeevanaadiNo': '',
+          'isManual': false,
+        };
+        _referredBySearchController.text = profile.profileDetails.referredById
+            .toString();
+        _referredByCtrl.text = profile.profileDetails.referredById.toString();
+      } else {
+        // Case 3: No referral
+        _selectedReferredBy = null;
+        _referredByCtrl.text = '';
+        _referredBySearchController.text = '';
       }
 
       _jeevanadiIdCtrl.text = profile.basicDetails.id.toString();
@@ -366,21 +383,43 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
         .toList();
   }
 
+  // List<Map<String, dynamic>> _getFormattedOccasions() {
+  //   return _occasions
+  //       .where((occ) => occ["name"]?.isNotEmpty == true)
+  //       .map(
+  //         (occ) => {
+  //           "occassionId": occ["id"] != null && occ["id"].toString().isNotEmpty
+  //               ? int.tryParse(occ["id"].toString())
+  //               : null,
+  //           "occName": occ["name"] ?? "",
+  //           "occDate": occ["date"]?.isEmpty == true ? null : occ["date"],
+  //           "status": "ACTIVE",
+  //         },
+  //       )
+  //       .toList();
+  // }
   List<Map<String, dynamic>> _getFormattedOccasions() {
-    return _occasions
-        .where((occ) => occ["name"]?.isNotEmpty == true)
-        .map(
-          (occ) => {
-            "occassionId": occ["id"] != null && occ["id"].toString().isNotEmpty
-                ? int.tryParse(occ["id"].toString())
-                : null,
-            "occName": occ["name"] ?? "",
-            "occDate": occ["date"]?.isEmpty == true ? null : occ["date"],
-            "status": "ACTIVE",
-          },
-        )
-        .toList();
-  }
+  return _occasions
+      .where((occ) => occ["name"]?.isNotEmpty == true)
+      .map((occ) {
+        final idValue = occ["id"]?.toString();
+
+        final bool isExisting =
+            idValue != null &&
+            idValue.isNotEmpty &&
+            idValue != "0";
+
+        return {
+          "occassionId": isExisting
+              ? int.tryParse(idValue)
+              : null, // ✅ new → null
+          "occName": occ["name"] ?? "",
+          "occDate": occ["date"]?.isEmpty == true ? null : occ["date"],
+          "status": "ACTIVE",
+        };
+      })
+      .toList();
+}
 
   @override
   void dispose() {

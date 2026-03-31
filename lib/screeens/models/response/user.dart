@@ -42,6 +42,7 @@ class User {
   final String? password;
   final String? userType;
   final List<String> userTypes;
+  final List<String> roles;
   final String status;
   final String? pincode;
   final String? city;
@@ -60,6 +61,7 @@ class User {
     required this.email,
     this.mobileNumber,
     this.password,
+      this.roles = const [],
     //required this.userType,
     this.userType,
     required this.status,
@@ -83,6 +85,7 @@ class User {
       mobileNumber: json['mobileNumber'],
       password: json['password'] ?? "",
       userType: json['userType'],
+      roles: (json['roles'] as List?)?.map((x) => x.toString()).toList() ?? const [],
       joinedDate: json['joinedDate'] as String?,
       status: json['status'],
       pincode: json['pincode'],
@@ -105,6 +108,7 @@ class User {
       'mobileNumber': mobileNumber,
       'password': password,
       'userType': userType,
+      'roles': roles,
       'joinedDate': joinedDate,
       'status': status,
       'pincode': pincode,

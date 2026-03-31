@@ -120,7 +120,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
                                   ? name
                                   : screenType == "DHARMASETU"
                                   ? name
-                                  : "${name} Demographic Info",
+                                  : "${name}'s Demographic Info:",
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -254,13 +254,13 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           _jeevanaadiUser?.basicDetails.jeevanadiNo ?? "N/A",
                         ),
                       ),
-                      Expanded(
-                        child: _infoTile(
-                          Icons.person_outline,
-                          'Jeevanadi No',
-                          _jeevanaadiUser?.basicDetails.jeevanadiNo ?? "N/A",
-                        ),
-                      ),
+                      // Expanded(
+                      //   child: _infoTile(
+                      //     Icons.person_outline,
+                      //     'Jeevanadi No',
+                      //     _jeevanaadiUser?.basicDetails.jeevanadiNo ?? "N/A",
+                      //   ),
+                      // ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -299,6 +299,13 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           : _user,
                     ),
                   ),
+                const SizedBox(height: 16),
+                if (screenType == "USER_PROFILE" && _user != null && _user.userTypes.isNotEmpty) ...[
+  const SizedBox(height: 16),
+  _sectionTitle('User Roles'),
+  _buildUserTypesChips(_user.userTypes),
+],
+
                 const SizedBox(height: 16),
 
                 // Actions - Show for all screen types
@@ -363,7 +370,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                           label: Text(
                             screenType == "VISIT"
                                 ? 'View Full Details'
-                                : 'click to view more actions',
+                                //: 'Click to view more actions',
+                                : 'More Actions',
                             style: const TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(
@@ -463,13 +471,13 @@ class _ListViewScreenState extends State<ListViewScreen> {
                   ),
                 ],
 
-                Text("User Activity"),
-                LinearProgressIndicator(
-                  value: 0.5,
+                // Text("User Activity"),
+                // LinearProgressIndicator(
+                //   value: 0.5,
 
-                  backgroundColor: Colors.grey[300],
-                  valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                ),
+                //   backgroundColor: Colors.grey[300],
+                //   valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
+                // ),
               ],
             ),
     );
@@ -532,6 +540,40 @@ class _ListViewScreenState extends State<ListViewScreen> {
       },
     );
   }
+  
+  Widget _buildUserTypesChips(List<String> userTypes) {
+  if (userTypes.isEmpty) return const Text('-');
+  return Wrap(
+    spacing: 6,
+    runSpacing: 4,
+    children: userTypes.map((type) {
+      return Chip(
+        label: Text(
+          type,
+          style: const TextStyle(fontSize: 12, color: Colors.white),
+        ),
+        backgroundColor: _getUserTypeColor(type),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      );
+    }).toList(),
+  );
+}
+
+Color _getUserTypeColor(String userType) {
+  switch (userType.toUpperCase()) {
+    case 'SUPER_ADMIN':
+      return Colors.red;
+    case 'ADMIN':
+      return Colors.orange;
+    case 'KARYAKARTHA':
+      return Colors.blue;
+    case 'OFFICE_STAFF':
+      return Colors.green;
+    default:
+      return Colors.grey;
+  }
+}
 }
 
 Widget buildDotContainer(Color color, String text) {
