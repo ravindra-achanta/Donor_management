@@ -84,7 +84,7 @@ class _UsersState extends State<Users> {
                                     Row(
                                       children: [
                                         const Text(
-                                          "All Users :",
+                                          "All Users",
                                           style: TextStyle(
                                             fontSize: 18,
                                             fontWeight: FontWeight.bold,
@@ -152,25 +152,15 @@ class _UsersState extends State<Users> {
                                       },
                                       onDelete: (id) {},
                                       onUpdate: (id) {
-                                        try {
-                                          final user = state?.users?.firstWhere(
-                                            (u) => u.id == id,
-                                          );
-                                          if (user != null) {
-                                            Get.to(
-                                              () => RegistrationPage(
-                                                title: "Edit User",
-                                                type: RegistrationType.user,
-                                                user: user,
-                                                isEdit: true,
-                                              ),
-                                            );
-                                          }
-                                        } catch (e) {
-                                          debugPrint(
-                                            'User not found with id: $id',
-                                          );
-                                        }
+                                        Get.to(
+                                          () => RegistrationPage(
+                                            title: "Edit User",
+                                            type: RegistrationType.user,
+                                            user: null, // not needed anymore
+                                            isEdit: true,
+                                            userId: id,
+                                          ),
+                                        );
                                       },
                                     ),
                                     Padding(

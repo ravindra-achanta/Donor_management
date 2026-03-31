@@ -10,15 +10,20 @@ class LogoutScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Layout(
-      child: Center(
+   return Layout(
+  child: Align(
+    alignment: Alignment.topCenter, // 👈 move to top center
+    child: Padding(
+      padding: const EdgeInsets.only(top: 80), // 👈 space from top
+      child: SizedBox(
+        width: 400, // 👈 control width (important)
         child: Card(
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(12),
           ),
-          elevation: 4,
+          elevation: 6,
           child: Padding(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(16),
             child: BlocListener<ProfileBloc, ProfileState>(
               listener: (context, state) {
                 if (state.status == ProfileStatus.initial) {
@@ -32,52 +37,44 @@ class LogoutScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Icon
                   CircleAvatar(
-                    radius: 25,
+                    radius: 28,
                     backgroundColor: Colors.red.shade50,
                     child: Icon(
                       Icons.logout,
-                      size: 30,
+                      size: 32,
                       color: Colors.red.shade600,
                     ),
                   ),
-                  const SizedBox(height: 3),
+                  const SizedBox(height: 12),
 
-                  // Title
                   const Text(
                     "Logout Account",
                     style: TextStyle(
                       fontSize: 18,
-                      color: Colors.white,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 2),
 
-                  // Description
+                  const SizedBox(height: 8),
+
                   const Text(
                     "Are you sure want to logout your account?",
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Colors.grey, fontSize: 13),
                   ),
+
                   const SizedBox(height: 20),
 
-                  // Buttons
                   Row(
                     children: [
-                      // Cancel
                       Expanded(
                         child: OutlinedButton(
                           onPressed: () => Navigator.pop(context),
-                          style: OutlinedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 10),
-                          ),
                           child: const Text("Cancel"),
                         ),
                       ),
                       const SizedBox(width: 10),
-                      // Logout
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
@@ -85,9 +82,11 @@ class LogoutScreen extends StatelessWidget {
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red.shade600,
-                            padding: const EdgeInsets.symmetric(vertical: 10),
                           ),
-                          child: const Text("Logout", style: TextStyle(color: Colors.white)),
+                          child: const Text(
+                            "Logout",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                     ],
@@ -98,6 +97,8 @@ class LogoutScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
+    ),
+  ),
+);
   }
 }

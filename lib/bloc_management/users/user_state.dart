@@ -15,6 +15,7 @@ class UserState extends Equatable {
   final User? user;
   final bool? profileLoading;
   final String? profileErrorMsg;
+  
 
   UserState({
     this.status = UserScreenState.initial,

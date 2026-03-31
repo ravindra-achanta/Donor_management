@@ -10,12 +10,19 @@ class ProfileState extends Equatable {
   final User? user;
   final String? profileErrorMsg;
   final String? successMessage;
+  final bool isUpdateError;
+  final bool isUpdateSuccess;
+  final String? errorMessage;
 
   const ProfileState({
     this.status = ProfileStatus.initial,
     this.user,
     this.profileErrorMsg,
     this.successMessage,
+    this.isUpdateError = false,
+    this.isUpdateSuccess = false,
+    this.errorMessage,
+    
   });
 
   ProfileState copyWith({
@@ -24,6 +31,9 @@ class ProfileState extends Equatable {
     String? profileErrorMsg,
     bool clearError = false, 
     String? successMessage,
+    bool? isUpdateError,
+    bool? isUpdateSuccess,
+    String? errorMessage,
   }) {
     return ProfileState(
       status: status ?? this.status,
@@ -31,9 +41,12 @@ class ProfileState extends Equatable {
       profileErrorMsg:
           clearError ? null : profileErrorMsg ?? this.profileErrorMsg,
       successMessage: successMessage ?? this.successMessage,
+      isUpdateError: isUpdateError ?? this.isUpdateError,
+      isUpdateSuccess: isUpdateSuccess ?? this.isUpdateSuccess,
+      errorMessage: errorMessage ?? this.errorMessage,
     );
   }
 
   @override
-  List<Object?> get props => [status, user, profileErrorMsg, successMessage];
+  List<Object?> get props => [status, user, profileErrorMsg, successMessage, isUpdateError, isUpdateSuccess, errorMessage];
 }

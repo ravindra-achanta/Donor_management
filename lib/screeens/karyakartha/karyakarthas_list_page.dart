@@ -186,6 +186,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     CommonList(
                                       users: state?.karyakarthas ?? [],
                                       currentPage: state?.currentPage ?? 0,
+                                      screenType: 'KARYAKARTHA',
                                       onUserTap: (id) {
                                         if (state?.profileLoading == true) return;
                                         context.read<KaryakarthaBloc>().add(
