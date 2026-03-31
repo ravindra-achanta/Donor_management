@@ -137,7 +137,7 @@ class _MyProfileState extends State<MyProfile> {
   Widget _buildStats(User user) {
     return Row(
       children: [
-        _statCard("Assignments",
+        _statCard("Assigned Members",
             user.karyakarthaAssignCount.toString()),
         _statCard("Roles", user.userTypes.length.toString()),
         _statCard("Status", user.status),

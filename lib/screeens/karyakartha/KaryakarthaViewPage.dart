@@ -703,16 +703,17 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
                 _refreshUnassignedList(order: newOrder);
               },
             ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: CommonSearchBar(
-                controller: _searchController,
-                hintText: "Search unassigned...",
-                onSearch: (value) {
-                  _performUnassignedSearch();
-                },
-              ),
-            ),
+            const SizedBox(width: 3),
+SizedBox(
+  width: 200, 
+  child: CommonSearchBar(
+    controller: _searchController,
+    hintText: "Search unassigned...",
+    onSearch: (value) {
+      _performUnassignedSearch();
+    },
+  ),
+),
             if (state.selectedUnassignedIds.isNotEmpty)
               Flexible(
                 // SizedBox(

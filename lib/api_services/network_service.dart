@@ -174,7 +174,7 @@ class NetworkService {
     final statusCode = response.statusCode;
     final body = response.body;
 
-    // print("API [$statusCode]: $body");
+    print("API [$statusCode]: $body");
 
     if (statusCode >= 200 && statusCode < 300) {
       if (body.isEmpty) {

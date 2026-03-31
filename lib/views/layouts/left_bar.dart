@@ -176,6 +176,7 @@ class _LeftBarState extends State<LeftBar>
                         isCondensed: isCondensed,
                         route: '/requests',
                       ),
+                    if (Vikasdb().getString("USER_TYPE")!= "GURUJI")
                     NavigationItem(
                       iconData: LucideIcons.arrowLeftRight,
                       title: "Dharmasetu",
@@ -202,6 +203,12 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/profile',
                     ),
+                     NavigationItem(
+                      iconData: LucideIcons.activity,
+                      title: "Activity",
+                      isCondensed: isCondensed,
+                      route: '/activity-list',
+                    ),
 
                     NavigationItem(
                       iconData: LucideIcons.logOut,
@@ -209,6 +216,7 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/logout',
                     ),
+
 
 
                     // NavigationItem(

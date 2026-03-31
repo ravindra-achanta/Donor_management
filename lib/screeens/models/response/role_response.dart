@@ -3,8 +3,8 @@ import 'package:equatable/equatable.dart';
 class Role extends Equatable {
   final String id;
   final String roleName;
-  final String createdTime;
-  final String updatedTime;
+  final String? createdTime;
+  final String? updatedTime;
   final String? createdUserID;
   final String? updatedUserID;
   final String status;
@@ -12,8 +12,8 @@ class Role extends Equatable {
   Role({
     required this.id,
     required this.roleName,
-    required this.createdTime,
-    required this.updatedTime,
+     this.createdTime,
+     this.updatedTime,
     this.createdUserID,
     this.updatedUserID,
     required this.status,

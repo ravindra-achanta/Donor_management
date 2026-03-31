@@ -28,7 +28,7 @@ class VisitsListScreen extends StatefulWidget {
 class _VisitsListScreenState extends State<VisitsListScreen> {
   static const _flexValues = [6, 3, 7];
   static const _animationDuration = Duration(milliseconds: 300);
-  bool _showMetrics = true;
+  bool _showMetrics = false;
 
   @override
   void initState() {
@@ -94,10 +94,19 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (_showMetrics) ...[
-          _buildMetricsChart(state),
-          const SizedBox(height: 10),
-        ],
+        // if (_showMetrics) ...[
+        //   _buildMetricsChart(state),
+        //   const SizedBox(height: 10),
+        // ],
+         AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _showMetrics
+            ? Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildMetricsChart(state),
+              )
+            : const SizedBox(),
+      ),
         Expanded(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -198,7 +207,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
           Row(
             children: [
               const Text(
-                "Visits :",
+                "Total Visits :",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),

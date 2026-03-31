@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/screeens/Activity/ActivityListScreen.dart';
+import 'package:vikas_app/screeens/Activity/ActivityScreen.dart';
 import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
 import 'package:vikas_app/screeens/authentication/password_change_screen.dart';
@@ -133,20 +135,22 @@ getPageRoute() {
       },
     ),
 
-    GetPage(
-      name: '/profile-analytics',
-      page: () => const ProfileAnalyticsScreen(),
-    ),
+    // GetPage(
+    //   name: '/profile-analytics',
+    //   page: () => const ProfileAnalyticsScreen(),
+    // ),
 
-    GetPage(
-      name: '/profile-analytics',
-      page: () => const ActivityScoreScreen(),
-    ),
+    // GetPage(
+    //   name: '/profile-analytics',
+    //   page: () => const ActivityScoreScreen(),
+    // ),
 
-    GetPage(
-      name: '/profile-analytics',
-      page: () => const DonationsReportScreen(),
-    ),
+    // GetPage(
+    //   name: '/profile-analytics',
+    //   page: () => const DonationsReportScreen(),
+    // ),
+    GetPage(name: '/activity-list', page: () => const ActivityListScreen()),
+GetPage(name: '/activity', page: () => const CreateActivityScreen()),
     GetPage(name: '/logout', page: () => const LogoutScreen()),
 
     //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),

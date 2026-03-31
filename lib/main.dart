@@ -4,9 +4,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/api_services/network_repos/activity_repository.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
 import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
+import 'package:vikas_app/bloc_management/Activity/activity_bloc.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
@@ -60,8 +62,9 @@ Future<void> main() async {
             
           ),
           BlocProvider<NoticeBloc>(create: (_) => NoticeBloc()),
-          
-          
+          BlocProvider<ActivityBloc>(
+            create: (_) => ActivityBloc(repo: ActivityRepository()),
+          ),
 
           BlocProvider<UserBloc>(create: (_) => UserBloc()),
           BlocProvider<AuthBloc>(

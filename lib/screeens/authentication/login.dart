@@ -31,6 +31,13 @@ class _LoginPageState extends State<LoginPage> {
   List<Role> roles = [];
 
   String? selectedRole;
+  final Map<String, String> roleDisplayNames = {
+    'GURUJI': 'Guruji',
+    'SUPER_ADMIN': 'Super Admin',
+    'ADMIN': 'Admin',
+    'KARYAKARTHA': 'Karyakartha',
+    'OFFICE_STAFF': 'Office Staff',
+  };
 
   @override
   void initState() {
@@ -340,7 +347,8 @@ class _LoginPageState extends State<LoginPage> {
                                 items: state.availableRoles!.map((role) {
                                   return DropdownMenuItem<String>(
                                     value: role,
-                                    child: Text(role),
+                                    //child: Text(role),
+                                    child: Text(roleDisplayNames[role] ?? role),
                                   );
                                 }).toList(),
                                 onChanged: (value) =>
@@ -399,7 +407,7 @@ class _LoginPageState extends State<LoginPage> {
                                       state.isLoginChecked
                                           ? (selectedRole == null
                                                 ? 'Select a role'
-                                                : 'Login as $selectedRole')
+                                               : 'Login as ${roleDisplayNames[selectedRole] ?? selectedRole}')
                                           : 'Login',
                                       color: Colors.white,
                                     ),
