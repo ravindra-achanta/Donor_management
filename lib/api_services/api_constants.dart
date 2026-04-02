@@ -1,6 +1,6 @@
 class ApiConstants {
-    static const String baseUrl = "http://172.235.18.48:8050";
-   //static const String baseUrl = "https://vikas.vidyaranyam.in";
+    // static const String baseUrl = "http://172.235.18.48:8050";
+   static const String baseUrl = "https://vikas.vidyaranyam.in";
    
 
   static const String VIKAS = "/vikas/api/v1";
