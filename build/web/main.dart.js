@@ -132662,7 +132662,7 @@ if(new A.ch().d9(0,j)!=="OFFICE_STAFF"&&new A.ch().d9(0,j)!=="KARYAKARTHA")m.pus
 m.push(new A.jh(B.adZ,"Jeevanadi Members",l.e,"/jeevanadi",k))
 if(new A.ch().d9(0,j)!=="OFFICE_STAFF"&&new A.ch().d9(0,j)!=="KARYAKARTHA")m.push(new A.jh(B.ae6,"Users",l.e,"/users",k))
 if(new A.ch().d9(0,j)==="OFFICE_STAFF")m.push(new A.jh(B.adY,"Requests",l.e,"/requests",k))
-if(new A.ch().d9(0,j)!=="GURUJI"&&new A.ch().d9(0,j)!=="OFFICE_STAFF")m.push(new A.jh(B.adV,"Dharmasetu",l.e,"/dharmasetu",k))
+if(new A.ch().d9(0,j)==="ADMIN"||new A.ch().d9(0,j)==="KARYAKARTHA")m.push(new A.jh(B.adV,"Dharmasetu",l.e,"/dharmasetu",k))
 m.push(new A.jh(B.ae_,"Notices",l.e,"/notices/list",k))
 m.push(new A.jh(B.r6,"Visits",l.e,"/visits",k))
 m.push(new A.jh(B.ae5,"Profile",l.e,"/profile",k))
