@@ -43,6 +43,7 @@ class UserState extends Equatable {
     User? user,
     bool? profileLoading,
     String? profileErrorMsg,
+    
   }) {
     return UserState(
       status: status ?? this.status,
@@ -55,6 +56,8 @@ class UserState extends Equatable {
       user: user ?? this.user,
       profileLoading: profileLoading ?? this.profileLoading,
       profileErrorMsg: profileErrorMsg ?? this.profileErrorMsg,
+      delLoading: delLoading ?? this.delLoading,
+
     );
   }
 

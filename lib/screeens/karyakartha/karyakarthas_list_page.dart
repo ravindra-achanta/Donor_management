@@ -200,7 +200,8 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                           message:
                                               "Are you sure you want to delete this user?\nThis action cannot be undone.",
                                           onConfirm: () {
-                                            // deleteUserApi(user.id);
+                                            context.read<KaryakarthaBloc>().add(DeleteKaryakarthaEvent(id));
+                                            Navigator.pop(context);
                                           },
                                         );
                                       },
@@ -355,7 +356,14 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                       onDelete: () {
                                         DeletionPopup.showDeleteConfirmation(
                                           context: context,
-                                          onConfirm: () {},
+                                          onConfirm: () {
+                                            final karyakarthaId = state?.karyakarthaProfile?.id;
+                                            if (karyakarthaId != null) {
+                                              context.read<KaryakarthaBloc>().add(DeleteKaryakarthaEvent(karyakarthaId));
+                                              Navigator.pop(context);
+                                              context.read<KaryakarthaBloc>().add(CloseProfileView());
+                                            }
+                                          },
                                           title: "Delete User ?",
                                           message:
                                               "Are you sure you want to delete this user?\nThis action cannot be undone.",

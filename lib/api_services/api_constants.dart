@@ -1,6 +1,7 @@
 class ApiConstants {
-    //static const String baseUrl = "http://172.235.18.48:8050";
-   static const String baseUrl = "https://vikas.vidyaranyam.in";
+    static const String baseUrl = "http://172.235.18.48:8050";
+   //static const String baseUrl = "https://vikas.vidyaranyam.in";
+   
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -19,7 +20,9 @@ class ApiConstants {
   static const String CHANGE_PASSWORD = "$IDM_URI/user/changePassword";
   static const String GET_USERS = "$IDM_URI/users/all";
   static const String GET_USER_BY_ID = "$IDM_URI/user";
-  static const String UPDATE_PROFILE = "$IDM_URI/update/user";
+  //static const String UPDATE_PROFILE = "$IDM_URI/update/user";
+   static const String UPDATE_USER = "$IDM_URI/update/user";           
+  static const String UPDATE_PROFILE = "$IDM_URI/update/user/profile"; // Profile-specific 
   //roles
   static const String GET_ROLES = "${role_URI}/roles";
    static const String CHECK_LOGIN = "$IDM_URI/user";
@@ -51,6 +54,8 @@ static const String jeevandi_search = "${JEEVANADI_URI}/users/";
   static const String visitsDetails = "$VIKAS/visits";
   static const String visitsDelete = "$VIKAS/visits";
    static const String visitMetrics = "$VIKAS/visits/charts/metric";
+  static const String ACTIVITY_DASHBOARD = "$VIKAS/activity/dashboard";
+
 
   static const String DHARMASETU_LIST = "$VIKAS/dharmasetu/list";
   static const String DHARMASETU_GET_BY_ID = "$VIKAS/dharmasetu";
@@ -77,6 +82,8 @@ static const String uploadimage = "$IDM_URI/image";
 //activity/callLogs
 static const String ACTIVITY_LIST = "$VIKAS/callLogs/list";
 static const String ACTIVITY_CREATE = "$VIKAS/callLogs/create";
+
+static const String DELETE_USER = "$IDM_URI/delete/user";
 
 
 

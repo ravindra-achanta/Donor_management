@@ -24,4 +24,18 @@ class UpdateProfile extends ProfileEvent {
   List<Object?> get props => [id, user];
 }
 
+
+class UpdateProfileInfo extends ProfileEvent {
+  final String id;
+  final User user;
+
+  UpdateProfileInfo({
+    required this.id,
+    required this.user,
+  });
+
+  @override
+  List<Object?> get props => [id, user];
+}
+
 class LogoutEvent extends ProfileEvent {}

@@ -43,6 +43,7 @@ class _DashboardState extends State<Dashboard> {
 
       
       context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
+      context.read<DashboardBloc>().add(PostDashboardActivityEvent());
 
       /// FETCH NOTICES
      // context.read<NoticeBloc>().add(FetchNoticesEvent());
@@ -167,6 +168,9 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
 
                 const SizedBox(height: 24),
 
+              //  const SizedBox(height: 24),
+
+
               ],
             ),
           ),
@@ -179,6 +183,8 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
  Widget _buildStatsGrid() {
   return  StatsGrid();
 }
+
+  //_buildActivityDashboard() {}
 
 
 }

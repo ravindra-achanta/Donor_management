@@ -8,12 +8,14 @@ class DashboardState extends Equatable {
   final DashboardApiStatus status;
   final UserMetricsResponse? metrics;
   final ContributionResponse? donationMetrics;
+  final Map<String, dynamic>? activityDashboard;
   final String? errorMessage;
 
   const DashboardState({
     this.status = DashboardApiStatus.initial,
     this.metrics,
     this.errorMessage,
+    this.activityDashboard,
     this.donationMetrics,
   });
 
@@ -22,15 +24,17 @@ class DashboardState extends Equatable {
     UserMetricsResponse? metrics,
     String? errorMessage,
     ContributionResponse? donationMetrics,
+    Map<String, dynamic>? activityDashboard,
   }) {
     return DashboardState(
       status: status ?? this.status,
       metrics: metrics ?? this.metrics,
       errorMessage: errorMessage ?? this.errorMessage,
       donationMetrics: donationMetrics ?? this.donationMetrics,
+      activityDashboard: activityDashboard ?? this.activityDashboard,
     );
   }
 
   @override
-  List<Object?> get props => [status, metrics, errorMessage, donationMetrics];
+  List<Object?> get props => [status, metrics, errorMessage, donationMetrics, activityDashboard];
 }

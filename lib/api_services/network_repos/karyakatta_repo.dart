@@ -66,7 +66,18 @@ class KaryakattaRepo {
     }
   }
 
-  Future<void> deleteKaryakartha(String id) async {
-    await _api.delete("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
+  Future<ApiResult<Map<String, dynamic>>> deleteKaryakartha(String id) async {
+    final result = await _api.delete("${ApiConstants.DELETE_USER}/$id");
+    
+    if (!result.isSuccess) {
+      return ApiResult.failure(result.error);
+    }
+
+    try {
+      final data = result.data as Map<String, dynamic>;
+      return ApiResult.success(data);
+    } catch (e) {
+      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+    }
   }
 }
