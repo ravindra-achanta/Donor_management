@@ -42,4 +42,31 @@ class DashboardRepo {
       );
     }
   }
+
+
+  Future<ApiResult<Map<String, dynamic>>> postActivityDashboard() async {
+    final url = ApiConstants.ACTIVITY_DASHBOARD;
+    
+    
+    final result = await _api.post(url, body: {});
+
+    if (!result.isSuccess) {
+      print("❌ [DashboardRepo] Failed to fetch dashboard - Error: ${result.error?.message}");
+      return ApiResult.failure(result.error);
+    }
+
+    try {
+      print("✅ [DashboardRepo] Activity dashboard fetched successfully");
+      print("📦 [DashboardRepo] Response: ${result.data}");
+      final data = result.data as Map<String, dynamic>;
+      return ApiResult.success(data);
+    } catch (e) {
+      print("❌ [DashboardRepo] Parse error: $e");
+      return ApiResult.failure(
+        ApiError(message: "Data parsing error: $e"),
+      );
+    }
+  }
+
+  
 }

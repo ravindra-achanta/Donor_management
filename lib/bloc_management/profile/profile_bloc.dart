@@ -8,6 +8,7 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   ProfileBloc() : super(ProfileState()) {
     on<FetchProfile>(_fetchPrfile);
      on<UpdateProfile>(_updateProfile);
+       on<UpdateProfileInfo>(_updateProfileInfo);
      on<LogoutEvent>(_logout);
      
   }
@@ -55,12 +56,13 @@ Future<void> _updateProfile(
   ));
 
   final response =
-      await profileRepo.editProfile(event.id, event.user);
+      await profileRepo.updateUser(event.id, event.user);
 
   if (response.isSuccess) {
     emit(state.copyWith(
-      status: ProfileStatus.updated,  
-      successMessage: "Profile updated successfully",
+      status: ProfileStatus.updated, 
+      user: response.data, 
+      successMessage: "User updated successfully",
     ));
   } else {
     emit(state.copyWith(
@@ -80,5 +82,31 @@ Future<void> _logout(
     successMessage: null,
   ));
 }
+
+
+ Future<void> _updateProfileInfo(
+    UpdateProfileInfo event,
+    Emitter<ProfileState> emit,
+  ) async {
+    emit(state.copyWith(
+      status: ProfileStatus.updating,
+      profileErrorMsg: null,
+    ));
+
+    final response = await profileRepo.updateProfile(event.id, event.user);
+
+    if (response.isSuccess) {
+      emit(state.copyWith(
+        status: ProfileStatus.updated,
+        user: response.data,
+        successMessage: "Profile updated successfully",
+      ));
+       } else {
+      emit(state.copyWith(
+        status: ProfileStatus.error,
+        profileErrorMsg: response.error?.message ?? "Update failed",
+      ));
+    }
+  }
 
 }

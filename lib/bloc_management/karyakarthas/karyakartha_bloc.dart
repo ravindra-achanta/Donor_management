@@ -9,7 +9,7 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
   KaryakarthaBloc() : super(KaryakarthaState()) {
     on<FetchKaryakattasEvent>(_onFetchKaryakattas);
     // on<AddUserEvent>(_addUser);
-    // on<DeleteUserEvent>(_deleteUser);
+    on<DeleteKaryakarthaEvent>(_deleteKaryakartha);
     on<FetchKaryakarthaProfileEvent>(_onFetchKaryakarthaProfile);
     on<CloseProfileView>(_closeProfileView);
     // on<UpdateUserEvent>(_updateUser);
@@ -100,5 +100,32 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
     Emitter<KaryakarthaState> emit,
   ) async {
     emit(state.copyWith(isProfileViewVisible: false));
+  }
+
+  Future<void> _deleteKaryakartha(
+    DeleteKaryakarthaEvent event,
+    Emitter<KaryakarthaState> emit,
+  ) async {
+    emit(state.copyWith(delLoading: true));
+    
+    final response = await karyakattaRepo.deleteKaryakartha(event.userId);
+    
+    if (response.isSuccess) {
+      final updatedKaryakarthas = state.karyakarthas?.where((u) => u.id != event.userId).toList() ?? [];
+      emit(
+        state.copyWith(
+          delLoading: false,
+          users: updatedKaryakarthas,
+          errorMessage: null,
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          delLoading: false,
+          errorMessage: response.error?.message ?? "Failed to delete karyakartha",
+        ),
+      );
+    }
   }
 }

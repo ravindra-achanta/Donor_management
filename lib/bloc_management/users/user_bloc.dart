@@ -10,6 +10,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     on<FetchUsersEvent>(_fetchUsers);
     on<CloseProfileView>(_closeProfileView);
     on<FetchUsersProfileEvent>(_onFetchJeevanaadiProfile);
+     on<DeleteUserEvent>(_deleteUser);
   }
 
   final userRepo = UserRepo();
@@ -85,10 +86,38 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     }
   }
 
+  Future<void> _deleteUser(
+  DeleteUserEvent event,
+  Emitter<UserState> emit,
+) async {
+  emit(state.copyWith(delLoading: true));
+  
+  final response = await userRepo.deleteUser(event.userId);
+  
+  if (response.isSuccess) {
+    final updatedUsers = state.users?.where((u) => u.id != event.userId).toList() ?? [];
+    emit(
+      state.copyWith(
+        delLoading: false,
+        users: updatedUsers,
+        errorMessage: null,
+      ),
+    );
+  } else {
+    emit(
+      state.copyWith(
+        delLoading: false,
+        errorMessage: response.error?.message ?? "Failed to delete user",
+      ),
+    );
+  }
+}
+
   Future<void> _closeProfileView(
     CloseProfileView event,
     Emitter<UserState> emit,
   ) async {
     emit(state.copyWith(isProfileViewVisible: false));
   }
+
 }
