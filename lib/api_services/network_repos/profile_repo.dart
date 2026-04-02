@@ -22,56 +22,51 @@ class ProfileRepo {
     }
   }
 
-
-Future<ApiResult<User>> updateUser(String id, User user) async {
-  final url = "${ApiConstants.UPDATE_USER}/$id";
-  final body = user.toJson();
-  
-  print("🔄 [ProfileRepo] Updating user at: $url");
-  print("📦 [ProfileRepo] Request body: $body");
-  
-  final result = await _api.put(url, body: body);
-
-  if (!result.isSuccess) {
-    print("❌ [ProfileRepo] Update failed - Error: ${result.error?.message}");
-    print("❌ [ProfileRepo] Raw error: ${result.error}");
-    return ApiResult.failure(result.error);
-  }
-
-  try {
-    print("✅ [ProfileRepo] Update successful");
-    return ApiResult.success(User.fromJson(result.data));
-  } catch (e) {
-    print("❌ [ProfileRepo] Parse error: $e");
-    return ApiResult.failure(
-      ApiError(message: "Data parsing error: $e"),
-    );
-  }
-}
-
- Future<ApiResult<User>> updateProfile(String id, User user) async {
-    final url = "${ApiConstants.UPDATE_PROFILE}/$id";
+  Future<ApiResult<User>> updateUser(String id, User user) async {
+    final url = "${ApiConstants.UPDATE_USER}/$id";
     final body = user.toJson();
-    
-    print("🔄 [ProfileRepo] Updating profile at: $url");
+
+    print("🔄 [ProfileRepo] Updating user at: $url");
     print("📦 [ProfileRepo] Request body: $body");
-    
+
     final result = await _api.put(url, body: body);
 
     if (!result.isSuccess) {
-      print("❌ [ProfileRepo] Profile update failed - Error: ${result.error?.message}");
+      print("❌ [ProfileRepo] Update failed - Error: ${result.error?.message}");
+      print("❌ [ProfileRepo] Raw error: ${result.error}");
       return ApiResult.failure(result.error);
     }
-     try {
-      print("✅ [ProfileRepo] Profile update successful");
+
+    try {
+      print("✅ [ProfileRepo] Update successful");
       return ApiResult.success(User.fromJson(result.data));
     } catch (e) {
       print("❌ [ProfileRepo] Parse error: $e");
-      return ApiResult.failure(
-        ApiError(message: "Data parsing error: $e"),
-      );
+      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
     }
   }
 
-  
+  Future<ApiResult<User>> updateProfile(String id, User user) async {
+    final url = "${ApiConstants.UPDATE_PROFILE}/$id";
+    final body = user.toJson();
+
+    print("🔄 [ProfileRepo] Updating profile at: $url");
+    print("📦 [ProfileRepo] Request body: $body");
+
+    final result = await _api.put(url, body: body);
+
+    if (!result.isSuccess) {
+      print(
+        "❌ [ProfileRepo] Profile update failed - Error: ${result.error?.message}",
+      );
+      return ApiResult.failure(result.error);
+    }
+    // try {
+    print("✅ [ProfileRepo] Profile update successful");
+    return ApiResult.success(User.fromJson(result.data));
+    // } catch (e) {
+    //   print("❌ [ProfileRepo] Parse error: $e");
+    //   return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+    // }
+  }
 }
