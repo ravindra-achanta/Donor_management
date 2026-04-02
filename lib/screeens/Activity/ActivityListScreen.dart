@@ -97,7 +97,7 @@ class _ActivityListScreenState extends State<ActivityListScreen> {
                               ),
                               AddButton().addButton(
                                 context: context,
-                                buttonText: "Add Activity",
+                                buttonText: "Add Call Activity",
                                 onClicked: () {
                                   Get.toNamed('/activity');
                                 },

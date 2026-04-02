@@ -176,7 +176,7 @@ class _LeftBarState extends State<LeftBar>
                         isCondensed: isCondensed,
                         route: '/requests',
                       ),
-                    if (Vikasdb().getString("USER_TYPE")!= "GURUJI")
+                    if (Vikasdb().getString("USER_TYPE")!= "GURUJI" && Vikasdb().getString("USER_TYPE")!= "OFFICE_STAFF")
                     NavigationItem(
                       iconData: LucideIcons.arrowLeftRight,
                       title: "Dharmasetu",

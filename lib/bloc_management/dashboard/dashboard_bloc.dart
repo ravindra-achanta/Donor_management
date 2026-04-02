@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/api_services/network_repos/dashboard_repository.dart';
 
@@ -10,6 +12,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
   DashboardBloc() : super(const DashboardState()) {
     on<FetchDashboardMetricsEvent>(_fetchMetrics);
     on<FetchDonationMetricsEvent>(_fetchDonationMetrics);
+    on<PostDashboardActivityEvent>(_postDashboardActivity);
   }
 
   Future<void> _fetchDonationMetrics(
@@ -62,4 +65,20 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       );
     }
   }
-}
+
+ Future<void> _postDashboardActivity(
+    PostDashboardActivityEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(state.copyWith(status: DashboardApiStatus.loading));
+
+    final response = await dashboardRepo.postActivityDashboard();
+
+    if (response.isSuccess) {
+      print("✅ Dashboard activity posted successfully");
+    } else {
+      print("❌ Failed to post dashboard activity - Error: ${response.error?.message}");
+      
+           }
+    }
+  }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nb_utils/nb_utils.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/screeens/Activity/ActivityListScreen.dart';
 import 'package:vikas_app/screeens/Activity/ActivityScreen.dart';
 import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
@@ -25,6 +27,7 @@ import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
+import 'package:vikas_app/screeens/profile/profile_edit.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
 import 'package:vikas_app/screeens/users/users_list_page.dart';
 import 'package:vikas_app/screeens/visits/visits.dart';
@@ -33,18 +36,33 @@ import 'package:vikas_app/screeens/visits/AddVisit.dart';
 class AuthMiddleware extends GetMiddleware {
   @override
   RouteSettings? redirect(String? route) {
-    // print('Middleware: Checking authorization for route: $route');
-    // bool isAuthorizationExpired = BaseController().isAuthorizationExpired();
-    // if (isAuthorizationExpired) {
-    //   print('Authorization expired, redirecting to login.');
-    //   return RouteSettings(name: '/auth/login', arguments: route);
-    // } else {
-    //   print('Authorization not expired, redirecting to login.');
-    // }
-    // return null;
-    // return AuthService.isLoggedIn
-    //     ? null
-    //     : const RouteSettings(name: '/auth/login');
+    print('Checking route: $route');
+
+    if (route == '/login') return null;
+
+    if (isAuthorizationExpired()) {
+      print('Redirecting to login');
+      Vikasdb().clearSharedPref();
+      return RouteSettings(name: '/login', arguments: route);
+    }
+
+    return null;
+  }
+
+  bool isAuthorizationExpired() {
+    String token = Vikasdb().getString("TOKEN") ?? "";
+
+    if (token.isEmpty) return true;
+
+    return isExpired(token);
+  }
+
+  bool isExpired(String token) {
+    try {
+      return JwtDecoder.isExpired(token);
+    } catch (e) {
+      return true;
+    }
   }
 }
 
@@ -72,19 +90,19 @@ getPageRoute() {
     GetPage(
       name: '/karyakarthas',
       page: () => const KaryakarthasListPage(),
-      //middlewares: [AuthMiddleware()],
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(
       name: '/jeevanadi',
       page: () => JeevanaadiListPage(),
-      // middlewares: [AuthMiddleware()], // optional if you need auth
+      middlewares: [AuthMiddleware()], // optional if you need auth
     ),
 
     GetPage(
       name: '/assign-members',
       page: () => const AssignMembersPage(),
-      // middlewares: [AuthMiddleware()],
+      middlewares: [AuthMiddleware()],
     ),
 
     GetPage(
@@ -94,16 +112,36 @@ getPageRoute() {
         type: RegistrationType.user,
         user: null,
       ),
+      middlewares: [AuthMiddleware()],
     ),
 
-    GetPage(name: '/profile', page: () => const MyProfile()),
-    GetPage(name: '/dharmasetu', page: () => const DharmasetuListScreen()),
-    GetPage(name: '/add/dharmasetu', page: () => const AddDharmasetu()),
+    GetPage(
+      name: '/profile',
+      page: () => const MyProfile(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/dharmasetu',
+      page: () => const DharmasetuListScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/add/dharmasetu',
+      page: () => const AddDharmasetu(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-    GetPage(name: '/view/dharmasetu', page: () => const ViewDharmasetu()),
-    //GetPage(name: '/edit/dharmasetu', page: () => const EditDharmasetu()),
-    //GetPage(name: '/notices', page: () => const Notices()),
-    GetPage(name: '/notices/list', page: () => const NoticesListScreen()),
+    GetPage(
+      name: '/view/dharmasetu',
+      page: () => const ViewDharmasetu(),
+      middlewares: [AuthMiddleware()],
+    ),
+
+    GetPage(
+      name: '/notices/list',
+      page: () => const NoticesListScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
 
     GetPage(
       name: '/notices',
@@ -112,20 +150,43 @@ getPageRoute() {
         final notice = args is NoticeResponse ? args : null;
         return Notices(noticeData: notice);
       },
+      middlewares: [AuthMiddleware()],
     ),
-    // GetPage(
-    //   name: '/view/notice',
-    //   //page: () => NoticeDetailScreen(notice: Get.arguments),
-    // ),
+
     GetPage(
       name: '/view/notice',
       page: () => NoticeDetailPage(notice: Get.arguments as NoticeResponse),
+      middlewares: [AuthMiddleware()],
     ),
-    GetPage(name: '/visits', page: () => const VisitsListScreen()),
-    GetPage(name: '/add/visit', page: () => const AddVisit()),
+    GetPage(
+  name: '/profile-edit',
+  page: () {
+    final userId = Get.arguments as String? ?? '';
+    return ProfileEditScreen(userId: userId);
+  },
+  middlewares: [AuthMiddleware()],
+),
+    GetPage(
+      name: '/visits',
+      page: () => const VisitsListScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/add/visit',
+      page: () => const AddVisit(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-    GetPage(name: '/users', page: () => const Users()),
-    GetPage(name: '/requests', page: () => const ReviewRequests()),
+    GetPage(
+      name: '/users',
+      page: () => const Users(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/requests',
+      page: () => const ReviewRequests(),
+      middlewares: [AuthMiddleware()],
+    ),
     GetPage(
       name: '/karyakartha-view',
       page: () {
@@ -133,77 +194,30 @@ getPageRoute() {
         final String karyakarthaId = Get.arguments as String? ?? '';
         return KaryaKarthaViewScreen(karyakarthaId: karyakarthaId);
       },
+      middlewares: [AuthMiddleware()],
     ),
 
-    // GetPage(
-    //   name: '/profile-analytics',
-    //   page: () => const ProfileAnalyticsScreen(),
-    // ),
+    GetPage(
+      name: '/activity-list',
+      page: () => const ActivityListScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/activity',
+      page: () => const CreateActivityScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
+    GetPage(
+      name: '/logout',
+      page: () => const LogoutScreen(),
+      middlewares: [AuthMiddleware()],
+    ),
 
-    // GetPage(
-    //   name: '/profile-analytics',
-    //   page: () => const ActivityScoreScreen(),
-    // ),
-
-    // GetPage(
-    //   name: '/profile-analytics',
-    //   page: () => const DonationsReportScreen(),
-    // ),
-    GetPage(name: '/activity-list', page: () => const ActivityListScreen()),
-GetPage(name: '/activity', page: () => const CreateActivityScreen()),
-    GetPage(name: '/logout', page: () => const LogoutScreen()),
-
-    //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen(userId: '',)),
-    // GetPage(
-    //   name: '/jeevandiview',
-    //   page: () {
-    //     final String userId = Get.arguments as String? ?? '';
-    //     return ViewJeevanadiScreen(userId: userId);
-    //   },
-    // ),
-    //GetPage(name: '/jeevandiview', page: () => ViewJeevanadiScreen()),
-    //     GetPage(
-    //   name: '/jeevandiview',
-    //   page: () {
-    //     final args = Get.arguments;
-    //     return ViewJeevanadiScreen.fromArguments(args);
-    //   },
-    // ),
     GetPage(
       name: '/jeevandiview',
-      page: () =>
-          ViewJeevanadiScreen.withArguments(), // Use withArguments instead of fromArguments
+      page: () => ViewJeevanadiScreen.withArguments(),
+      middlewares: [AuthMiddleware()],
     ),
-
-    // GetPage(
-    //   name: '/dashboard',
-    //   page: () => const AdminDashboardPage()
-    //   middlewares: [AuthMiddleware()],
-    // ),
-    // GetPage(
-    //   name: '/dashboard',
-    //   page: () => const AdminDashboardPage(),
-    //   middlewares: [AuthMiddleware()],
-    // ),
-
-    // GetPage(
-    //   name: '/admin/dashboard',
-    //   page: () => AdminDashboardPage(),
-    //   middlewares: [AuthMiddleware()],
-    // ),
-
-    //        GetPage(
-    //   name: '/karyakarthas',
-    //   page: () => BlocProvider(
-    //     create: (context) => KaryakarthasBloc(KaryakarthasRepository()),
-    //     child: const KaryakarthasListPage(),
-    //   ),
-    //   middlewares: [AuthMiddleware()],
-    //   //transition: Transition.noTransition,
-    // ),
-
-    // GetPage(name: '/auth/forgot_password', page: () => const ForgotPassword()),
-    // GetPage(name: '/auth/reset_password', page: () => const ResetPassword()),
   ];
 
   return routes

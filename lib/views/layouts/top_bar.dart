@@ -23,101 +23,90 @@ class _TopBarState extends State<TopBar>
   bool isMenuVisible = true;
   String empId = "";
 
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Container(
-          color: Colors.grey[200],
-          child: FxCard(
-            shadow: FxShadow(
-              position: FxShadowPosition.bottomRight,
-              elevation: 0.5,
-            ),
-            height: 75,
-            padding: FxSpacing.x(24),
-            color: topBarTheme.background.withAlpha(246),
-            child: Row(
-              children: [
-                /// LEFT MENU ICON
-                InkWell(
-                  onTap: () {
-                    ThemeCustomizer.toggleLeftBarCondensed();
-                  },
-                  child: Icon(
-                    LucideIcons.menu,
-                    color: topBarTheme.onBackground,
-                  ),
+ @override
+Widget build(BuildContext context) {
+  // Hide TopBar if user is not logged in
+  final userName = Vikasdb().getString("USER_NAME");
+  if (userName == null || userName.isEmpty) {
+    return const SizedBox.shrink();
+  }
+
+  return Material(
+    color: Colors.transparent,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+      child: Container(
+        color: Colors.grey[200],
+        child: FxCard(
+          shadow: FxShadow(
+            position: FxShadowPosition.bottomRight,
+            elevation: 0.5,
+          ),
+          height: 75,
+          padding: FxSpacing.x(24),
+          color: topBarTheme.background.withAlpha(246),
+          child: Row(
+            children: [
+              /// LEFT MENU ICON
+              InkWell(
+                onTap: () {
+                  ThemeCustomizer.toggleLeftBarCondensed();
+                },
+                child: Icon(
+                  LucideIcons.menu,
+                  color: topBarTheme.onBackground,
                 ),
-
-                const SizedBox(width: 24),
-
-                /// RIGHT SIDE
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      /// TEXT (outside popup)
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            const TextSpan(text: "Welcome "),
-                            TextSpan(
-                              text:
-                                  (Vikasdb()
-                                          .getString("USER_NAME")
-                                          ?.isNotEmpty ==
-                                      true)
-                                  ? Vikasdb().getString("USER_NAME")!
-                                  : "User",
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const TextSpan(text: " ("),
-                            TextSpan(text: _getUserDisplayName()),
-                            const TextSpan(text: ")"),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(width: 10),
-
-                      /// 👇 ONLY AVATAR IS TRIGGER NOW
-                      CustomPopupMenu(
-                        backdrop: true,
-                        offsetX: -140,
-                        offsetY: 10,
-
-                        menu: CircleAvatar(
-                          radius: 16,
-                          backgroundImage: NetworkImage(
-                            Vikasdb().getString("USER_PROFILE"),
+              ),
+              const SizedBox(width: 24),
+              /// RIGHT SIDE
+              Expanded(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    /// TEXT
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: "Welcome "),
+                          TextSpan(
+                            text: userName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
-                          onBackgroundImageError: (_, __) {},
-                          child: Vikasdb().getString("USER_PROFILE").isEmpty
-                              ? const Icon(Icons.person, size: 18)
-                              : null,
-                        ),
-
-                        menuBuilder: (context) {
-                          return buildAccountMenu();
-                        },
-
-                        onChange: (value) {},
+                          const TextSpan(text: " ("),
+                          TextSpan(text: _getUserDisplayName()),
+                          const TextSpan(text: ")"),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(width: 10),
+                    /// AVATAR & MENU
+                    CustomPopupMenu(
+                      backdrop: true,
+                      offsetX: -140,
+                      offsetY: 10,
+                      menu: CircleAvatar(
+                        radius: 16,
+                        backgroundImage: NetworkImage(
+                          Vikasdb().getString("USER_PROFILE") ?? "",
+                        ),
+                        onBackgroundImageError: (_, __) {},
+                        child: (Vikasdb().getString("USER_PROFILE")?.isEmpty ?? true)
+                            ? const Icon(Icons.person, size: 18)
+                            : null,
+                      ),
+                      menuBuilder: (context) => buildAccountMenu(),
+                      onChange: (value) {},
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   /// ================= DROPDOWN =================
   Widget buildAccountMenu() {
@@ -172,31 +161,27 @@ class _TopBarState extends State<TopBar>
             //   },
             // ),
             /// LOGOUT
-_buildMenuItem(
-  icon: FeatherIcons.logOut,
-  title: "Logout",
-  isDanger: true,
-  onTap: () async {
-    // ✅ Step 1: Close ALL overlays (not just one)
-    while (Get.isOverlaysOpen) {
-      Get.back();
-    }
-   
-    await Vikasdb.sharedPreferences!.clear();
-    
-    
-    await Vikasdb.sharedPreferences!.reload();
-    
-   
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    
-    Get.offAll(
-      () => const LoginPage(),
-      transition: Transition.fade,
-    );
-  },
-),
+            _buildMenuItem(
+              icon: FeatherIcons.logOut,
+              title: "Logout",
+              isDanger: true,
+              onTap: () async {
+                while (Get.isOverlaysOpen) {
+                  Get.back();
+                }
+
+                await Vikasdb.sharedPreferences!.clear();
+
+                await Vikasdb.sharedPreferences!.reload();
+
+                await Future.delayed(const Duration(milliseconds: 300));
+
+                Get.offAll(
+                  () => const LoginPage(),
+                  transition: Transition.fade,
+                );
+              },
+            ),
           ],
         ),
       ),
@@ -248,4 +233,5 @@ _buildMenuItem(
       return "User";
     }
   }
+  
 }

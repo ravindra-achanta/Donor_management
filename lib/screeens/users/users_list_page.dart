@@ -9,6 +9,7 @@ import 'package:vikas_app/screeens/common/ErrorText.dart';
 import 'package:vikas_app/screeens/common/add_button.dart';
 import 'package:vikas_app/screeens/common/common_list.dart';
 import 'package:vikas_app/screeens/common/common_search_bar.dart';
+import 'package:vikas_app/screeens/common/deletion_popup.dart';
 import 'package:vikas_app/screeens/common/list_view.dart';
 import 'package:vikas_app/screeens/common/loader.dart';
 import 'package:vikas_app/screeens/common/stats_grid.dart';
@@ -150,7 +151,20 @@ class _UsersState extends State<Users> {
                                           FetchUsersProfileEvent(userId: id),
                                         );
                                       },
-                                      onDelete: (id) {},
+                                      onDelete: (id) {
+                                        DeletionPopup.showDeleteConfirmation(
+                                          context: context,
+                                          title: "Delete User?",
+                                          message:
+                                              "Are you sure you want to delete this user?\nThis action cannot be undone.",
+                                          confirmText: "Delete",
+                                          onConfirm: () {
+                                            context.read<UserBloc>().add(
+                                              DeleteUserEvent(userId: id),
+                                            );
+                                          },
+                                        );
+                                      },
                                       onUpdate: (id) {
                                         Get.to(
                                           () => RegistrationPage(

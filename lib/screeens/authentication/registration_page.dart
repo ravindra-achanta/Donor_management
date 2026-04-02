@@ -18,18 +18,97 @@ import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/screeens/models/request/identity_request.dart';
 import 'package:vikas_app/screeens/models/response/role_response.dart';
 
+// ===== Constants =====
+class _RegistrationPageConstants {
+  static const double borderRadius = 12.0;
+  static const double contentPaddingHorizontal = 16.0;
+  static const double contentPaddingVertical = 14.0;
+  static const double buttonHeight = 45.0;
+  static const double buttonBorderRadius = 8.0;
+  static const double inputBottomPadding = 18.0;
+  static const double dividerThickness = 1.0;
+  static const double cardElevation = 5.0;
+  static const double cardPadding = 32.0;
+  static const double formHorizontalPadding = 24.0;
+  static const double formVerticalPadding = 16.0;
+  static const double progressIndicatorSize = 20.0;
+  static const double progressIndicatorStrokeWidth = 2.0;
+  static const double focusedBorderWidth = 1.5;
+  static const double iconSize = 18.0;
+
+  static const int mobilePhoneDigits = 10;
+  static const int pincodeDigits = 6;
+  static const int minDateYear = 2000;
+  static const int maxDateYear = 2050;
+
+  static const Duration snackBarDuration = Duration(seconds: 3);
+  static const Duration profileFetchDelay = Duration(milliseconds: 500);
+  static const Duration popNavigationDelay = Duration(seconds: 2);
+
+  static const Color primaryButtonColor = Color(0xFF8D6E63);
+  static const Color inputFillColor = Color(0xffF7F9FC);
+  static const Color focusedBorderColor = Colors.blue;
+  static const Color errorColor = Colors.red;
+  static const Color successColor = Colors.green;
+  static const Color warningColor = Colors.orange;
+
+  static const String successMessage = "User created successfully";
+  static const String errorNoUserData = 'Error: User data not loaded. Please try again.';
+  static const String errorSelectRole = 'Please select at least one role';
+  static const String dialogSelectRoles = "Select Role(s)";
+  static const String buttonDone = "Done";
+  static const String buttonRetry = "Retry";
+  static const String loadingRoles = 'Loading roles...';
+  static const String failedLoadRoles = 'Failed to load roles: ';
+  static const String labelStartDate = "Start Date";
+  static const String labelRole = "Role";
+  static const String hintSelectStartDate = "Select Start Date";
+  static const String hintSelectRole = "Select Role(s)";
+  static const String hintEnter = "Enter ";
+  static const String personalInfo = "Personal Information";
+  static const String addressInfo = "Address Information";
+  static const String buttonRegister = "Register";
+  static const String buttonUpdate = "Update";
+  static const String buttonCancel = "Cancel";
+
+  static const String fieldFirstName = "First Name";
+  static const String fieldLastName = "Last Name";
+  static const String fieldEmail = "Email";
+  static const String fieldMobile = "Mobile Number";
+  static const String fieldArea = "Area";
+  static const String fieldCity = "City";
+  static const String fieldState = "State";
+  static const String fieldCountry = "Country";
+  static const String fieldPincode = "Pincode";
+
+  static const String validationRequired = ' is required';
+  static const String validationLettersOnly = ' must contain letters only';
+  static const String validationNumbersOnly = ' must contain numbers only';
+  static const String validationMobileDigits = 'Mobile Number must be 10 digits';
+  static const String validationPincodeDigits = 'Pincode must be 6 digits';
+  static const String validationEmail = 'Enter a valid email';
+  static const String validationStartDateRequired = "Start Date is required";
+
+  static const String karyakarthaRole = "KARYAKARTHA";
+  static const String rolePattern = r'^[a-zA-Z\s]+$';
+  static const String numberPattern = r'^\d+$';
+  static const String emailPattern = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+}
+
 class RegistrationPage extends StatefulWidget {
   final String title;
   final RegistrationType type;
   final User? user;
   final bool isEdit;
   final String? userId;
+  final bool fromProfile;
 
   const RegistrationPage({
     super.key,
     required this.title,
     required this.type,
     required this.user,
+    this.fromProfile = false,
     this.isEdit = false,
     this.userId,
   });
@@ -53,30 +132,26 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final TextEditingController startDateCtrl = TextEditingController();
 
   List<Role> selectedRoles = [];
-  User? fetchedUser; // Store fetched user for edit
+  User? fetchedUser;
   bool isLoadingUser = false;
-  bool _isUserLoaded = false; 
-  bool _rolesLoaded = false; 
+  bool _isUserLoaded = false;
 
   @override
   void initState() {
     super.initState();
-
-    // Fetch roles first
-    print("🚀 [initState] Fetching roles...");
-    context.read<AuthBloc>().add(FetchRolesEventByType());
+    
+    if (!widget.fromProfile) {
+      context.read<AuthBloc>().add(FetchRolesEventByType());
+    }
 
     if (widget.isEdit && widget.userId != null) {
-      print("🚀 [initState] isEdit=true, userId=${widget.userId}");
       isLoadingUser = true;
-      Future.delayed(const Duration(milliseconds: 500), () {
-        print("📡 [initState] Triggering FetchUsersProfileEvent with userId=${widget.userId}");
+      Future.delayed(_RegistrationPageConstants.profileFetchDelay, () {
         context.read<UserBloc>().add(
           FetchUsersProfileEvent(userId: widget.userId!),
         );
       });
     } else {
-      print("🚀 [initState] isEdit=false, setting default start date");
       startDateCtrl.text = _formatDate(DateTime.now());
     }
   }
@@ -94,15 +169,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
     areaCtrl.text = user.area ?? "";
     stateCtrl.text = user.state ?? "";
     countryCtrl.text = user.country ?? "";
-    
-    //startDateCtrl.text = user.joinedDate ?? _formatDate(DateTime.now())
     startDateCtrl.text = user.startedDate ?? _formatDate(DateTime.now());
+    
     selectedRoles.addAll(
-      (user.roles ?? []).map((roleName) => Role(
-            id: roleName, 
-            roleName: roleName,
-            status: "ACTIVE",
-          )),
+      (user.userTypes ?? user.roles ?? []).map(
+        (roleName) => Role(id: roleName, roleName: roleName, status: "ACTIVE"),
+      ),
     );
   }
 
@@ -144,20 +216,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
       ],
       child: MultiBlocListener(
         listeners: [
-          // Listener for AuthBloc (for user creation)
           BlocListener<AuthBloc, AuthState>(
             listener: (context, state) {
               if (state.isUserCreated) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      state.creationMessage ?? "User created successfully",
+                      state.creationMessage ?? _RegistrationPageConstants.successMessage,
                     ),
-                    backgroundColor: Colors.green,
-                    duration: const Duration(seconds: 3),
+                    backgroundColor: _RegistrationPageConstants.successColor,
+                    duration: _RegistrationPageConstants.snackBarDuration,
                   ),
                 );
-                Future.delayed(const Duration(milliseconds: 500), () {
+                Future.delayed(_RegistrationPageConstants.profileFetchDelay, () {
                   _clearForm();
                   context.read<AuthBloc>().add(CheckAuthStatusEvent());
                   if (widget.type == RegistrationType.karyakartha) {
@@ -171,23 +242,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state.errorMessage!),
-                    backgroundColor: Colors.red,
-                    duration: const Duration(seconds: 3),
+                    backgroundColor: _RegistrationPageConstants.errorColor,
+                    duration: _RegistrationPageConstants.snackBarDuration,
                   ),
                 );
               }
             },
           ),
-          
+
           BlocListener<UserBloc, UserState?>(
             listener: (context, state) {
               if (state?.profileLoading == true) {
-                print("⏳ [BlocListener] profileLoading=true");
                 setState(() => isLoadingUser = true);
               } else if (state?.profileLoading == false &&
                   state?.user != null &&
                   !_isUserLoaded) {
-                print("✅ [BlocListener] User profile fetched: id=${state!.user!.id}, name=${state.user!.name}");
                 setState(() {
                   fetchedUser = state!.user;
                   isLoadingUser = false;
@@ -196,26 +265,23 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 });
 
                 final authState = context.read<AuthBloc>().state;
-                print("✅ [BlocListener] Roles available: ${authState.typeBasedRoles.length}");
-                if (!authState.isLoadingRoles &&
+                if (!widget.fromProfile && !authState.isLoadingRoles &&
                     authState.typeBasedRoles.isNotEmpty) {
-                  print("🔄 [BlocListener] Calling role population...");
                   _populateRolesFromUser(
                     fetchedUser!,
                     authState.typeBasedRoles,
                   );
                 }
               } else if (state?.profileErrorMsg != null && !_isUserLoaded) {
-                print("❌ [BlocListener] Error fetching profile: ${state!.profileErrorMsg}");
                 setState(() => isLoadingUser = false);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(state!.profileErrorMsg!),
-                    backgroundColor: Colors.red,
+                    backgroundColor: _RegistrationPageConstants.errorColor,
                   ),
                 );
                 Future.delayed(
-                  const Duration(seconds: 2),
+                  _RegistrationPageConstants.popNavigationDelay,
                   () => Navigator.pop(context),
                 );
               }
@@ -244,9 +310,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
           },
           onClearForm: _clearForm,
           user: widget.user,
-          fetchedUser: fetchedUser, // ✅ Pass fetched user from API
+          fetchedUser: fetchedUser,
           isEdit: widget.isEdit,
-          isLoadingUser: isLoadingUser, // Pass loading flag
+          isLoadingUser: isLoadingUser,
+          fromProfile: widget.fromProfile,
         ),
       ),
     );
@@ -254,29 +321,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   void _populateRolesFromUser(User user, List<Role> availableRoles) {
     final userRoleNames = user.userTypes ?? user.roles ?? [];
-    print("🔍 [Role Matching] User role names: $userRoleNames");
-    print("🔍 [Role Matching] Available roles count: ${availableRoles.length}");
-    
+
     if (userRoleNames.isEmpty || availableRoles.isEmpty) {
-      print("⚠️ [Role Matching] Empty roles - userRoles: ${userRoleNames.isEmpty}, availableRoles: ${availableRoles.isEmpty}");
       return;
     }
 
     final matchedRoles = availableRoles.where((role) {
-      final matches = userRoleNames.any(
+      return userRoleNames.any(
         (name) => name.toUpperCase() == role.roleName.toUpperCase(),
       );
-      if (matches) {
-        print("✅ [Role Matching] Matched: ${role.displayName} (${role.roleName})");
-      }
-      return matches;
     }).toList();
 
     if (matchedRoles.isNotEmpty) {
-      print("✅ [Role Matching] Populated ${matchedRoles.length} roles");
       setState(() => selectedRoles = matchedRoles);
-    } else {
-      print("⚠️ [Role Matching] No roles matched");
     }
   }
 }
@@ -285,9 +342,10 @@ class _RegistrationFormContent extends StatefulWidget {
   final GlobalKey<FormState> formKey;
   final String title;
   final User? user;
-  final User? fetchedUser; // ✅ Added for edit mode
+  final User? fetchedUser;
   final bool isEdit;
-  final bool isLoadingUser; // Added
+  final bool isLoadingUser;
+  final bool fromProfile;
 
   final TextEditingController firstNameCtrl;
   final TextEditingController lastNameCtrl;
@@ -302,16 +360,15 @@ class _RegistrationFormContent extends StatefulWidget {
   final List<Role> selectedRoles;
   final Function(List<Role>) onRolesUpdated;
   final VoidCallback onClearForm;
-
   final dynamic type;
 
   const _RegistrationFormContent({
     required this.title,
     required this.type,
     required this.user,
-    required this.fetchedUser, // ✅ Added
+    required this.fetchedUser,
     required this.isEdit,
-    required this.isLoadingUser, // Added
+    required this.isLoadingUser,
     required this.formKey,
     required this.firstNameCtrl,
     required this.lastNameCtrl,
@@ -326,6 +383,7 @@ class _RegistrationFormContent extends StatefulWidget {
     required this.selectedRoles,
     required this.onRolesUpdated,
     required this.onClearForm,
+    required this.fromProfile,
   });
 
   @override
@@ -334,17 +392,42 @@ class _RegistrationFormContent extends StatefulWidget {
 }
 
 class _RegistrationFormContentState extends State<_RegistrationFormContent> {
+  late TextEditingController roleController;
+
   @override
   void initState() {
     super.initState();
-    context.read<AuthBloc>().add(FetchRolesEventByType());
+    roleController = TextEditingController();
+    if (!widget.fromProfile) {
+      context.read<AuthBloc>().add(FetchRolesEventByType());
+    }
   }
+
+  @override
+  void dispose() {
+    roleController.dispose();
+    super.dispose();
+  }
+
+  void _updateRoleField() {
+    roleController.text = widget.selectedRoles.isNotEmpty
+        ? widget.selectedRoles.map((e) => e.displayName).join(", ")
+        : "";
+  }
+  List<String> _getCurrentDisplayRoles() {
+  if (widget.selectedRoles.isNotEmpty) {
+    return widget.selectedRoles.map((e) => e.displayName).toList();
+  } else if (widget.isEdit && widget.fetchedUser != null) {
+    final fetchedRoles = widget.fetchedUser!.userTypes ?? widget.fetchedUser!.roles ?? [];
+    return fetchedRoles.cast<String>().toList();
+  }
+  return [];
+}
 
   String _formatDate(DateTime date) {
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
   }
 
-  // Input field builder (unchanged)
   Widget _input(
     TextEditingController controller,
     String label, {
@@ -356,7 +439,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     bool enabled = true,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(
+        bottom: _RegistrationPageConstants.inputBottomPadding,
+      ),
       child: TextFormField(
         controller: controller,
         keyboardType: keyboardType,
@@ -367,105 +452,156 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           if (numbersOnly) FilteringTextInputFormatter.digitsOnly,
         ],
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: "Enter $label",
-          prefixIcon: icon != null
-              ? Icon(icon, color: Colors.grey.shade600)
-              : null,
-          filled: true,
-          fillColor: !enabled ? Colors.grey[200] : const Color(0xffF7F9FC),
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.blue, width: 1.5),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.red, width: 1.5),
-          ),
+        decoration: _buildInputDecoration(
+          label: label,
+          icon: icon,
+          enabled: enabled,
         ),
-        validator: (value) {
-          if (widget.isEdit) return null;
-          if (label == "First Name" ||
-              label == "Last Name" ||
-              label == "Mobile Number") {
-            if (value == null || value.trim().isEmpty)
-              return '$label is required';
-          }
-          if (lettersOnly &&
-              value!.trim().isNotEmpty &&
-              !RegExp(r'^[a-zA-Z\s]+$').hasMatch(value.trim())) {
-            return '$label must contain letters only';
-          }
-          if (numbersOnly &&
-              value!.trim().isNotEmpty &&
-              !RegExp(r'^\d+$').hasMatch(value.trim())) {
-            return '$label must contain numbers only';
-          }
-          if (label == "Mobile Number" && value!.trim().length != 10) {
-            return 'Mobile Number must be 10 digits';
-          }
-          if (label == "Pincode" &&
-              value!.trim().isNotEmpty &&
-              value!.trim().length != 6) {
-            return 'Pincode must be 6 digits';
-          }
-          if (label == "Email" &&
-              value!.trim().isNotEmpty &&
-              !RegExp(
-                r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-              ).hasMatch(value!.trim())) {
-            return 'Enter a valid email';
-          }
-          return null;
-        },
+        validator: (value) => _validateInput(value, label, lettersOnly, numbersOnly),
       ),
     );
+  }
+
+  InputDecoration _buildInputDecoration({
+    required String label,
+    IconData? icon,
+    required bool enabled,
+  }) {
+    final borderSide = BorderSide(color: Colors.grey.shade300);
+
+    return InputDecoration(
+      labelText: label,
+      hintText: "${_RegistrationPageConstants.hintEnter}$label",
+      prefixIcon: icon != null
+          ? Icon(icon, color: Colors.grey.shade600)
+          : null,
+      filled: true,
+      fillColor: !enabled ? Colors.grey[200] : _RegistrationPageConstants.inputFillColor,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: _RegistrationPageConstants.contentPaddingHorizontal,
+        vertical: _RegistrationPageConstants.contentPaddingVertical,
+      ),
+      border: _buildOutlineInputBorder(borderSide),
+      enabledBorder: _buildOutlineInputBorder(borderSide),
+      focusedBorder: _buildOutlineInputBorder(
+        const BorderSide(
+          color: _RegistrationPageConstants.focusedBorderColor,
+          width: _RegistrationPageConstants.focusedBorderWidth,
+        ),
+      ),
+      errorBorder: _buildOutlineInputBorder(
+        const BorderSide(color: _RegistrationPageConstants.errorColor),
+      ),
+      focusedErrorBorder: _buildOutlineInputBorder(
+        const BorderSide(
+          color: _RegistrationPageConstants.errorColor,
+          width: _RegistrationPageConstants.focusedBorderWidth,
+        ),
+      ),
+    );
+  }
+
+  OutlineInputBorder _buildOutlineInputBorder(BorderSide borderSide) {
+    return OutlineInputBorder(
+      borderRadius: BorderRadius.circular(_RegistrationPageConstants.borderRadius),
+      borderSide: borderSide,
+    );
+  }
+
+  String? _validateInput(
+    String? value,
+    String label,
+    bool lettersOnly,
+    bool numbersOnly,
+  ) {
+    if (widget.isEdit) return null;
+
+    // Required field validation
+    if (_isRequiredField(label)) {
+      if (value == null || value.trim().isEmpty) {
+        return '$label${_RegistrationPageConstants.validationRequired}';
+      }
+    }
+
+    // Letters only validation
+    if (lettersOnly &&
+        value != null &&
+        value.trim().isNotEmpty &&
+        !RegExp(_RegistrationPageConstants.rolePattern).hasMatch(value.trim())) {
+      return '$label${_RegistrationPageConstants.validationLettersOnly}';
+    }
+
+    // Numbers only validation
+    if (numbersOnly &&
+        value != null &&
+        value.trim().isNotEmpty &&
+        !RegExp(_RegistrationPageConstants.numberPattern).hasMatch(value.trim())) {
+      return '$label${_RegistrationPageConstants.validationNumbersOnly}';
+    }
+
+    // Mobile number validation
+    if (label == _RegistrationPageConstants.fieldMobile &&
+        value != null &&
+        value.trim().length != _RegistrationPageConstants.mobilePhoneDigits) {
+      return _RegistrationPageConstants.validationMobileDigits;
+    }
+
+    // Pincode validation
+    if (label == _RegistrationPageConstants.fieldPincode &&
+        value != null &&
+        value.trim().isNotEmpty &&
+        value.trim().length != _RegistrationPageConstants.pincodeDigits) {
+      return _RegistrationPageConstants.validationPincodeDigits;
+    }
+
+    // Email validation
+    if (label == _RegistrationPageConstants.fieldEmail &&
+        value != null &&
+        value.trim().isNotEmpty &&
+        !RegExp(_RegistrationPageConstants.emailPattern).hasMatch(value.trim())) {
+      return _RegistrationPageConstants.validationEmail;
+    }
+
+    return null;
+  }
+
+  bool _isRequiredField(String label) {
+    return label == _RegistrationPageConstants.fieldFirstName ||
+        label == _RegistrationPageConstants.fieldLastName ||
+        label == _RegistrationPageConstants.fieldMobile;
   }
 
   Widget _registerButton(BuildContext context, bool isLoading) {
     return Expanded(
       child: SizedBox(
-        height: 45,
+        height: _RegistrationPageConstants.buttonHeight,
         child: ElevatedButton(
           onPressed: isLoading || widget.isLoadingUser
               ? null
               : () => _submit(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF8D6E63),
+            backgroundColor: _RegistrationPageConstants.primaryButtonColor,
             foregroundColor: Colors.white,
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(
+                _RegistrationPageConstants.buttonBorderRadius,
+              ),
             ),
             elevation: 3,
           ),
           child: isLoading || widget.isLoadingUser
               ? const SizedBox(
-                  height: 20,
-                  width: 20,
+                  height: _RegistrationPageConstants.progressIndicatorSize,
+                  width: _RegistrationPageConstants.progressIndicatorSize,
                   child: CircularProgressIndicator(
-                    strokeWidth: 2,
+                    strokeWidth: _RegistrationPageConstants.progressIndicatorStrokeWidth,
                     color: Colors.white,
                   ),
                 )
               : Text(
-                  widget.isEdit ? "Update" : "Register",
+                  widget.isEdit
+                      ? _RegistrationPageConstants.buttonUpdate
+                      : _RegistrationPageConstants.buttonRegister,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -479,7 +615,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
   Widget _cancelButton(BuildContext context, bool isLoading) {
     return Expanded(
       child: SizedBox(
-        height: 45,
+        height: _RegistrationPageConstants.buttonHeight,
         child: ElevatedButton(
           onPressed: isLoading || widget.isLoadingUser
               ? null
@@ -488,13 +624,15 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
             backgroundColor: Colors.white,
             foregroundColor: Colors.grey[700],
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(
+                _RegistrationPageConstants.buttonBorderRadius,
+              ),
               side: BorderSide(color: Colors.grey[400]!, width: 1),
             ),
             elevation: 1,
           ),
           child: const Text(
-            "Cancel",
+            _RegistrationPageConstants.buttonCancel,
             style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           ),
         ),
@@ -506,24 +644,22 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     if (!widget.formKey.currentState!.validate()) return;
 
     if (widget.isEdit) {
-      // ✅ Use fetchedUser when available (user fetched from API), fallback to widget.user
       final userToUpdate = widget.fetchedUser ?? widget.user;
       if (userToUpdate == null) {
-        print("❌ [Submit] Error: No user data available for update");
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Error: User data not loaded. Please try again.'),
-            backgroundColor: Colors.red,
+            content: Text(_RegistrationPageConstants.errorNoUserData),
+            backgroundColor: _RegistrationPageConstants.errorColor,
           ),
         );
         return;
       }
 
-      print("📝 [Submit] Updating user ID: ${userToUpdate.id}");
-
-      final updatedRoles = widget.selectedRoles.isNotEmpty
-          ? widget.selectedRoles.map((role) => role.id).toList()
-          : userToUpdate.roles;
+      final updatedRoles = widget.fromProfile
+          ? (userToUpdate.userTypes ?? userToUpdate.roles)
+          : (widget.selectedRoles.isNotEmpty
+              ? widget.selectedRoles.map((role) => role.id).toList()
+              : userToUpdate.roles);
 
       final updatedUser = User(
         id: userToUpdate.id,
@@ -539,14 +675,14 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         state: widget.stateCtrl.text.trim(),
         country: widget.countryCtrl.text.trim(),
       );
-
-      print(
-        "📝 [Submit] Request body: id=${updatedUser.id}, name=${updatedUser.name}, roles=${updatedUser.roles}",
-      );
-
-      context.read<ProfileBloc>().add(
+      if(widget.fromProfile) {
+        context.read<ProfileBloc>().add(UpdateProfileInfo(id: userToUpdate.id, user: updatedUser));
+      } else {
+        context.read<ProfileBloc>().add(
         UpdateProfile(id: userToUpdate.id, user: updatedUser),
       );
+      }
+       widget.fromProfile ? Get.back() :
       widget.type == RegistrationType.user
           ? Get.toNamed('/users')
           : Get.toNamed('/karyakarthas');
@@ -554,8 +690,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
       if (widget.selectedRoles.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Please select at least one role'),
-            backgroundColor: Colors.orange,
+            content: Text(_RegistrationPageConstants.errorSelectRole),
+            backgroundColor: _RegistrationPageConstants.warningColor,
           ),
         );
         return;
@@ -590,41 +726,45 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
 
   Widget _startDateField(bool isLoading, BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
+      padding: const EdgeInsets.only(
+        bottom: _RegistrationPageConstants.inputBottomPadding,
+      ),
       child: TextFormField(
         controller: widget.startDateCtrl,
         readOnly: true,
         enabled: !isLoading && !widget.isLoadingUser,
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
         decoration: InputDecoration(
-          labelText: "Start Date",
-          hintText: "Select Start Date",
+          labelText: _RegistrationPageConstants.labelStartDate,
+          hintText: _RegistrationPageConstants.hintSelectStartDate,
           prefixIcon: const Icon(Icons.event, color: Colors.grey),
           filled: true,
-          fillColor: const Color(0xffF7F9FC),
+          fillColor: _RegistrationPageConstants.inputFillColor,
           contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
+            horizontal: _RegistrationPageConstants.contentPaddingHorizontal,
+            vertical: _RegistrationPageConstants.contentPaddingVertical,
           ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+          border: _buildOutlineInputBorder(
+            BorderSide(color: Colors.grey.shade300),
           ),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.shade300),
+          enabledBorder: _buildOutlineInputBorder(
+            BorderSide(color: Colors.grey.shade300),
           ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+          focusedBorder: _buildOutlineInputBorder(
+            const BorderSide(
+              color: _RegistrationPageConstants.focusedBorderColor,
+              width: _RegistrationPageConstants.focusedBorderWidth,
+            ),
           ),
           suffixIcon: Container(
             margin: const EdgeInsets.all(6),
             decoration: BoxDecoration(
               color: Colors.blue.shade50,
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(
+                _RegistrationPageConstants.buttonBorderRadius,
+              ),
             ),
-            child: const Icon(Icons.calendar_today, size: 18),
+            child: const Icon(Icons.calendar_today, size: _RegistrationPageConstants.iconSize),
           ),
         ),
         onTap: isLoading || widget.isLoadingUser
@@ -633,160 +773,179 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                 final pickedDate = await showDatePicker(
                   context: context,
                   initialDate: DateTime.now(),
-                  firstDate: DateTime(2000),
-                  lastDate: DateTime(2050),
+                  firstDate: DateTime(_RegistrationPageConstants.minDateYear),
+                  lastDate: DateTime(_RegistrationPageConstants.maxDateYear),
                 );
                 if (pickedDate != null) {
                   widget.startDateCtrl.text = _formatDate(pickedDate);
                 }
               },
         validator: (value) =>
-            value == null || value.isEmpty ? "Start Date is required" : null,
+            value == null || value.isEmpty
+                ? _RegistrationPageConstants.validationStartDateRequired
+                : null,
       ),
     );
   }
+Widget _multiSelectRoleField(
+  bool isLoading,
+  BuildContext context,
+  List<Role> allRoles,
+) {
+  final isKaryakartha = widget.type == RegistrationType.karyakartha;
+  final displayRoles = _getCurrentDisplayRoles();
+  
+  // Update controller whenever this rebuilds
+  _updateRoleField();
 
-  Widget _multiSelectRoleField(
-    bool isLoading,
-    BuildContext context,
-    List<Role> allRoles,
-  ) {
-    final isKaryakartha = widget.type == RegistrationType.karyakartha;
-    String selectedText = widget.selectedRoles.isNotEmpty
-        ? widget.selectedRoles.map((e) => e.displayName).join(", ")
-        : "";
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          GestureDetector(
-            onTap: (isLoading || isKaryakartha || widget.isLoadingUser)
-                ? null
-                : () async {
-                    await showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) {
-                        return StatefulBuilder(
-                          builder: (context, setModalState) {
-                            return DraggableScrollableSheet(
-                              initialChildSize: 0.35,
-                              minChildSize: 0.25,
-                              maxChildSize: 0.6,
-                              expand: false,
-                              builder: (_, controller) {
-                                return Container(
-                                  padding: const EdgeInsets.all(20),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.vertical(
-                                      top: Radius.circular(20),
-                                    ),
-                                  ),
-                                  child: ListView(
-                                    controller: controller,
-                                    children: [
-                                      const Center(
-                                        child: Text(
-                                          "Select Role(s)",
-                                          style: TextStyle(
-                                            fontSize: 18,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 16),
-                                      ...allRoles.map((role) {
-                                        final isSelected = widget.selectedRoles
-                                            .any((r) => r.id == role.id);
-                                        return CheckboxListTile(
-                                          dense: true,
-                                          title: Text(role.displayName),
-                                          value: isSelected,
-                                          onChanged: (val) {
-                                            setModalState(() {
-                                              final updatedList =
-                                                  List<Role>.from(
-                                                    widget.selectedRoles,
-                                                  );
-                                              if (val == true) {
-                                                updatedList.add(role);
-                                              } else {
-                                                updatedList.removeWhere(
-                                                  (r) => r.id == role.id,
-                                                );
-                                              }
-                                              widget.onRolesUpdated(
-                                                updatedList,
-                                              );
-                                            });
-                                          },
-                                        );
-                                      }).toList(),
-                                      const SizedBox(height: 10),
-                                      ElevatedButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        child: const Text("Done"),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
-            child: AbsorbPointer(
-              child: TextFormField(
-                readOnly: true,
-                enabled: !isLoading && !widget.isLoadingUser,
-                initialValue: selectedText,
-                maxLines: 1,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w500,
+  return Padding(
+    padding: const EdgeInsets.only(
+      bottom: _RegistrationPageConstants.inputBottomPadding,
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GestureDetector(
+          onTap: (isLoading || isKaryakartha || widget.isLoadingUser || widget.fromProfile)
+              ? null
+              : () => _showRoleSelectionSheet(context, allRoles),
+          child: AbsorbPointer(
+            child: TextFormField(
+              readOnly: true,
+              enabled: !isLoading && !widget.isLoadingUser && !widget.fromProfile,
+              controller: roleController,
+              maxLines: 1,
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              decoration: InputDecoration(
+                labelText: _RegistrationPageConstants.labelRole,
+                hintText: _RegistrationPageConstants.hintSelectRole,
+                prefixIcon: const Icon(Icons.badge, color: Colors.grey),
+                filled: true,
+                fillColor: (isKaryakartha || widget.fromProfile)
+                    ? Colors.grey[200]
+                    : _RegistrationPageConstants.inputFillColor,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: _RegistrationPageConstants.contentPaddingHorizontal,
+                  vertical: _RegistrationPageConstants.contentPaddingVertical,
                 ),
-                decoration: InputDecoration(
-                  labelText: "Role",
-                  hintText: "Select Role(s)",
-                  prefixIcon: const Icon(Icons.badge, color: Colors.grey),
-                  filled: true,
-                  fillColor: isKaryakartha
-                      ? Colors.grey[200]
-                      : const Color(0xffF7F9FC),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 14,
-                  ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.grey.shade300),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: const BorderSide(
-                      color: Colors.blue,
-                      width: 1.5,
-                    ),
-                  ),
-                  suffixIcon: isKaryakartha
-                      ? const Icon(Icons.lock, size: 18)
-                      : const Icon(Icons.keyboard_arrow_down),
+                border: _buildOutlineInputBorder(
+                  BorderSide(color: Colors.grey.shade300),
                 ),
+                enabledBorder: _buildOutlineInputBorder(
+                  BorderSide(color: Colors.grey.shade300),
+                ),
+                focusedBorder: _buildOutlineInputBorder(
+                  const BorderSide(
+                    color: _RegistrationPageConstants.focusedBorderColor,
+                    width: _RegistrationPageConstants.focusedBorderWidth,
+                  ),
+                ),
+                suffixIcon: (isKaryakartha || widget.fromProfile)
+                    ? const Icon(Icons.lock, size: _RegistrationPageConstants.iconSize)
+                    : const Icon(Icons.keyboard_arrow_down),
               ),
             ),
           ),
-        ],
-      ),
+        ),
+        // Display roles as chips if more than 2 roles
+        if (displayRoles.length > 2)
+          Padding(
+            padding: const EdgeInsets.only(top: 12.0),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: displayRoles
+                  .map((role) => Chip(
+                        label: Text(role),
+                        backgroundColor: Colors.blue[50],
+                        labelStyle: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ))
+                  .toList(),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+
+  Future<void> _showRoleSelectionSheet(
+    BuildContext context,
+    List<Role> allRoles,
+  ) async {
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            return DraggableScrollableSheet(
+              initialChildSize: 0.35,
+              minChildSize: 0.25,
+              maxChildSize: 0.6,
+              expand: false,
+              builder: (_, controller) {
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: ListView(
+                    controller: controller,
+                    children: [
+                      const Center(
+                        child: Text(
+                          _RegistrationPageConstants.dialogSelectRoles,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ...allRoles.map((role) {
+                        final isSelected = widget.selectedRoles
+                            .any((r) => r.id == role.id);
+                        return CheckboxListTile(
+                          dense: true,
+                          title: Text(role.displayName),
+                          value: isSelected,
+                          onChanged: (val) {
+                            setModalState(() {
+                              final updatedList =
+                                  List<Role>.from(widget.selectedRoles);
+                              if (val == true) {
+                                updatedList.add(role);
+                              } else {
+                                updatedList.removeWhere(
+                                  (r) => r.id == role.id,
+                                );
+                              }
+                              widget.onRolesUpdated(updatedList);
+                            });
+                          },
+                        );
+                      }).toList(),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(_RegistrationPageConstants.buttonDone),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
     );
   }
 
@@ -798,11 +957,14 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         final isLoading = state.isCreatingUser || state.isLoadingRoles;
         final roles = state.typeBasedRoles;
 
+        // Auto-select karyakartha role
         if (widget.type == RegistrationType.karyakartha &&
             roles.isNotEmpty &&
             widget.selectedRoles.isEmpty) {
           final karyakarthaRole = roles.firstWhere(
-            (r) => r.displayName.toUpperCase() == "KARYAKARTHA",
+            (r) =>
+                r.displayName.toUpperCase() ==
+                _RegistrationPageConstants.karyakarthaRole,
           );
           WidgetsBinding.instance.addPostFrameCallback((_) {
             widget.onRolesUpdated([karyakarthaRole]);
@@ -817,7 +979,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                 children: const [
                   CircularProgressIndicator(),
                   SizedBox(height: 16),
-                  Text('Loading roles...'),
+                  Text(_RegistrationPageConstants.loadingRoles),
                 ],
               ),
             ),
@@ -841,15 +1003,17 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'Failed to load roles: ${state.errorMessage}',
+                      '${_RegistrationPageConstants.failedLoadRoles}${state.errorMessage}',
                       textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.red),
+                      style: const TextStyle(
+                        color: _RegistrationPageConstants.errorColor,
+                      ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
                       onPressed: () =>
                           context.read<AuthBloc>().add(FetchRolesEvent()),
-                      child: const Text('Retry'),
+                      child: const Text(_RegistrationPageConstants.buttonRetry),
                     ),
                   ],
                 ),
@@ -858,170 +1022,190 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           );
         }
 
-        Widget rowFields(Widget first, Widget second) {
-          return isWideScreen
-              ? Row(
-                  children: [
-                    Expanded(child: first),
-                    const SizedBox(width: 16),
-                    Expanded(child: second),
-                  ],
-                )
-              : Column(children: [first, second]);
-        }
+        return _buildRegistrationForm(context, isWideScreen, isLoading, roles);
+      },
+    );
+  }
 
-        return Layout(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Form(
-                    key: widget.formKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Backbutton().buildBackButton(context, "Users"),
-                        const SizedBox(height: 10),
-                        Text(
-                          widget.title,
-                          style: const TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        const Divider(thickness: 1),
-                        const SizedBox(height: 10),
-                        const Text(
-                          "Personal Information",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        rowFields(
-                          _input(
-                            widget.firstNameCtrl,
-                            "First Name",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                          _input(
-                            widget.lastNameCtrl,
-                            "Last Name",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                        ),
-                        rowFields(
-                          _input(
-                            widget.emailCtrl,
-                            "Email",
-                            keyboardType: TextInputType.emailAddress,
-                            isLoading: isLoading,
-                          ),
-                          _input(
-                            widget.mobileCtrl,
-                            "Mobile Number",
-                            keyboardType: TextInputType.phone,
-                            numbersOnly: true,
-                            isLoading: isLoading,
-                            enabled: !widget.isEdit,
-                          ),
-                        ),
-                        rowFields(
-                          _multiSelectRoleField(isLoading, context, roles),
-                          _startDateField(isLoading, context),
-                        ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          "Address Information",
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        rowFields(
-                          _input(
-                            widget.areaCtrl,
-                            "Area",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                          _input(
-                            widget.cityCtrl,
-                            "City",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                        ),
-                        rowFields(
-                          _input(
-                            widget.stateCtrl,
-                            "State",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                          _input(
-                            widget.countryCtrl,
-                            "Country",
-                            lettersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                        ),
-                        rowFields(
-                          _input(
-                            widget.pincodeCtrl,
-                            "Pincode",
-                            keyboardType: TextInputType.number,
-                            numbersOnly: true,
-                            isLoading: isLoading,
-                          ),
-                          const SizedBox(),
-                        ),
-                        const SizedBox(height: 22),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Container(
-                            width: MediaQuery.of(context).size.width > 600
-                                ? 430
-                                : double.infinity,
-                            child: isWideScreen
-                                ? Row(
-                                    children: [
-                                      _cancelButton(context, isLoading),
-                                      const SizedBox(width: 16),
-                                      _registerButton(context, isLoading),
-                                    ],
-                                  )
-                                : Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.stretch,
-                                    children: [
-                                      _registerButton(context, isLoading),
-                                      const SizedBox(height: 12),
-                                      _cancelButton(context, isLoading),
-                                    ],
-                                  ),
-                          ),
-                        ),
-                      ],
+  Widget _buildRegistrationForm(
+    BuildContext context,
+    bool isWideScreen,
+    bool isLoading,
+    List<Role> roles,
+  ) {
+    Widget rowFields(Widget first, Widget second) {
+      return isWideScreen
+          ? Row(
+              children: [
+                Expanded(child: first),
+                const SizedBox(width: 16),
+                Expanded(child: second),
+              ],
+            )
+          : Column(children: [first, second]);
+    }
+
+    return Layout(
+      child: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(
+            horizontal: _RegistrationPageConstants.formHorizontalPadding,
+            vertical: _RegistrationPageConstants.formVerticalPadding,
+          ),
+          child: Card(
+            elevation: _RegistrationPageConstants.cardElevation,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(
+                _RegistrationPageConstants.borderRadius,
+              ),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(_RegistrationPageConstants.cardPadding),
+              child: Form(
+                key: widget.formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Backbutton().buildBackButton(context, "Users"),
+                    const SizedBox(height: 10),
+                    Text(
+                      widget.title,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    const Divider(
+                      thickness: _RegistrationPageConstants.dividerThickness,
+                    ),
+                    const SizedBox(height: 10),
+                    const Text(
+                      _RegistrationPageConstants.personalInfo,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    rowFields(
+                      _input(
+                        widget.firstNameCtrl,
+                        _RegistrationPageConstants.fieldFirstName,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                      _input(
+                        widget.lastNameCtrl,
+                        _RegistrationPageConstants.fieldLastName,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                    rowFields(
+                      _input(
+                        widget.emailCtrl,
+                        _RegistrationPageConstants.fieldEmail,
+                        keyboardType: TextInputType.emailAddress,
+                        isLoading: isLoading,
+                      ),
+                      _input(
+                        widget.mobileCtrl,
+                        _RegistrationPageConstants.fieldMobile,
+                        keyboardType: TextInputType.phone,
+                        numbersOnly: true,
+                        isLoading: isLoading,
+                        enabled: !widget.isEdit,
+                      ),
+                    ),
+
+
+                    rowFields(
+                      _multiSelectRoleField(isLoading, context, roles),
+                      _startDateField(isLoading, context),
+                    ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      _RegistrationPageConstants.addressInfo,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    rowFields(
+                      _input(
+                        widget.areaCtrl,
+                        _RegistrationPageConstants.fieldArea,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                      _input(
+                        widget.cityCtrl,
+                        _RegistrationPageConstants.fieldCity,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                    rowFields(
+                      _input(
+                        widget.stateCtrl,
+                        _RegistrationPageConstants.fieldState,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                      _input(
+                        widget.countryCtrl,
+                        _RegistrationPageConstants.fieldCountry,
+                        lettersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                    ),
+                    rowFields(
+                      _input(
+                        widget.pincodeCtrl,
+                        _RegistrationPageConstants.fieldPincode,
+                        keyboardType: TextInputType.number,
+                        numbersOnly: true,
+                        isLoading: isLoading,
+                      ),
+                      const SizedBox(),
+                    ),
+                    const SizedBox(height: 22),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        width: MediaQuery.of(context).size.width > 600
+                            ? 430
+                            : double.infinity,
+                        child: isWideScreen
+                            ? Row(
+                                children: [
+                                  _cancelButton(context, isLoading),
+                                  const SizedBox(width: 16),
+                                  _registerButton(context, isLoading),
+                                ],
+                              )
+                            : Column(
+                                crossAxisAlignment:
+                                    CrossAxisAlignment.stretch,
+                                children: [
+                                  _registerButton(context, isLoading),
+                                  const SizedBox(height: 12),
+                                  _cancelButton(context, isLoading),
+                                ],
+                              ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
+
+

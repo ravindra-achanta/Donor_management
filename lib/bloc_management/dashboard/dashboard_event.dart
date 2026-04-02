@@ -15,3 +15,4 @@ class FetchDonationMetricsEvent extends DashboardEvent {
   @override
   List<Object?> get props => [id];
 }
+class PostDashboardActivityEvent extends DashboardEvent {}

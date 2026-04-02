@@ -17,3 +17,12 @@ class FetchUsersProfileEvent extends UserEvent {
 }
 
 class CloseProfileView extends UserEvent {}
+
+class DeleteUserEvent extends UserEvent {
+  final String userId;
+  
+  DeleteUserEvent({required this.userId});
+  
+  @override
+  List<Object?> get props => [userId];
+}

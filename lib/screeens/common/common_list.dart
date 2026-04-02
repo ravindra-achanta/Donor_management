@@ -102,15 +102,13 @@ class _CommonListState extends State<CommonList> {
                   if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF" ||
                       Vikasdb().getString("USER_TYPE") == "KARYAKARTHA")
                     tableHeader('Actions', flex: 2),
-                ] 
-              else if (screenType == 'ACTIVITY') ...[
+                ] else if (screenType == 'ACTIVITY') ...[
                   tableHeader('Call Status', flex: 2),
                   tableHeader('Description', flex: 3),
                   tableHeader('Jeevanaadi No', flex: 1),
-                 // tableHeader('Date', flex: 2),
-                 // tableHeader('Created By', flex: 2),
-                ] 
-              else if (screenType == 'VISIT') ...[
+                  // tableHeader('Date', flex: 2),
+                  // tableHeader('Created By', flex: 2),
+                ] else if (screenType == 'VISIT') ...[
                   //tableHeader('ID', flex: 1),
                   tableHeader('Visitor Name', flex: 2),
                   tableHeader('Phone Number', flex: 2),
@@ -118,22 +116,20 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('No. of Guests', flex: 1),
                   if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                     tableHeader('Actions', flex: 1),
-                     
                 ] else if (screenType == 'DONATION') ...[
                   tableHeader('Amount'),
                   tableHeader('Donation type'),
                   tableHeader('Donation date'),
                   const SizedBox.shrink(),
-                ]else if (screenType == 'KARYAKARTHA') ...[
-  tableHeader('Name'),
-  tableHeader('Mobile'),
-  tableHeader('UserType'),
-  tableHeader('Actions'),
-]
-                 else ...[
+                ] else if (screenType == 'KARYAKARTHA') ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
-                  tableHeader('Roles'),
+                  tableHeader('UserType'),
+                  tableHeader('Actions'),
+                ] else ...[
+                  tableHeader('Name'),
+                  tableHeader('Mobile'),
+                  tableHeader('Roles',flex: 2),
                   tableHeader('Actions'),
                 ],
               ],
@@ -173,12 +169,10 @@ class _CommonListState extends State<CommonList> {
                   mobile = rowData.mobileNumber ?? "";
                   userType = rowData.userType ?? "";
                 } else if (rowData is Activity) {
-  name = rowData.callStatus;
-  JeevanaadiNo = rowData.jeevanaadiId.toString();
-  date = rowData.date;
-  
-}
-                 else if (rowData is DonationEvent) {
+                  name = rowData.callStatus;
+                  JeevanaadiNo = rowData.jeevanaadiId.toString();
+                  date = rowData.date;
+                } else if (rowData is DonationEvent) {
                   amount = rowData.amount.toString();
                   donationType = rowData.eventType;
                   date = formatDate(rowData.date.toString());
@@ -303,13 +297,19 @@ class _CommonListState extends State<CommonList> {
                             ] else if (screenType == 'ACTIVITY') ...[
                               if (rowData is Activity) ...[
                                 tableData(rowData.callStatus, flex: 2),
-                                tableData(rowData.description, flex: 3, maxLines: 2),
-                                tableData(rowData.jeevanaadiId.toString(), flex: 1),
+                                tableData(
+                                  rowData.description,
+                                  flex: 3,
+                                  maxLines: 2,
+                                ),
+                                tableData(
+                                  rowData.jeevanaadiId.toString(),
+                                  flex: 1,
+                                ),
                                 //tableData(rowData.date, flex: 2),
-                               // tableData(rowData.createdUserID, flex: 2),
+                                // tableData(rowData.createdUserID, flex: 2),
                               ],
-                            ]
-                            else if (screenType == 'VISIT') ...[
+                            ] else if (screenType == 'VISIT') ...[
                               if (rowData is VisitView) ...[
                                 tableData(rowData.visitorName, flex: 2),
                                 tableData(rowData.phoneNumber, flex: 2),
@@ -349,37 +349,36 @@ class _CommonListState extends State<CommonList> {
                               tableData(donationType),
                               tableData(date),
                               const SizedBox.shrink(),
-                            ]else if (screenType == 'KARYAKARTHA') ...[
-  tableData(name),
-  tableData(mobile),
-  tableData(userType),
-  Expanded(
-    child: Row(
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        HoverIconButton(
-          icon: Icons.delete_outline,
-          hoverColor: Colors.red.withOpacity(0.1),
-          iconColor: Colors.red,
-          onTap: () => widget.onDelete(rowData.id),
-        ),
-        const SizedBox(width: 10),
-        HoverIconButton(
-          icon: Icons.edit_outlined,
-          hoverColor: Colors.blue.withOpacity(0.1),
-          iconColor: Colors.blue,
-          onTap: () => widget.onUpdate(rowData.id),
-        ),
-      ],
-    ),
-  ),
-]
-                             else ...[
+                            ] else if (screenType == 'KARYAKARTHA') ...[
+                              tableData(name),
+                              tableData(mobile),
+                              tableData(userType),
+                              Expanded(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    HoverIconButton(
+                                      icon: Icons.delete_outline,
+                                      hoverColor: Colors.red.withOpacity(0.1),
+                                      iconColor: Colors.red,
+                                      onTap: () => widget.onDelete(rowData.id),
+                                    ),
+                                    // const SizedBox(width: 10),
+                                    // HoverIconButton(
+                                    //   icon: Icons.edit_outlined,
+                                    //   hoverColor: Colors.blue.withOpacity(0.1),
+                                    //   iconColor: Colors.blue,
+                                    //   onTap: () => widget.onUpdate(rowData.id),
+                                    // ),
+                                  ],
+                                ),
+                              ),
+                            ] else ...[
                               // Default case (User)
                               tableData(name),
                               tableData(mobile),
                               // tableData(userType),
-                               if (rowData is User) ...[
+                              if (rowData is User) ...[
                                 Expanded(
                                   flex: 2,
                                   child: _buildUserTypeChips(rowData.userTypes),
@@ -391,6 +390,7 @@ class _CommonListState extends State<CommonList> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
+                                    
                                     HoverIconButton(
                                       icon: Icons.delete_outline,
                                       hoverColor: Colors.red.withOpacity(0.1),
@@ -480,22 +480,21 @@ class _CommonListState extends State<CommonList> {
     );
   }
 
-
   Color _getStatusColor(String status) {
-  switch (status) {
-    case "Approved":
-    case "COMPLETED":
-      return Colors.green;
-    case "Rejected":
-    case "CANCELLED":
-      return Colors.red;
-    case "WIP":
-    case "Work In Progress":
-      return Colors.orange;
-    default:
-      return Colors.orange;
+    switch (status) {
+      case "Approved":
+      case "COMPLETED":
+        return Colors.green;
+      case "Rejected":
+      case "CANCELLED":
+        return Colors.red;
+      case "WIP":
+      case "Work In Progress":
+        return Colors.orange;
+      default:
+        return Colors.orange;
+    }
   }
-}
 
   Widget tableHeader(String title, {int flex = 1}) {
     return Expanded(
@@ -511,7 +510,7 @@ class _CommonListState extends State<CommonList> {
     );
   }
 
-  Widget tableData(String data, {int flex = 1, int maxLines=1}) {
+  Widget tableData(String data, {int flex = 1, int maxLines = 1}) {
     return Expanded(
       flex: flex,
       child: Text(
@@ -535,26 +534,26 @@ class _CommonListState extends State<CommonList> {
       onTap: onTap,
     );
   }
-  
+
   Widget _buildUserTypeChips(List<String> userTypes) {
-  if (userTypes.isEmpty) {
-    return const Text(
-      '-',
-      style: TextStyle(color: Color.fromARGB(255, 158, 158, 158)),
+    if (userTypes.isEmpty) {
+      return const Text(
+        '-',
+        style: TextStyle(color: Color.fromARGB(255, 158, 158, 158)),
+      );
+    }
+    // Display as comma-separated text without colored containers
+    return Text(
+      userTypes.join(', '),
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w500,
+        color: Colors.black87,
+      ),
+      overflow: TextOverflow.ellipsis,
+      maxLines: 2,
     );
   }
-  // Display as comma-separated text without colored containers
-  return Text(
-    userTypes.join(', '),
-    style: const TextStyle(
-      fontSize: 14,
-      fontWeight: FontWeight.w500,
-      color: Colors.black87,
-    ),
-    overflow: TextOverflow.ellipsis,
-    maxLines: 2,
-  );
-}
 }
 
 class HoverIconButton extends StatefulWidget {

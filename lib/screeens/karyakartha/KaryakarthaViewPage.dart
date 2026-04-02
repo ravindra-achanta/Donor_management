@@ -837,7 +837,7 @@ SizedBox(
           children: [
             if (user.jeevanaadiNo != null)
               Text(
-                "Jeevanaadi ID: ${user.jeevanaadiNo!}",
+                "Jeevanaadi No: ${user.jeevanaadiNo!}",
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             if (user.jeevanaadiNo != null && user.joinedDate != null)
@@ -891,7 +891,7 @@ SizedBox(
           children: [
             if (user.jeevanaadiNo != null)
               Text(
-                "Jeevanaadi ID: ${user.jeevanaadiNo!}",
+                "Jeevanaadi No: ${user.jeevanaadiNo!}",
                 style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
               ),
             if (user.jeevanaadiNo != null && user.joinedDate != null)
