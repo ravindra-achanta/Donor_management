@@ -53,7 +53,8 @@ class _RegistrationPageConstants {
   static const Color warningColor = Colors.orange;
 
   static const String successMessage = "User created successfully";
-  static const String errorNoUserData = 'Error: User data not loaded. Please try again.';
+  static const String errorNoUserData =
+      'Error: User data not loaded. Please try again.';
   static const String errorSelectRole = 'Please select at least one role';
   static const String dialogSelectRoles = "Select Role(s)";
   static const String buttonDone = "Done";
@@ -84,7 +85,8 @@ class _RegistrationPageConstants {
   static const String validationRequired = ' is required';
   static const String validationLettersOnly = ' must contain letters only';
   static const String validationNumbersOnly = ' must contain numbers only';
-  static const String validationMobileDigits = 'Mobile Number must be 10 digits';
+  static const String validationMobileDigits =
+      'Mobile Number must be 10 digits';
   static const String validationPincodeDigits = 'Pincode must be 6 digits';
   static const String validationEmail = 'Enter a valid email';
   static const String validationStartDateRequired = "Start Date is required";
@@ -139,7 +141,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
   @override
   void initState() {
     super.initState();
-    
+
     if (!widget.fromProfile) {
       context.read<AuthBloc>().add(FetchRolesEventByType());
     }
@@ -170,7 +172,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     stateCtrl.text = user.state ?? "";
     countryCtrl.text = user.country ?? "";
     startDateCtrl.text = user.startedDate ?? _formatDate(DateTime.now());
-    
+
     selectedRoles.addAll(
       (user.userTypes ?? user.roles ?? []).map(
         (roleName) => Role(id: roleName, roleName: roleName, status: "ACTIVE"),
@@ -222,21 +224,25 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(
-                      state.creationMessage ?? _RegistrationPageConstants.successMessage,
+                      state.creationMessage ??
+                          _RegistrationPageConstants.successMessage,
                     ),
                     backgroundColor: _RegistrationPageConstants.successColor,
                     duration: _RegistrationPageConstants.snackBarDuration,
                   ),
                 );
-                Future.delayed(_RegistrationPageConstants.profileFetchDelay, () {
-                  _clearForm();
-                  context.read<AuthBloc>().add(CheckAuthStatusEvent());
-                  if (widget.type == RegistrationType.karyakartha) {
-                    Get.toNamed('/karyakarthas');
-                  } else {
-                    Get.toNamed('/users');
-                  }
-                });
+                Future.delayed(
+                  _RegistrationPageConstants.profileFetchDelay,
+                  () {
+                    _clearForm();
+                    context.read<AuthBloc>().add(CheckAuthStatusEvent());
+                    if (widget.type == RegistrationType.karyakartha) {
+                      Get.toNamed('/karyakarthas');
+                    } else {
+                      Get.toNamed('/users');
+                    }
+                  },
+                );
               }
               if (state.isError && state.errorMessage != null) {
                 ScaffoldMessenger.of(context).showSnackBar(
@@ -265,7 +271,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
                 });
 
                 final authState = context.read<AuthBloc>().state;
-                if (!widget.fromProfile && !authState.isLoadingRoles &&
+                if (!widget.fromProfile &&
+                    !authState.isLoadingRoles &&
                     authState.typeBasedRoles.isNotEmpty) {
                   _populateRolesFromUser(
                     fetchedUser!,
@@ -414,15 +421,17 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         ? widget.selectedRoles.map((e) => e.displayName).join(", ")
         : "";
   }
+
   List<String> _getCurrentDisplayRoles() {
-  if (widget.selectedRoles.isNotEmpty) {
-    return widget.selectedRoles.map((e) => e.displayName).toList();
-  } else if (widget.isEdit && widget.fetchedUser != null) {
-    final fetchedRoles = widget.fetchedUser!.userTypes ?? widget.fetchedUser!.roles ?? [];
-    return fetchedRoles.cast<String>().toList();
+    if (widget.selectedRoles.isNotEmpty) {
+      return widget.selectedRoles.map((e) => e.displayName).toList();
+    } else if (widget.isEdit && widget.fetchedUser != null) {
+      final fetchedRoles =
+          widget.fetchedUser!.userTypes ?? widget.fetchedUser!.roles ?? [];
+      return fetchedRoles.cast<String>().toList();
+    }
+    return [];
   }
-  return [];
-}
 
   String _formatDate(DateTime date) {
     return "${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}";
@@ -457,7 +466,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           icon: icon,
           enabled: enabled,
         ),
-        validator: (value) => _validateInput(value, label, lettersOnly, numbersOnly),
+        validator: (value) =>
+            _validateInput(value, label, lettersOnly, numbersOnly),
       ),
     );
   }
@@ -472,11 +482,11 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     return InputDecoration(
       labelText: label,
       hintText: "${_RegistrationPageConstants.hintEnter}$label",
-      prefixIcon: icon != null
-          ? Icon(icon, color: Colors.grey.shade600)
-          : null,
+      prefixIcon: icon != null ? Icon(icon, color: Colors.grey.shade600) : null,
       filled: true,
-      fillColor: !enabled ? Colors.grey[200] : _RegistrationPageConstants.inputFillColor,
+      fillColor: !enabled
+          ? Colors.grey[200]
+          : _RegistrationPageConstants.inputFillColor,
       contentPadding: const EdgeInsets.symmetric(
         horizontal: _RegistrationPageConstants.contentPaddingHorizontal,
         vertical: _RegistrationPageConstants.contentPaddingVertical,
@@ -503,7 +513,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
 
   OutlineInputBorder _buildOutlineInputBorder(BorderSide borderSide) {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(_RegistrationPageConstants.borderRadius),
+      borderRadius: BorderRadius.circular(
+        _RegistrationPageConstants.borderRadius,
+      ),
       borderSide: borderSide,
     );
   }
@@ -527,7 +539,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     if (lettersOnly &&
         value != null &&
         value.trim().isNotEmpty &&
-        !RegExp(_RegistrationPageConstants.rolePattern).hasMatch(value.trim())) {
+        !RegExp(
+          _RegistrationPageConstants.rolePattern,
+        ).hasMatch(value.trim())) {
       return '$label${_RegistrationPageConstants.validationLettersOnly}';
     }
 
@@ -535,7 +549,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     if (numbersOnly &&
         value != null &&
         value.trim().isNotEmpty &&
-        !RegExp(_RegistrationPageConstants.numberPattern).hasMatch(value.trim())) {
+        !RegExp(
+          _RegistrationPageConstants.numberPattern,
+        ).hasMatch(value.trim())) {
       return '$label${_RegistrationPageConstants.validationNumbersOnly}';
     }
 
@@ -558,7 +574,9 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
     if (label == _RegistrationPageConstants.fieldEmail &&
         value != null &&
         value.trim().isNotEmpty &&
-        !RegExp(_RegistrationPageConstants.emailPattern).hasMatch(value.trim())) {
+        !RegExp(
+          _RegistrationPageConstants.emailPattern,
+        ).hasMatch(value.trim())) {
       return _RegistrationPageConstants.validationEmail;
     }
 
@@ -594,7 +612,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                   height: _RegistrationPageConstants.progressIndicatorSize,
                   width: _RegistrationPageConstants.progressIndicatorSize,
                   child: CircularProgressIndicator(
-                    strokeWidth: _RegistrationPageConstants.progressIndicatorStrokeWidth,
+                    strokeWidth:
+                        _RegistrationPageConstants.progressIndicatorStrokeWidth,
                     color: Colors.white,
                   ),
                 )
@@ -658,8 +677,8 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
       final updatedRoles = widget.fromProfile
           ? (userToUpdate.userTypes ?? userToUpdate.roles)
           : (widget.selectedRoles.isNotEmpty
-              ? widget.selectedRoles.map((role) => role.id).toList()
-              : userToUpdate.roles);
+                ? widget.selectedRoles.map((role) => role.id).toList()
+                : userToUpdate.roles);
 
       final updatedUser = User(
         id: userToUpdate.id,
@@ -675,15 +694,18 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         state: widget.stateCtrl.text.trim(),
         country: widget.countryCtrl.text.trim(),
       );
-      if(widget.fromProfile) {
-        context.read<ProfileBloc>().add(UpdateProfileInfo(id: userToUpdate.id, user: updatedUser));
+      if (widget.fromProfile) {
+        context.read<ProfileBloc>().add(
+          UpdateProfileInfo(id: userToUpdate.id, user: updatedUser),
+        );
       } else {
         context.read<ProfileBloc>().add(
-        UpdateProfile(id: userToUpdate.id, user: updatedUser),
-      );
+          UpdateProfile(id: userToUpdate.id, user: updatedUser),
+        );
       }
-       widget.fromProfile ? Get.back() :
-      widget.type == RegistrationType.user
+      widget.fromProfile
+          ? Get.toNamed('/profile')
+          : widget.type == RegistrationType.user
           ? Get.toNamed('/users')
           : Get.toNamed('/karyakarthas');
     } else {
@@ -764,7 +786,10 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                 _RegistrationPageConstants.buttonBorderRadius,
               ),
             ),
-            child: const Icon(Icons.calendar_today, size: _RegistrationPageConstants.iconSize),
+            child: const Icon(
+              Icons.calendar_today,
+              size: _RegistrationPageConstants.iconSize,
+            ),
           ),
         ),
         onTap: isLoading || widget.isLoadingUser
@@ -780,97 +805,110 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
                   widget.startDateCtrl.text = _formatDate(pickedDate);
                 }
               },
-        validator: (value) =>
-            value == null || value.isEmpty
-                ? _RegistrationPageConstants.validationStartDateRequired
-                : null,
+        validator: (value) => value == null || value.isEmpty
+            ? _RegistrationPageConstants.validationStartDateRequired
+            : null,
       ),
     );
   }
-Widget _multiSelectRoleField(
-  bool isLoading,
-  BuildContext context,
-  List<Role> allRoles,
-) {
-  final isKaryakartha = widget.type == RegistrationType.karyakartha;
-  final displayRoles = _getCurrentDisplayRoles();
-  
-  // Update controller whenever this rebuilds
-  _updateRoleField();
 
-  return Padding(
-    padding: const EdgeInsets.only(
-      bottom: _RegistrationPageConstants.inputBottomPadding,
-    ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        GestureDetector(
-          onTap: (isLoading || isKaryakartha || widget.isLoadingUser || widget.fromProfile)
-              ? null
-              : () => _showRoleSelectionSheet(context, allRoles),
-          child: AbsorbPointer(
-            child: TextFormField(
-              readOnly: true,
-              enabled: !isLoading && !widget.isLoadingUser && !widget.fromProfile,
-              controller: roleController,
-              maxLines: 1,
-              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
-              decoration: InputDecoration(
-                labelText: _RegistrationPageConstants.labelRole,
-                hintText: _RegistrationPageConstants.hintSelectRole,
-                prefixIcon: const Icon(Icons.badge, color: Colors.grey),
-                filled: true,
-                fillColor: (isKaryakartha || widget.fromProfile)
-                    ? Colors.grey[200]
-                    : _RegistrationPageConstants.inputFillColor,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: _RegistrationPageConstants.contentPaddingHorizontal,
-                  vertical: _RegistrationPageConstants.contentPaddingVertical,
+  Widget _multiSelectRoleField(
+    bool isLoading,
+    BuildContext context,
+    List<Role> allRoles,
+  ) {
+    final isKaryakartha = widget.type == RegistrationType.karyakartha;
+    final displayRoles = _getCurrentDisplayRoles();
+
+    // Update controller whenever this rebuilds
+    _updateRoleField();
+
+    return Padding(
+      padding: const EdgeInsets.only(
+        bottom: _RegistrationPageConstants.inputBottomPadding,
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          GestureDetector(
+            onTap:
+                (isLoading ||
+                    isKaryakartha ||
+                    widget.isLoadingUser ||
+                    widget.fromProfile)
+                ? null
+                : () => _showRoleSelectionSheet(context, allRoles),
+            child: AbsorbPointer(
+              child: TextFormField(
+                readOnly: true,
+                enabled:
+                    !isLoading && !widget.isLoadingUser && !widget.fromProfile,
+                controller: roleController,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
                 ),
-                border: _buildOutlineInputBorder(
-                  BorderSide(color: Colors.grey.shade300),
-                ),
-                enabledBorder: _buildOutlineInputBorder(
-                  BorderSide(color: Colors.grey.shade300),
-                ),
-                focusedBorder: _buildOutlineInputBorder(
-                  const BorderSide(
-                    color: _RegistrationPageConstants.focusedBorderColor,
-                    width: _RegistrationPageConstants.focusedBorderWidth,
+                decoration: InputDecoration(
+                  labelText: _RegistrationPageConstants.labelRole,
+                  hintText: _RegistrationPageConstants.hintSelectRole,
+                  prefixIcon: const Icon(Icons.badge, color: Colors.grey),
+                  filled: true,
+                  fillColor: (isKaryakartha || widget.fromProfile)
+                      ? Colors.grey[200]
+                      : _RegistrationPageConstants.inputFillColor,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal:
+                        _RegistrationPageConstants.contentPaddingHorizontal,
+                    vertical: _RegistrationPageConstants.contentPaddingVertical,
                   ),
+                  border: _buildOutlineInputBorder(
+                    BorderSide(color: Colors.grey.shade300),
+                  ),
+                  enabledBorder: _buildOutlineInputBorder(
+                    BorderSide(color: Colors.grey.shade300),
+                  ),
+                  focusedBorder: _buildOutlineInputBorder(
+                    const BorderSide(
+                      color: _RegistrationPageConstants.focusedBorderColor,
+                      width: _RegistrationPageConstants.focusedBorderWidth,
+                    ),
+                  ),
+                  suffixIcon: (isKaryakartha || widget.fromProfile)
+                      ? const Icon(
+                          Icons.lock,
+                          size: _RegistrationPageConstants.iconSize,
+                        )
+                      : const Icon(Icons.keyboard_arrow_down),
                 ),
-                suffixIcon: (isKaryakartha || widget.fromProfile)
-                    ? const Icon(Icons.lock, size: _RegistrationPageConstants.iconSize)
-                    : const Icon(Icons.keyboard_arrow_down),
               ),
             ),
           ),
-        ),
-        // Display roles as chips if more than 2 roles
-        if (displayRoles.length > 2)
-          Padding(
-            padding: const EdgeInsets.only(top: 12.0),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: displayRoles
-                  .map((role) => Chip(
+          // Display roles as chips if more than 2 roles
+          if (displayRoles.length > 2)
+            Padding(
+              padding: const EdgeInsets.only(top: 12.0),
+              child: Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: displayRoles
+                    .map(
+                      (role) => Chip(
                         label: Text(role),
                         backgroundColor: Colors.blue[50],
                         labelStyle: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
                         ),
-                      ))
-                  .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
             ),
-          ),
-      ],
-    ),
-  );
-}
-
+        ],
+      ),
+    );
+  }
 
   Future<void> _showRoleSelectionSheet(
     BuildContext context,
@@ -911,22 +949,22 @@ Widget _multiSelectRoleField(
                       ),
                       const SizedBox(height: 16),
                       ...allRoles.map((role) {
-                        final isSelected = widget.selectedRoles
-                            .any((r) => r.id == role.id);
+                        final isSelected = widget.selectedRoles.any(
+                          (r) => r.id == role.id,
+                        );
                         return CheckboxListTile(
                           dense: true,
                           title: Text(role.displayName),
                           value: isSelected,
                           onChanged: (val) {
                             setModalState(() {
-                              final updatedList =
-                                  List<Role>.from(widget.selectedRoles);
+                              final updatedList = List<Role>.from(
+                                widget.selectedRoles,
+                              );
                               if (val == true) {
                                 updatedList.add(role);
                               } else {
-                                updatedList.removeWhere(
-                                  (r) => r.id == role.id,
-                                );
+                                updatedList.removeWhere((r) => r.id == role.id);
                               }
                               widget.onRolesUpdated(updatedList);
                             });
@@ -936,7 +974,9 @@ Widget _multiSelectRoleField(
                       const SizedBox(height: 10),
                       ElevatedButton(
                         onPressed: () => Navigator.pop(context),
-                        child: const Text(_RegistrationPageConstants.buttonDone),
+                        child: const Text(
+                          _RegistrationPageConstants.buttonDone,
+                        ),
                       ),
                     ],
                   ),
@@ -1060,7 +1100,9 @@ Widget _multiSelectRoleField(
               ),
             ),
             child: Padding(
-              padding: const EdgeInsets.all(_RegistrationPageConstants.cardPadding),
+              padding: const EdgeInsets.all(
+                _RegistrationPageConstants.cardPadding,
+              ),
               child: Form(
                 key: widget.formKey,
                 child: Column(
@@ -1118,7 +1160,6 @@ Widget _multiSelectRoleField(
                         enabled: !widget.isEdit,
                       ),
                     ),
-
 
                     rowFields(
                       _multiSelectRoleField(isLoading, context, roles),
@@ -1187,8 +1228,7 @@ Widget _multiSelectRoleField(
                                 ],
                               )
                             : Column(
-                                crossAxisAlignment:
-                                    CrossAxisAlignment.stretch,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
                                   _registerButton(context, isLoading),
                                   const SizedBox(height: 12),
@@ -1207,5 +1247,3 @@ Widget _multiSelectRoleField(
     );
   }
 }
-
-

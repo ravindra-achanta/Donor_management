@@ -134,7 +134,7 @@ class _MyProfileState extends State<MyProfile> {
               );
               _loadProfile();
             },
-          )
+          ),
           // IconButton(
           //   icon: const Icon(Icons.edit, color: Colors.white),
           //   onPressed: () {
@@ -252,8 +252,8 @@ class _MyProfileState extends State<MyProfile> {
   Widget _buildUserTypesGrid(User user) {
     List<String> types = [];
 
-    if (user.userType != null && user.userType!.isNotEmpty) {
-      types.add(user.userType!);
+    if (user.userType != null && (user.userType?.isNotEmpty ?? false)) {
+      types.add(user.userType ?? "");
     } else if (user.userTypes.isNotEmpty) {
       types = user.userTypes;
     }
