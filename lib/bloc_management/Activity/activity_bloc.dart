@@ -9,6 +9,8 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
   ActivityBloc({required this.repo}) : super(const ActivityState()) {
     on<FetchActivitiesEvent>(_onFetchActivities);
     on<CreateActivityEvent>(_onCreateActivity);
+    on<FetchUserActivityDashboardEvent>(_onFetchUserActivityDashboard);
+
   }
 
   Future<void> _onFetchActivities(
@@ -54,6 +56,7 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
 
     try {
       final result = await repo.createActivity(event.request);
+      
 
       if (result.isSuccess) {
         emit(state.copyWith(
@@ -79,4 +82,36 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
       ));
     }
   }
+
+
+
+
+Future<void> 
+_onFetchUserActivityDashboard(
+  FetchUserActivityDashboardEvent event,
+  Emitter<ActivityState> emit,
+) async {
+  emit(state.copyWith(isDashboardLoading: true));
+
+  try {
+    final result = await repo.fetchUserActivityDashboard(userId: event.id);
+
+    if (result.isSuccess) {
+      emit(state.copyWith(
+        isDashboardLoading: false,
+        dashboardMetrics: result.data ?? [],
+      ));
+    } else {
+      emit(state.copyWith(
+        isDashboardLoading: false,
+        errorMessage: result.error?.message ?? 'Failed to fetch dashboard metrics',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isDashboardLoading: false,
+      errorMessage: e.toString(),
+    ));
+  }
+}
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nb_utils/nb_utils.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/screeens/Activity/ActivityDashboardScreen.DART';
 import 'package:vikas_app/screeens/Activity/ActivityListScreen.dart';
 import 'package:vikas_app/screeens/Activity/ActivityScreen.dart';
 import 'package:vikas_app/screeens/assignmembers/assign_members_page.dart';
@@ -176,6 +177,15 @@ getPageRoute() {
       page: () => const AddVisit(),
       middlewares: [AuthMiddleware()],
     ),
+//     GetPage(
+//   name: '/activity-dashboard',
+//   page: () {
+//     final String userId = Get.arguments as String? ?? '';
+//     return ActivityDashboardScreen(id: userId);
+//   },
+ 
+//   middlewares: [AuthMiddleware()],
+// ),
 
     GetPage(
       name: '/users',

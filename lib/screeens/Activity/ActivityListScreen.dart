@@ -81,7 +81,7 @@ class _ActivityListScreenState extends State<ActivityListScreen> {
                               Row(
                                 children: [
                                   const Text(
-                                    "Activity Call Logs",
+                                    "Call Logs List",
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontWeight: FontWeight.bold,
@@ -97,7 +97,7 @@ class _ActivityListScreenState extends State<ActivityListScreen> {
                               ),
                               AddButton().addButton(
                                 context: context,
-                                buttonText: "Add Call Activity",
+                                buttonText: "Add Call Data",
                                 onClicked: () {
                                   Get.toNamed('/activity');
                                 },
