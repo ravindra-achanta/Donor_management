@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
+import 'package:vikas_app/screeens/models/response/activity_dashboard_metrics.dart';
 
 enum ActivityStatus { initial, loading, loaded, error, creating, created }
 
@@ -12,6 +13,8 @@ class ActivityState extends Equatable {
   final String? errorMessage;
   final bool isCreating;
   final String? creationMessage;
+    final List<ActivityDashboardMetrics> dashboardMetrics;
+    final bool isDashboardLoading;
 
   const ActivityState({
     this.status = ActivityStatus.initial,
@@ -22,6 +25,8 @@ class ActivityState extends Equatable {
     this.errorMessage,
     this.isCreating = false,
     this.creationMessage,
+     this.dashboardMetrics = const [], 
+    this.isDashboardLoading = false,
   });
 
   ActivityState copyWith({
@@ -33,6 +38,8 @@ class ActivityState extends Equatable {
     String? errorMessage,
     bool? isCreating,
     String? creationMessage,
+     List<ActivityDashboardMetrics>? dashboardMetrics, 
+    bool? isDashboardLoading,
   }) {
     return ActivityState(
       status: status ?? this.status,
@@ -43,6 +50,8 @@ class ActivityState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       isCreating: isCreating ?? this.isCreating,
       creationMessage: creationMessage ?? this.creationMessage,
+      dashboardMetrics: dashboardMetrics ?? this.dashboardMetrics, 
+      isDashboardLoading: isDashboardLoading ?? this.isDashboardLoading, 
     );
   }
 
@@ -55,6 +64,9 @@ class ActivityState extends Equatable {
     totalElements,
     errorMessage,
     isCreating,
-    creationMessage
+    creationMessage,
+    dashboardMetrics,
+    isDashboardLoading,
   ];
+    
 }

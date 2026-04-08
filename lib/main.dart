@@ -66,7 +66,7 @@ Future<void> main() async {
             create: (_) => ActivityBloc(repo: ActivityRepository()),
           ),
 
-          BlocProvider<UserBloc>(create: (_) => UserBloc()),
+        BlocProvider<UserBloc>(create: (_) => UserBloc()),
           BlocProvider<AuthBloc>(
             create: (_) => AuthBloc(authRepository: AuthRepository()),
           ),

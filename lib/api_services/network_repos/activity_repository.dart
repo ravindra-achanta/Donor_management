@@ -1,9 +1,11 @@
 import 'package:vikas_app/api_services/api_constants.dart';
 import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/screeens/models/request/activity_request.dart%20%20%E2%9C%85%20Cractivity_request.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
+import 'package:vikas_app/screeens/models/response/activity_dashboard_metrics.dart';
 
 class ActivityRepository {
   final _api = NetworkService.instance;
@@ -60,4 +62,34 @@ class ActivityRepository {
       );
     }
   }
+
+  
+Future<ApiResult<List<ActivityDashboardMetrics>>> 
+fetchUserActivityDashboard({required String userId}) async {
+
+  final url = ApiConstants.ACTIVITY_USER_DASHBOARD.replaceAll("{id}", userId);
+
+  final result = await _api.get(
+    url,
+  
+  );
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    final List<dynamic> jsonList = result.data as List<dynamic>;
+
+    final data = jsonList
+        .map((e) => ActivityDashboardMetrics.fromJson(e))
+        .toList();
+
+    return ApiResult.success(data);
+  } catch (e) {
+    return ApiResult.failure(
+      ApiError(message: "Parsing error: $e"),
+    );
+  }
+}
 }

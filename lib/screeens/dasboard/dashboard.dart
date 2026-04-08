@@ -27,7 +27,6 @@ class Dashboard extends StatefulWidget {
 }
 
 class _DashboardState extends State<Dashboard> {
-
   String selectedRange = "Week";
 
   /// NOTICE QUEUE
@@ -40,52 +39,44 @@ class _DashboardState extends State<Dashboard> {
     super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-
-      
       context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
       context.read<DashboardBloc>().add(PostDashboardActivityEvent());
 
       /// FETCH NOTICES
-     // context.read<NoticeBloc>().add(FetchNoticesEvent());
+      // context.read<NoticeBloc>().add(FetchNoticesEvent());
       if (Vikasdb().getString("USER_TYPE") != "GURUJI") {
-      context.read<NoticeBloc>().add(FetchNoticesEvent());
-    }
-
-
+        context.read<NoticeBloc>().add(FetchNoticesEvent());
+      }
     });
   }
 
   /// START NOTICE QUEUE
-void _startNoticeQueue(List<NoticeResponse> notices) {
-  if (notices.isEmpty || _isShowing) return;
+  void _startNoticeQueue(List<NoticeResponse> notices) {
+    if (notices.isEmpty || _isShowing) return;
 
-  /// ✅ prevent re-trigger for same data
-  //if (_pendingNotices.isNotEmpty) return;
-   final uniqueNotices = <int, NoticeResponse>{};
-  for (var notice in notices) {
-    
-    
+    /// ✅ prevent re-trigger for same data
+    //if (_pendingNotices.isNotEmpty) return;
+    final uniqueNotices = <int, NoticeResponse>{};
+    for (var notice in notices) {}
+
+    _pendingNotices.clear();
+    _pendingNotices.addAll(notices);
+
+    _currentNoticeIndex = 0;
+    _isShowing = true;
+
+    _showNextNotice();
   }
-
-  _pendingNotices.clear();
-  _pendingNotices.addAll(notices);
-
-  _currentNoticeIndex = 0;
-  _isShowing = true;
-
-  _showNextNotice();
-}
 
   /// SHOW NEXT NOTICE
   void _showNextNotice() {
-
     if (_currentNoticeIndex >= _pendingNotices.length) {
       _isShowing = false;
       return;
     }
 
     final notice = _pendingNotices[_currentNoticeIndex];
-     bool closed = false;
+    bool closed = false;
 
     NoticePopup.show(
       context: context,
@@ -94,61 +85,47 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
       description: notice.description,
       cancelText: "Close",
       onClosed: () {
-
-        context.read<NoticeBloc>().add(
-          MarkNoticeReadEvent(notice.id),
-        );
+        context.read<NoticeBloc>().add(MarkNoticeReadEvent(notice.id));
 
         setState(() {
           _currentNoticeIndex++;
         });
 
-        Future.delayed(
-          const Duration(milliseconds: 300),
-          _showNextNotice,
-        );
+        Future.delayed(const Duration(milliseconds: 300), _showNextNotice);
       },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-
     return Layout(
-
       child: MultiBlocListener(
-
         listeners: [
-
           BlocListener<NoticeBloc, NoticeState>(
-  listenWhen: (previous, current) {
-    return previous.status != current.status &&
-           current.status == NoticeStatus.success;
-  },
-  listener: (context, state) {
-     if (Vikasdb().getString("USER_TYPE") == "GURUJI") return;
-    if (state.notices.isNotEmpty) {
-      _startNoticeQueue(state.notices);
-    }
-  },
-),
-
+            listenWhen: (previous, current) {
+              return previous.status != current.status &&
+                  current.status == NoticeStatus.success;
+            },
+            listener: (context, state) {
+              if (Vikasdb().getString("USER_TYPE") == "GURUJI") return;
+              if (state.notices.isNotEmpty) {
+                _startNoticeQueue(state.notices);
+              }
+            },
+          ),
         ],
 
         child: Padding(
           padding: const EdgeInsets.all(20),
 
           child: SingleChildScrollView(
-
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-
                 /// HEADER
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-
                     const Text(
                       "Dashboard",
                       style: TextStyle(
@@ -156,8 +133,6 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-
-
                   ],
                 ),
 
@@ -168,9 +143,7 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
 
                 const SizedBox(height: 24),
 
-              //  const SizedBox(height: 24),
-
-
+                //  const SizedBox(height: 24),
               ],
             ),
           ),
@@ -179,12 +152,9 @@ void _startNoticeQueue(List<NoticeResponse> notices) {
     );
   }
 
-
- Widget _buildStatsGrid() {
-  return  StatsGrid();
-}
+  Widget _buildStatsGrid() {
+    return StatsGrid();
+  }
 
   //_buildActivityDashboard() {}
-
-
 }

@@ -5,7 +5,9 @@ class UserView extends Equatable {
   final String name;
   final String email;
   final String mobileNumber;
-    final String? userType;
+  final String? userType;
+  final List<String> userTypes;
+
   final String status;
   final String? startedDate;
   final String? pincode;
@@ -21,6 +23,7 @@ class UserView extends Equatable {
     required this.email,
     required this.mobileNumber,
     this.userType,
+    this.userTypes = const [],
     required this.status,
     this.startedDate,
     this.pincode,
@@ -38,6 +41,10 @@ class UserView extends Equatable {
       email: json['email'] as String,
       mobileNumber: json['mobileNumber'] as String,
       userType: json['userType'] as String?,
+      userTypes: (json['userTypes'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       status: json['status'] as String,
       startedDate: json['startedDate'] as String?,
       pincode: json['pincode'] as String?,
@@ -56,6 +63,7 @@ class UserView extends Equatable {
       'email': email,
       'mobileNumber': mobileNumber,
       'userType': userType,
+      'userTypes': userTypes,
       'status': status,
       'startedDate': startedDate,
       'pincode': pincode,
@@ -74,6 +82,7 @@ class UserView extends Equatable {
     email,
     mobileNumber,
     userType,
+    userTypes,
     status,
     startedDate,
     pincode,

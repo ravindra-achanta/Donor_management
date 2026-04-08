@@ -3,7 +3,8 @@ import 'dart:math';
 class Images {
   ///----------------- Brand -----------------------------------//
    static String logoIcon = 'assets/images/logo/logo_icon_dark.png';
-  
+
+static String fistIcon = 'assets/fist.png';  // ✅ Add   
 
   ///----------------- Dummy Image -----------------------------------//
 

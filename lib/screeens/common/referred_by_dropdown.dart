@@ -42,6 +42,8 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
     if (widget.initialValue != null) {
       widget.controller.text = widget.initialValue!['userName'] ?? '';
     }
+      widget.controller.addListener(_onSearchTextChanged);
+
 
     _focusNode.addListener(() {
       if (_focusNode.hasFocus) {
@@ -61,6 +63,7 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
 
   @override
   void dispose() {
+     widget.controller.removeListener(_onSearchTextChanged);
     _focusNode.dispose();
     _scrollController.dispose();
     super.dispose();
@@ -256,4 +259,14 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
       ),
     );
   }
+
+ // ✅ ADD THIS NEW METHOD
+void _onSearchTextChanged() {
+  final currentText = widget.controller.text.trim();
+  
+  // If search field is cleared, fetch all data (no search query)
+  if (currentText.isEmpty && _showSuggestions) {
+    _resetAndLoad();
+  }
+}
 }

@@ -185,7 +185,7 @@ class _LeftBarState extends State<LeftBar>
                         route: '/dharmasetu',
                       ),
                     NavigationItem(
-                      iconData: LucideIcons.info,
+                      iconData: LucideIcons.fileText,
                       title: "Notices",
                       isCondensed: isCondensed,
                       route: '/notices/list',
@@ -204,9 +204,12 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/profile',
                     ),
+                     if (Vikasdb().getString("USER_TYPE") != "ADMIN" ||
+                        Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" )
+                         
                     NavigationItem(
-                      iconData: LucideIcons.activity,
-                      title: "Activity",
+                      iconData: LucideIcons.phoneCall,
+                      title: "Call Logs",
                       isCondensed: isCondensed,
                       route: '/activity-list',
                     ),
