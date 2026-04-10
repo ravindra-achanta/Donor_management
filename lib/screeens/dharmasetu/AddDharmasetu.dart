@@ -10,25 +10,14 @@ import 'package:vikas_app/screeens/models/request/dharmasetu_model.dart';
 import 'package:vikas_app/views/layouts/layout.dart';
 
 // Define the enums here or import from a separate file
-enum DharmasetuType {
-  COMMUNITY,
-  HOME,
-  ONLINE
-}
+enum DharmasetuType { COMMUNITY, HOME, ONLINE }
 
-enum DharmasetuStatus {
-  WIP,
-  CANCELLED,
-  COMPLETED
-}
+enum DharmasetuStatus { WIP, CANCELLED, COMPLETED }
 
 class AddDharmasetu extends StatefulWidget {
   final DharmasetuModel? dharmasetu;
 
-  const AddDharmasetu({
-    super.key,
-    this.dharmasetu,
-  });
+  const AddDharmasetu({super.key, this.dharmasetu});
 
   @override
   State<AddDharmasetu> createState() => _AddDharmaSetuState();
@@ -51,11 +40,10 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   final _feedbackController = TextEditingController();
   final _dateController = TextEditingController();
   final _referredByController = TextEditingController();
-  
 
   DharmasetuType? _selectedType;
   DharmasetuStatus? _selectedStatus;
-  Map<String, dynamic>? _selectedReferredBy; 
+  Map<String, dynamic>? _selectedReferredBy;
 
   bool _isSubmitting = false;
   bool _isLoading = false;
@@ -89,14 +77,14 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   @override
   void initState() {
     super.initState();
-    
+
     // Get arguments for edit mode
     final args = Get.arguments;
     isEdit = args is Map && args['isEdit'] == true;
     model = args is Map ? args['model'] : args;
-    
+
     final d = widget.dharmasetu ?? model;
-    
+
     // If edit mode, fetch fresh data from server
     if (isEdit && d != null && (d.id?.isNotEmpty ?? false)) {
       _loadFreshData(d.id!);
@@ -114,7 +102,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
     setState(() => _isLoading = true);
     try {
       final result = await _dharmaRepository.getDharmasetuById(dharmasetuId);
-      
+
       if (result.isSuccess && result.data != null) {
         final freshModel = DharmasetuModel.fromView(result.data!);
         setState(() {
@@ -145,10 +133,10 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   void _populateForm(DharmasetuModel d) {
     // Set type
     _selectedType = _getTypeFromString(d.type);
-    
+
     // Set status
     _selectedStatus = _getStatusFromString(d.dharmasetuStatus);
-    
+
     // Populate all fields
     _communityNameController.text = d.communityName ?? '';
     _pointOfContactController.text = d.pointOfContact ?? '';
@@ -187,32 +175,38 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
 
       // Create the model with all fields
       final dharmasetu = DharmasetuModel(
-        id: widget.dharmasetu?.id ?? model?.id ?? '', // Use model ID if widget ID not available
-        dharmasetuId: widget.dharmasetu?.dharmasetuId ?? model?.dharmasetuId ?? '', // Use model ID if widget ID not available
+        id:
+            widget.dharmasetu?.id ??
+            model?.id ??
+            '', // Use model ID if widget ID not available
+        dharmasetuId:
+            widget.dharmasetu?.dharmasetuId ??
+            model?.dharmasetuId ??
+            '', // Use model ID if widget ID not available
         type: _selectedType!.name,
-        communityName: _communityNameController.text.isNotEmpty 
-            ? _communityNameController.text.trim() 
+        communityName: _communityNameController.text.isNotEmpty
+            ? _communityNameController.text.trim()
             : null,
-        pointOfContact: _pointOfContactController.text.isNotEmpty 
-            ? _pointOfContactController.text.trim() 
+        pointOfContact: _pointOfContactController.text.isNotEmpty
+            ? _pointOfContactController.text.trim()
             : null,
-        address: _addressController.text.isNotEmpty 
-            ? _addressController.text.trim() 
+        address: _addressController.text.isNotEmpty
+            ? _addressController.text.trim()
             : null,
-        city: _cityController.text.isNotEmpty 
-            ? _cityController.text.trim() 
+        city: _cityController.text.isNotEmpty
+            ? _cityController.text.trim()
             : null,
-        state: _stateController.text.isNotEmpty 
-            ? _stateController.text.trim() 
+        state: _stateController.text.isNotEmpty
+            ? _stateController.text.trim()
             : null,
-        country: _countryController.text.isNotEmpty 
-            ? _countryController.text.trim() 
+        country: _countryController.text.isNotEmpty
+            ? _countryController.text.trim()
             : null,
-        pincode: _pincodeController.text.isNotEmpty 
-            ? _pincodeController.text.trim() 
+        pincode: _pincodeController.text.isNotEmpty
+            ? _pincodeController.text.trim()
             : null,
-        meetingLink: _meetingLinkController.text.isNotEmpty 
-            ? _meetingLinkController.text.trim() 
+        meetingLink: _meetingLinkController.text.isNotEmpty
+            ? _meetingLinkController.text.trim()
             : null,
         feedback: _feedbackController.text.trim(),
         date: _dateController.text.trim(),
@@ -221,7 +215,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
       );
 
       print('Submitting Dharmasetu: ${dharmasetu.toJson()}');
-      
+
       if (widget.dharmasetu != null || isEdit) {
         // Update existing
         context.read<DharmasetuBloc>().add(UpdateDharmasetuEvent(dharmasetu));
@@ -236,28 +230,28 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   @override
   Widget build(BuildContext context) {
     final isUpdate = widget.dharmasetu != null || isEdit;
-    
+
     return BlocListener<DharmasetuBloc, DharmasetuState>(
       listener: (context, state) {
         setState(() => _isSubmitting = state.isSubmitting);
 
         if (state.successMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.successMessage!),
-              backgroundColor: Colors.green,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(state.successMessage!),
+          //     backgroundColor: Colors.green,
+          //   ),
+          // );
           Get.offNamed('/dharmasetu');
         }
 
         if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.errorMessage!),
-              backgroundColor: Colors.red,
-            ),
-          );
+          // ScaffoldMessenger.of(context).showSnackBar(
+          //   SnackBar(
+          //     content: Text(state.errorMessage!),
+          //     backgroundColor: Colors.red,
+          //   ),
+          // );
           setState(() => _isSubmitting = false);
         }
       },
@@ -265,84 +259,80 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: _isLoading
-              ? const Center(
-                  child: CircularProgressIndicator(),
-                )
+              ? const Center(child: CircularProgressIndicator())
               : Card(
-  elevation: 4,
-  shadowColor: Colors.blueGrey.withOpacity(0.2),
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(20),
-  ),
-  child: Padding(
-    padding: const EdgeInsets.all(32),
-    child: SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        isUpdate ? 'Update Dharmasetu' : 'Add Dharmasetu',
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                  elevation: 4,
+                  shadowColor: Colors.blueGrey.withOpacity(0.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: SingleChildScrollView(
+                      child: Form(
+                        key: _formKey,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.arrow_back),
+                                  onPressed: () => Navigator.pop(context),
+                                ),
+                                Text(
+                                  isUpdate
+                                      ? 'Update Dharmasetu'
+                                      : 'Add Dharmasetu',
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Type Selection
+                            _typeDropdown(isUpdate),
+                            const SizedBox(height: 24),
+
+                            // Dynamic fields based on type
+                            _buildTypeSpecificFields(),
+
+                            const SizedBox(height: 24),
+
+                            // Date and Referred By
+                            _twoFieldRow(
+                              _dateField(),
+                              _buildReferredByField(), // <-- new widget
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Feedback field (full width)
+                            _textField(
+                              'Feedback',
+                              _feedbackController,
+                              maxLines: 3,
+                              required: true,
+                            ),
+
+                            const SizedBox(height: 16),
+
+                            // Status Selection
+                            _statusDropdown(),
+
+                            const SizedBox(height: 30),
+
+                            // Action buttons
+                            _actionButtons(isUpdate),
+                          ],
                         ),
                       ),
-                      // if (isUpdate) ...[
-                      //   const SizedBox(height: 8),
-                      //   Text(
-                      //     'ID: ${widget.dharmasetu?.dharmasetuId ?? widget.dharmasetu?.id ?? model?.dharmasetuId ?? model?.id}',
-                      //     style: TextStyle(
-                      //       fontSize: 14,
-                      //       color: Colors.grey[600],
-                      //     ),
-                      //   ),
-                      // ],
-                      const SizedBox(height: 24),
-
-                      // Type Selection
-                      _typeDropdown(isUpdate),
-                      const SizedBox(height: 24),
-
-                      // Dynamic fields based on type
-                      _buildTypeSpecificFields(),
-
-                      const SizedBox(height: 24),
-
-                      
-
-                      // Date and Referred By
-                     _twoFieldRow(
-  _dateField(),
-  _buildReferredByField(),   // <-- new widget
-),
-
-                      const SizedBox(height: 16),
-
-                      // Feedback field (full width)
-                      _textField(
-                        'Feedback', 
-                        _feedbackController, 
-                        maxLines: 3,
-                        required: true,
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Status Selection
-                      _statusDropdown(),
-
-                      const SizedBox(height: 30),
-
-                      // Action buttons
-                      _actionButtons(isUpdate),
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-          ),
         ),
       ),
     );
@@ -357,13 +347,10 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
       children: [
         Text(
           '${_getTypeTitle()} Details',
-          style: const TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-          ),
+          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
-        
+
         if (_selectedType == DharmasetuType.COMMUNITY) ...[
           // COMMUNITY fields
           _textField(
@@ -396,24 +383,12 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
           ),
           const SizedBox(height: 16),
           _twoFieldRow(
-            _textField(
-              'City',
-              _cityController,
-              required: true,
-            ),
-            _textField(
-              'State',
-              _stateController,
-              required: true,
-            ),
+            _textField('City', _cityController, required: true),
+            _textField('State', _stateController, required: true),
           ),
           const SizedBox(height: 16),
           _twoFieldRow(
-            _textField(
-              'Country',
-              _countryController,
-              required: true,
-            ),
+            _textField('Country', _countryController, required: true),
             _textField(
               'Pincode',
               _pincodeController,
@@ -496,120 +471,124 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
   }
 
   Widget _typeDropdown(bool isUpdate) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Type *',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 12),
-      SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SegmentedButton<DharmasetuType>(
-          segments: DharmasetuType.values.map((type) {
-            return ButtonSegment<DharmasetuType>(
-              value: type,
-              label: Text(type.name),
-              icon: Icon(_getTypeIcon(type)),
-            );
-          }).toList(),
-          selected: _selectedType != null ? {_selectedType!} : {},
-          onSelectionChanged: _isSubmitting || isUpdate
-              ? null
-              : (Set<DharmasetuType> newSelection) {
-                  setState(() {
-                    _selectedType = newSelection.first;
-                    // Clear type-specific fields when type changes
-                    _communityNameController.clear();
-                    _pointOfContactController.clear();
-                    _addressController.clear();
-                    _cityController.clear();
-                    _stateController.clear();
-                    _countryController.clear();
-                    _pincodeController.clear();
-                    _meetingLinkController.clear();
-                  });
-                },
-          style: SegmentedButton.styleFrom(
-            foregroundColor: Colors.grey[700],
-            selectedForegroundColor: Colors.white,
-            selectedBackgroundColor: _getTypeColor(_selectedType),
-            backgroundColor: Colors.grey[100],
-            side: BorderSide.none,
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Type *',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: SegmentedButton<DharmasetuType>(
+            segments: DharmasetuType.values.map((type) {
+              return ButtonSegment<DharmasetuType>(
+                value: type,
+                label: Text(type.name),
+                icon: Icon(_getTypeIcon(type)),
+              );
+            }).toList(),
+            selected: _selectedType != null ? {_selectedType!} : {},
+            onSelectionChanged: _isSubmitting || isUpdate
+                ? null
+                : (Set<DharmasetuType> newSelection) {
+                    setState(() {
+                      _selectedType = newSelection.first;
+                      // Clear type-specific fields when type changes
+                      _communityNameController.clear();
+                      _pointOfContactController.clear();
+                      _addressController.clear();
+                      _cityController.clear();
+                      _stateController.clear();
+                      _countryController.clear();
+                      _pincodeController.clear();
+                      _meetingLinkController.clear();
+                    });
+                  },
+            style: SegmentedButton.styleFrom(
+              foregroundColor: Colors.grey[700],
+              selectedForegroundColor: Colors.white,
+              selectedBackgroundColor: _getTypeColor(_selectedType),
+              backgroundColor: Colors.grey[100],
+              side: BorderSide.none,
+            ),
           ),
         ),
-      ),
-      if (isUpdate) const SizedBox(height: 8),
-      if (isUpdate)
-        Text(
-          'Type cannot be changed during update',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-            fontStyle: FontStyle.italic,
+        if (isUpdate) const SizedBox(height: 8),
+        if (isUpdate)
+          Text(
+            'Type cannot be changed during update',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
           ),
-        ),
-    ],
-  );
-}
-
-IconData _getTypeIcon(DharmasetuType type) {
-  switch (type) {
-    case DharmasetuType.COMMUNITY:
-      return Icons.group;
-    case DharmasetuType.HOME:
-      return Icons.home;
-    case DharmasetuType.ONLINE:
-      return Icons.videocam;
+      ],
+    );
   }
-}
 
-Color _getTypeColor(DharmasetuType? type) {
-  switch (type) {
-    case DharmasetuType.COMMUNITY:
-      return Colors.orange;
-    case DharmasetuType.HOME:
-      return Colors.teal;
-    case DharmasetuType.ONLINE:
-      return Colors.purple;
-    default:
-      return Colors.blue;
+  IconData _getTypeIcon(DharmasetuType type) {
+    switch (type) {
+      case DharmasetuType.COMMUNITY:
+        return Icons.group;
+      case DharmasetuType.HOME:
+        return Icons.home;
+      case DharmasetuType.ONLINE:
+        return Icons.videocam;
+    }
   }
-}
+
+  Color _getTypeColor(DharmasetuType? type) {
+    switch (type) {
+      case DharmasetuType.COMMUNITY:
+        return Colors.orange;
+      case DharmasetuType.HOME:
+        return Colors.teal;
+      case DharmasetuType.ONLINE:
+        return Colors.purple;
+      default:
+        return Colors.blue;
+    }
+  }
 
   Widget _statusDropdown() {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Status *',
-        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-      ),
-      const SizedBox(height: 12),
-      Wrap(
-        spacing: 12,
-        runSpacing: 8,
-        children: DharmasetuStatus.values.map((status) {
-          return FilterChip(
-            label: Text(status.name),
-            selected: _selectedStatus == status,
-            onSelected: _isSubmitting ? null : (selected) {
-              setState(() => _selectedStatus = status);
-            },
-            selectedColor: _getStatusColor(status).withOpacity(0.3),
-            checkmarkColor: _getStatusColor(status),
-            backgroundColor: Colors.grey[100],
-            side: BorderSide(color: _getStatusColor(status).withOpacity(0.5)),
-            labelStyle: TextStyle(
-              fontWeight: _selectedStatus == status ? FontWeight.w600 : FontWeight.normal,
-            ),
-          );
-        }).toList(),
-      ),
-    ],
-  );
-}
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'Status *',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 12,
+          runSpacing: 8,
+          children: DharmasetuStatus.values.map((status) {
+            return FilterChip(
+              label: Text(status.name),
+              selected: _selectedStatus == status,
+              onSelected: _isSubmitting
+                  ? null
+                  : (selected) {
+                      setState(() => _selectedStatus = status);
+                    },
+              selectedColor: _getStatusColor(status).withOpacity(0.3),
+              checkmarkColor: _getStatusColor(status),
+              backgroundColor: Colors.grey[100],
+              side: BorderSide(color: _getStatusColor(status).withOpacity(0.5)),
+              labelStyle: TextStyle(
+                fontWeight: _selectedStatus == status
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
 
   Color _getStatusColor(DharmasetuStatus status) {
     switch (status) {
@@ -628,19 +607,21 @@ Color _getTypeColor(DharmasetuType? type) {
     controller: _dateController,
     enabled: !_isSubmitting,
     decoration: _inputDecoration('Date (YYYY-MM-DD)', required: true),
-    validator: (v) => v == null || v.trim().isEmpty ? 'Please enter Date' : null,
+    validator: (v) =>
+        v == null || v.trim().isEmpty ? 'Please enter Date' : null,
     readOnly: true,
     onTap: () async {
       DateTime? pickedDate = await showDatePicker(
         context: context,
-        initialDate: _dateController.text.isNotEmpty 
+        initialDate: _dateController.text.isNotEmpty
             ? DateTime.parse(_dateController.text)
             : DateTime.now(),
         firstDate: DateTime(2000),
         lastDate: DateTime(2100),
       );
       if (pickedDate != null) {
-        String formattedDate = "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
+        String formattedDate =
+            "${pickedDate.year}-${pickedDate.month.toString().padLeft(2, '0')}-${pickedDate.day.toString().padLeft(2, '0')}";
         setState(() {
           _dateController.text = formattedDate;
         });
@@ -648,75 +629,86 @@ Color _getTypeColor(DharmasetuType? type) {
     },
   );
 
-  // 
+  //
   Widget _actionButtons(bool isUpdate) => Padding(
-  padding: const EdgeInsets.only(top: 24),
-  child: Row(
-    mainAxisAlignment: MainAxisAlignment.end,
-    children: [
-      OutlinedButton(
-        style: OutlinedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          side: BorderSide(color: Colors.grey.shade400),
-        ),
-        onPressed: _isSubmitting ? null : () => Get.back(),
-        child: const Text('Cancel', style: TextStyle(fontSize: 16)),
-      ),
-      const SizedBox(width: 16),
-      Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            colors: isUpdate
-                ? [Colors.orange, Colors.deepOrange]
-                : [Colors.blue, Colors.lightBlue],
+    padding: const EdgeInsets.only(top: 24),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        OutlinedButton(
+          style: OutlinedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            side: BorderSide(color: Colors.grey.shade400),
           ),
+          onPressed: _isSubmitting ? null : () => Get.back(),
+          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
         ),
-        child: ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            backgroundColor: Colors.transparent,
-            shadowColor: Colors.transparent,
+        const SizedBox(width: 16),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            gradient: LinearGradient(
+              colors: isUpdate
+                  ? [Colors.orange, Colors.deepOrange]
+                  : [Colors.blue, Colors.lightBlue],
+            ),
           ),
-          onPressed: _isSubmitting ? null : _submitForm,
-          child: _isSubmitting
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    color: Colors.white,
-                  ),
-                )
-              : Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(isUpdate ? Icons.update : Icons.check_circle, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      isUpdate ? 'Update' : 'Save',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              backgroundColor: const Color.fromARGB(0, 240, 104, 104),
+              shadowColor: Colors.transparent,
+            ),
+            onPressed: _isSubmitting ? null : _submitForm,
+            child: _isSubmitting
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: Colors.white,
                     ),
-                  ],
-                ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        isUpdate ? Icons.update : Icons.check_circle,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        isUpdate ? 'Update' : 'Save',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                           color: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
         ),
-      ),
-    ],
-  ),
-);
+      ],
+    ),
+  );
 
   Widget _buildReferredByField() {
-  return ReferredByDropdown(
-    controller: _referredByController,
-    initialValue: _selectedReferredBy,
-    onSelected: (value) {
-      setState(() {
-        _selectedReferredBy = value;
-        _referredByController.text = value?['userName'] ?? '';
-      });
-    },
-  );
-}
+    return ReferredByDropdown(
+      controller: _referredByController,
+      initialValue: _selectedReferredBy,
+      onSelected: (value) {
+        setState(() {
+          _selectedReferredBy = value;
+          _referredByController.text = value?['userName'] ?? '';
+        });
+      },
+    );
+  }
 }
