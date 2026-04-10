@@ -123092,7 +123092,7 @@ k="/vikas/api/v1/vikas/jeevanaadi/staff/requests/"+a
 s=3
 return A.r(p.a.d5(0,k),$async$Cd)
 case 3:o=c
-A.br("\ud83d\udce1 Full URL: http://172.235.18.48:8050"+k)
+A.br("\ud83d\udce1 Full URL: https://vikas.vidyaranyam.in"+k)
 if(!o.c){j=o.b
 A.br("\u274c Error: "+A.k(j==null?null:j.a))
 q=new A.a9(null,o.b,!1,t.IG)
@@ -123568,7 +123568,7 @@ d5(a,b){return this.ace(0,b)},
 ace(a,b){var s=0,r=A.x(t.w1),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$d5=A.t(function(c,d){if(c===1){o.push(d)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.eV("http://172.235.18.48:8050"+b,0,null)
+m=A.eV("https://vikas.vidyaranyam.in"+b,0,null)
 s=7
 return A.r(n.pA(),$async$d5)
 case 7:l=d
@@ -123600,7 +123600,7 @@ lH(a,b){return this.aRj(a,b)},
 aRj(a,b){var s=0,r=A.x(t.w1),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$lH=A.t(function(c,d){if(c===1){o.push(d)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.eV("http://172.235.18.48:8050"+a,0,null)
+m=A.eV("https://vikas.vidyaranyam.in"+a,0,null)
 s=7
 return A.r(n.pA(),$async$lH)
 case 7:l=d
@@ -123635,7 +123635,7 @@ aRw(a,b){return this.jN(0,b,null)},
 aRz(a,b,c){var s=0,r=A.x(t.w1),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$jN=A.t(function(d,e){if(d===1){o.push(e)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.eV("http://172.235.18.48:8050"+b,0,null)
+m=A.eV("https://vikas.vidyaranyam.in"+b,0,null)
 s=7
 return A.r(n.pA(),$async$jN)
 case 7:l=e
@@ -123671,7 +123671,7 @@ var $async$tu=A.t(function(c,d){if(c===1)return A.u(d,r)
 for(;;)switch(s){case 0:s=3
 return A.r(p.pA(),$async$tu)
 case 3:h=d
-g=A.byU("POST",A.eV("http://172.235.18.48:8050"+a,0,null))
+g=A.byU("POST",A.eV("https://vikas.vidyaranyam.in"+a,0,null))
 g.r.P(0,h)
 s=4
 return A.r(b.Tw(),$async$tu)
@@ -123702,7 +123702,7 @@ qd(a,b){return this.aL1(0,b)},
 aL1(a,b){var s=0,r=A.x(t.w1),q,p=2,o=[],n=this,m,l,k,j,i,h,g
 var $async$qd=A.t(function(c,d){if(c===1){o.push(d)
 s=p}for(;;)switch(s){case 0:p=4
-m=A.eV("http://172.235.18.48:8050"+b,0,null)
+m=A.eV("https://vikas.vidyaranyam.in"+b,0,null)
 s=7
 return A.r(n.pA(),$async$qd)
 case 7:l=d
