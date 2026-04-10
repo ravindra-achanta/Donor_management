@@ -54,10 +54,9 @@ class _DashboardState extends State<Dashboard> {
   void _startNoticeQueue(List<NoticeResponse> notices) {
     if (notices.isEmpty || _isShowing) return;
 
-    /// ✅ prevent re-trigger for same data
-    //if (_pendingNotices.isNotEmpty) return;
-    final uniqueNotices = <int, NoticeResponse>{};
-    for (var notice in notices) {}
+    if (_pendingNotices.isNotEmpty) return;
+    // final uniqueNotices = <int, NoticeResponse>{};
+    // for (var notice in notices) {}
 
     _pendingNotices.clear();
     _pendingNotices.addAll(notices);

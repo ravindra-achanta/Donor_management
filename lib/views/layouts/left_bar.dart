@@ -197,13 +197,6 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/visits',
                     ),
-
-                    NavigationItem(
-                      iconData: LucideIcons.userCog,
-                      title: "Profile",
-                      isCondensed: isCondensed,
-                      route: '/profile',
-                    ),
                      if (Vikasdb().getString("USER_TYPE") != "ADMIN" ||
                         Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" )
                          
@@ -213,6 +206,14 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/activity-list',
                     ),
+
+                    NavigationItem(
+                      iconData: LucideIcons.userCog,
+                      title: "Profile",
+                      isCondensed: isCondensed,
+                      route: '/profile',
+                    ),
+                    
 
                     NavigationItem(
                       iconData: LucideIcons.logOut,

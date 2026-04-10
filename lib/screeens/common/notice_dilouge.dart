@@ -28,94 +28,48 @@ class NoticePopup {
             elevation: 0,
             child: Container(
               width: MediaQuery.of(context).size.width * 0.9,
-              constraints: const BoxConstraints(maxWidth: 400),
+              constraints: const BoxConstraints(maxWidth: 380),
               decoration: BoxDecoration(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
                 boxShadow: const [
                   BoxShadow(
-                    color: Colors.black26,
+                    color: Colors.black12,
                     blurRadius: 25,
                     offset: Offset(0, 10),
-                  )
+                  ),
                 ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(18),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-
-                    /// IMAGE SECTION
+                    /// 🔥 SMALL IMAGE (OPTIONAL)
                     if (imageUrl.isNotEmpty)
                       Stack(
                         children: [
                           Image.network(
                             imageUrl,
-                            height: 180,
+                            height: 120, // ✅ smaller
                             width: double.infinity,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) {
-                              return Container(
-                                height: 180,
-                                color: Colors.grey.shade300,
-                                child: const Center(
-                                  child: Icon(
-                                    Icons.image_not_supported,
-                                    size: 50,
-                                    color: Colors.grey,
-                                  ),
-                                ),
-                              );
-                            },
-                            loadingBuilder: (context, child, loadingProgress) {
-                              if (loadingProgress == null) return child;
-
-                              return Container(
-                                height: 180,
-                                color: Colors.grey.shade200,
-                                child: const Center(
-                                  child: CircularProgressIndicator(),
-                                ),
-                              );
-                            },
                           ),
 
-                          /// GRADIENT
-                          Positioned.fill(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [
-                                    Colors.black.withOpacity(0.35),
-                                    Colors.transparent,
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-
-                          /// CLOSE BUTTON
                           Positioned(
-                            top: 10,
-                            right: 10,
+                            top: 8,
+                            right: 8,
                             child: GestureDetector(
-                              onTap: () {
-                                 Navigator.pop(dialogContext, true); 
-                                //handleClose(); // ✅ fixed
-                              },
+                              onTap: () => Navigator.pop(dialogContext),
                               child: Container(
                                 padding: const EdgeInsets.all(6),
                                 decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.6),
-                                  shape: BoxShape.circle,
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: const Icon(
                                   Icons.close,
-                                  size: 18,
+                                  size: 16,
                                   color: Colors.white,
                                 ),
                               ),
@@ -124,61 +78,117 @@ class NoticePopup {
                         ],
                       ),
 
-                    /// CONTENT
+                    /// 🔥 CONTENT
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(20, 22, 20, 20),
+                      padding: const EdgeInsets.all(16),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          /// HEADER
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: Colors.blue.withOpacity(0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(
+                                  Icons.notifications,
+                                  size: 16,
+                                  color: Colors.blue,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
 
-                          /// TITLE
-                          Text(
-                            title,
-                            style: const TextStyle(
-                              fontSize: 20,
-                              fontWeight: FontWeight.w700,
-                            ),
+                             
+                              Expanded(
+                                child: RichText(
+                                  text: TextSpan(
+                                    children: [
+                                      const TextSpan(
+                                        text: "Title: ",
+                                        style: TextStyle(
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.w600,
+                                          color:Colors.brown,
+                                        ),
+                                      ),
+                                      TextSpan(
+                                        text: title,
+                                        style: const TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+
+                              if (imageUrl.isEmpty)
+                                GestureDetector(
+                                  onTap: () => Navigator.pop(dialogContext),
+                                  child: const Icon(Icons.close, size: 18),
+                                ),
+                            ],
                           ),
 
                           const SizedBox(height: 10),
 
                           /// DESCRIPTION
-                          Text(
-                            description,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey.shade700,
-                              height: 1.5,
+                          RichText(
+                            text: TextSpan(
+                              children: [
+                                const TextSpan(
+                                  text: "Notice: ",
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.brown,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text: description,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black87,
+                                    height: 1.5,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 16),
 
-                        
-                          SizedBox(
-                            width: double.infinity,
-                            height: 48,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                 Navigator.pop(dialogContext);
-                                //handleClose(); // ✅ fixed
-                              },
-                              style: ElevatedButton.styleFrom(
-                                elevation: 0,
-                                backgroundColor: Colors.blue.shade600,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
+                          /// ACTIONS
+                          Row(
+                            children: [
+                              // TextButton(
+                              //   onPressed: () => Navigator.pop(dialogContext),
+                              //   child: const Text("Dismiss"),
+                              // ),
+                              const Spacer(),
+                              
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(dialogContext),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.blue.shade600,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 10,
+                                  ),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                                child: Text(
+                                  cancelText,
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
-                              child: Text(
-                                cancelText,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
+                            ],
                           ),
                         ],
                       ),
@@ -191,7 +201,7 @@ class NoticePopup {
         );
       },
     ).then((_) {
-      handleClose(); 
+      handleClose();
     });
   }
 }
