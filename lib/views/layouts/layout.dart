@@ -156,12 +156,13 @@ class Layout extends StatelessWidget {
                         child: ClipRRect(
                           clipBehavior: Clip.antiAliasWithSaveLayer,
                           borderRadius: BorderRadius.circular(2),
-                          child: Image.asset(
-                            "assets/fist.png",
-                            width: 24,
-                            height: 18,
-                            fit: BoxFit.cover,
-                          ),
+                          // child: Image.asset(
+                          //   "assets/fist.png",
+                          //   width: 24,
+                          //   height: 18,
+                          //   fit: BoxFit.cover,
+                          // ),
+                          
                         ),
                       ),
                     ),

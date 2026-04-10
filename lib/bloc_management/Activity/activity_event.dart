@@ -31,3 +31,11 @@ class CreateActivityEvent extends ActivityEvent {
   @override
   List<Object?> get props => [request];
 }
+
+class FetchUserActivityDashboardEvent extends ActivityEvent {
+   final String id;
+  const FetchUserActivityDashboardEvent({required this.id});
+
+  @override
+  List<Object?> get props => [id];
+}

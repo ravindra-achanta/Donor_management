@@ -1,6 +1,8 @@
 class ApiConstants {
-  // static const String baseUrl = "http://172.235.18.48:8050";
-  static const String baseUrl = "https://vikas.vidyaranyam.in";
+  // static const String baseUrl = "http://r:8050";
+  //static const String baseUrl = "https://vikas.vidyaranyam.in";
+     static const String baseUrl = "http://172.235.18.48:8050";
+
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -79,6 +81,7 @@ class ApiConstants {
   //activity/callLogs
   static const String ACTIVITY_LIST = "$VIKAS/callLogs/list";
   static const String ACTIVITY_CREATE = "$VIKAS/callLogs/create";
+static const String ACTIVITY_USER_DASHBOARD = "$VIKAS/activity/user/{id}/activity";
 
   static const String DELETE_USER = "$IDM_URI/delete/user";
 

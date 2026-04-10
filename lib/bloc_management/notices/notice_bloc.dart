@@ -76,6 +76,9 @@ class NoticeBloc extends Bloc<NoticeEvent, NoticeState> {
   MarkNoticeReadEvent event,
   Emitter<NoticeState> emit,
 ) async {
+   if (!state.notices.any((n) => n.id == event.id)) return;
+
+  
   final result = await noticeRepo.markNoticeAsRead(event.id);
 
   if (result.isSuccess) {

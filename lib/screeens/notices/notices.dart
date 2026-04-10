@@ -128,7 +128,7 @@ class _NoticesState extends State<Notices> {
   void _fetchUsers() async {
     setState(() => _isLoadingUsers = true);
     final authRepo = AuthRepository();
-    final result = await authRepo.getAllUsers(page: 0, size: 1000);
+    final result = await authRepo.getAllUsers(page: 0, size: 500);
 
     if (result.isSuccess && result.data != null) {
       setState(() {
@@ -285,10 +285,14 @@ class _NoticesState extends State<Notices> {
     } else {
       sendTo = "TO_SPECIFIC";
 
-      final validUsers = _selectedUsers.where((user) {
-        return user.userType != null &&
-            _allowedUserTypes.contains(user.userType);
-      }).toList();
+      // final validUsers = _selectedUsers.where((user) {
+      //   return user.userType != null &&
+      //       _allowedUserTypes.contains(user.userType);
+      // }).toList();
+     final validUsers = _selectedUsers.where((user) {
+    return user.userTypes.isNotEmpty &&
+        user.userTypes.any((type) => _allowedUserTypes.contains(type));
+  }).toList();
 
       if (validUsers.isEmpty) {
         _showError(
@@ -299,11 +303,13 @@ class _NoticesState extends State<Notices> {
       }
 
       specificUsers = validUsers.map((user) {
-        return {
-          'id': user.id,
-          'type': user.userType!,
-        };
-      }).toList();
+    final validType = user.userTypes
+        .firstWhere((type) => _allowedUserTypes.contains(type));
+    return {
+      'id': user.id,
+      'type': validType,
+    };
+  }).toList();
     }
 
     final request = NoticeRequest(
@@ -353,210 +359,269 @@ class _NoticesState extends State<Notices> {
     });
   }
 
-  // void _showUserSelectionDialog() {
-  //   List<UserView> tempSelected = List.from(_selectedUsers);
+  
 
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setStateDialog) {
-  //           return Dialog(
-  //             insetPadding: const EdgeInsets.all(20),
-  //             child: ConstrainedBox(
-  //               constraints: const BoxConstraints(
-  //                 maxWidth: 700,
-  //                 maxHeight: 400,
-  //               ),
-  //               child: Padding(
-  //                 padding: const EdgeInsets.all(16),
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   crossAxisAlignment: CrossAxisAlignment.stretch,
-  //                   children: [
-  //                     const Text(
-  //                       'Select Users',
-  //                       style: TextStyle(
-  //                         fontSize: 18,
-  //                         fontWeight: FontWeight.bold,
-  //                       ),
-  //                     ),
-  //                     const SizedBox(height: 12),
-  //                     Expanded(
-  //                       child: _isLoadingUsers
-  //                           ? const Center(child: CircularProgressIndicator())
-  //                           : _allUsers.isEmpty
-  //                           ? const Center(child: Text('No users available'))
-  //                           : ListView.builder(
-  //                               shrinkWrap: true,
-  //                               itemCount: _allUsers.length,
-  //                               itemBuilder: (context, index) {
-  //                                 final user = _allUsers[index];
-  //                                 // final hasValidType =
-  //                                 //     user.userType.isNotEmpty &&
-  //                                 //     _allowedUserTypes.contains(
-  //                                 //       user.userType,
-  //                                 //     );
-  //                                 // final isSelected = tempSelected.any(
-  //                                 //   (u) => u.id == user.id,
-  //                                 // );
-  //                                 final hasValidType =
-  //                                     user.userType != null &&
-  //                                     _allowedUserTypes.contains(user.userType);
-  //                                 final isSelected = tempSelected.any(
-  //                                   (u) => u.id == user.id,
-  //                                 );
-  //                                 return CheckboxListTile(
-  //                                   value: isSelected && hasValidType,
-  //                                   title: Text(
-  //                                     user.name ?? 'Unknown',
-  //                                     style: TextStyle(
-  //                                       fontSize: 14,
-  //                                       color: hasValidType
-  //                                           ? Colors.black
-  //                                           : Colors.grey,
-  //                                     ),
-  //                                   ),
-  //                                   subtitle: Text(
-  //                                     hasValidType
-  //                                         ? user.userType!
-  //                                         : 'Invalid type',
-  //                                     style: TextStyle(
-  //                                       color: hasValidType
-  //                                           ? Colors.grey
-  //                                           : Colors.red,
-  //                                     ),
-  //                                   ),
-  //                                   onChanged: hasValidType
-  //                                       ? (checked) {
-  //                                           setStateDialog(() {
-  //                                             if (checked == true) {
-  //                                               if (!tempSelected.any(
-  //                                                 (u) => u.id == user.id,
-  //                                               )) {
-  //                                                 tempSelected.add(user);
-  //                                               }
-  //                                             } else {
-  //                                               tempSelected.removeWhere(
-  //                                                 (u) => u.id == user.id,
-  //                                               );
-  //                                             }
-  //                                           });
-  //                                         }
-  //                                       : null,
-  //                                   dense: true,
-  //                                 );
-  //                               },
-  //                             ),
-  //                     ),
-  //                     const SizedBox(height: 16),
-  //                     Row(
-  //                       mainAxisAlignment: MainAxisAlignment.end,
-  //                       children: [
-  //                         TextButton(
-  //                           onPressed: () => Navigator.pop(context),
-  //                           child: const Text('Cancel'),
-  //                         ),
-  //                         const SizedBox(width: 8),
-  //                         ElevatedButton(
-  //                           onPressed: () {
-  //                             setState(() {
-  //                               _selectedUsers = List.from(tempSelected);
-  //                             });
-  //                             Navigator.pop(context);
-  //                           },
-  //                           child: const Text('Done'),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
+// void _showUserSelectionDialog() {
+//   // Filter users to those with valid types
+//   final validUsers = _allUsers.where((user) {
+//     return user.userType != null && _allowedUserTypes.contains(user.userType);
+//   }).toList();
 
+//   // Group users by userType (already distinct by type)
+//   final Map<String, List<UserView>> groupedUsers = {};
+//   for (final user in validUsers) {
+//     final type = user.userType!;
+//     groupedUsers.putIfAbsent(type, () => []).add(user);
+//   }
+
+//   // Sort groups according to the order in _allowedUserTypes
+//   final List<String> groupKeys = [];
+//   for (final type in _allowedUserTypes) {
+//     if (groupedUsers.containsKey(type)) {
+//       groupKeys.add(type);
+//     }
+//   }
+
+//   // Keep a local copy of selected users (these are the actual UserView objects)
+//   List<UserView> tempSelected = List.from(_selectedUsers);
+
+//   showDialog(
+//     context: context,
+//     builder: (context) {
+//       return StatefulBuilder(
+//         builder: (context, setStateDialog) {
+//           // Helper to check if a specific user (by id and type) is selected
+//           bool isUserSelected(UserView user) {
+//             return tempSelected.any((selected) =>
+//                 selected.id == user.id && selected.userType == user.userType);
+//           }
+
+//           // Helper to check if all users in a group are selected
+//           bool isGroupSelected(String groupKey) {
+//             final groupUsers = groupedUsers[groupKey] ?? [];
+//             if (groupUsers.isEmpty) return false;
+//             return groupUsers.every((user) => isUserSelected(user));
+//           }
+
+//           // Helper to check if any user in a group is selected (for tri-state)
+//           bool isGroupPartiallySelected(String groupKey) {
+//             final groupUsers = groupedUsers[groupKey] ?? [];
+//             if (groupUsers.isEmpty) return false;
+//             final selectedCount = groupUsers.where((user) => isUserSelected(user)).length;
+//             return selectedCount > 0 && selectedCount < groupUsers.length;
+//           }
+
+//           // Helper to toggle a group (select/deselect all users in that group)
+//           void toggleGroup(String groupKey, bool selected) {
+//             setStateDialog(() {
+//               final groupUsers = groupedUsers[groupKey] ?? [];
+//               for (final user in groupUsers) {
+//                 if (selected) {
+//                   if (!isUserSelected(user)) {
+//                     tempSelected.add(user);
+//                   }
+//                 } else {
+//                   tempSelected.removeWhere((selected) =>
+//                       selected.id == user.id && selected.userType == user.userType);
+//                 }
+//               }
+//             });
+//           }
+
+//           // Helper to toggle a single user
+//           void toggleUser(UserView user, bool selected) {
+//             setStateDialog(() {
+//               if (selected) {
+//                 if (!isUserSelected(user)) {
+//                   tempSelected.add(user);
+//                 }
+//               } else {
+//                 tempSelected.removeWhere((selected) =>
+//                     selected.id == user.id && selected.userType == user.userType);
+//               }
+//             });
+//           }
+
+//           return Dialog(
+//             insetPadding: const EdgeInsets.all(20),
+//             child: ConstrainedBox(
+//               constraints: const BoxConstraints(maxWidth: 700, maxHeight: 500),
+//               child: Padding(
+//                 padding: const EdgeInsets.all(16),
+//                 child: Column(
+//                   mainAxisSize: MainAxisSize.min,
+//                   crossAxisAlignment: CrossAxisAlignment.stretch,
+//                   children: [
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                       children: [
+//                         const Text(
+//                           'Select Users',
+//                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+//                         ),
+//                         Text(
+//                           '${tempSelected.length} selected',
+//                           style: const TextStyle(fontSize: 14, color: Colors.grey),
+//                         ),
+//                       ],
+//                     ),
+//                     const SizedBox(height: 12),
+//                     Expanded(
+//                       child: _isLoadingUsers
+//                           ? const Center(child: CircularProgressIndicator())
+//                           : groupedUsers.isEmpty
+//                               ? const Center(
+//                                   child: Text('No users with valid types found'),
+//                                 )
+//                               : ListView.builder(
+//                                   itemCount: groupKeys.length,
+//                                   itemBuilder: (context, index) {
+//                                     final groupKey = groupKeys[index];
+//                                     final groupUsers = groupedUsers[groupKey]!;
+//                                     final groupSelected = isGroupSelected(groupKey);
+//                                     final groupPartial = isGroupPartiallySelected(groupKey);
+
+//                                     return Card(
+//                                       margin: const EdgeInsets.only(bottom: 8),
+//                                       elevation: 0,
+//                                       shape: RoundedRectangleBorder(
+//                                         side: BorderSide(color: Colors.grey.shade300),
+//                                         borderRadius: BorderRadius.circular(8),
+//                                       ),
+//                                       child: ExpansionTile(
+//                                         initiallyExpanded: true,
+//                                         title: Row(
+//                                           children: [
+//                                             Checkbox(
+//                                               value: groupSelected,
+//                                               tristate: groupPartial,
+//                                               onChanged: (value) {
+//                                                 toggleGroup(groupKey, value ?? false);
+//                                               },
+//                                             ),
+//                                             const SizedBox(width: 8),
+//                                             Text(
+//                                               groupKey,
+//                                               style: const TextStyle(
+//                                                 fontWeight: FontWeight.bold,
+//                                                 fontSize: 16,
+//                                               ),
+//                                             ),
+//                                             const Spacer(),
+//                                             Text(
+//                                               '${groupUsers.length} users',
+//                                               style: const TextStyle(
+//                                                 fontSize: 12,
+//                                                 color: Colors.grey,
+//                                               ),
+//                                             ),
+//                                           ],
+//                                         ),
+//                                         children: groupUsers.map((user) {
+//                                           final isSelected = isUserSelected(user);
+//                                           return CheckboxListTile(
+//                                             value: isSelected,
+//                                             title: Text(
+//                                               user.name ?? 'Unknown',
+//                                               style: const TextStyle(fontSize: 14),
+//                                             ),
+//                                             subtitle: Text(
+//                                               user.userType ?? 'No type',
+//                                               style: const TextStyle(fontSize: 12),
+//                                             ),
+//                                             onChanged: (value) {
+//                                               toggleUser(user, value ?? false);
+//                                             },
+//                                             dense: true,
+//                                             controlAffinity:
+//                                                 ListTileControlAffinity.leading,
+//                                           );
+//                                         }).toList(),
+//                                       ),
+//                                     );
+//                                   },
+//                                 ),
+//                     ),
+//                     const SizedBox(height: 16),
+//                     Row(
+//                       mainAxisAlignment: MainAxisAlignment.end,
+//                       children: [
+//                         TextButton(
+//                           onPressed: () => Navigator.pop(context),
+//                           child: const Text('Cancel'),
+//                         ),
+//                         const SizedBox(width: 8),
+//                         ElevatedButton(
+//                           onPressed: () {
+//                             setState(() {
+//                               _selectedUsers = List.from(tempSelected);
+//                             });
+//                             Navigator.pop(context);
+//                           },
+//                           child: const Text('Done'),
+//                         ),
+//                       ],
+//                     ),
+//                   ],
+//                 ),
+//               ),
+//             ),
+//           );
+//         },
+//       );
+//     },
+//   );
+// }
 void _showUserSelectionDialog() {
-  // Filter users to those with valid types
-  final validUsers = _allUsers.where((user) {
-    return user.userType != null && _allowedUserTypes.contains(user.userType);
-  }).toList();
-
-  // Group users by userType (already distinct by type)
-  final Map<String, List<UserView>> groupedUsers = {};
-  for (final user in validUsers) {
-    final type = user.userType!;
-    groupedUsers.putIfAbsent(type, () => []).add(user);
-  }
-
-  // Sort groups according to the order in _allowedUserTypes
-  final List<String> groupKeys = [];
-  for (final type in _allowedUserTypes) {
-    if (groupedUsers.containsKey(type)) {
-      groupKeys.add(type);
+  // Get unique users with valid types
+  final Map<String, UserView> uniqueUsers = {};
+  
+  for (final user in _allUsers) {
+    final validTypes = user.userTypes
+        .where((type) => _allowedUserTypes.contains(type))
+        .toList();
+    
+    if (validTypes.isNotEmpty) {
+      uniqueUsers[user.id] = user;
     }
   }
 
-  // Keep a local copy of selected users (these are the actual UserView objects)
-  List<UserView> tempSelected = List.from(_selectedUsers);
+  // Keep a local copy of selected user-type combinations
+  List<Map<String, String>> tempSelected = 
+      List.from(_selectedUsers.map((user) => {
+        'id': user.id,
+        'type': user.userTypes
+            .firstWhere((type) => _allowedUserTypes.contains(type))
+      }));
 
   showDialog(
     context: context,
     builder: (context) {
       return StatefulBuilder(
         builder: (context, setStateDialog) {
-          // Helper to check if a specific user (by id and type) is selected
-          bool isUserSelected(UserView user) {
-            return tempSelected.any((selected) =>
-                selected.id == user.id && selected.userType == user.userType);
+          // Check if a user has ANY type selected
+          bool isUserSelected(String userId) {
+            return tempSelected.any((item) => item['id'] == userId);
           }
 
-          // Helper to check if all users in a group are selected
-          bool isGroupSelected(String groupKey) {
-            final groupUsers = groupedUsers[groupKey] ?? [];
-            if (groupUsers.isEmpty) return false;
-            return groupUsers.every((user) => isUserSelected(user));
+          // Check if a specific user-type combo is selected
+          bool isTypeSelected(String userId, String type) {
+            return tempSelected.any((item) => 
+                item['id'] == userId && item['type'] == type);
           }
 
-          // Helper to check if any user in a group is selected (for tri-state)
-          bool isGroupPartiallySelected(String groupKey) {
-            final groupUsers = groupedUsers[groupKey] ?? [];
-            if (groupUsers.isEmpty) return false;
-            final selectedCount = groupUsers.where((user) => isUserSelected(user)).length;
-            return selectedCount > 0 && selectedCount < groupUsers.length;
-          }
-
-          // Helper to toggle a group (select/deselect all users in that group)
-          void toggleGroup(String groupKey, bool selected) {
-            setStateDialog(() {
-              final groupUsers = groupedUsers[groupKey] ?? [];
-              for (final user in groupUsers) {
-                if (selected) {
-                  if (!isUserSelected(user)) {
-                    tempSelected.add(user);
-                  }
-                } else {
-                  tempSelected.removeWhere((selected) =>
-                      selected.id == user.id && selected.userType == user.userType);
-                }
-              }
-            });
-          }
-
-          // Helper to toggle a single user
-          void toggleUser(UserView user, bool selected) {
+          // Toggle a specific type for a user
+          void toggleType(String userId, String type, bool selected) {
             setStateDialog(() {
               if (selected) {
-                if (!isUserSelected(user)) {
-                  tempSelected.add(user);
+                // Add this type for the user
+                if (!isTypeSelected(userId, type)) {
+                  tempSelected.add({'id': userId, 'type': type});
                 }
               } else {
-                tempSelected.removeWhere((selected) =>
-                    selected.id == user.id && selected.userType == user.userType);
+                // Remove this type for the user
+                tempSelected.removeWhere((item) => 
+                    item['id'] == userId && item['type'] == type);
               }
             });
           }
@@ -564,7 +629,7 @@ void _showUserSelectionDialog() {
           return Dialog(
             insetPadding: const EdgeInsets.all(20),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 700, maxHeight: 500),
+              constraints: const BoxConstraints(maxWidth: 700, maxHeight: 600),
               child: Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -575,7 +640,7 @@ void _showUserSelectionDialog() {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          'Select Users',
+                          'Select Users & Types',
                           style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                         Text(
@@ -586,80 +651,128 @@ void _showUserSelectionDialog() {
                     ),
                     const SizedBox(height: 12),
                     Expanded(
-                      child: _isLoadingUsers
-                          ? const Center(child: CircularProgressIndicator())
-                          : groupedUsers.isEmpty
-                              ? const Center(
-                                  child: Text('No users with valid types found'),
-                                )
-                              : ListView.builder(
-                                  itemCount: groupKeys.length,
-                                  itemBuilder: (context, index) {
-                                    final groupKey = groupKeys[index];
-                                    final groupUsers = groupedUsers[groupKey]!;
-                                    final groupSelected = isGroupSelected(groupKey);
-                                    final groupPartial = isGroupPartiallySelected(groupKey);
+                      child: uniqueUsers.isEmpty
+                          ? const Center(
+                              child: Text('No users with valid types found'),
+                            )
+                          : ListView.builder(
+                              itemCount: uniqueUsers.length,
+                              itemBuilder: (context, index) {
+                                final user = uniqueUsers.values.elementAt(index);
+                                final validTypes = user.userTypes
+                                    .where((type) => 
+                                        _allowedUserTypes.contains(type))
+                                    .toList();
 
-                                    return Card(
-                                      margin: const EdgeInsets.only(bottom: 8),
-                                      elevation: 0,
-                                      shape: RoundedRectangleBorder(
-                                        side: BorderSide(color: Colors.grey.shade300),
-                                        borderRadius: BorderRadius.circular(8),
-                                      ),
-                                      child: ExpansionTile(
-                                        initiallyExpanded: true,
-                                        title: Row(
+                                return Card(
+                                  margin: const EdgeInsets.only(bottom: 12),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(
+                                    side: BorderSide(
+                                        color: Colors.grey.shade300),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(12),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        // User name header
+                                        Row(
                                           children: [
                                             Checkbox(
-                                              value: groupSelected,
-                                              tristate: groupPartial,
-                                              onChanged: (value) {
-                                                toggleGroup(groupKey, value ?? false);
+                                              value: isUserSelected(user.id),
+                                              onChanged: (checked) {
+                                                setStateDialog(() {
+                                                  if (checked == true) {
+                                                    // Select all types for this user
+                                                    for (final type 
+                                                        in validTypes) {
+                                                      if (!isTypeSelected(
+                                                          user.id, type)) {
+                                                        tempSelected.add({
+                                                          'id': user.id,
+                                                          'type': type
+                                                        });
+                                                      }
+                                                    }
+                                                  } else {
+                                                    // Deselect all types for this user
+                                                    tempSelected.removeWhere(
+                                                        (item) =>
+                                                            item['id'] ==
+                                                            user.id);
+                                                  }
+                                                });
                                               },
                                             ),
                                             const SizedBox(width: 8),
-                                            Text(
-                                              groupKey,
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 16,
-                                              ),
-                                            ),
-                                            const Spacer(),
-                                            Text(
-                                              '${groupUsers.length} users',
-                                              style: const TextStyle(
-                                                fontSize: 12,
-                                                color: Colors.grey,
+                                            Expanded(
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    user.name ?? 'Unknown',
+                                                    style: const TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                  Text(
+                                                    user.email ?? '',
+                                                    style: TextStyle(
+                                                      fontSize: 12,
+                                                      color: Colors
+                                                          .grey.shade600,
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
                                             ),
                                           ],
                                         ),
-                                        children: groupUsers.map((user) {
-                                          final isSelected = isUserSelected(user);
-                                          return CheckboxListTile(
-                                            value: isSelected,
-                                            title: Text(
-                                              user.name ?? 'Unknown',
-                                              style: const TextStyle(fontSize: 14),
-                                            ),
-                                            subtitle: Text(
-                                              user.userType ?? 'No type',
-                                              style: const TextStyle(fontSize: 12),
-                                            ),
-                                            onChanged: (value) {
-                                              toggleUser(user, value ?? false);
-                                            },
-                                            dense: true,
-                                            controlAffinity:
-                                                ListTileControlAffinity.leading,
-                                          );
-                                        }).toList(),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                        const SizedBox(height: 8),
+                                        // User types as checkboxes
+                                        Padding(
+                                          padding: const EdgeInsets.only(
+                                              left: 40),
+                                          child: Wrap(
+                                            spacing: 16,
+                                            runSpacing: 8,
+                                            children: validTypes.map((type) {
+                                              final isSelected =
+                                                  isTypeSelected(user.id, type);
+                                              return Row(
+                                                mainAxisSize:
+                                                    MainAxisSize.min,
+                                                children: [
+                                                  Checkbox(
+                                                    value: isSelected,
+                                                    onChanged: (checked) {
+                                                      toggleType(user.id, type,
+                                                          checked ?? false);
+                                                    },
+                                                  ),
+                                                  Text(
+                                                    type,
+                                                    style: const TextStyle(
+                                                      fontSize: 13,
+                                                    ),
+                                                  ),
+                                                ],
+                                              );
+                                            }).toList(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -672,8 +785,22 @@ void _showUserSelectionDialog() {
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
+                            // Convert selections back to UserView objects
+                            final selectedUserIds = <String>{};
+                            for (final item in tempSelected) {
+                              selectedUserIds.add(item['id']!);
+                            }
+
+                            final finalSelected = <UserView>[];
+                            for (final userId in selectedUserIds) {
+                              final user = uniqueUsers[userId];
+                              if (user != null) {
+                                finalSelected.add(user);
+                              }
+                            }
+
                             setState(() {
-                              _selectedUsers = List.from(tempSelected);
+                              _selectedUsers = finalSelected;
                             });
                             Navigator.pop(context);
                           },

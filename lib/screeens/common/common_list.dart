@@ -3,6 +3,7 @@ import 'package:get/get_core/src/get_main.dart';
 import 'package:get/get_navigation/src/extension_navigation.dart';
 import 'package:intl/intl.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/screeens/Activity/ActivityDashboardScreen.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
 import 'package:vikas_app/screeens/models/response/donations.dart';
@@ -129,7 +130,7 @@ class _CommonListState extends State<CommonList> {
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
-                  tableHeader('Roles',flex: 2),
+                  tableHeader('Roles', flex: 2),
                   tableHeader('Actions'),
                 ],
               ],
@@ -363,13 +364,23 @@ class _CommonListState extends State<CommonList> {
                                       iconColor: Colors.red,
                                       onTap: () => widget.onDelete(rowData.id),
                                     ),
-                                    // const SizedBox(width: 10),
+                                    const SizedBox(width: 10),
                                     // HoverIconButton(
-                                    //   icon: Icons.edit_outlined,
+                                    //   icon: Icons.remove_red_eye,
                                     //   hoverColor: Colors.blue.withOpacity(0.1),
                                     //   iconColor: Colors.blue,
                                     //   onTap: () => widget.onUpdate(rowData.id),
                                     // ),
+                                    HoverIconButton(
+                                      icon: Icons.remove_red_eye,
+                                      hoverColor: Colors.blue.withOpacity(0.1),
+                                      iconColor: Colors.blue,
+                                      onTap: () {
+                                        Get.to(
+                                          () =>  ActivityDashboardScreen(id: rowData.id),
+                                        );
+                                      },
+                                    ),
                                   ],
                                 ),
                               ),
@@ -390,7 +401,6 @@ class _CommonListState extends State<CommonList> {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    
                                     HoverIconButton(
                                       icon: Icons.delete_outline,
                                       hoverColor: Colors.red.withOpacity(0.1),
