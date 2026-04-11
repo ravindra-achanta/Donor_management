@@ -26,10 +26,12 @@ class _TopBarState extends State<TopBar>
  @override
 Widget build(BuildContext context) {
   // Hide TopBar if user is not logged in
-  final userName = Vikasdb().getString("USER_NAME");
-  if (userName == null || userName.isEmpty) {
-    return const SizedBox.shrink();
-  }
+  // final userName = Vikasdb().getString("USER_NAME");
+  // if (userName == null || userName.isEmpty) {
+  //   return const SizedBox.shrink();
+  // }
+    final userName = Vikasdb().getString("USER_NAME") ?? "User";
+
 
   return Material(
     color: Colors.transparent,
