@@ -27,6 +27,7 @@ import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
 import 'package:vikas_app/screeens/notices/notices.dart';
+import 'package:vikas_app/screeens/office%20staff/OfficeStaffListPage.dart';
 import 'package:vikas_app/screeens/profile/profile.dart';
 import 'package:vikas_app/screeens/profile/profile_edit.dart';
 import 'package:vikas_app/screeens/requests/review_requests.dart';
@@ -93,6 +94,13 @@ getPageRoute() {
       page: () => const KaryakarthasListPage(),
       middlewares: [AuthMiddleware()],
     ),
+
+    GetPage(
+      name: '/office-staff',
+      page: () => const OfficeStaffListPage(),
+      middlewares: [AuthMiddleware()],
+    ),
+
 
     GetPage(
       name: '/jeevanadi',

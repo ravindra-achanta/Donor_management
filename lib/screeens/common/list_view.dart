@@ -300,11 +300,13 @@ class _ListViewScreenState extends State<ListViewScreen> {
                     ),
                   ),
                 const SizedBox(height: 16),
-                if (screenType == "USER_PROFILE" && _user != null && _user.userTypes.isNotEmpty) ...[
-  const SizedBox(height: 16),
-  _sectionTitle('User Roles'),
-  _buildUserTypesChips(_user.userTypes),
-],
+                if (screenType == "USER_PROFILE" &&
+                    _user != null &&
+                    _user.userTypes.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  _sectionTitle('User Roles'),
+                  _buildUserTypesChips(_user.userTypes),
+                ],
 
                 const SizedBox(height: 16),
 
@@ -312,51 +314,52 @@ class _ListViewScreenState extends State<ListViewScreen> {
                 if (screenType != "DARMASETU" && screenType != "VISITS")
                   _sectionTitle('Actions'),
                 const SizedBox(height: 4),
-                if (screenType != "DARMASETU" && screenType != "VISITS")
+                if (screenType != "DARMASETU" && screenType != "VISITS" ||
+                    screenType == "kart")
                   Row(
                     children: [
-                      FutureBuilder<bool>(
-                        future: isDeleteButtonVisible(),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data == false) {
-                            return const SizedBox();
-                          }
+                      // FutureBuilder<bool>(
+                      //   future: isDeleteButtonVisible(),
+                      //   builder: (context, snapshot) {
+                      //     if (!snapshot.hasData || snapshot.data == false) {
+                      //       return const SizedBox();
+                      //     }
 
-                          return Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                widget.onDelete();
-                              },
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                color: Colors.white,
-                              ),
-                              label: Text(
-                                screenType == "VISIT"
-                                    ? 'Delete Visit'
-                                    : 'Delete',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: const Color.fromARGB(
-                                  255,
-                                  255,
-                                  103,
-                                  92,
-                                ),
-                                shape: const RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.all(
-                                    Radius.circular(8),
-                                  ),
-                                ),
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                      //     return Expanded(
+                      //       child: OutlinedButton.icon(
+                      //         onPressed: () {
+                      //           widget.onDelete();
+                      //         },
+                      //         icon: const Icon(
+                      //           Icons.delete_outline,
+                      //           color: Colors.white,
+                      //         ),
+                      //         label: Text(
+                      //           screenType == "VISIT"
+                      //               ? 'Delete Visit'
+                      //               : 'Delete',
+                      //           style: const TextStyle(color: Colors.white),
+                      //         ),
+                      //         style: OutlinedButton.styleFrom(
+                      //           backgroundColor: const Color.fromARGB(
+                      //             255,
+                      //             255,
+                      //             103,
+                      //             92,
+                      //           ),
+                      //           shape: const RoundedRectangleBorder(
+                      //             borderRadius: BorderRadius.all(
+                      //               Radius.circular(8),
+                      //             ),
+                      //           ),
+                      //           padding: const EdgeInsets.symmetric(
+                      //             vertical: 14,
+                      //           ),
+                      //         ),
+                      //       ),
+                      //     );
+                      //   },
+                      // ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: ElevatedButton.icon(
@@ -511,13 +514,11 @@ class _ListViewScreenState extends State<ListViewScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(
-                  child: 
-                  _infoTile(
+                  child: _infoTile(
                     Icons.feedback_outlined,
                     'Avg Donation Frequency',
                     "${state?.donationMetrics?.monthlyAvgFrequency ?? "N/A"} times/monthly ",
                   ),
-                  
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -525,7 +526,6 @@ class _ListViewScreenState extends State<ListViewScreen> {
                     Icons.calendar_today,
                     'Avg Donation Amount',
                     "₹${state?.donationMetrics?.monthlyAmountAvgFrequency?.toStringAsFixed(2) ?? "N/A"}",
-                    
                   ),
                 ),
               ],
@@ -540,40 +540,40 @@ class _ListViewScreenState extends State<ListViewScreen> {
       },
     );
   }
-  
-  Widget _buildUserTypesChips(List<String> userTypes) {
-  if (userTypes.isEmpty) return const Text('-');
-  return Wrap(
-    spacing: 6,
-    runSpacing: 4,
-    children: userTypes.map((type) {
-      return Chip(
-        label: Text(
-          type,
-          style: const TextStyle(fontSize: 12, color: Colors.white),
-        ),
-        backgroundColor: _getUserTypeColor(type),
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      );
-    }).toList(),
-  );
-}
 
-Color _getUserTypeColor(String userType) {
-  switch (userType.toUpperCase()) {
-    case 'SUPER_ADMIN':
-      return Colors.red;
-    case 'ADMIN':
-      return Colors.orange;
-    case 'KARYAKARTHA':
-      return Colors.blue;
-    case 'OFFICE_STAFF':
-      return Colors.green;
-    default:
-      return Colors.grey;
+  Widget _buildUserTypesChips(List<String> userTypes) {
+    if (userTypes.isEmpty) return const Text('-');
+    return Wrap(
+      spacing: 6,
+      runSpacing: 4,
+      children: userTypes.map((type) {
+        return Chip(
+          label: Text(
+            type,
+            style: const TextStyle(fontSize: 12, color: Colors.white),
+          ),
+          backgroundColor: _getUserTypeColor(type),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        );
+      }).toList(),
+    );
   }
-}
+
+  Color _getUserTypeColor(String userType) {
+    switch (userType.toUpperCase()) {
+      case 'SUPER_ADMIN':
+        return Colors.red;
+      case 'ADMIN':
+        return Colors.orange;
+      case 'KARYAKARTHA':
+        return Colors.blue;
+      case 'OFFICE_STAFF':
+        return Colors.green;
+      default:
+        return Colors.grey;
+    }
+  }
 }
 
 Widget buildDotContainer(Color color, String text) {

@@ -11,13 +11,15 @@ import 'package:vikas_app/screeens/models/response/jeevanaadiView.dart';
 class ReferredByDropdown extends StatefulWidget {
   final TextEditingController controller;
   final Function(Map<String, dynamic>?) onSelected;
-  final Map<String, dynamic>? initialValue; // <-- added (optional)
+  final Map<String, dynamic>? initialValue; 
+  final String labelText;// <-- added (optional)
 
   const ReferredByDropdown({
     Key? key,
     required this.controller,
     required this.onSelected,
-    this.initialValue, // <-- optional parameter
+    this.initialValue,
+     this.labelText = 'Referred By', // <-- optional parameter
   }) : super(key: key);
 
   @override
@@ -203,7 +205,8 @@ class _ReferredByDropdownState extends State<ReferredByDropdown> {
             focusNode: _focusNode,
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
-              labelText: 'Referred By',
+              //labelText: 'Referred By',
+              labelText: widget.labelText,
               hintText: 'Search by phoneNumber or jeevanadiNo',
               filled: true,
               fillColor: Colors.white,

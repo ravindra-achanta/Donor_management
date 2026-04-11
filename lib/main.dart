@@ -7,8 +7,10 @@ import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_repos/activity_repository.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
+import 'package:vikas_app/api_services/network_repos/office_staff_repo.dart';
 import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
 import 'package:vikas_app/bloc_management/Activity/activity_bloc.dart';
+import 'package:vikas_app/bloc_management/Officestaff/office_staff_bloc.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
@@ -44,6 +46,9 @@ Future<void> main() async {
         providers: [
           // 🔹 Karyakartha Bloc
           BlocProvider<KaryakarthaBloc>(create: (_) => KaryakarthaBloc()),
+BlocProvider<OfficeStaffBloc>(
+  create: (_) => OfficeStaffBloc(OfficeStaffRepo()),
+),
            BlocProvider<DashboardBloc>(
       create: (_) => DashboardBloc(),
     ),

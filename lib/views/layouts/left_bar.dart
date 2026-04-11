@@ -151,7 +151,7 @@ class _LeftBarState extends State<LeftBar>
                         Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.badgeCheck,
-                        title: "Karyakarthas",
+                        title: "Karyakartha List",
                         isCondensed: isCondensed,
                         route: '/karyakarthas',
                       ),
@@ -168,6 +168,14 @@ class _LeftBarState extends State<LeftBar>
                         title: "Users",
                         isCondensed: isCondensed,
                         route: '/users',
+                      ),
+                       if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
+                      NavigationItem(
+                        iconData: LucideIcons.briefcase,
+                        title: "Office Staff List",
+                        isCondensed: isCondensed,
+                        route: '/office-staff',
                       ),
                     if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                       NavigationItem(

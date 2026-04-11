@@ -1,7 +1,7 @@
 class ApiConstants {
   // static const String baseUrl = "http://r:8050";
-  static const String baseUrl = "https://vikas.vidyaranyam.in";
-    //  static const String baseUrl = "http://172.235.18.48:8050";
+ // static const String baseUrl = "https://vikas.vidyaranyam.in";
+      static const String baseUrl = "http://172.235.18.48:8050";
 
 
   static const String VIKAS = "/vikas/api/v1";
@@ -14,6 +14,8 @@ class ApiConstants {
   // Endpoints
   static const String GET_KARYAKARTHAS = "${IDM_URI}/users/all";
   static const String GET_KARYAKARTHAS_BY_ID = "${IDM_URI}/user";
+   static const String GET_OFFICE_STAFF ="${IDM_URI}/users/all";
+  static const String GET_OFFICE_STAFF_BY_ID = "${IDM_URI}/user";
 
   //login
   static const String LOGIN = "$IDM_URI/user/login";
