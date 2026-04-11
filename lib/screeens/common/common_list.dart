@@ -127,10 +127,16 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Mobile'),
                   tableHeader('UserType'),
                   tableHeader('Actions'),
+                ] else if (screenType == 'OFFICE_STAFF') ...[
+                  tableHeader('Name'),
+                  tableHeader('Mobile'),
+                  tableHeader('UserType'),
+                  tableHeader('Actions'),
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
                   tableHeader('Roles', flex: 2),
+                  if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" )
                   tableHeader('Actions'),
                 ],
               ],
@@ -180,6 +186,7 @@ class _CommonListState extends State<CommonList> {
                 }
 
                 final isHovered = hoveredIndex == index;
+                final isSuperAdmin = Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN";
 
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
@@ -350,34 +357,42 @@ class _CommonListState extends State<CommonList> {
                               tableData(donationType),
                               tableData(date),
                               const SizedBox.shrink(),
-                            ] else if (screenType == 'KARYAKARTHA') ...[
+                            ]
+                            //else if (screenType == 'KARYAKARTHA') ...[
+                            else if (screenType == 'KARYAKARTHA' ||
+                                screenType == 'OFFICE_STAFF') ...[
                               tableData(name),
                               tableData(mobile),
-                              tableData(userType),
+                              //tableData(userType),
+                              tableData(
+                                (rowData is User &&
+                                        rowData.userType == "OFFICE_STAFF")
+                                    ? "Office Staff"
+                                    : userType,
+                              ),
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    HoverIconButton(
-                                      icon: Icons.delete_outline,
-                                      hoverColor: Colors.red.withOpacity(0.1),
-                                      iconColor: Colors.red,
-                                      onTap: () => widget.onDelete(rowData.id),
-                                    ),
-                                    const SizedBox(width: 10),
+                                    // if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "GURUJI")
+
                                     // HoverIconButton(
-                                    //   icon: Icons.remove_red_eye,
-                                    //   hoverColor: Colors.blue.withOpacity(0.1),
-                                    //   iconColor: Colors.blue,
-                                    //   onTap: () => widget.onUpdate(rowData.id),
+                                    //   icon: Icons.delete_outline,
+                                    //   hoverColor: Colors.red.withOpacity(0.1),
+                                    //   iconColor: Colors.red,
+                                    //   onTap: () => widget.onDelete(rowData.id),
                                     // ),
+                                    const SizedBox(width: 10),
+
                                     HoverIconButton(
                                       icon: Icons.remove_red_eye,
                                       hoverColor: Colors.blue.withOpacity(0.1),
                                       iconColor: Colors.blue,
                                       onTap: () {
                                         Get.to(
-                                          () =>  ActivityDashboardScreen(id: rowData.id),
+                                          () => ActivityDashboardScreen(
+                                            id: rowData.id,
+                                          ),
                                         );
                                       },
                                     ),
@@ -385,7 +400,9 @@ class _CommonListState extends State<CommonList> {
                                 ),
                               ),
                             ] else ...[
+                            
                               // Default case (User)
+
                               tableData(name),
                               tableData(mobile),
                               // tableData(userType),
@@ -397,26 +414,40 @@ class _CommonListState extends State<CommonList> {
                               ] else ...[
                                 tableData(userType),
                               ],
+                                if (!isSuperAdmin) 
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   children: [
-                                    HoverIconButton(
-                                      icon: Icons.delete_outline,
-                                      hoverColor: Colors.red.withOpacity(0.1),
-                                      iconColor: Colors.red,
-                                      onTap: () => widget.onDelete(rowData.id),
-                                    ),
+                                    if (Vikasdb().getString("USER_TYPE") ==
+                                            "GURUJI" ||
+                                        Vikasdb().getString("USER_TYPE") ==
+                                            "ADMIN")
+                                      HoverIconButton(
+                                        icon: Icons.delete_outline,
+                                        hoverColor: Colors.red.withOpacity(0.1),
+                                        iconColor: Colors.red,
+                                        onTap: () =>
+                                            widget.onDelete(rowData.id),
+                                      ),
                                     const SizedBox(width: 10),
-                                    HoverIconButton(
-                                      icon: Icons.edit_outlined,
-                                      hoverColor: Colors.blue.withOpacity(0.1),
-                                      iconColor: Colors.blue,
-                                      onTap: () => widget.onUpdate(rowData.id),
-                                    ),
+                                    if (Vikasdb().getString("USER_TYPE") ==
+                                            "GURUJI" ||
+                                        Vikasdb().getString("USER_TYPE") ==
+                                            "ADMIN")
+                                      HoverIconButton(
+                                        icon: Icons.edit_outlined,
+                                        hoverColor: Colors.blue.withOpacity(
+                                          0.1,
+                                        ),
+                                        iconColor: Colors.blue,
+                                        onTap: () =>
+                                            widget.onUpdate(rowData.id),
+                                      ),
                                   ],
                                 ),
                               ),
+                        
                             ],
                           ],
                         ),
