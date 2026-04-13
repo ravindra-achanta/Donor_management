@@ -243,10 +243,10 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                       ),
                       Row(
                         children: [
-                          IconButton(
-                            icon: const Icon(Icons.refresh),
-                            onPressed: _loadNotices,
-                          ),
+                          // IconButton(
+                          //   icon: const Icon(Icons.refresh),
+                          //   onPressed: _loadNotices,
+                          // ),
                           const SizedBox(width: 8),
 
                           if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||

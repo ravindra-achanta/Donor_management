@@ -366,9 +366,9 @@ class _CreateActivityScreenState extends State<CreateActivityScreen> {
   Widget _buildJeevanaadiSearchField() {
     return ReferredByDropdown(
       controller: _searchJeevanaadiCtrl,
+      labelText: 'Jeevanaadi Member',
       onSelected: (Map<String, dynamic>? value) {
         if (value == null) return;
-        // When a member is selected from dropdown, auto-fill the number field
         if (value['isManual'] == true) {
           // Manual entry: user can type directly in the number field
           _jeevandiNoCtrl.text = '';

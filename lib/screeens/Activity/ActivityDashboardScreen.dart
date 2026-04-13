@@ -68,7 +68,7 @@ class _ActivityDashboardScreenState
           ),
           const SizedBox(width: 8),
           const Text(
-            "Website Activity Dashboard",
+            "Website Activity:",
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.bold,
@@ -86,7 +86,8 @@ class _ActivityDashboardScreenState
 
       /// 📈 GRAPH 1 - TOTAL
       _chartCard(
-        title: "Total Activity",
+        title: "Website Activity",
+        //(DashboardCount + DharmasetuCount + VisitsCount)",
         child: _buildTotalChart(data),
       ),
 

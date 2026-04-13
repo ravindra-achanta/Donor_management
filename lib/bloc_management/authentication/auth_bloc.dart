@@ -215,6 +215,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         await Vikasdb().setString("TOKEN", state.token!);
         await Vikasdb().setString("USER_ID", state.userId!);
         await Vikasdb().setUserType("USER_TYPE", state.userType!.toString());
+        
       } else {
         print("ERROR: Missing token, userId, or userType in state");
         print("token is null: ${state.token == null}");

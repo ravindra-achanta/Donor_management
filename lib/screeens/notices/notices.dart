@@ -33,6 +33,7 @@ class _NoticesState extends State<Notices> {
  
   String _selectedSpecificOption = 'User Type';
   NoticeType? _selectedAudienceType;
+  List<Map<String, String>> _selectedUserTypeCombinations = [];
   List<UserView> _selectedUsers = [];
   List<UserView> _allUsers = [];
   DateTime? _selectedDate;
@@ -285,31 +286,13 @@ class _NoticesState extends State<Notices> {
     } else {
       sendTo = "TO_SPECIFIC";
 
-      // final validUsers = _selectedUsers.where((user) {
-      //   return user.userType != null &&
-      //       _allowedUserTypes.contains(user.userType);
-      // }).toList();
-     final validUsers = _selectedUsers.where((user) {
-    return user.userTypes.isNotEmpty &&
-        user.userTypes.any((type) => _allowedUserTypes.contains(type));
-  }).toList();
-
-      if (validUsers.isEmpty) {
-        _showError(
-          'No users with a valid type selected. Allowed types: ${_allowedUserTypes.join(', ')}',
-        );
+      if (_selectedUserTypeCombinations.isEmpty) {
+        _showError('Please select at least one user with a user type');
         setState(() => _isSubmitting = false);
         return;
       }
 
-      specificUsers = validUsers.map((user) {
-    final validType = user.userTypes
-        .firstWhere((type) => _allowedUserTypes.contains(type));
-    return {
-      'id': user.id,
-      'type': validType,
-    };
-  }).toList();
+      specificUsers = List.from(_selectedUserTypeCombinations);
     }
 
     final request = NoticeRequest(
@@ -350,6 +333,7 @@ class _NoticesState extends State<Notices> {
       _selectedSpecificOption = 'User Type';
       _selectedAudienceType = null;
       _selectedUsers.clear();
+      _selectedUserTypeCombinations.clear();
       _selectedFile = null;
       _selectedFileBytes = null;
       _selectedFileName = null;
@@ -587,12 +571,7 @@ void _showUserSelectionDialog() {
   }
 
   // Keep a local copy of selected user-type combinations
-  List<Map<String, String>> tempSelected = 
-      List.from(_selectedUsers.map((user) => {
-        'id': user.id,
-        'type': user.userTypes
-            .firstWhere((type) => _allowedUserTypes.contains(type))
-      }));
+  List<Map<String, String>> tempSelected = List.from(_selectedUserTypeCombinations);
 
   showDialog(
     context: context,
@@ -785,21 +764,23 @@ void _showUserSelectionDialog() {
                         const SizedBox(width: 8),
                         ElevatedButton(
                           onPressed: () {
-                            // Convert selections back to UserView objects
-                            final selectedUserIds = <String>{};
-                            for (final item in tempSelected) {
-                              selectedUserIds.add(item['id']!);
-                            }
-
-                            final finalSelected = <UserView>[];
-                            for (final userId in selectedUserIds) {
-                              final user = uniqueUsers[userId];
-                              if (user != null) {
-                                finalSelected.add(user);
-                              }
-                            }
-
+                            // Keep tempSelected which already has all user-type combinations
                             setState(() {
+                              _selectedUserTypeCombinations = List.from(tempSelected);
+                              
+                              // For UI display, get unique users
+                              final selectedUserIds = <String>{};
+                              for (final item in tempSelected) {
+                                selectedUserIds.add(item['id']!);
+                              }
+                              
+                              final finalSelected = <UserView>[];
+                              for (final userId in selectedUserIds) {
+                                final user = uniqueUsers[userId];
+                                if (user != null) {
+                                  finalSelected.add(user);
+                                }
+                              }
                               _selectedUsers = finalSelected;
                             });
                             Navigator.pop(context);
@@ -1008,12 +989,26 @@ void _showUserSelectionDialog() {
                               ),
                             ),
                           ),
-                          if (_selectedUsers.isNotEmpty) ...[
+                          if (_selectedUserTypeCombinations.isNotEmpty) ...[
                             const SizedBox(height: 12),
                             Wrap(
                               spacing: 8,
                               runSpacing: 8,
-                              children: _selectedUsers.map((user) {
+                              children: _selectedUserTypeCombinations.map((combo) {
+                                final userId = combo['id']!;
+                                final type = combo['type']!;
+                                final user = _allUsers.firstWhere(
+                                  (u) => u.id == userId,
+                                  orElse: () => UserView(
+                                    id: userId,
+                                    name: 'Unknown',
+                                    email: '',
+                                    mobileNumber: '',
+                                    userTypes: [],
+                                    status: '',
+                                  ),
+                                );
+                                
                                 return Container(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 12,
@@ -1029,12 +1024,23 @@ void _showUserSelectionDialog() {
                                   child: Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      Text(user.name ?? 'Unknown'),
+                                      Text('${user.name} ($type)'),
                                       const SizedBox(width: 6),
                                       GestureDetector(
                                         onTap: () {
                                           setState(() {
-                                            _selectedUsers.remove(user);
+                                            // Remove this specific user-type combination
+                                            _selectedUserTypeCombinations.removeWhere(
+                                              (item) => item['id'] == userId && item['type'] == type,
+                                            );
+                                            
+                                            // Update displayed users
+                                            final remainingIds = _selectedUserTypeCombinations
+                                                .map((item) => item['id']!)
+                                                .toSet();
+                                            _selectedUsers = _selectedUsers
+                                                .where((user) => remainingIds.contains(user.id))
+                                                .toList();
                                           });
                                         },
                                         child: const Icon(

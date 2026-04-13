@@ -187,19 +187,19 @@ class _DharmasetuListScreenState extends State<DharmasetuListScreen> {
                               ),
                               Row(
                                 children: [
-                                  IconButton(
-                                    icon: const Icon(Icons.refresh),
-                                    onPressed: () {
-                                      context.read<DharmasetuBloc>().add(
-                                        const LoadDharmasetu(page: 0),
-                                      );
-                                      // Hide profile view on refresh
-                                      setState(() {
-                                        _isProfileViewVisible = false;
-                                        _selectedDharmasetu = null;
-                                      });
-                                    },
-                                  ),
+                                  // IconButton(
+                                  //   icon: const Icon(Icons.refresh),
+                                  //   onPressed: () {
+                                  //     context.read<DharmasetuBloc>().add(
+                                  //       const LoadDharmasetu(page: 0),
+                                  //     );
+                                  //     // Hide profile view on refresh
+                                  //     setState(() {
+                                  //       _isProfileViewVisible = false;
+                                  //       _selectedDharmasetu = null;
+                                  //     });
+                                  //   },
+                                  // ),
                                   const SizedBox(width: 8),
                                   if (Vikasdb().getString("USER_TYPE") ==
                                           "OFFICE_STAFF" ||

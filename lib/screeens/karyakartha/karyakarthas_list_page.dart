@@ -89,7 +89,28 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     //     fontWeight: FontWeight.bold,
                                     //   ),
                                     // ),
-                                    Row( children: [ const Text( "All Karyakarthas :", style: TextStyle( fontSize: 18, fontWeight: FontWeight.bold, ), ), const SizedBox(width: 8), Chip( label: Text('${state!.totalElements}'), avatar: const Icon( Icons.people, size: 18, ), backgroundColor: Colors.grey.shade200, ), ], ),
+                                    Row(
+                                      children: [
+                                        const Text(
+                                          "All Karyakarthas :",
+                                          style: TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Chip(
+                                          label: Text(
+                                            '${state!.totalElements}',
+                                          ),
+                                          avatar: const Icon(
+                                            Icons.people,
+                                            size: 18,
+                                          ),
+                                          backgroundColor: Colors.grey.shade200,
+                                        ),
+                                      ],
+                                    ),
                                     // SizedBox(
                                     //   width: 250,
                                     //   child: TextFormField(
@@ -146,19 +167,19 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                     //   ),
                                     // ),
                                     CommonSearchBar(
-  controller: _searchController,
-  hintText: "Search karyakarthas...",
-  onSearch: (value) {
-    context.read<KaryakarthaBloc>().add(
-      FetchKaryakattasEvent(
-        0,
-        value.isNotEmpty ? value : null,
-      ),
-    );
-  },
-),
+                                      controller: _searchController,
+                                      hintText: "Search karyakarthas...",
+                                      onSearch: (value) {
+                                        context.read<KaryakarthaBloc>().add(
+                                          FetchKaryakattasEvent(
+                                            0,
+                                            value.isNotEmpty ? value : null,
+                                          ),
+                                        );
+                                      },
+                                    ),
                                     if (Vikasdb().getString("USER_TYPE") !=
-                                        "GURUJI")
+                                        "GURUJI" && Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN")
                                       AddButton().addButton(
                                         context: context,
                                         buttonText: "Add Karyakartha",
@@ -188,7 +209,8 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                       currentPage: state?.currentPage ?? 0,
                                       screenType: 'KARYAKARTHA',
                                       onUserTap: (id) {
-                                        if (state?.profileLoading == true) return;
+                                        if (state?.profileLoading == true)
+                                          return;
                                         context.read<KaryakarthaBloc>().add(
                                           FetchKaryakarthaProfileEvent(id),
                                         );
@@ -200,7 +222,9 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                           message:
                                               "Are you sure you want to delete this user?\nThis action cannot be undone.",
                                           onConfirm: () {
-                                            context.read<KaryakarthaBloc>().add(DeleteKaryakarthaEvent(id));
+                                            context.read<KaryakarthaBloc>().add(
+                                              DeleteKaryakarthaEvent(id),
+                                            );
                                             Navigator.pop(context);
                                           },
                                         );
@@ -357,11 +381,20 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                         DeletionPopup.showDeleteConfirmation(
                                           context: context,
                                           onConfirm: () {
-                                            final karyakarthaId = state?.karyakarthaProfile?.id;
+                                            final karyakarthaId =
+                                                state?.karyakarthaProfile?.id;
                                             if (karyakarthaId != null) {
-                                              context.read<KaryakarthaBloc>().add(DeleteKaryakarthaEvent(karyakarthaId));
+                                              context
+                                                  .read<KaryakarthaBloc>()
+                                                  .add(
+                                                    DeleteKaryakarthaEvent(
+                                                      karyakarthaId,
+                                                    ),
+                                                  );
                                               Navigator.pop(context);
-                                              context.read<KaryakarthaBloc>().add(CloseProfileView());
+                                              context
+                                                  .read<KaryakarthaBloc>()
+                                                  .add(CloseProfileView());
                                             }
                                           },
                                           title: "Delete User ?",
