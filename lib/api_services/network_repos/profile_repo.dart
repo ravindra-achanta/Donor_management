@@ -36,15 +36,20 @@ class ProfileRepo {
       print("❌ [ProfileRepo] Raw error: ${result.error}");
       return ApiResult.failure(result.error);
     }
-
-    try {
-      print("✅ [ProfileRepo] Update successful");
-      return ApiResult.success(User.fromJson(result.data));
-    } catch (e) {
-      print("❌ [ProfileRepo] Parse error: $e");
-      return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
-    }
+        print("✅ [ProfileRepo] Update successful");
+    return ApiResult.success(user);
   }
+
+  //   try {
+  //     print("✅ [ProfileRepo] Update successful");
+  //     return ApiResult.success(User.fromJson(result.data));
+  //   } catch (e) {
+  //     print("❌ [ProfileRepo] Parse error: $e");
+  //     return ApiResult.failure(ApiError(message: "Data parsing error: $e"));
+  //   }
+  // }
+  
+
 
   Future<ApiResult<User>> updateProfile(String id, User user) async {
     final url = "${ApiConstants.UPDATE_PROFILE}/$id";
@@ -61,9 +66,10 @@ class ProfileRepo {
       );
       return ApiResult.failure(result.error);
     }
-    // try {
+   
     print("✅ [ProfileRepo] Profile update successful");
-    return ApiResult.success(User.fromJson(result.data));
+    //return ApiResult.success(User.fromJson(result.data));
+    return ApiResult.success(user); 
     // } catch (e) {
     //   print("❌ [ProfileRepo] Parse error: $e");
     //   return ApiResult.failure(ApiError(message: "Data parsing error: $e"));

@@ -204,7 +204,13 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       emit(state.copyWith(
         assignedKaryakarthas: updatedList,              
         assignedTotalPages: data?.totalPages ?? 0,
-        assignedTotalElements: data?.totalElements ?? 0,
+       // assignedTotalElements: data?.totalElements ?? 0,
+        assignedTotalElements: event.searchQuery == null 
+    ? (data?.totalElements ?? 0)
+    : state.assignedTotalElements,  
+  assignedTotalElementsBeforeSearch: event.searchQuery == null 
+    ? (data?.totalElements ?? 0)
+    : state.assignedTotalElementsBeforeSearch,
         assignedCurrentPage: data?.currentPage ?? 0,
         isLoadingAssigned: false,
         errorMessage: null,
@@ -265,7 +271,13 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
       emit(state.copyWith(
         unassignedKaryakarthas: updatedList,           
         unassignedTotalPages: data?.totalPages ?? 0,
-        unassignedTotalElements: data?.totalElements ?? 0,
+       // unassignedTotalElements: data?.totalElements ?? 0,
+       unassignedTotalElements: event.searchQuery == null 
+    ? (data?.totalElements ?? 0)
+    : state.unassignedTotalElements,  
+  unassignedTotalElementsBeforeSearch: event.searchQuery == null 
+    ? (data?.totalElements ?? 0)
+    : state.unassignedTotalElementsBeforeSearch,
         unassignedCurrentPage: data?.currentPage ?? 0,
         isLoadingUnassigned: false,
         errorMessage: null,

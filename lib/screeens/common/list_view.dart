@@ -139,7 +139,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
                 ),
 
                 if (screenType == "JEEVANAADI_PROFILE" ||
-                    screenType == "USER_PROFILE")
+                    screenType == "USER_PROFILE" ||
+                    screenType == "KARYAKARTHA")
                   buildDemoGrphs(_jeevanaadiUser ?? _user),
 
                 // const SizedBox(height: 6),
@@ -311,11 +312,17 @@ class _ListViewScreenState extends State<ListViewScreen> {
                 const SizedBox(height: 16),
 
                 // Actions - Show for all screen types
-                if (screenType != "DARMASETU" && screenType != "VISITS")
+                if (screenType != "DARMASETU" &&
+                    screenType != "VISITS" &&
+                    screenType != "USER_PROFILE")
                   _sectionTitle('Actions'),
                 const SizedBox(height: 4),
-                if (screenType != "DARMASETU" && screenType != "VISITS" ||
-                    screenType == "kart")
+
+                if (screenType == "KARYAKARTHA" ||
+                    (screenType != "DARMASETU" &&
+                        screenType != "VISITS" &&
+                        screenType != "USER_PROFILE" &&
+                        screenType != "OFFICE_STAFF"))
                   Row(
                     children: [
                       // FutureBuilder<bool>(
@@ -421,9 +428,16 @@ class _ListViewScreenState extends State<ListViewScreen> {
           : Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                if (screenType == "USER_PROFILE") ...[
+                // if (screenType == "USER_PROFILE"|| screenType == "KARYAKARTHA") ...[
+                if (screenType == "KARYAKARTHA" ||
+                    (screenType == "USER_PROFILE" &&
+                        jeevanaadiUser is User &&
+                        jeevanaadiUser.userTypes
+                            .map((e) => e.toUpperCase())
+                            .contains('KARYAKARTHA'))) ...[
                   Card(
                     elevation: 2,
+
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -458,10 +472,11 @@ class _ListViewScreenState extends State<ListViewScreen> {
                                   ),
                                   TextSpan(
                                     text:
-                                        "${jeevanaadiUser.karyakarthaAssignCount}",
+                                        "${jeevanaadiUser.karyakarthaAssignCount ?? '0'}",
                                     style: const TextStyle(
                                       fontSize: 22,
                                       fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
                                     ),
                                   ),
                                 ],
@@ -570,6 +585,8 @@ class _ListViewScreenState extends State<ListViewScreen> {
         return Colors.blue;
       case 'OFFICE_STAFF':
         return Colors.green;
+      case 'JEEVANAADI_LEAD':
+        return Colors.purple;
       default:
         return Colors.grey;
     }

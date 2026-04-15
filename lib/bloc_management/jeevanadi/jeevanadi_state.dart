@@ -35,9 +35,11 @@ class JeevanaadiState extends Equatable {
   final bool isRemoving;
   final int unassignedTotalPages;
   final int unassignedTotalElements;
+  final int unassignedTotalElementsBeforeSearch; 
   final int unassignedCurrentPage;
   final bool isLoadingUnassigned;
   final int assignedTotalPages;
+  final int assignedTotalElementsBeforeSearch;  
   final int assignedTotalElements;
   final int assignedCurrentPage;
   final bool isLoadingAssigned;
@@ -87,7 +89,9 @@ final String? approveErrorMsg;
     this.donationsError,
     this.jeevanadiMember,
     this.assignedKaryakarthas = const [],
+    this.assignedTotalElementsBeforeSearch = 0,
     this.unassignedKaryakarthas = const [],
+    this.unassignedTotalElementsBeforeSearch = 0,
     this.selectedUnassignedIds = const [],
     this.isAssigning = false,
     this.isRemoving = false,
@@ -149,9 +153,11 @@ final String? approveErrorMsg;
     List<JeevanaadiUser>? unassignedKaryakarthas,
     List<String>? selectedUnassignedIds,
     bool? isAssigning,
+    int? assignedTotalElementsBeforeSearch,
     bool? isRemoving,
     int? unassignedTotalPages,
     int? unassignedTotalElements,
+    int? unassignedTotalElementsBeforeSearch,
     int? unassignedCurrentPage,
     bool? isLoadingUnassigned,
     int? assignedTotalPages,
@@ -229,6 +235,7 @@ final String? approveErrorMsg;
       referredByLoading: referredByLoading ?? this.referredByLoading,
       referredByUsers: referredByUsers ?? this.referredByUsers,
       referredByError: referredByError ?? this.referredByError,
+
       referredByCurrentPage:
           referredByCurrentPage ?? this.referredByCurrentPage,
       referredByTotalPages: referredByTotalPages ?? this.referredByTotalPages,

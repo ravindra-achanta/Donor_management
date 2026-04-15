@@ -59,6 +59,7 @@ class _NoticesState extends State<Notices> {
     'KARYAKARTHA',
     'ADMIN',
     'OFFICE_STAFF',
+    'JEEVANAADI_LEAD'
   ];
 
   //Map<String, String> _userIdToName = {};

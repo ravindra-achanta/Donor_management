@@ -3,7 +3,8 @@ enum UserType {
   superAdmin('SUPER_ADMIN'),
   admin('ADMIN'),
   karyakartha('KARYAKARTHA'),
-  officeStaff('OFFICE_STAFF');
+  officeStaff('OFFICE_STAFF'),
+  jeevanaadiLead('JEEVANAADI_LEAD');
 
   final String value;
 
@@ -21,6 +22,8 @@ enum UserType {
         return UserType.karyakartha;
       case 'OFFICE_STAFF':
         return UserType.officeStaff;
+      case 'JEEVANAADI_LEAD':
+        return UserType.jeevanaadiLead;
       default:
         throw ArgumentError('Unknown UserType: $value');
     }
@@ -38,6 +41,8 @@ enum UserType {
         return 'Karyakartha';
       case UserType.officeStaff:
         return 'Office Staff';
+      case UserType.jeevanaadiLead:
+        return 'Jeevanaadi Lead';
     }
   }
 
