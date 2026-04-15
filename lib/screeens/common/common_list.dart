@@ -40,6 +40,37 @@ class CommonList<T> extends StatefulWidget {
 
 class _CommonListState extends State<CommonList> {
   int? hoveredIndex;
+  int _getRolePriority(String? role) {
+    switch (role?.toUpperCase()) {
+      case 'GURUJI':
+        return 1; // Highest authority
+      case 'SUPER_ADMIN':
+        return 2;
+      case 'ADMIN':
+        return 3;
+      case 'JEEVANAADI_LEAD':
+        return 4;
+      case 'KARYAKARTHA':
+        return 5;
+      case 'OFFICE_STAFF':
+        return 6; // Lowest authority
+      default:
+        return 999;
+    }
+  }
+
+  bool _canEditUser(User user, String currentUserType) {
+    int currentUserPriority = _getRolePriority(currentUserType);
+
+    if (user.userTypes.isNotEmpty) {
+      int? lowestUserPriority = user.userTypes
+          .map((role) => _getRolePriority(role))
+          .reduce((a, b) => a < b ? a : b);
+
+      return currentUserPriority < lowestUserPriority;
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -126,18 +157,18 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Name'),
                   tableHeader('Mobile'),
                   tableHeader('UserType'),
-                  tableHeader('Actions'),
+                  tableHeader('Metrics'),
                 ] else if (screenType == 'OFFICE_STAFF') ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
                   tableHeader('UserType'),
-                  tableHeader('Actions'),
+                  tableHeader('Metrics'),
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
                   tableHeader('Roles', flex: 2),
-                  if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" )
-                  tableHeader('Actions'),
+                  if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "GURUJI")
+                    tableHeader('Actions'),
                 ],
               ],
             ),
@@ -186,7 +217,8 @@ class _CommonListState extends State<CommonList> {
                 }
 
                 final isHovered = hoveredIndex == index;
-                final isSuperAdmin = Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN";
+                final isSuperAdmin =
+                    Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN";
 
                 return MouseRegion(
                   cursor: SystemMouseCursors.click,
@@ -400,9 +432,7 @@ class _CommonListState extends State<CommonList> {
                                 ),
                               ),
                             ] else ...[
-                            
                               // Default case (User)
-
                               tableData(name),
                               tableData(mobile),
                               // tableData(userType),
@@ -414,40 +444,86 @@ class _CommonListState extends State<CommonList> {
                               ] else ...[
                                 tableData(userType),
                               ],
-                                if (!isSuperAdmin) 
-                              Expanded(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: [
-                                    if (Vikasdb().getString("USER_TYPE") ==
-                                            "GURUJI" ||
-                                        Vikasdb().getString("USER_TYPE") ==
-                                            "ADMIN")
-                                      HoverIconButton(
-                                        icon: Icons.delete_outline,
-                                        hoverColor: Colors.red.withOpacity(0.1),
-                                        iconColor: Colors.red,
-                                        onTap: () =>
-                                            widget.onDelete(rowData.id),
-                                      ),
-                                    const SizedBox(width: 10),
-                                    if (Vikasdb().getString("USER_TYPE") ==
-                                            "GURUJI" ||
-                                        Vikasdb().getString("USER_TYPE") ==
-                                            "ADMIN")
-                                      HoverIconButton(
-                                        icon: Icons.edit_outlined,
-                                        hoverColor: Colors.blue.withOpacity(
-                                          0.1,
+                              //   if (!isSuperAdmin)
+                              // Expanded(
+                              //   child: Row(
+                              //     mainAxisAlignment: MainAxisAlignment.start,
+                              //     children: [
+                              //       if (Vikasdb().getString("USER_TYPE") ==
+                              //               "GURUJI" ||
+                              //           Vikasdb().getString("USER_TYPE") ==
+                              //               "ADMIN")
+                              //         HoverIconButton(
+                              //           icon: Icons.delete_outline,
+                              //           hoverColor: Colors.red.withOpacity(0.1),
+                              //           iconColor: Colors.red,
+                              //           onTap: () =>
+                              //               widget.onDelete(rowData.id),
+                              //         ),
+                              //       const SizedBox(width: 10),
+                              //       if (Vikasdb().getString("USER_TYPE") ==
+                              //               "GURUJI" ||
+                              //           Vikasdb().getString("USER_TYPE") ==
+                              //               "ADMIN")
+                              //         HoverIconButton(
+                              //           icon: Icons.edit_outlined,
+                              //           hoverColor: Colors.blue.withOpacity(
+                              //             0.1,
+                              //           ),
+                              //           iconColor: Colors.blue,
+                              //           onTap: () =>
+                              //               widget.onUpdate(rowData.id),
+                              //         ),
+                              //     ],
+                              //   ),
+                              // ),
+                              //if (rowData is User)
+                              if (rowData is User && Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "GURUJI")
+
+                                Expanded(
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      if (rowData.id !=
+                                              Vikasdb().getString("USER_ID") &&
+                                          !(rowData.userTypes.contains(
+                                                "GURUJI",
+                                              ) &&
+                                              (Vikasdb().getString(
+                                                        "USER_TYPE",
+                                                      ) ==
+                                                      "SUPER_ADMIN" ||
+                                                  Vikasdb().getString(
+                                                        "USER_TYPE",
+                                                      ) ==
+                                                      "ADMIN")))
+                                        HoverIconButton(
+                                          icon: Icons.edit_outlined,
+                                          hoverColor: Colors.blue.withOpacity(
+                                            0.1,
+                                          ),
+                                          iconColor: Colors.blue,
+                                          onTap: () =>
+                                              widget.onUpdate(rowData.id),
                                         ),
-                                        iconColor: Colors.blue,
-                                        onTap: () =>
-                                            widget.onUpdate(rowData.id),
-                                      ),
-                                  ],
+                                      const SizedBox(width: 10),
+
+                                      if (_canEditUser(
+                                        rowData,
+                                        Vikasdb().getString("USER_TYPE") ?? "",
+                                      ))
+                                        HoverIconButton(
+                                          icon: Icons.delete_outline,
+                                          hoverColor: Colors.red.withOpacity(
+                                            0.1,
+                                          ),
+                                          iconColor: Colors.red,
+                                          onTap: () =>
+                                              widget.onDelete(rowData.id),
+                                        ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                        
                             ],
                           ],
                         ),

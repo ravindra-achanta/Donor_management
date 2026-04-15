@@ -46,14 +46,16 @@ class Role extends Equatable {
   int? get userTypeValue {
     switch (roleName) {
       case 'SUPER_ADMIN':
-        return 0;
-      case 'ADMIN':
-        return 1;
-      case 'KARYAKARTHA':
         return 2;
-      case 'OFFICE_STAFF':
+      case 'ADMIN':
         return 3;
+      case 'KARYAKARTHA':
+        return 5;
+      case 'OFFICE_STAFF':
+        return 6;
       case 'GURUJI':
+        return 1;
+      case 'JEEVANAADI_LEAD':
         return 4;
       default:
         return null;
@@ -72,6 +74,8 @@ class Role extends Equatable {
         return 'Office Staff';
       case 'GURUJI':
         return 'Guruji';
+      case 'JEEVANAADI_LEAD':
+        return 'Jeevanaadi Lead';
       default:
         return roleName.replaceAll('_', ' ');
     }

@@ -33,6 +33,9 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
   String? _selectedKaryakarthaId;
   String? _unassignedOrder;
   String? _assignedOrder;
+  int? unassignedTotalElements;
+  int? unassignedSearchCount;
+  bool isSearchingUnassigned = false;
   final TextEditingController _searchController = TextEditingController();
   final TextEditingController _karyakarthaSearchController =
       TextEditingController();
@@ -40,11 +43,14 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
       TextEditingController();
   final bool isAdmin =
       Vikasdb().getString("USER_TYPE")?.toUpperCase() == "ADMIN";
+      final bool isJeevanadiLead =
+    Vikasdb().getString("USER_TYPE")?.toUpperCase() == "JEEVANAADI_LEAD";
+
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: isAdmin ? 2 : 1, vsync: this);
+    _tabController = TabController(length: isJeevanadiLead ? 2 : 1, vsync: this);
     _loadKaryakarthaList();
     if (widget.karyakarthaId != null) {
       _selectedKaryakarthaId = widget.karyakarthaId;
@@ -449,7 +455,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
               children: [
                 TabBar(
                   controller: _tabController,
-                  tabs: isAdmin
+                  tabs: isJeevanadiLead
                       ? const [
                           Tab(text: "For Deallocate"),
                           Tab(text: "For Allocate"),
@@ -473,7 +479,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
                         state,
                         isAdmin: isAdmin,
                       ), // Deallocate
-                      if (isAdmin)
+                      if (isJeevanadiLead)
                         _buildUnassignedTabContent(
                           state,
                           isAdmin: isAdmin,
@@ -550,7 +556,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
             ),
             const SizedBox(width: 8),
 
-            if (isAdmin && state.selectedAssignedIds.isNotEmpty)
+            if (isJeevanadiLead && state.selectedAssignedIds.isNotEmpty)
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -687,6 +693,7 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
                 const SizedBox(width: 12),
                 FxText.bodyMedium(
                   "Unassigned (${state.unassignedTotalElements ?? 0})",
+                  // "Unassigned (${state.unassignedTotalElementsBeforeSearch ?? 0})",
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     color: Colors.black,
                     fontSize: 16,
@@ -704,16 +711,16 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
               },
             ),
             const SizedBox(width: 3),
-SizedBox(
-  width: 200, 
-  child: CommonSearchBar(
-    controller: _searchController,
-    hintText: "Search unassigned...",
-    onSearch: (value) {
-      _performUnassignedSearch();
-    },
-  ),
-),
+            SizedBox(
+              width: 200,
+              child: CommonSearchBar(
+                controller: _searchController,
+                hintText: "Search unassigned...",
+                onSearch: (value) {
+                  _performUnassignedSearch();
+                },
+              ),
+            ),
             if (state.selectedUnassignedIds.isNotEmpty)
               Flexible(
                 // SizedBox(
@@ -812,7 +819,7 @@ SizedBox(
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: isAdmin
+        leading: isJeevanadiLead
             ? Checkbox(
                 value: isSelected,
                 onChanged: (value) {
@@ -869,7 +876,7 @@ SizedBox(
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        leading: isAdmin
+        leading: isJeevanadiLead
             ? Checkbox(
                 value: isSelected,
                 onChanged: (value) {

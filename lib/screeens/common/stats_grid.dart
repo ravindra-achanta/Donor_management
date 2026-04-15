@@ -83,15 +83,15 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Total Vikas Users
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
-                    isVisibleType("USERS"))
-                   StatCard(
-                    title: "Total Vikas Users",
-                    value: "${metrics.activeKaryakarthas+metrics.activeStaff+metrics.activeAdmins}",
-                    icon: Icons.people_alt_rounded,
-                    color: Colors.indigo,
-                    screenWidth: constraints.maxWidth,
-                  ),
+                // if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                //     isVisibleType("USERS"))
+                //    StatCard(
+                //     title: "Total Vikas Users",
+                //     value: "${metrics.activeKaryakarthas+metrics.activeStaff+metrics.activeAdmins}",
+                //     icon: Icons.people_alt_rounded,
+                //     color: Colors.indigo,
+                //     screenWidth: constraints.maxWidth,
+                //   ),
 
                 /// Total Admins
                 if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
