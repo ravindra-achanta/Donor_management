@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/profile/profile_bloc.dart';
 import 'package:vikas_app/bloc_management/profile/profile_event.dart';
+import 'package:vikas_app/bloc_management/profile/profile_state.dart';
 import 'package:vikas_app/bloc_management/users/user_bloc.dart';
 import 'package:vikas_app/bloc_management/users/user_event.dart';
 import 'package:vikas_app/bloc_management/users/user_state.dart';
@@ -297,6 +298,55 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   _RegistrationPageConstants.popNavigationDelay,
                   () => Navigator.pop(context),
                 );
+              }
+            },
+          ),
+
+          // BlocListener<ProfileBloc, ProfileState?>(
+          //   listener: (context, state) {
+          //     if (state?.errorMessage != null) {
+          //       ScaffoldMessenger.of(context).showSnackBar(
+          //         SnackBar(
+          //           content: Text(state!.errorMessage!),
+          //           backgroundColor: _RegistrationPageConstants.errorColor,
+          //           duration: const Duration(seconds: 3),
+          //         ),
+          //       );
+          //     }
+          //   },
+          // ),
+          BlocListener<ProfileBloc, ProfileState?>(
+            listener: (context, state) {
+              // Show error when update fails
+              if (state?.status == ProfileStatus.error &&
+                  state?.profileErrorMsg != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state!.profileErrorMsg!),
+                    backgroundColor: _RegistrationPageConstants.errorColor,
+                    duration: const Duration(seconds: 4),
+                  ),
+                );
+              }
+              // Show success and navigate when update succeeds
+              else if (state?.status == ProfileStatus.updated &&
+                  state?.successMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state!.successMessage!),
+                    backgroundColor: _RegistrationPageConstants.successColor,
+                    duration: const Duration(seconds: 2),
+                  ),
+                );
+                Future.delayed(const Duration(milliseconds: 800), () {
+                  if (mounted) {
+                    widget.fromProfile
+                        ? Get.toNamed('/profile')
+                        : widget.type == RegistrationType.user
+                        ? Get.toNamed('/users')
+                        : Get.toNamed('/karyakarthas');
+                  }
+                });
               }
             },
           ),
@@ -712,11 +762,7 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
           UpdateProfile(id: userToUpdate.id, user: updatedUser),
         );
       }
-      widget.fromProfile
-          ? Get.toNamed('/profile')
-          : widget.type == RegistrationType.user
-          ? Get.toNamed('/users')
-          : Get.toNamed('/karyakarthas');
+      // Navigation will happen in ProfileBloc listener after successful update
     } else {
       if (widget.selectedRoles.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -728,9 +774,12 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
         return;
       }
 
-      final List<int> roleIds = widget.selectedRoles
-          .map((role) => int.parse(role.id))
-          .toList();
+      // final List<int> roleIds = widget.selectedRoles
+      //     .map((role) => int.parse(role.id))
+      //     .toList();
+      final List<int> roleIds = widget.selectedRoles.isNotEmpty
+          ? widget.selectedRoles.map((role) => int.parse(role.id)).toList()
+          : [];
 
       final request = IdentityRequest(
         name:
@@ -998,114 +1047,160 @@ class _RegistrationFormContentState extends State<_RegistrationFormContent> {
   //     },
   //   );
   // }
-Future<void> _showRoleSelectionSheet(
-  BuildContext context,
-  List<Role> allRoles,
-) async {
-  
-  final bool enforceSequential = widget.isSuperAdmin && !widget.isEdit;
+  Future<void> _showRoleSelectionSheet(
+    BuildContext context,
+    List<Role> allRoles,
+  ) async {
+    final bool enforceSequential = widget.isSuperAdmin && !widget.isEdit;
 
-  await showModalBottomSheet(
-    context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setModalState) {
-          bool isAdminSelected() => widget.selectedRoles.any(
-            (role) => role.displayName.toUpperCase() == "ADMIN",
-          );
-
-       
-          List<Role> displayedRoles;
-          if (enforceSequential && !isAdminSelected()) {
-            // Show only Admin role
-            displayedRoles = allRoles.where(
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            bool isAdminSelected() => widget.selectedRoles.any(
               (role) => role.displayName.toUpperCase() == "ADMIN",
-            ).toList();
-          } else {
-            
-            displayedRoles = allRoles;
-          }
+            );
 
-          return DraggableScrollableSheet(
-            initialChildSize: 0.35,
-            minChildSize: 0.25,
-            maxChildSize: 0.6,
-            expand: false,
-            builder: (_, controller) {
-              return Container(
-                padding: const EdgeInsets.all(20),
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                child: ListView(
-                  controller: controller,
-                  children: [
-                    const Center(
-                      child: Text(
-                        _RegistrationPageConstants.dialogSelectRoles,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
+            List<Role> displayedRoles;
+            if (enforceSequential && !isAdminSelected()) {
+              // Show only Admin role
+              displayedRoles = allRoles
+                  .where((role) => role.displayName.toUpperCase() == "ADMIN")
+                  .toList();
+            } else {
+              displayedRoles = allRoles;
+            }
+
+            return DraggableScrollableSheet(
+              initialChildSize: 0.35,
+              minChildSize: 0.25,
+              maxChildSize: 0.6,
+              expand: false,
+              builder: (_, controller) {
+                return Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  child: ListView(
+                    controller: controller,
+                    children: [
+                      const Center(
+                        child: Text(
+                          _RegistrationPageConstants.dialogSelectRoles,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 16),
-                    ...displayedRoles.map((role) {
-                      final isAdminRole =
-                          role.displayName.toUpperCase() == "ADMIN";
-                      final isSelected = widget.selectedRoles.any(
-                        (r) => r.id == role.id,
-                      );
+                      const SizedBox(height: 16),
+                      ...displayedRoles.map((role) {
+                        final isAdminRole =
+                            role.displayName.toUpperCase() == "ADMIN";
+                        final isSelected = widget.selectedRoles.any(
+                          (r) => r.id == role.id,
+                        );
 
-                     
-                      bool isEnabled = true;
+                        bool isEnabled = true;
 
-                      return CheckboxListTile(
-                        dense: true,
-                        title: Text(role.displayName),
-                        value: isSelected,
-                        enabled: isEnabled,
-                        onChanged: (val) {
-                          setModalState(() {
-                            final updatedList =
-                                List<Role>.from(widget.selectedRoles);
-                            if (val == true) {
-                              updatedList.add(role);
-                            } else {
-                              updatedList.removeWhere((r) => r.id == role.id);
-                              // If we are in sequential mode and Admin is being removed,
-                              // clear all non-Admin roles and the modal will rebuild
-                              // to show only Admin again.
-                              if (enforceSequential && isAdminRole) {
-                                updatedList.removeWhere(
-                                  (r) =>
-                                      r.displayName.toUpperCase() != "ADMIN",
-                                );
+                        return CheckboxListTile(
+                          dense: true,
+                          title: Text(role.displayName),
+                          value: isSelected,
+                          enabled: isEnabled,
+                          // onChanged: (val) {
+                          //   setModalState(() {
+                          //     final updatedList = List<Role>.from(
+                          //       widget.selectedRoles,
+                          //     );
+                          //     if (val == true) {
+                          //       updatedList.add(role);
+                          //     } else {
+                          //       updatedList.removeWhere((r) => r.id == role.id);
+
+                          //       if (enforceSequential && isAdminRole) {
+                          //         updatedList.removeWhere(
+                          //           (r) =>
+                          //               r.displayName.toUpperCase() != "ADMIN",
+                          //         );
+                          //       }
+                          //     }
+                          //     widget.onRolesUpdated(updatedList);
+                          //   });
+                          // },
+                          onChanged: (val) {
+                            setModalState(() {
+                              final updatedList = List<Role>.from(
+                                widget.selectedRoles,
+                              );
+                              if (val == true) {
+                                // Check if role already exists before adding
+                                if (!updatedList.any((r) => r.id == role.id)) {
+                                  updatedList.add(role);
+                                }
+                              } else {
+                                updatedList.removeWhere((r) => r.id == role.id);
+
+                                if (enforceSequential && isAdminRole) {
+                                  updatedList.removeWhere(
+                                    (r) =>
+                                        r.displayName.toUpperCase() != "ADMIN",
+                                  );
+                                }
                               }
-                            }
-                            widget.onRolesUpdated(updatedList);
-                          });
-                        },
-                      );
-                    }).toList(),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text(_RegistrationPageConstants.buttonDone),
-                    ),
-                  ],
-                ),
-              );
-            },
-          );
-        },
-      );
-    },
-  );
-}
+                              widget.onRolesUpdated(updatedList);
+                            });
+                          },
+                        );
+                      }).toList(),
+                      const SizedBox(height: 10),
+                      ElevatedButton(
+                        onPressed: () => Navigator.pop(context),
+                        child: const Text(
+                          _RegistrationPageConstants.buttonDone,
+                        ),
+                      ),
+                      // ElevatedButton(
+                      //   onPressed: () {
+                      //     if (widget.selectedRoles.isEmpty) {
+                      //       // Show error message
+                      //       ScaffoldMessenger.of(context).showSnackBar(
+                      //         const SnackBar(
+                      //           content: Text(
+                      //             _RegistrationPageConstants.errorSelectRole,
+                      //           ),
+                      //           backgroundColor:
+                      //               _RegistrationPageConstants.warningColor,
+                      //           duration: Duration(seconds: 2),
+                      //         ),
+                      //       );
+                      //     } else {
+                      //       // Close dialog if at least one role is selected
+                      //       Navigator.pop(context);
+                      //     }
+                      //   },
+                      //   child: const Text(
+                      //     _RegistrationPageConstants.buttonDone,
+                      //   ),
+                      // ),
+                    ],
+                  ),
+                );
+              },
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<AuthBloc, AuthState>(
@@ -1225,8 +1320,8 @@ Future<void> _showRoleSelectionSheet(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Backbutton().buildBackButton(context, "Users"),
-                    const SizedBox(height: 10),
+                    Backbutton().buildBackButton(context, ""),
+                    const SizedBox(width: 10),
                     Text(
                       widget.title,
                       style: const TextStyle(

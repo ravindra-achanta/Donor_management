@@ -37,6 +37,7 @@ class _LoginPageState extends State<LoginPage> {
     'ADMIN': 'Admin',
     'KARYAKARTHA': 'Karyakartha',
     'OFFICE_STAFF': 'Office Staff',
+    'JEEVANAADI_LEAD': 'Jeevanaadi Lead',
   };
 
   @override

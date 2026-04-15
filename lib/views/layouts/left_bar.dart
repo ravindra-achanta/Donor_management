@@ -151,32 +151,36 @@ class _LeftBarState extends State<LeftBar>
                         Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
                       NavigationItem(
                         iconData: LucideIcons.badgeCheck,
-                        title: "Karyakartha List",
+                        title: "View Karyakarthas",
                         isCondensed: isCondensed,
                         route: '/karyakarthas',
                       ),
                     NavigationItem(
                       iconData: LucideIcons.heartHandshake,
-                      title: "Jeevanadi Members",
+                      title: "View Jeevanadis",
                       isCondensed: isCondensed,
                       route: '/jeevanadi',
                     ),
                     if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
-                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
-                      NavigationItem(
-                        iconData: LucideIcons.users,
-                        title: "Users",
-                        isCondensed: isCondensed,
-                        route: '/users',
-                      ),
-                       if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
-                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA")
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA" &&
+                        Vikasdb().getString("USER_TYPE") != "JEEVANAADI_LEAD" )
                       NavigationItem(
                         iconData: LucideIcons.briefcase,
-                        title: "Office Staff List",
+                        title: "View Office Staff",
                         isCondensed: isCondensed,
                         route: '/office-staff',
                       ),
+                    if (Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
+                        Vikasdb().getString("USER_TYPE") != "KARYAKARTHA" &&
+                        Vikasdb().getString("USER_TYPE") != "JEEVANAADI_LEAD")
+
+                      NavigationItem(
+                        iconData: LucideIcons.users,
+                        title: "Users Management",
+                        isCondensed: isCondensed,
+                        route: '/users',
+                      ),
+
                     if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                       NavigationItem(
                         iconData: LucideIcons.fileClock,
@@ -198,22 +202,22 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/notices/list',
                     ),
-
-                    NavigationItem(
-                      iconData: LucideIcons.eye,
-                      title: "Visits",
-                      isCondensed: isCondensed,
-                      route: '/visits',
-                    ),
-                     if (Vikasdb().getString("USER_TYPE") != "ADMIN" ||
-                        Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" )
-                         
-                    NavigationItem(
-                      iconData: LucideIcons.phoneCall,
-                      title: "Call Logs",
-                      isCondensed: isCondensed,
-                      route: '/activity-list',
-                    ),
+                    if (Vikasdb().getString("USER_TYPE") != "JEEVANAADI_LEAD")
+                      NavigationItem(
+                        iconData: LucideIcons.eye,
+                        title: "Visits",
+                        isCondensed: isCondensed,
+                        route: '/visits',
+                      ),
+                    if (Vikasdb().getString("USER_TYPE") != "ADMIN" &&
+                        Vikasdb().getString("USER_TYPE") != "OFFICE_STAFF" &&
+                        Vikasdb().getString("USER_TYPE") != "JEEVANAADI_LEAD")
+                      NavigationItem(
+                        iconData: LucideIcons.phoneCall,
+                        title: "Call Logs",
+                        isCondensed: isCondensed,
+                        route: '/activity-list',
+                      ),
 
                     NavigationItem(
                       iconData: LucideIcons.userCog,
@@ -221,7 +225,6 @@ class _LeftBarState extends State<LeftBar>
                       isCondensed: isCondensed,
                       route: '/profile',
                     ),
-                    
 
                     NavigationItem(
                       iconData: LucideIcons.logOut,
