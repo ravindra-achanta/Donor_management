@@ -4,7 +4,8 @@ enum NoticeType {
   toAdmins('TO_ADMINS'),
   tosuperadmins('TO_SUPERADMINS'),
   toKaryakarthas('TO_KARYAKARTHAS'),
-  toOfficeStaff('TO_OFFICESTAFF');
+  toOfficeStaff('TO_OFFICESTAFF'),
+  tojeevanaadiLead('TO_JEEVANAADI_LEAD');
 
   final String value;
 
@@ -24,6 +25,9 @@ enum NoticeType {
         return NoticeType.toKaryakarthas;
       case 'TO_OFFICESTAFF':
         return NoticeType.toOfficeStaff;
+      case 'TO_JEEVANAADI_LEAD':
+        return NoticeType.tojeevanaadiLead;
+        
       default:
         throw ArgumentError('Unknown NoticeType: $value');
     }
@@ -43,6 +47,8 @@ enum NoticeType {
         return 'Karyakartha';
       case NoticeType.toOfficeStaff:
         return 'Office Staff';
+      case NoticeType.tojeevanaadiLead:
+        return 'Jeevanaadi Lead';
     }
   }
 

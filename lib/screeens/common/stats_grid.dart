@@ -50,7 +50,6 @@ class StatsGrid extends StatelessWidget {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-
             double aspectRatio;
             if (constraints.maxWidth > 1200) {
               aspectRatio = 2.1;
@@ -70,9 +69,8 @@ class StatsGrid extends StatelessWidget {
                 childAspectRatio: aspectRatio,
               ),
               children: [
-
                 /// Total Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN", "JEEVANAADI_LEAD"]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Total Jeevanadis",
@@ -120,7 +118,8 @@ class StatsGrid extends StatelessWidget {
                     isVisibleType("REQUESTS"))
                   StatCard(
                     title: "Total Requests",
-                    value: "${metrics.pendingRequests + metrics.inProgressRequests + metrics.completedRequests}",
+                    value:
+                        "${metrics.pendingRequests + metrics.inProgressRequests + metrics.completedRequests}",
                     icon: Icons.assignment,
                     color: Colors.teal,
                     screenWidth: constraints.maxWidth,
@@ -137,26 +136,26 @@ class StatsGrid extends StatelessWidget {
                     screenWidth: constraints.maxWidth,
                   ),
 
-                   if (isCardVisible(["OFFICE_STAFF"]) &&
-                    isVisibleType("REQUESTS"))
-                  StatCard(
-                    title: "InProgress Requests",
-                    value: "${metrics.inProgressRequests}",
-                    icon: Icons.hourglass_top,
-                    color: Colors.orange,
-                    screenWidth: constraints.maxWidth,
-                  ),
+                // if (isCardVisible(["OFFICE_STAFF"]) &&
+                //     isVisibleType("REQUESTS"))
+                //   StatCard(
+                //     title: "InProgress Requests",
+                //     value: "${metrics.inProgressRequests}",
+                //     icon: Icons.hourglass_top,
+                //     color: Colors.orange,
+                //     screenWidth: constraints.maxWidth,
+                //   ),
 
                 /// Completed Requests
-                if (isCardVisible(["OFFICE_STAFF"]) &&
-                    isVisibleType("REQUESTS"))
-                  StatCard(
-                    title: "Completed Requests",
-                    value: "${metrics.completedRequests}",
-                    icon: Icons.task_alt,
-                    color: Colors.green,
-                    screenWidth: constraints.maxWidth,
-                  ),
+                // if (isCardVisible(["OFFICE_STAFF"]) &&
+                //     isVisibleType("REQUESTS"))
+                //   StatCard(
+                //     title: "Completed Requests",
+                //     value: "${metrics.completedRequests}",
+                //     icon: Icons.task_alt,
+                //     color: Colors.green,
+                //     screenWidth: constraints.maxWidth,
+                //   ),
 
                 /// Active Jeevanadis
                 if (!["KARYAKARTHA", "OFFICE_STAFF"].contains(userType) &&
@@ -170,7 +169,7 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Inactive Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN","JEEVANAADI_LEAD"]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Inactive Jeevanadis",
@@ -181,7 +180,7 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Assigned Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN", "ADMIN"]) &&
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN", "ADMIN","JEEVANAADI_LEAD"]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Assigned Jeevanadis",
@@ -203,8 +202,9 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Active Karyakarthas
-                if (!["KARYAKARTHA", "OFFICE_STAFF"].contains(userType) &&
-                    isVisibleType("USERS") ||  isVisibleType("KARYAKARTHA"))
+                if (!["KARYAKARTHA", "OFFICE_STAFF", "JEEVANAADI_LEAD"].contains(userType) &&
+                        isVisibleType("USERS") ||
+                    isVisibleType("KARYAKARTHA"))
                   StatCard(
                     title: "Active Karyakarthas",
                     value: "${metrics.activeKaryakarthas}",
@@ -215,12 +215,14 @@ class StatsGrid extends StatelessWidget {
 
                 /// Profile Update %
                 if (isCardVisible(["KARYAKARTHA"]) &&
-                    isVisibleType("KARYAKARTHA")|| isVisibleType("JEEVANAADI"))
+                    (isVisibleType("KARYAKARTHA") ||
+                        isVisibleType("JEEVANAADI")) &&
+                    !isCardVisible(["ADMIN"]))
                   StatCard(
                     title: "Profile Update %",
                     value:
                         "${metrics.updationPercentgaeByKaryakartha?.toStringAsFixed(2)}%",
-                    icon: Icons.trending_up,
+                    icon: Icons.percent_outlined,
                     color: Colors.amber,
                     screenWidth: constraints.maxWidth,
                   ),

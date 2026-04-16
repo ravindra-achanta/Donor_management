@@ -179,7 +179,7 @@ class _KaryakarthasListPageState extends State<KaryakarthasListPage> {
                                       },
                                     ),
                                     if (Vikasdb().getString("USER_TYPE") !=
-                                        "GURUJI" && Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN")
+                                        "GURUJI" && Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "JEEVANAADI_LEAD" && Vikasdb().getString("USER_TYPE") != "ADMIN")
                                       AddButton().addButton(
                                         context: context,
                                         buttonText: "Add Karyakartha",

@@ -207,7 +207,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
           Row(
             children: [
               const Text(
-                "Total Visits :",
+                "Vidyaranayam Visits :",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 8),

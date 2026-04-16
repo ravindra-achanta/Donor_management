@@ -275,8 +275,8 @@ class _AddVisitState extends State<AddVisit> {
   Widget _buildTabSelector() {
     return Row(
       children: [
-        Expanded(child: _tabItem("Existing", true)),
-        Expanded(child: _tabItem("Manual", false)),
+        Expanded(child: _tabItem("Existing Jeevanaadi", true)),
+        Expanded(child: _tabItem("Manual Entry", false)),
       ],
     );
   }

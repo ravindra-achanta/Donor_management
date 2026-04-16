@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/Activity/activity_bloc.dart';
 import 'package:vikas_app/bloc_management/Activity/activity_event.dart';
 import 'package:vikas_app/bloc_management/Activity/activity_state.dart';
@@ -95,6 +96,7 @@ class _ActivityListScreenState extends State<ActivityListScreen> {
                                   ),
                                 ],
                               ),
+                               if (Vikasdb().getString("USER_TYPE") != "GURUJI" )
                               AddButton().addButton(
                                 context: context,
                                 buttonText: "Add Call Data",
