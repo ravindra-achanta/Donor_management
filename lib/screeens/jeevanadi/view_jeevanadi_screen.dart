@@ -349,8 +349,7 @@ class ViewJeevanadiScreen extends StatelessWidget {
             ),
           ),
 
-          if (Vikasdb().getString("USER_TYPE") == 'OFFICE_STAFF' ||
-              (Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA'))
+          if ((Vikasdb().getString("USER_TYPE") == 'KARYAKARTHA'))
             ElevatedButton.icon(
               onPressed: () {
                 Navigator.push(
@@ -1064,38 +1063,37 @@ class ViewJeevanadiScreen extends StatelessWidget {
           //     ),
           //   ),
           // Instead of calling _showApprovalDialog
-if (state.isFromRequest &&
-    state.requestStatus == 'PENDING' &&
-    Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
-  MouseRegion(
-    cursor: SystemMouseCursors.click,
-    child: GestureDetector(
-    onTap: () {
-       
-        context.read<JeevanaadiBloc>().add(
-          ApproveJeevanaadiEvent(jeevanadiId!),
-        );
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 8,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.green,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: const Text(
-          'Approve',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    ),
-  ),
+          if (state.isFromRequest &&
+              state.requestStatus == 'PENDING' &&
+              Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () {
+                  context.read<JeevanaadiBloc>().add(
+                    ApproveJeevanaadiEvent(jeevanadiId!),
+                  );
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.green,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Text(
+                    'Approve',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
 
           //const SizedBox(width: 12),
 
