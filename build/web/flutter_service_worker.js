@@ -3,11 +3,11 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"flutter_bootstrap.js": "1a90fccc0776c0aafad19375dbe4fb89",
+const RESOURCES = {"flutter_bootstrap.js": "8b9884a09cd3163fc0b7df92eb639292",
 "version.json": "c22a4e881e575b348de46c10fef54d5b",
 "index.html": "c7ff97e75879b8d9f0c34874fef92b70",
 "/": "c7ff97e75879b8d9f0c34874fef92b70",
-"main.dart.js": "abb4dcf0ce9bb53734587237ea26c43f",
+"main.dart.js": "5a200ec5525c29f19aea0753e6f58de1",
 "flutter.js": "24bc71911b75b5f8135c949e27a2984e",
 "icons/favicon-16x16.png": "ecb56881fcc9ff4e879b5fffe4a98f5e",
 "icons/favicon.ico": "f15ef1fe66e7f31a417c8a98f078aef4",
@@ -1415,7 +1415,7 @@ const RESOURCES = {"flutter_bootstrap.js": "1a90fccc0776c0aafad19375dbe4fb89",
 "assets/shaders/ink_sparkle.frag": "ecc85a2e95f5e9f53123dcaf8cb9b6ce",
 "assets/shaders/stretch_effect.frag": "40d68efbbf360632f614c731219e95f0",
 "assets/AssetManifest.bin": "19be6176511c28b0702e781e3647c139",
-"assets/fonts/MaterialIcons-Regular.otf": "7084d264443d6e10a609e5d5abe95fff",
+"assets/fonts/MaterialIcons-Regular.otf": "69046660a7758ac33ccf556b33162c64",
 "assets/assets/images/student.png": "ae20a4c36f43157a92b94c16ad9847b0",
 "assets/assets/images/login4.jpg": "98014387ca4c9a1f7c99ad3a7aa146f1",
 "assets/assets/vidyaaranayam_logo.png": "c70a23ce44f410273591f06fb2e5398f",
