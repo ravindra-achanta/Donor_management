@@ -129,7 +129,7 @@ class _OfficeStaffListPageState extends State<OfficeStaffListPage> {
                                     if (Vikasdb().getString("USER_TYPE") !=
                                             "GURUJI" &&
                                         Vikasdb().getString("USER_TYPE") !=
-                                            "SUPER_ADMIN")
+                                            "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "ADMIN")
                                       AddButton().addButton(
                                         context: context,
                                         buttonText:

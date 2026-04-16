@@ -701,6 +701,7 @@ class _AddDharmaSetuState extends State<AddDharmasetu> {
 
   Widget _buildReferredByField() {
     return ReferredByDropdown(
+      labelText: "Jeevanaadi Members",
       controller: _referredByController,
       initialValue: _selectedReferredBy,
       onSelected: (value) {

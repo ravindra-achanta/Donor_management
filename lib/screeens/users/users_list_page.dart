@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
+import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/users/user_bloc.dart';
 import 'package:vikas_app/bloc_management/users/user_event.dart';
 import 'package:vikas_app/bloc_management/users/user_state.dart';
@@ -121,6 +122,7 @@ class _UsersState extends State<Users> {
                                       },
                                     ),
                                     // Add button
+                       if (Vikasdb().getString("USER_TYPE") != "GURUJI" )
                                     AddButton().addButton(
                                       context: context,
                                       buttonText: "Add New User",

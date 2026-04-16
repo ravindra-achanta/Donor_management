@@ -144,7 +144,8 @@ class _CommonListState extends State<CommonList> {
                   //tableHeader('ID', flex: 1),
                   tableHeader('Visitor Name', flex: 2),
                   tableHeader('Phone Number', flex: 2),
-                  //tableHeader('Visit Purpose', flex: 2),
+                 // tableHeader('Existing', flex: 1),
+                  tableHeader('Visit Purpose', flex: 2),
                   tableHeader('No. of Guests', flex: 1),
                   if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                     tableHeader('Actions', flex: 1),
@@ -353,6 +354,9 @@ class _CommonListState extends State<CommonList> {
                               if (rowData is VisitView) ...[
                                 tableData(rowData.visitorName, flex: 2),
                                 tableData(rowData.phoneNumber, flex: 2),
+                              tableData(rowData.visitPurpose, flex: 2),
+
+                                
 
                                 tableData(
                                   rowData.noOfGuests.toString(),

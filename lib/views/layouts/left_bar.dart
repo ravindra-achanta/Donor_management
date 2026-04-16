@@ -176,7 +176,7 @@ class _LeftBarState extends State<LeftBar>
 
                       NavigationItem(
                         iconData: LucideIcons.users,
-                        title: "Users Management",
+                        title: "Users Information",
                         isCondensed: isCondensed,
                         route: '/users',
                       ),
@@ -226,12 +226,12 @@ class _LeftBarState extends State<LeftBar>
                       route: '/profile',
                     ),
 
-                    NavigationItem(
-                      iconData: LucideIcons.logOut,
-                      title: "Logout",
-                      isCondensed: isCondensed,
-                      route: '/logout',
-                    ),
+                    // NavigationItem(
+                    //   iconData: LucideIcons.logOut,
+                    //   title: "Logout",
+                    //   isCondensed: isCondensed,
+                    //   route: '/logout',
+                    // ),
 
                     // NavigationItem(
                     //   iconData: LucideIcons.userCog,
