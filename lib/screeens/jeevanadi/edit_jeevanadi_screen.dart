@@ -175,7 +175,7 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
         _referredBySearchController.text = '';
       }
 
-      _jeevanadiIdCtrl.text = profile.basicDetails.id.toString();
+      _jeevanadiIdCtrl.text = profile.basicDetails.jeevanadiNo.toString();
       _dojCtrl.text = profile.profileDetails.joinedDate ?? '';
 
       _mobileCtrl.text = profile.profileDetails.phoneNumber;
@@ -676,8 +676,8 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             _dropdownService.getGenderValues(),
           ),
           _dropdownField(
-            "Material Status",
-            'materialStatus',
+            "Marital status",
+            'maritalStatus',
             _dropdownService.getMaritalStatusValues(),
           ),
         ),
@@ -709,15 +709,23 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
           ),
           _textField("PAN Number", _panCtrl),
         ),
-        _twoFieldRow(
-          _dropdownField("Role & Permission *", 'role', [
-            "Donor",
-            "Admin",
-            "Member",
-            "Volunteer",
-          ]),
-          _buildReferredByField(),
-        ),
+        // _twoFieldRow(
+        //   _dropdownField("Role & Permission *", 'role', [
+        //     "Donor",
+        //     "Admin",
+        //     "Member",
+        //     "Volunteer",
+        //   ], enabled: false,
+           
+        //   ),
+        //   _buildReferredByField(),
+        // ),
+        Column(
+  children: [
+    _buildReferredByField(),
+    const SizedBox(height: 16),
+  ],
+),
       ],
     );
   }
@@ -740,12 +748,13 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
       title: 'Jeevanadi Info',
       children: [
         _twoFieldRow(
-          _textField("Jeevanadi Id", _jeevanadiIdCtrl),
-          _dateField("Date of Joining", _dojCtrl),
+          _textField("Jeevanadi No", _jeevanadiIdCtrl, readOnly: true),
+          _dateField("Date of Joining", _dojCtrl, readOnly: true),
         ),
       ],
     );
   }
+
 
   Widget _buildContactDetails() {
     return _buildSection(
@@ -952,10 +961,11 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
     ),
   );
 
-  Widget _textField(String label, TextEditingController controller) => Padding(
+  Widget _textField(String label, TextEditingController controller, {bool readOnly = false}) => Padding(
     padding: const EdgeInsets.only(bottom: 12),
     child: TextFormField(
       controller: controller,
+      readOnly: readOnly,
       style: const TextStyle(fontSize: 14),
       decoration: _inputDecoration(label),
     ),
@@ -978,20 +988,23 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
         ),
       );
 
-  Widget _dateField(String label, TextEditingController controller) => Padding(
+  Widget _dateField(String label, TextEditingController controller,{bool readOnly = false}) => Padding(
     padding: const EdgeInsets.only(bottom: 12),
     child: TextFormField(
       controller: controller,
       readOnly: true,
-      onTap: () => _pickDate(controller),
+     // onTap: () => _pickDate(controller),
+    onTap: readOnly ? null : () => _pickDate(controller),  
+
       decoration: _inputDecoration(
         label,
-        suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey),
-      ),
+ suffixIcon: readOnly 
+          ? const Icon(Icons.lock, color: Colors.grey) 
+          : const Icon(Icons.calendar_today, color: Colors.grey),      ),
     ),
   );
 
-  Widget _dropdownField(String label, String key, List<String> items) {
+  Widget _dropdownField(String label, String key, List<String> items,{bool enabled = true}) {
     // Safely get the current value as String
     String? currentValue;
 
@@ -1019,14 +1032,17 @@ class _EditJeevanadiScreenState extends State<EditJeevanadiScreen> {
             (e) => DropdownMenuItem<String>(value: e, child: Text(e)),
           ),
         ],
-        onChanged: (v) {
+        onChanged: enabled ? (v) {
           setState(() {
             _dropdownValues[key] = v ?? '';
           });
-        },
+        } : null,
         decoration: _inputDecoration(label),
         icon: const Icon(Icons.arrow_drop_down, color: Colors.grey),
-        style: const TextStyle(color: Colors.black, fontSize: 14),
+        style: TextStyle(
+        color: enabled ? Colors.black : Colors.grey,
+        fontSize: 14,
+      ),
         dropdownColor: Colors.white,
       ),
     );

@@ -368,6 +368,9 @@ class _ListViewScreenState extends State<ListViewScreen> {
                       //   },
                       // ),
                       const SizedBox(width: 8),
+                     if (Vikasdb().getString("USER_TYPE") != "ADMIN"  &&
+                        Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN")
+
                       Expanded(
                         child: ElevatedButton.icon(
                           onPressed: () {
@@ -381,7 +384,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
                             screenType == "VISIT"
                                 ? 'View Full Details'
                                 //: 'Click to view more actions',
-                                : 'More Actions',
+                                : 'More Details',
                             style: const TextStyle(color: Colors.white),
                           ),
                           style: ElevatedButton.styleFrom(

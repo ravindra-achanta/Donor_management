@@ -457,8 +457,8 @@ class _KaryaKarthaViewScreenState extends State<KaryaKarthaViewScreen>
                   controller: _tabController,
                   tabs: isJeevanadiLead
                       ? const [
-                          Tab(text: "For Deallocate"),
-                          Tab(text: "For Allocate"),
+                          Tab(text: "Allocated"),
+                          Tab(text: "Unassigned"),
                         ]
                       : const [Tab(text: "Assigned Members")],
 

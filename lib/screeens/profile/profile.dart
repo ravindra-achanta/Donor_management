@@ -56,8 +56,8 @@ class _MyProfileState extends State<MyProfile> {
                   _buildHeader(user),
                   const SizedBox(height: 16),
 
-                  _buildStats(user),
-                  const SizedBox(height: 16),
+                   _buildStats(user),
+                  // const SizedBox(height: 16),
 
                   _buildProfileCard(user),
                 ],
