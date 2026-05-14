@@ -13,6 +13,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<FetchDashboardMetricsEvent>(_fetchMetrics);
     on<FetchDonationMetricsEvent>(_fetchDonationMetrics);
     on<PostDashboardActivityEvent>(_postDashboardActivity);
+    on<FetchDonationsMetricsAllEvent>(_fetchDonationsMetricsAll);
   }
 
   Future<void> _fetchDonationMetrics(
@@ -81,4 +82,31 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       
            }
     }
+
+    Future<void> _fetchDonationsMetricsAll(
+    FetchDonationsMetricsAllEvent event,
+    Emitter<DashboardState> emit,
+  ) async {
+    emit(state.copyWith(status: DashboardApiStatus.loading));
+
+    final response = await dashboardRepo.getDonationsMetricsAll();
+
+    if (response.isSuccess) {
+      print("✅ [DashboardBloc] Donations metrics all fetched");
+      emit(
+        state.copyWith(
+          status: DashboardApiStatus.loaded,
+          donationsMetricsAll: response.data,
+        ),
+      );
+    } else {
+      print("❌ [DashboardBloc] Error fetching donations metrics all: ${response.error?.message}");
+      emit(
+        state.copyWith(
+          status: DashboardApiStatus.error,
+          errorMessage: response.error?.message ?? "Failed to load donations metrics",
+        ),
+      );
+    }
+  }
   }

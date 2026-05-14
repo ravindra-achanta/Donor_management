@@ -1,4 +1,3 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get/get.dart';
@@ -73,34 +72,30 @@ class _AddVisitState extends State<AddVisit> {
   }
 
   void _populateData(VisitModel data) {
-  _visitId = data.id;
+    _visitId = data.id;
 
-  _controllers['name']!.text = data.visitorName;
-  _controllers['phone']!.text = data.phoneNumber;
-  _controllers['email']!.text = data.email;
-  _controllers['comments']!.text = data.comments;
-  _controllers['guests']!.text = data.noOfGuests.toString();
+    _controllers['name']!.text = data.visitorName;
+    _controllers['phone']!.text = data.phoneNumber;
+    _controllers['email']!.text = data.email;
+    _controllers['comments']!.text = data.comments;
+    _controllers['guests']!.text = data.noOfGuests.toString();
 
-  _selectedPurpose = data.visitPurpose;
+    _selectedPurpose = data.visitPurpose;
 
-  if (data.jeevanaadiId != null &&
-      data.jeevanaadiId!.isNotEmpty) {
+    if (data.jeevanaadiId != null && data.jeevanaadiId!.isNotEmpty) {
+      _isExistingTab = true;
+      _isUserSelected = true;
 
-    
-    _isExistingTab = true;
-    _isUserSelected = true;
+      _controllers['jeevanaadiId']!.text = data.jeevanaadiId!;
 
-    _controllers['jeevanaadiId']!.text = data.jeevanaadiId!;
+      _searchController.text = data.visitorName;
+    } else {
+      _isExistingTab = false;
+      _isUserSelected = true;
+    }
 
-    _searchController.text = data.visitorName;
-
-  } else {
-    _isExistingTab = false;
-    _isUserSelected = true; 
+    setState(() {});
   }
-
-  setState(() {});
-}
 
   @override
   void dispose() {
@@ -132,7 +127,7 @@ class _AddVisitState extends State<AddVisit> {
 
                 _controllers['phone']!.text =
                     profile.profileDetails.phoneNumber ?? '';
-                    _isFetchedUser = true;
+                _isFetchedUser = true;
               });
             }
           },
@@ -284,17 +279,17 @@ class _AddVisitState extends State<AddVisit> {
   Widget _tabItem(String text, bool isExisting) {
     final isSelected = _isExistingTab == isExisting;
     return GestureDetector(
-    onTap: () {
-  setState(() {
-    _isExistingTab = isExisting;
+      onTap: () {
+        setState(() {
+          _isExistingTab = isExisting;
 
-    if (!_isEditMode) {
-      _isUserSelected = false;
-      _searchController.clear();
-      _controllers.forEach((k, v) => v.clear());
-    }
-  });
-},
+          if (!_isEditMode) {
+            _isUserSelected = false;
+            _searchController.clear();
+            _controllers.forEach((k, v) => v.clear());
+          }
+        });
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         color: isSelected ? Colors.blue : Colors.grey.shade200,
@@ -338,16 +333,23 @@ class _AddVisitState extends State<AddVisit> {
 
         const SizedBox(height: 10),
 
-     if (_isUserSelected || _isEditMode) ...[
-  _buildField('Visitor Name', Icons.person, 'name',
-      readOnly: _isFetchedUser),
-  const SizedBox(height: 16),
-  _buildField('Email', Icons.email, 'email',
-      readOnly: _isFetchedUser),
-  const SizedBox(height: 16),
-  _buildField('Phone Number', Icons.phone, 'phone',
-  readOnly: _isFetchedUser,)
-]
+        if (_isUserSelected || _isEditMode) ...[
+          _buildField(
+            'Visitor Name',
+            Icons.person,
+            'name',
+            readOnly: _isFetchedUser,
+          ),
+          const SizedBox(height: 16),
+          _buildField('Email', Icons.email, 'email', readOnly: _isFetchedUser),
+          const SizedBox(height: 16),
+          _buildField(
+            'Phone Number',
+            Icons.phone,
+            'phone',
+            readOnly: _isFetchedUser,
+          ),
+        ],
       ],
     );
   }
@@ -432,6 +434,7 @@ class _AddVisitState extends State<AddVisit> {
             ? _controllers['jeevanaadiId']!.text
             : null,
         visitorName: _controllers['name']!.text,
+        createdByName: '', // This will be set in the backend based on the logged-in user
         phoneNumber: _controllers['phone']!.text,
         email: _controllers['email']!.text,
         visitPurpose: _selectedPurpose ?? '',
@@ -447,4 +450,3 @@ class _AddVisitState extends State<AddVisit> {
     }
   }
 }
-

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vikas_app/screeens/models/request/donations_all_metrics.dart';
 import 'package:vikas_app/screeens/models/request/user_metrics_response.dart';
 import 'package:vikas_app/screeens/models/response/donationMetrics.dart';
 
@@ -8,6 +9,7 @@ class DashboardState extends Equatable {
   final DashboardApiStatus status;
   final UserMetricsResponse? metrics;
   final ContributionResponse? donationMetrics;
+  final DonationsAllMetrics? donationsMetricsAll;
   final Map<String, dynamic>? activityDashboard;
   final String? errorMessage;
 
@@ -17,6 +19,8 @@ class DashboardState extends Equatable {
     this.errorMessage,
     this.activityDashboard,
     this.donationMetrics,
+    this.donationsMetricsAll,
+    
   });
 
   DashboardState copyWith({
@@ -24,6 +28,7 @@ class DashboardState extends Equatable {
     UserMetricsResponse? metrics,
     String? errorMessage,
     ContributionResponse? donationMetrics,
+    DonationsAllMetrics? donationsMetricsAll,
     Map<String, dynamic>? activityDashboard,
   }) {
     return DashboardState(
@@ -32,9 +37,10 @@ class DashboardState extends Equatable {
       errorMessage: errorMessage ?? this.errorMessage,
       donationMetrics: donationMetrics ?? this.donationMetrics,
       activityDashboard: activityDashboard ?? this.activityDashboard,
+      donationsMetricsAll: donationsMetricsAll ?? this.donationsMetricsAll,
     );
   }
 
   @override
-  List<Object?> get props => [status, metrics, errorMessage, donationMetrics, activityDashboard];
+  List<Object?> get props => [status, metrics, errorMessage, donationMetrics, activityDashboard, donationsMetricsAll];
 }

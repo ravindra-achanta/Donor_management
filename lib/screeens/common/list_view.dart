@@ -172,28 +172,29 @@ class _ListViewScreenState extends State<ListViewScreen> {
                   ),
 
                   // Row 4: Number of Guests and Existing Visitor
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: _infoTile(
-                          Icons.group,
-                          'Number of Guests',
-                          _visit.noOfGuests.toString(),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      // Expanded(
-                      //   child: _infoTile(
-                      //     Icons.check_circle_outline,
-                      //     'Existing Visitor',
-                      //     _visit.existVisitor ? 'Yes' : 'No',
+                Row(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Expanded(
+      child: _infoTile(
+        Icons.group,
+        'Number of Guests',
+        _visit.noOfGuests.toString(),
+      ),
+    ),
 
-                      //     //valueColor: Colors.green,
-                      //   ),
-                      // ),
-                    ],
-                  ),
+    const SizedBox(width: 16),
+
+    Expanded(
+      child: _infoTile(
+        Icons.person_outline,
+        'Created By',
+        _visit.createdByName ?? "N/A",
+      ),
+    ),
+  ],
+),
+                     
                   const SizedBox(height: 16),
                   _infoTile(
                     Icons.comment_outlined,
@@ -236,11 +237,33 @@ class _ListViewScreenState extends State<ListViewScreen> {
                       ),
                     ],
                   ),
-                  _infoTile(
-                    Icons.person,
-                    'Referred By',
-                    _dharmasetu.referredBy,
-                  ),
+                  // _infoTile(
+                  //   Icons.person,
+                  //   'Referred By',
+                  //   _dharmasetu.referredBy,
+                  // ),
+                  Row(
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Expanded(
+      child: _infoTile(
+        Icons.person,
+        'Referred By',
+        _dharmasetu.referredBy,
+      ),
+    ),
+
+    const SizedBox(width: 16),
+
+    Expanded(
+      child: _infoTile(
+        Icons.person_outline,
+        'Created By',
+        _dharmasetu.createdByName ?? "N/A",
+      ),
+    ),
+  ],
+),
                   const SizedBox(height: 16),
                 ],
 
@@ -535,7 +558,7 @@ class _ListViewScreenState extends State<ListViewScreen> {
                   child: _infoTile(
                     Icons.feedback_outlined,
                     'Avg Donation Frequency',
-                    "${state?.donationMetrics?.monthlyAvgFrequency ?? "N/A"} times/monthly ",
+                    "${state?.donationMetrics?.monthlyAvgFrequency!.toStringAsFixed(2) ?? "N/A"} times/monthly ",
                   ),
                 ),
                 const SizedBox(width: 16),

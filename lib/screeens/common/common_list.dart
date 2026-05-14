@@ -144,8 +144,10 @@ class _CommonListState extends State<CommonList> {
                   //tableHeader('ID', flex: 1),
                   tableHeader('Visitor Name', flex: 2),
                   tableHeader('Phone Number', flex: 2),
-                 // tableHeader('Existing', flex: 1),
+                  // tableHeader('Existing', flex: 1),
                   tableHeader('Visit Purpose', flex: 2),
+                  tableHeader('Created By', flex: 2),
+
                   tableHeader('No. of Guests', flex: 1),
                   if (Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
                     tableHeader('Actions', flex: 1),
@@ -168,7 +170,8 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Name'),
                   tableHeader('Mobile'),
                   tableHeader('Roles', flex: 2),
-                  if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "GURUJI")
+                  if (Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" &&
+                      Vikasdb().getString("USER_TYPE") != "GURUJI")
                     tableHeader('Actions'),
                 ],
               ],
@@ -354,9 +357,8 @@ class _CommonListState extends State<CommonList> {
                               if (rowData is VisitView) ...[
                                 tableData(rowData.visitorName, flex: 2),
                                 tableData(rowData.phoneNumber, flex: 2),
-                              tableData(rowData.visitPurpose, flex: 2),
-
-                                
+                                tableData(rowData.visitPurpose, flex: 2),
+                                tableData(rowData.createdByName, flex: 2),
 
                                 tableData(
                                   rowData.noOfGuests.toString(),
@@ -482,8 +484,10 @@ class _CommonListState extends State<CommonList> {
                               //   ),
                               // ),
                               //if (rowData is User)
-                              if (rowData is User && Vikasdb().getString("USER_TYPE") != "SUPER_ADMIN" && Vikasdb().getString("USER_TYPE") != "GURUJI")
-
+                              if (rowData is User &&
+                                  Vikasdb().getString("USER_TYPE") !=
+                                      "SUPER_ADMIN" &&
+                                  Vikasdb().getString("USER_TYPE") != "GURUJI")
                                 Expanded(
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.start,

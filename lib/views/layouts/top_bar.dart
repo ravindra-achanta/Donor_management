@@ -1,9 +1,13 @@
 import 'package:feather_icons/feather_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutx/flutx.dart';
 import 'package:get/get.dart';
 import 'package:lucide_icons/lucide_icons.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_event.dart';
+import 'package:vikas_app/bloc_management/authentication/auth_state.dart';
 import 'package:vikas_app/screeens/authentication/login.dart';
 import 'package:vikas_app/screeens/models/enum/user_type.dart';
 import 'package:vikas_app/themes/app_style.dart';
@@ -25,98 +29,103 @@ class _TopBarState extends State<TopBar>
 
   @override
   Widget build(BuildContext context) {
-    // Hide TopBar if user is not logged in
-    // final userName = Vikasdb().getString("USER_NAME");
-    // if (userName == null || userName.isEmpty) {
-    //   return const SizedBox.shrink();
-    // }
-    //final userName = Vikasdb().getString("USER_NAME") ?? "User";
-    final userName = Vikasdb().getString("USER_NAME");
+    return BlocBuilder<AuthBloc, AuthState>(
+      builder: (context, authState) {
+        // Hide TopBar on logout success
+        if (authState.status == AuthStatus.logoutSuccess) {
+          return const SizedBox.shrink();
+        }
 
-    if (userName == null || userName.isEmpty) {
-      return const SizedBox.shrink();
-    }
+        //final userName = Vikasdb().getString("USER_NAME");
+        final userName = authState.status == AuthStatus.logoutSuccess
+            ? null
+            : Vikasdb().getString("USER_NAME");
+        if (userName == null || userName.isEmpty) {
+          return const SizedBox.shrink();
+        }
 
-    return Material(
-      color: Colors.transparent,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-        child: Container(
-          color: Colors.grey[200],
-          child: FxCard(
-            shadow: FxShadow(
-              position: FxShadowPosition.bottomRight,
-              elevation: 0.5,
+        return Material(
+          color: Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 12.0,
             ),
-            height: 75,
-            padding: FxSpacing.x(24),
-            color: topBarTheme.background.withAlpha(246),
-            child: Row(
-              children: [
-                /// LEFT MENU ICON
-                InkWell(
-                  onTap: () {
-                    ThemeCustomizer.toggleLeftBarCondensed();
-                  },
-                  child: Icon(
-                    LucideIcons.menu,
-                    color: topBarTheme.onBackground,
-                  ),
+            child: Container(
+              color: Colors.grey[200],
+              child: FxCard(
+                shadow: FxShadow(
+                  position: FxShadowPosition.bottomRight,
+                  elevation: 0.5,
                 ),
-                const SizedBox(width: 24),
+                height: 75,
+                padding: FxSpacing.x(24),
+                color: topBarTheme.background.withAlpha(246),
+                child: Row(
+                  children: [
+                    InkWell(
+                      onTap: () {
+                        ThemeCustomizer.toggleLeftBarCondensed();
+                      },
 
-                /// RIGHT SIDE
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      /// TEXT
-                      Text.rich(
-                        TextSpan(
-                          children: [
-                            const TextSpan(text: "Welcome "),
+                      child: Icon(
+                        LucideIcons.menu,
+                        color: topBarTheme.onBackground,
+                      ),
+                    ),
+                    const SizedBox(width: 24),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Text.rich(
                             TextSpan(
-                              text: userName,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                              ),
+                              children: [
+                                const TextSpan(text: "Welcome "),
+                                TextSpan(
+                                  text: userName,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const TextSpan(text: " ("),
+                                TextSpan(text: _getUserDisplayName()),
+                                const TextSpan(text: ")"),
+                              ],
                             ),
-                            const TextSpan(text: " ("),
-                            TextSpan(text: _getUserDisplayName()),
-                            const TextSpan(text: ")"),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-
-                      /// AVATAR & MENU
-                      CustomPopupMenu(
-                        backdrop: true,
-                        offsetX: -140,
-                        offsetY: 10,
-                        menu: CircleAvatar(
-                          radius: 16,
-                          backgroundImage: NetworkImage(
-                            Vikasdb().getString("USER_PROFILE") ?? "",
                           ),
-                          onBackgroundImageError: (_, __) {},
-                          child:
-                              (Vikasdb().getString("USER_PROFILE")?.isEmpty ??
-                                  true)
-                              ? const Icon(Icons.person, size: 18)
-                              : null,
-                        ),
-                        menuBuilder: (context) => buildAccountMenu(),
-                        onChange: (value) {},
+                          const SizedBox(width: 10),
+                          CustomPopupMenu(
+                            backdrop: true,
+                            offsetX: -140,
+                            offsetY: 10,
+                            menu: CircleAvatar(
+                              radius: 16,
+                              backgroundImage: NetworkImage(
+                                Vikasdb().getString("USER_PROFILE") ?? "",
+                              ),
+                              onBackgroundImageError: (_, __) {},
+                              child:
+                                  (Vikasdb()
+                                          .getString("USER_PROFILE")
+                                          ?.isEmpty ??
+                                      true)
+                                  ? const Icon(Icons.person, size: 18)
+                                  : null,
+                            ),
+                            menuBuilder: (context) => buildAccountMenu(),
+                            onChange: (value) {},
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -133,48 +142,20 @@ class _TopBarState extends State<TopBar>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          
-
-           
-
             const Divider(height: 1),
 
-            /// LOGOUT
-            // _buildMenuItem(
-            //   icon: FeatherIcons.logOut,
-            //   title: "Logout",
-            //   isDanger: true,
-            //   onTap: () async {
-            //     await Vikasdb.sharedPreferences!.clear();
-
-            //     if (Get.isOverlaysOpen) {
-            //       Get.back();
-            //     }
-
-            //     Get.offAll(() => const LoginPage());
-            //   },
-            // ),
-            /// LOGOUT
             _buildMenuItem(
               icon: FeatherIcons.logOut,
               title: "Logout",
               isDanger: true,
-              onTap: () async {
+              onTap: () {
                 while (Get.isOverlaysOpen) {
                   Get.back();
                 }
-
-                await Vikasdb.sharedPreferences!.clear();
-
-                setState(() {});
-                // await Vikasdb.sharedPreferences!.reload();
-
-                //await Future.delayed(const Duration(milliseconds: 300));
-
-                Get.offAll(
-                  () => const LoginPage(),
-                  transition: Transition.fade,
-                );
+                if (context.mounted) {
+                  context.read<AuthBloc>().add(LogoutEvent());
+                  Get.offAll(() => const LoginPage());
+                }
               },
             ),
           ],

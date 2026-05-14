@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_state.dart';
+import 'package:vikas_app/screeens/common/donation_stat_card.dart';
 import 'package:vikas_app/screeens/common/stat_card.dart';
 
 class StatsGrid extends StatelessWidget {
@@ -70,7 +71,11 @@ class StatsGrid extends StatelessWidget {
               ),
               children: [
                 /// Total Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN", "JEEVANAADI_LEAD"]) &&
+                if (isCardVisible([
+                      "GURUJI",
+                      "SUPER_ADMIN",
+                      "JEEVANAADI_LEAD",
+                    ]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Total Jeevanadis",
@@ -169,7 +174,11 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Inactive Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN","JEEVANAADI_LEAD"]) &&
+                if (isCardVisible([
+                      "GURUJI",
+                      "SUPER_ADMIN",
+                      "JEEVANAADI_LEAD",
+                    ]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Inactive Jeevanadis",
@@ -180,7 +189,12 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Assigned Jeevanadis
-                if (isCardVisible(["GURUJI", "SUPER_ADMIN", "ADMIN","JEEVANAADI_LEAD"]) &&
+                if (isCardVisible([
+                      "GURUJI",
+                      "SUPER_ADMIN",
+                      "ADMIN",
+                      "JEEVANAADI_LEAD",
+                    ]) &&
                     isVisibleType("JEEVANAADI"))
                   StatCard(
                     title: "Assigned Jeevanadis",
@@ -202,7 +216,11 @@ class StatsGrid extends StatelessWidget {
                   ),
 
                 /// Active Karyakarthas
-                if (!["KARYAKARTHA", "OFFICE_STAFF", "JEEVANAADI_LEAD"].contains(userType) &&
+                if (![
+                          "KARYAKARTHA",
+                          "OFFICE_STAFF",
+                          "JEEVANAADI_LEAD",
+                        ].contains(userType) &&
                         isVisibleType("USERS") ||
                     isVisibleType("KARYAKARTHA"))
                   StatCard(
@@ -212,6 +230,27 @@ class StatsGrid extends StatelessWidget {
                     color: Colors.purple,
                     screenWidth: constraints.maxWidth,
                   ),
+
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                    isVisibleType("KARYAKARTHA"))
+                  StatCard(
+                    title: "Inactive Karyakarthas",
+                    value: "${metrics.inactiveKaryakarthas}",
+                    icon: Icons.people_alt,
+                    color: Colors.purple,
+                    screenWidth: constraints.maxWidth,
+                  ),
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                    isVisibleType("KARYAKARTHA"))
+                  StatCard(
+                    title: "Total Karyakarthas",
+                    value: "${metrics.totalKaryakarthas}",
+                    icon: Icons.people_alt,
+                    color: Colors.purple,
+                    screenWidth: constraints.maxWidth,
+                  ),
+
+                /// Total Contributions
 
                 /// Profile Update %
                 if (isCardVisible(["KARYAKARTHA"]) &&
@@ -223,6 +262,42 @@ class StatsGrid extends StatelessWidget {
                     value:
                         "${metrics.updationPercentgaeByKaryakartha?.toStringAsFixed(2)}%",
                     icon: Icons.percent_outlined,
+                    color: Colors.amber,
+                    screenWidth: constraints.maxWidth,
+                  ),
+
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                    state.donationsMetricsAll != null &&
+                    visibleType == null)
+                  DonationStatCard(
+                    title: "Total Contributions",
+                    value: "${state.donationsMetricsAll!.totalContributions}",
+                    //icon: Icons.attach_money_rounded,
+                    color: Colors.green,
+                    screenWidth: constraints.maxWidth,
+                  ),
+
+                /// Monthly Avg Frequency
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                    state.donationsMetricsAll != null &&
+                    visibleType == null)
+                  DonationStatCard(
+                    title: "Monthly Avg Frequency",
+                    value: "${state.donationsMetricsAll!.monthlyAvgFrequency}",
+                    //icon: Icons.trending_up_rounded,
+                    color: Colors.teal,
+                    screenWidth: constraints.maxWidth,
+                  ),
+
+                /// Monthly Amount Average
+                if (isCardVisible(["GURUJI", "SUPER_ADMIN"]) &&
+                    state.donationsMetricsAll != null &&
+                    visibleType == null)
+                  DonationStatCard(
+                    title: "Monthly Avg Amount",
+                    value:
+                        "${state.donationsMetricsAll!.monthlyAmountAvgFrequency}",
+                    //icon: Icons.account_balance_wallet_rounded,
                     color: Colors.amber,
                     screenWidth: constraints.maxWidth,
                   ),

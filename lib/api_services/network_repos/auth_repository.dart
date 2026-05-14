@@ -183,11 +183,27 @@ class AuthRepository {
     }
   }
 
-  
+  // Logout API
+  Future<ApiResult<Map<String, dynamic>>> logout() async {
+    final result = await _api.post(
+      ApiConstants.LOGOUT,
+      body: {},
+    );
 
-  
+    if (!result.isSuccess) {
+      return ApiResult.failure(result.error);
+    }
 
-
+    try {
+      // Response contains: { "message": "string", "timestamp": "2026-05-13T10:04:53.675Z" }
+      final Map<String, dynamic> data = result.data ?? {};
+      return ApiResult.success(data);
+    } catch (e) {
+      return ApiResult.failure(
+        ApiError(message: 'Error parsing logout response: $e'),
+      );
+    }
+  }
 }
 
 

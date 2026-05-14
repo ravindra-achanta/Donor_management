@@ -16,22 +16,20 @@ class JeevanadiRepo {
     int page,
     int size,
     String? searchQuery,
-      String? orderedBy,
+    String? orderedBy,
   ) async {
-  final queryParams = {
-  'page': page.toString(),
-  'size': size.toString(),
-};
+    final queryParams = {'page': page.toString(), 'size': size.toString()};
 
-if (searchQuery != null && searchQuery.isNotEmpty) {
-  queryParams['searchValue'] = searchQuery;
-}
- if (orderedBy != null && orderedBy.isNotEmpty) {
-    queryParams['orderedBy'] = orderedBy; 
-  }
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      queryParams['searchValue'] = searchQuery;
+    }
+    if (orderedBy != null && orderedBy.isNotEmpty) {
+      queryParams['orderedBy'] = orderedBy;
+    }
 
-final uri = Uri.parse(ApiConstants.GET_JEEVANAADIS)
-    .replace(queryParameters: queryParams);
+    final uri = Uri.parse(
+      ApiConstants.GET_JEEVANAADIS,
+    ).replace(queryParameters: queryParams);
     final result = await _api.get(uri.toString());
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -163,30 +161,26 @@ final uri = Uri.parse(ApiConstants.GET_JEEVANAADIS)
   Future<ApiResult<JeevanaadiPaginatedView>> getUnassignedJeevanadiUsers({
     required int page,
     required int size,
-     String? searchQuery,
-        String? orderedBy,
-
+    String? searchQuery,
+    String? orderedBy,
   }) async {
     // final url =
     //     "${ApiConstants.jeevanadi_nonallocated_users}?page=$page&size=$size";
 
     // final result = await _api.get(url);
-     final baseUrl = ApiConstants.jeevanadi_nonallocated_users;
+    final baseUrl = ApiConstants.jeevanadi_nonallocated_users;
 
+    final queryParams = {'page': page.toString(), 'size': size.toString()};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      queryParams['searchValue'] = searchQuery;
+    }
+    if (orderedBy != null && orderedBy.isNotEmpty) {
+      // ← add
+      queryParams['orderedBy'] = orderedBy;
+    }
 
-  final queryParams = {
-    'page': page.toString(),
-    'size': size.toString(),
-  };
-  if (searchQuery != null && searchQuery.isNotEmpty) {
-    queryParams['searchValue'] = searchQuery;  
-  }
-    if (orderedBy != null && orderedBy.isNotEmpty) {   // ← add
-    queryParams['orderedBy'] = orderedBy;
-  }
-
-  final uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
-  final result = await _api.get(uri.toString());
+    final uri = Uri.parse(baseUrl).replace(queryParameters: queryParams);
+    final result = await _api.get(uri.toString());
 
     if (!result.isSuccess) {
       return ApiResult.failure(result.error);
@@ -209,22 +203,20 @@ final uri = Uri.parse(ApiConstants.GET_JEEVANAADIS)
     required String karyakarthaId,
     required int page,
     required int size,
-      String? searchQuery,
-        String? orderedBy,
+    String? searchQuery,
+    String? orderedBy,
   }) async {
-    final queryParams = {
-    'page': page.toString(),
-    'size': size.toString(),
-  };
-  if (searchQuery != null && searchQuery.isNotEmpty) {
-    queryParams['searchValue'] = searchQuery;
-  }
-  if (orderedBy != null && orderedBy.isNotEmpty) {   // ← add
-    queryParams['orderedBy'] = orderedBy;
-  }
-     final url = Uri.parse(
-    '${ApiConstants.jeevanadi_allocate_user}/karyakartha/$karyakarthaId',
-  ).replace(queryParameters: queryParams);
+    final queryParams = {'page': page.toString(), 'size': size.toString()};
+    if (searchQuery != null && searchQuery.isNotEmpty) {
+      queryParams['searchValue'] = searchQuery;
+    }
+    if (orderedBy != null && orderedBy.isNotEmpty) {
+      // ← add
+      queryParams['orderedBy'] = orderedBy;
+    }
+    final url = Uri.parse(
+      '${ApiConstants.jeevanadi_allocate_user}/karyakartha/$karyakarthaId',
+    ).replace(queryParameters: queryParams);
 
     print('📡 Fetching assigned karyakarthas from: $url');
 
@@ -338,24 +330,47 @@ final uri = Uri.parse(ApiConstants.GET_JEEVANAADIS)
     await _api.delete("${ApiConstants.GET_KARYAKARTHAS_BY_ID}/$id");
   }
 
-Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(String jeevanadiId) async {
-  final url = ApiConstants.approverequest + "$jeevanadiId/approve";
-  
+  Future<ApiResult<Map<String, dynamic>>> approveJeevanaadi(
+    String jeevanadiId,
+  ) async {
+    final url = ApiConstants.approverequest + "$jeevanadiId/approve";
 
-  final result = await _api.put(url,body: {}); 
+    final result = await _api.put(url, body: {});
 
-  if (!result.isSuccess) {
-    print('❌ Approval failed: ${result.error?.message}');
-    return ApiResult.failure(result.error);
+    if (!result.isSuccess) {
+      print('❌ Approval failed: ${result.error?.message}');
+      return ApiResult.failure(result.error);
+    }
+
+    print('✅ Jeevanaadi approved successfully');
+    return ApiResult.success(result.data);
   }
 
-  print('✅ Jeevanaadi approved successfully');
-  return ApiResult.success(result.data);
-}
+  // Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(
+  //   String query,
+  // ) async {
+  //   final url = "${ApiConstants.jeevandi_search}search/{value}";
+  //   final result = await _api.get(url);
 
+  //   if (!result.isSuccess) {
+  //     return ApiResult.failure(result.error);
+  //   }
 
-Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(String query) async {
-  final url = "${ApiConstants.jeevandi_search}search/$query";
+  //   try {
+  //     final List<dynamic> data = result.data;
+  //     final users = data.map((json) => JeevanaadiUser.fromJson(json)).toList();
+  //     return ApiResult.success(users);
+  //   } catch (e) {
+  //     return ApiResult.failure(ApiError(message: "Parsing error: $e"));
+  //   }
+  // }
+  Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(
+  String query,
+) async {
+  final url = "${ApiConstants.jeevandi_search}/$query";
+
+  print("🔍 Search URL: $url");
+
   final result = await _api.get(url);
 
   if (!result.isSuccess) {
@@ -364,12 +379,16 @@ Future<ApiResult<List<JeevanaadiUser>>> searchJeevanaadiUsers(String query) asyn
 
   try {
     final List<dynamic> data = result.data;
-    final users = data.map((json) => JeevanaadiUser.fromJson(json)).toList();
+
+    final users = data
+        .map((json) => JeevanaadiUser.fromJson(json))
+        .toList();
+
     return ApiResult.success(users);
   } catch (e) {
-    return ApiResult.failure(ApiError(message: "Parsing error: $e"));
+    return ApiResult.failure(
+      ApiError(message: "Parsing error: $e"),
+    );
   }
 }
-
-
 }

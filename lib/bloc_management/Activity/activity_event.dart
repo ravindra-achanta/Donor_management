@@ -39,3 +39,8 @@ class FetchUserActivityDashboardEvent extends ActivityEvent {
   @override
   List<Object?> get props => [id];
 }
+class LoadActivityMetricsEvent extends ActivityEvent {
+  const LoadActivityMetricsEvent();
+  @override
+  List<Object?> get props => [];
+}

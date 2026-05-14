@@ -562,9 +562,14 @@ void _showUserSelectionDialog() {
   final Map<String, UserView> uniqueUsers = {};
   
   for (final user in _allUsers) {
+    // final validTypes = user.userTypes
+    //     .where((type) => _allowedUserTypes.contains(type))
+    //     .toList();
     final validTypes = user.userTypes
-        .where((type) => _allowedUserTypes.contains(type))
-        .toList();
+    .where((type) =>
+        _allowedUserTypes.contains(type) &&
+        type != 'GURUJI')
+    .toList();
     
     if (validTypes.isNotEmpty) {
       uniqueUsers[user.id] = user;
@@ -641,8 +646,9 @@ void _showUserSelectionDialog() {
                                 final user = uniqueUsers.values.elementAt(index);
                                 final validTypes = user.userTypes
                                     .where((type) => 
-                                        _allowedUserTypes.contains(type))
+                                        _allowedUserTypes.contains(type) &&   type != 'GURUJI')
                                     .toList();
+                                    
 
                                 return Card(
                                   margin: const EdgeInsets.only(bottom: 12),

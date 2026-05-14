@@ -16,3 +16,5 @@ class FetchDonationMetricsEvent extends DashboardEvent {
   List<Object?> get props => [id];
 }
 class PostDashboardActivityEvent extends DashboardEvent {}
+
+class FetchDonationsMetricsAllEvent extends DashboardEvent {}

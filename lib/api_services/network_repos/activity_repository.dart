@@ -3,6 +3,7 @@ import 'package:vikas_app/api_services/api_error.dart';
 import 'package:vikas_app/api_services/api_result.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_service.dart';
+import 'package:vikas_app/screeens/models/request/ActivityMetrics.dart';
 import 'package:vikas_app/screeens/models/request/activity_request.dart%20%20%E2%9C%85%20Cractivity_request.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
 import 'package:vikas_app/screeens/models/response/activity_dashboard_metrics.dart';
@@ -89,6 +90,28 @@ fetchUserActivityDashboard({required String userId}) async {
   } catch (e) {
     return ApiResult.failure(
       ApiError(message: "Parsing error: $e"),
+    );
+  }
+}
+
+Future<ApiResult<List<ActivityMetrics>>> fetchActivityMetrics() async {
+  final result = await _api.get(ApiConstants.activityMetrics);
+
+  if (!result.isSuccess) {
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    List<ActivityMetrics> metrics = [];
+    if (result.data is List) {
+      metrics = (result.data as List)
+          .map((item) => ActivityMetrics.fromJson(item as Map<String, dynamic>))
+          .toList();
+    }
+    return ApiResult.success(metrics);
+  } catch (e) {
+    return ApiResult.failure(
+      ApiError(message: "Error parsing metrics: $e"),
     );
   }
 }
