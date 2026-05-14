@@ -41,6 +41,8 @@ class _DashboardState extends State<Dashboard> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
       context.read<DashboardBloc>().add(PostDashboardActivityEvent());
+      context.read<DashboardBloc>().add(FetchDonationsMetricsAllEvent());
+
 
       /// FETCH NOTICES
       // context.read<NoticeBloc>().add(FetchNoticesEvent());

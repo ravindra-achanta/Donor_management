@@ -11,6 +11,7 @@ class NoticeResponse {
   final String? createdUserID;
   final String? updatedUserID;
   final String? status;
+  final String? sentStatus;
 
   NoticeResponse({
     required this.id,
@@ -25,6 +26,7 @@ class NoticeResponse {
     this.createdUserID,
     this.updatedUserID,
     this.status,
+    this.sentStatus,
   });
 
   factory NoticeResponse.fromJson(Map<String, dynamic> json) {
@@ -45,6 +47,7 @@ class NoticeResponse {
       createdUserID: json['createdUserID'],
       updatedUserID: json['updatedUserID'],
       status: json['status'],
+      sentStatus: json['sentStatus'],
     );
   }
 
@@ -62,6 +65,7 @@ class NoticeResponse {
       "createdUserID": createdUserID,
       "updatedUserID": updatedUserID,
       "status": status,
+      "sentStatus": sentStatus,
     };
   }
   

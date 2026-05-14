@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class StatCard extends StatelessWidget {
   final String title;
   final String value;
-  final IconData icon;
+  final IconData? icon;
   final Color color;
   final double screenWidth; 
 
@@ -11,7 +11,7 @@ class StatCard extends StatelessWidget {
     Key? key,
     required this.title,
     required this.value,
-    required this.icon,
+    this.icon, 
     required this.color,
     required this.screenWidth,
   }) : super(key: key);
@@ -73,7 +73,7 @@ class StatCard extends StatelessWidget {
                   color: color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: color, size: iconSize),
+                child: icon != null ? Icon(icon, color: color, size: iconSize) : null,
               ),
               SizedBox(width: spacing),
               Expanded(

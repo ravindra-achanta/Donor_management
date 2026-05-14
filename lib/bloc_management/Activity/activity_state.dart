@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:vikas_app/screeens/models/request/ActivityMetrics.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
 import 'package:vikas_app/screeens/models/response/activity_dashboard_metrics.dart';
 
@@ -15,6 +16,9 @@ class ActivityState extends Equatable {
   final String? creationMessage;
     final List<ActivityDashboardMetrics> dashboardMetrics;
     final bool isDashboardLoading;
+     final Map<String, dynamic>? dashboardData;
+  final List<ActivityMetrics> metrics;
+  final bool metricsLoading;
 
   const ActivityState({
     this.status = ActivityStatus.initial,
@@ -27,6 +31,10 @@ class ActivityState extends Equatable {
     this.creationMessage,
      this.dashboardMetrics = const [], 
     this.isDashboardLoading = false,
+    this.metrics = const [],
+    this.metricsLoading = false,
+    this.dashboardData,
+    
   });
 
   ActivityState copyWith({
@@ -40,7 +48,11 @@ class ActivityState extends Equatable {
     String? creationMessage,
      List<ActivityDashboardMetrics>? dashboardMetrics, 
     bool? isDashboardLoading,
+    List<ActivityMetrics>? metrics,
+    bool? metricsLoading,
+
   }) {
+
     return ActivityState(
       status: status ?? this.status,
       activities: activities ?? this.activities,
@@ -52,6 +64,9 @@ class ActivityState extends Equatable {
       creationMessage: creationMessage ?? this.creationMessage,
       dashboardMetrics: dashboardMetrics ?? this.dashboardMetrics, 
       isDashboardLoading: isDashboardLoading ?? this.isDashboardLoading, 
+      metrics: metrics ?? this.metrics,
+      metricsLoading: metricsLoading ?? this.metricsLoading,
+
     );
   }
 
@@ -67,6 +82,8 @@ class ActivityState extends Equatable {
     creationMessage,
     dashboardMetrics,
     isDashboardLoading,
+    metrics,
+    metricsLoading,
   ];
     
 }

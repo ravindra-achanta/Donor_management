@@ -20,6 +20,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     //on<FetchAllUsersEvent>(_onFetchAllUsers);
     on<FetchRolesEvent>(_onFetchRoles);
     on<ChangePasswordEvent>(_onChangePassword);
+    on<LogoutEvent>(_onLogout);
     on<ResetAuthEvent>((event, emit) => emit(const AuthState()));
   }
   Future<void> _onCheckLogin(CheckLoginEvent event, Emitter<AuthState> emit) async {
@@ -318,4 +319,34 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     (e) => e.toString().split('.').last == type,
     orElse: () => UserType.karyakartha,
   );
-}}
+}
+
+  // Logout handler
+  Future<void> _onLogout(LogoutEvent event, Emitter<AuthState> emit) async {
+    emit(state.copyWith(status: AuthStatus.logouting, errorMessage: ''));
+
+    final response = await authRepository.logout();
+
+    if (response.isSuccess) {
+      // Clear local storage
+      await Vikasdb.sharedPreferences!.clear();
+      
+      emit(
+        state.copyWith(
+          status: AuthStatus.logoutSuccess,
+          userId: null,
+          token: null,
+          userType: null,
+          errorMessage: '',
+        ),
+      );
+    } else {
+      emit(
+        state.copyWith(
+          status: AuthStatus.error,
+          errorMessage: response.error?.message ?? 'Logout failed',
+        ),
+      );
+    }
+  }
+}

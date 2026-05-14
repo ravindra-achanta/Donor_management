@@ -33,11 +33,11 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
     });
     int size = 10;
 
-   final response = await karyakattaRepo.getKaryakarthas(
-  event.page,
-  size,
-  event.searchQuery,
-);
+    final response = await karyakattaRepo.getKaryakarthas(
+      event.page,
+      size,
+      event.searchQuery,
+    );
 
     if (response.isSuccess) {
       final List<User> users = response.data?.content ?? [];
@@ -107,11 +107,12 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
     Emitter<KaryakarthaState> emit,
   ) async {
     emit(state.copyWith(delLoading: true));
-    
+
     final response = await karyakattaRepo.deleteKaryakartha(event.userId);
-    
+
     if (response.isSuccess) {
-      final updatedKaryakarthas = state.karyakarthas?.where((u) => u.id != event.userId).toList() ?? [];
+      final updatedKaryakarthas =
+          state.karyakarthas?.where((u) => u.id != event.userId).toList() ?? [];
       emit(
         state.copyWith(
           delLoading: false,
@@ -123,7 +124,8 @@ class KaryakarthaBloc extends Bloc<KaryakarthaEvent, KaryakarthaState> {
       emit(
         state.copyWith(
           delLoading: false,
-          errorMessage: response.error?.message ?? "Failed to delete karyakartha",
+          errorMessage:
+              response.error?.message ?? "Failed to delete karyakartha",
         ),
       );
     }

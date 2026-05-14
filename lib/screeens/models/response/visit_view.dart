@@ -2,7 +2,8 @@
 
 class VisitView {
   final String id;
-  final String visitorName;      
+  final String visitorName; 
+  final String createdByName;
   final String phoneNumber;      
   final String email;
   final String visitPurpose;
@@ -14,7 +15,9 @@ class VisitView {
   VisitView({
     required this.id,
     required this.visitorName,
+    required this.createdByName,
     required this.phoneNumber,
+    
     required this.email,
     required this.visitPurpose,
     required this.comments,
@@ -26,6 +29,7 @@ class VisitView {
     return VisitView(
       id: json['id']?.toString() ?? '',
       visitorName: json['visitorName'] ?? '',
+      createdByName: json['createdByName'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       email: json['email'] ?? '',
       visitPurpose: json['visitPurpose'] ?? '',
@@ -40,6 +44,7 @@ class VisitView {
     return VisitView(
       id: model.id ?? '',
       visitorName: model.visitorName ?? model.name ?? '',
+      createdByName: model.createdByName ?? '',
       phoneNumber: model.phoneNumber ?? model.phone ?? '',
       email: model.email ?? '',
       visitPurpose: model.visitPurpose ?? '',
@@ -53,6 +58,7 @@ class VisitView {
     return {
       'id': id,
       'visitorName': visitorName,
+      'createdByName': createdByName,
       'phoneNumber': phoneNumber,
       'email': email,
       'visitPurpose': visitPurpose,

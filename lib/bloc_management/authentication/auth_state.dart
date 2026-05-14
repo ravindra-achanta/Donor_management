@@ -18,6 +18,8 @@ enum AuthStatus {
   changingPassword,
   passwordChanged,
   passwordChangeRequired,
+  logouting,
+  logoutSuccess,
 }
 
 class AuthState extends Equatable {

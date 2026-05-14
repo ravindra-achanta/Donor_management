@@ -10,6 +10,7 @@ class ActivityBloc extends Bloc<ActivityEvent, ActivityState> {
     on<FetchActivitiesEvent>(_onFetchActivities);
     on<CreateActivityEvent>(_onCreateActivity);
     on<FetchUserActivityDashboardEvent>(_onFetchUserActivityDashboard);
+    on<LoadActivityMetricsEvent>(_onLoadActivityMetrics);
 
   }
 
@@ -114,4 +115,30 @@ _onFetchUserActivityDashboard(
     ));
   }
 }
-}
+Future<void> _onLoadActivityMetrics(
+  LoadActivityMetricsEvent event,
+  Emitter<ActivityState> emit,
+) async {
+  emit(state.copyWith(metricsLoading: true));
+
+  try {
+    final result = await repo.fetchActivityMetrics();
+
+    if (result.isSuccess) {
+      emit(state.copyWith(
+        metrics: result.data ?? [],
+        metricsLoading: false,
+      ));
+    } else {
+      emit(state.copyWith(
+        metricsLoading: false,
+        errorMessage: result.error?.message ?? 'Failed to load metrics',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      metricsLoading: false,
+      errorMessage: 'Error loading metrics: $e',
+    ));
+  }
+}}

@@ -172,6 +172,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
                             arguments: VisitModel(
                               id: item.id,
                               visitorName: item.visitorName,
+                              createdByName: item.createdByName,
                               phoneNumber: item.phoneNumber,
                               email: item.email,
                               visitPurpose: item.visitPurpose,
@@ -385,6 +386,7 @@ class _VisitsListScreenState extends State<VisitsListScreen> {
     final visitView = VisitView(
       id: visit.id,
       visitorName: visit.visitorName,
+      createdByName: visit.createdByName,
       phoneNumber: visit.phoneNumber,
       email: visit.email,
       visitPurpose: visit.visitPurpose,

@@ -1,7 +1,7 @@
 class ApiConstants {
   // static const String baseUrl = "http://r:8050";
-  static const String baseUrl = "https://vikas.vidyaranyam.in";
-   //static const String baseUrl = "http://172.235.18.48:8050";
+ // static const String baseUrl = "https://vikas.vidyaranyam.in";
+   static const String baseUrl = "http://172.235.18.48:8050";
 
   static const String VIKAS = "/vikas/api/v1";
   static const String IDM_URI = "/vikas/api/v1/idm";
@@ -20,6 +20,7 @@ class ApiConstants {
   static const String LOGIN = "$IDM_URI/user/login";
   static const String CREATE_USER = "$IDM_URI/user/create";
   static const String CHANGE_PASSWORD = "$IDM_URI/user/changePassword";
+  static const String LOGOUT = "$IDM_URI/logout";
   static const String GET_USERS = "$IDM_URI/users/all";
   static const String GET_USER_BY_ID = "$IDM_URI/user";
   //static const String UPDATE_PROFILE = "$IDM_URI/update/user";
@@ -30,8 +31,9 @@ class ApiConstants {
   static const String GET_ROLES = "${role_URI}/roles";
   static const String CHECK_LOGIN = "$IDM_URI/user";
   static const String LOGIN_WITH_ROLE = "$IDM_URI/user";
-  static const String jeevandi_search = "${JEEVANADI_URI}/users/";
-
+  //static const String jeevandi_search = "${JEEVANADI_URI}/users/";
+static const String jeevandi_search =
+    "${JEEVANADI_URI}/users/search";
   //jeevanadi
   static const String GET_JEEVANAADIS = "${JEEVANADI_URI}/users";
   static const String jeevanadi_fullview = "${JEEVANADI_URI}/";
@@ -42,6 +44,7 @@ class ApiConstants {
       "${JEEVANADI_URI}/allocate/assignees/karyakartha";
   static const String jeevanadi_deallocate_assignees =
       "${JEEVANADI_URI}/deallocate/assignees/karyakartha";
+      
 
   static String getJeevanaadiUpdate = "$VIKAS/vikas/jeevanaadi/";
   static String getrequestview = "$VIKAS/vikas/jeevanaadi/staff/requests";
@@ -86,6 +89,10 @@ class ApiConstants {
       "$VIKAS/activity/user/{id}/activity";
 
   static const String DELETE_USER = "$IDM_URI/delete/user";
+  static const String activityMetrics = "$VIKAS/callLogs/chart/metric";
+
+  
+static const String DONATIONS_METRICS_ALL = "$VIKAS/donations/metrics/all";
 
   //review
   //static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";

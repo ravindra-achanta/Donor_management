@@ -104,6 +104,7 @@ class VisitBloc extends Bloc<VisitEvent, VisitState> {
       final visitModel = VisitModel(
         id: visitView.id,
         visitorName: visitView.visitorName,
+        createdByName: visitView.createdByName,
         phoneNumber: visitView.phoneNumber,
         email: visitView.email,
         visitPurpose: visitView.visitPurpose,

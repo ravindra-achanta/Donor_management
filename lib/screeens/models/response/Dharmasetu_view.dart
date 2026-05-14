@@ -3,6 +3,7 @@
 class DharmasetuView {
   final String id;
   final String dharmasetuId;
+  final String createdByName;
   final String type;
   final String communityName;
   final String pointOfContact;
@@ -20,6 +21,7 @@ class DharmasetuView {
   DharmasetuView({
     required this.id,
     required this.dharmasetuId,
+    required this.createdByName,
     required this.type,
     required this.communityName,
     required this.pointOfContact,
@@ -39,6 +41,7 @@ class DharmasetuView {
     return DharmasetuView(
       id: json['id'] ?? '',
       dharmasetuId: json['dharmasetuId'] ?? '',
+      createdByName: json['createdByName'] ?? '',
       type: json['type'] ?? '',
       communityName: json['communityName'] ?? '',
       pointOfContact: json['pointOfContact'] ?? '',
@@ -61,6 +64,7 @@ class DharmasetuView {
       'id': id,
       'dharmasetuId': dharmasetuId,
       'type': type,
+      'createdByName': createdByName,
       'communityName': communityName,
       'pointOfContact': pointOfContact,
       'address': address,
@@ -80,6 +84,7 @@ class DharmasetuView {
   DharmasetuView copyWith({
     String? id,
     String? dharmasetuId,
+    String? createdByName,
     String? type,
     String? communityName,
     String? pointOfContact,
@@ -97,6 +102,7 @@ class DharmasetuView {
     return DharmasetuView(
       id: id ?? this.id,
       dharmasetuId: dharmasetuId ?? this.dharmasetuId,
+      createdByName: createdByName ?? this.createdByName,
       type: type ?? this.type,
       communityName: communityName ?? this.communityName,
       pointOfContact: pointOfContact ?? this.pointOfContact,

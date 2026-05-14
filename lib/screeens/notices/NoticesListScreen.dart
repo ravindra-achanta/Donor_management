@@ -221,7 +221,20 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final displayedNotices = _filteredNotices;
+          //final displayedNotices = _filteredNotices;
+          final displayedNotices = [..._filteredNotices];
+
+          displayedNotices.sort((a, b) {
+            final aDate = DateFormat(
+              'dd-MM-yyyy HH:mm:ss',
+            ).parse('${a.sendDate} ${a.sendTime}');
+
+            final bDate = DateFormat(
+              'dd-MM-yyyy HH:mm:ss',
+            ).parse('${b.sendDate} ${b.sendTime}');
+
+            return bDate.compareTo(aDate); // Ascending
+          });
 
           return SingleChildScrollView(
             child: Padding(
@@ -468,24 +481,54 @@ class _NoticesListScreenState extends State<NoticesListScreen> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
+                if (Vikasdb().getString("USER_TYPE") == "GURUJI")
+                  Row(
+                    children: [
+                      // Sent Status
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: notice.sentStatus == "SENT"
+                              ? Colors.green
+                              : Colors.orange,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          notice.sentStatus ?? "PENDING",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(width: 6),
+
+                      // Audience Type
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 5,
+                        ),
+                        decoration: BoxDecoration(
+                          color: audienceColor,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Text(
+                          audienceDisplay,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                  decoration: BoxDecoration(
-                    color: audienceColor,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    audienceDisplay,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
               ],
             ),
             const SizedBox(height: 12),

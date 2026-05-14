@@ -123,7 +123,7 @@ class BasicDetails {
       otpExpiresAt: json['otpExpiresAt'],
       role: json['role'] ?? 0,
       //isActive: json['isActive'] ?? false,
-       isActive: json['active'] ?? false, 
+       isActive: json['isActive'] ?? false, 
       isDeleted: json['isDeleted'] ?? false,
       createdDate: json['createdDate'] ?? '',
       modifiedDate: json['modifiedDate'] ?? '',
