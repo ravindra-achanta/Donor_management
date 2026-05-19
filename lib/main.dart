@@ -7,12 +7,14 @@ import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/api_services/network_repos/activity_repository.dart';
 import 'package:vikas_app/api_services/network_repos/auth_repository.dart';
 import 'package:vikas_app/api_services/network_repos/darmasetu_repository.dart';
+import 'package:vikas_app/api_services/network_repos/department_repo.dart';
 import 'package:vikas_app/api_services/network_repos/office_staff_repo.dart';
 import 'package:vikas_app/api_services/network_repos/visits_repo.dart';
 import 'package:vikas_app/bloc_management/Activity/activity_bloc.dart';
 import 'package:vikas_app/bloc_management/Officestaff/office_staff_bloc.dart';
 import 'package:vikas_app/bloc_management/authentication/auth_bloc.dart';
 import 'package:vikas_app/bloc_management/dashboard/dashboard_bloc.dart';
+import 'package:vikas_app/bloc_management/department/department_bloc.dart';
 import 'package:vikas_app/bloc_management/dharmasetu/dharmasetu_bloc.dart';
 import 'package:vikas_app/bloc_management/jeevanadi/jeevanadi_bloc.dart';
 import 'package:vikas_app/bloc_management/karyakarthas/karyakartha_bloc.dart';
@@ -70,6 +72,10 @@ BlocProvider<OfficeStaffBloc>(
           BlocProvider<ActivityBloc>(
             create: (_) => ActivityBloc(repo: ActivityRepository()),
           ),
+          BlocProvider<DepartmentBloc>(
+            create: (_) => DepartmentBloc(DepartmentRepo()),
+          ),
+        
 
         BlocProvider<UserBloc>(create: (_) => UserBloc()),
           BlocProvider<AuthBloc>(

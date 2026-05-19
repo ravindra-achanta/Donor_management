@@ -67,6 +67,9 @@ final String? approveErrorMsg;
   final bool searchLoading;
   final String? searchError;
   final String? orderedBy;
+  final bool isRejecting;
+final String? rejectSuccessMsg;
+final String? rejectErrorMsg;
 
   const JeevanaadiState({
     this.delLoading = false,
@@ -124,8 +127,9 @@ final String? approveErrorMsg;
     this.searchLoading = false,
     this.searchError,
       this.orderedBy,
-
-
+      this.isRejecting = false,
+this.rejectSuccessMsg,
+this.rejectErrorMsg,
 
   });
 
@@ -185,6 +189,9 @@ final String? approveErrorMsg;
     bool? searchLoading,
     String? searchError,
     String? orderedBy,
+    bool? isRejecting,
+    String? rejectSuccessMsg,
+    String? rejectErrorMsg,
 
   }) {
     return JeevanaadiState(
@@ -251,6 +258,9 @@ final String? approveErrorMsg;
       searchLoading: searchLoading ?? this.searchLoading,
       searchError: searchError ?? this.searchError,
       orderedBy: orderedBy ?? this.orderedBy,
+      isRejecting: isRejecting ?? this.isRejecting,
+      rejectSuccessMsg: rejectSuccessMsg ?? this.rejectSuccessMsg,
+      rejectErrorMsg: rejectErrorMsg ?? this.rejectErrorMsg,
     );
   }
 
@@ -309,5 +319,8 @@ final String? approveErrorMsg;
     searchLoading,
     searchError,
     orderedBy,
+    isRejecting,
+    rejectSuccessMsg,
+    rejectErrorMsg,
   ];
 }

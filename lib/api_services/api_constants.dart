@@ -1,6 +1,6 @@
 class ApiConstants {
   // static const String baseUrl = "http://r:8050";
- // static const String baseUrl = "https://vikas.vidyaranyam.in";
+  //static const String baseUrl = "https://vikas.vidyaranyam.in";
    static const String baseUrl = "http://172.235.18.48:8050";
 
   static const String VIKAS = "/vikas/api/v1";
@@ -50,6 +50,7 @@ static const String jeevandi_search =
   static String getrequestview = "$VIKAS/vikas/jeevanaadi/staff/requests";
   static String getrequestviewbyid = "$VIKAS/vikas/jeevanaadi/staff/requests";
   static String approverequest = "$VIKAS/vikas/jeevanaadi/";
+  static String rejectrequest = "$VIKAS/notice/jeevanaadi/";
 
   //notices
   static const String NOTICES_BASE = "${IDM_URI}/notices";
@@ -93,6 +94,7 @@ static const String jeevandi_search =
 
   
 static const String DONATIONS_METRICS_ALL = "$VIKAS/donations/metrics/all";
+static const String DONATIONS_MONTHLY = "$VIKAS/donations/monthly-donations";
 
   //review
   //static const String REVIEW_REQUESTS = "$VIKAS/jeevanaadi";

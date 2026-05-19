@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:vikas_app/api_services/local_storage/VikasDB.dart';
 import 'package:vikas_app/screeens/Activity/ActivityDashboardScreen.dart';
 import 'package:vikas_app/screeens/common/NoDataFound.dart';
+import 'package:vikas_app/screeens/models/response/DepartmentResponse.dart';
 import 'package:vikas_app/screeens/models/response/activity.dart';
 import 'package:vikas_app/screeens/models/response/donations.dart';
 import 'package:vikas_app/screeens/models/response/donations_pagination.dart';
@@ -166,6 +167,11 @@ class _CommonListState extends State<CommonList> {
                   tableHeader('Mobile'),
                   tableHeader('UserType'),
                   tableHeader('Metrics'),
+                ] else if (screenType == 'DEPARTMENT') ...[
+                  tableHeader('Department Name', flex: 2),
+                  tableHeader('Description', flex: 2),
+                  // tableHeader('Status', flex: 1),
+                  tableHeader('Actions', flex: 1),
                 ] else ...[
                   tableHeader('Name'),
                   tableHeader('Mobile'),
@@ -390,6 +396,46 @@ class _CommonListState extends State<CommonList> {
                                     ),
                                   ),
                               ],
+                            ] else if (screenType == 'DEPARTMENT') ...[
+                              if (rowData is DepartmentResponse) ...[
+                                tableData(
+                                  rowData.departmentName ?? "-",
+                                  flex: 2,
+                                ),
+                                tableData(
+                                  rowData.description ?? "-",
+                                  flex: 2,
+                                  maxLines: 1,
+                                ), 
+                                Expanded(
+                                  flex: 1,
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      HoverIconButton(
+                                        icon: Icons.edit_outlined,
+                                        hoverColor: Colors.blue.withOpacity(
+                                          0.1,
+                                        ),
+                                        iconColor: Colors.blue,
+                                        onTap: () => widget.onUpdate(
+                                          rowData.id.toString(),
+                                        ),
+                                      ),
+                                      //const SizedBox(width: 8),
+                                      HoverIconButton(
+                                        icon: Icons.delete_outline,
+                                        hoverColor: Colors.red.withOpacity(0.1),
+                                        iconColor: Colors.red,
+                                        onTap: () => widget.onDelete(
+                                          rowData.id.toString(),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                             ] else if (screenType == 'DONATION') ...[
                               tableData(amount),
                               tableData(donationType),
@@ -408,6 +454,7 @@ class _CommonListState extends State<CommonList> {
                                     ? "Office Staff"
                                     : userType,
                               ),
+
                               Expanded(
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.start,

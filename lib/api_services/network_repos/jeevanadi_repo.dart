@@ -391,4 +391,44 @@ class JeevanadiRepo {
     );
   }
 }
+
+Future<ApiResult<Map<String, dynamic>>> rejectJeevanaadi(
+  String jeevanadiId,
+  String rejectReason,
+) async {
+
+  final url =
+      "${ApiConstants.rejectrequest}$jeevanadiId/reject";
+
+  print("🔴 Reject URL: $url");
+  print("🔴 Reject Reason: $rejectReason");
+
+  final body = {
+    "rejectReason": rejectReason,
+  };
+
+  final result = await _api.put(
+    url,
+    body: body,
+  );
+
+  if (!result.isSuccess) {
+
+    print(
+      "❌ Rejection failed: ${result.error?.message}",
+    );
+
+    return ApiResult.failure(
+      result.error,
+    );
+  }
+
+  print(
+    "✅ Jeevanaadi rejected successfully",
+  );
+
+  return ApiResult.success(
+    result.data,
+  );
+}
 }

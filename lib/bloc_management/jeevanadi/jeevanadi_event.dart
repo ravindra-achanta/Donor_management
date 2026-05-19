@@ -174,4 +174,16 @@ class SearchJeevanaadiUsersEvent extends JeevanaadiEvent {
   List<Object?> get props => [query];
 }
 
+class RejectJeevanaadiEvent extends JeevanaadiEvent {
+  final String jeevanadiId;
+  final String rejectReason;
+
+  RejectJeevanaadiEvent({
+    required this.jeevanadiId,
+    required this.rejectReason,
+  });
+
+  @override
+  List<Object?> get props => [jeevanadiId, rejectReason];
+}
 

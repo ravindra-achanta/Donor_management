@@ -14,6 +14,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     on<FetchDonationMetricsEvent>(_fetchDonationMetrics);
     on<PostDashboardActivityEvent>(_postDashboardActivity);
     on<FetchDonationsMetricsAllEvent>(_fetchDonationsMetricsAll);
+    on<FetchMonthlyDonationsEvent>(_fetchMonthlyDonations);
   }
 
   Future<void> _fetchDonationMetrics(
@@ -67,7 +68,7 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
     }
   }
 
- Future<void> _postDashboardActivity(
+  Future<void> _postDashboardActivity(
     PostDashboardActivityEvent event,
     Emitter<DashboardState> emit,
   ) async {
@@ -79,11 +80,65 @@ class DashboardBloc extends Bloc<DashboardEvent, DashboardState> {
       print("✅ Dashboard activity posted successfully");
     } else {
       print("❌ Failed to post dashboard activity - Error: ${response.error?.message}");
-      
-           }
     }
+  }
 
-    Future<void> _fetchDonationsMetricsAll(
+//   Future<void> _fetchMonthlyDonations(
+//   FetchMonthlyDonationsEvent event,
+//   Emitter<DashboardState> emit,
+// ) async {
+//   //emit(state.copyWith(status: DashboardApiStatus.loading));
+// emit(state.copyWith(status: state.status));
+//   final response = await dashboardRepo.getMonthlyDonations(year: event.year);
+
+//   if (response.isSuccess) {
+//     print("✅ [DashboardBloc] Monthly donations for year ${event.year} fetched");
+//     emit(
+//       state.copyWith(
+//         // status: DashboardApiStatus.loaded,
+//         // monthlyDonations: response.data,
+//         monthlyDonations: response.data,
+//       ),
+//     );
+//   } else {
+//     print("❌ [DashboardBloc] Error: ${response.error?.message}");
+//     emit(
+//       state.copyWith(
+//         status: DashboardApiStatus.error,
+//         errorMessage: response.error?.message ?? "Failed to load monthly donations",
+//       ),
+//     );
+//   }
+// }
+Future<void> _fetchMonthlyDonations(
+  FetchMonthlyDonationsEvent event,
+  Emitter<DashboardState> emit,
+) async {
+  emit(state.copyWith( monthlyDonationStatus: DashboardApiStatus.loading,));
+
+  final response = await dashboardRepo.getMonthlyDonations(year: event.year);
+
+  if (response.isSuccess) {
+    print("✅ [DashboardBloc] Monthly donations for year ${event.year} fetched");
+    emit(
+      state.copyWith(
+        //status: DashboardApiStatus.loaded,
+        monthlyDonations: response.data,
+        monthlyDonationStatus: DashboardApiStatus.loaded,
+      ),
+    );
+  } else {
+    print("❌ [DashboardBloc] Error: ${response.error?.message}");
+    emit(
+      state.copyWith(
+        status: DashboardApiStatus.error,
+        errorMessage: response.error?.message ?? "Failed to load monthly donations",
+      ),
+    );
+  }
+}
+
+  Future<void> _fetchDonationsMetricsAll(
     FetchDonationsMetricsAllEvent event,
     Emitter<DashboardState> emit,
   ) async {

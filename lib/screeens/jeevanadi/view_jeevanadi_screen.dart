@@ -85,186 +85,237 @@ class ViewJeevanadiScreen extends StatelessWidget {
       }
     });
 
-    return Layout(
-      child: BlocBuilder<JeevanaadiBloc, JeevanaadiState>(
-        buildWhen: (previous, current) {
-          return previous.jeevanaadiProfileFull !=
-                  current.jeevanaadiProfileFull ||
-              previous.profileLoading != current.profileLoading ||
-              previous.profileErrorMsg != current.profileErrorMsg ||
-              previous.isFromRequest != current.isFromRequest ||
-              previous.requestStatus != current.requestStatus ||
-              previous.allDonations != current.allDonations ||
-              previous.donationCurrentPage != current.donationCurrentPage ||
-              previous.totalDonationpages != current.totalDonationpages;
-        },
-        builder: (context, state) {
-          if (state.profileLoading == true) {
-            return const Center(
-              child: Padding(
-                padding: EdgeInsets.all(50.0),
-                child: CircularProgressIndicator(),
-              ),
-            );
-          }
-
-          if (state.profileErrorMsg != null) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(50.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline,
-                      color: Colors.red,
-                      size: 60,
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Error loading profile',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      state.profileErrorMsg!,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.grey),
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        context.read<JeevanaadiBloc>().add(
-                          FetchJeevanaadiProfileFullEvent(userId ?? ''),
-                        );
-                      },
-                      child: const Text('Retry'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          final profileFull = state.jeevanaadiProfileFull;
-
-          if (profileFull == null) {
-            return const SizedBox.shrink();
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // ---------- HEADER ROW ----------
-                // _buildHeaderRow(context, profileFull),
-                if (isFromRequest)
-                  _buildRequestHeaderRow(context, profileFull, state)
-                else
-                  _buildNormalHeaderRow(context, profileFull),
-
-                const SizedBox(height: 20),
-
-                // ---------- JEEVANADI & CONTACT CONTAINER ----------
-                _buildJeevanadiContactContainer(profileFull),
-
-                const SizedBox(height: 20),
-
-                // ---------- PERSONAL DETAILS CONTAINER ----------
-                _buildPersonalDetailsContainer(profileFull),
-
-                const SizedBox(height: 20),
-
-                // ---------- RELATIONSHIPS TABLE ----------
-                _buildRelationshipsTable(profileFull.relationDetails),
-
-                const SizedBox(height: 20),
-
-                // ---------- SPECIAL OCCASIONS TABLE ----------
-                // _buildOccasionsTable(
-                //   profileFull.occupationDetails != null
-                //       ? [profileFull.occupationDetails!]
-                //       : [],
-                // ),
-                _buildOccasionsTable(
-                  profileFull.occasionsDetails
-                      .where((occ) => occ != null)
-                      .map((occ) => occ as OccasionsDetails)
-                      .toList(),
-                ),
-
-                const SizedBox(height: 20),
-
-                const Text(
-                  "Donations ",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.brown,
-                  ),
-                ),
-
-                CommonList(
-                  users: state.allDonations,
-                  currentPage: state.donationCurrentPage,
-                  onUserTap: (user) {},
-                  onDelete: (user) {},
-                  onUpdate: (user) {},
-                  screenType: "DONATION",
-                ),
-                if (state.allDonations.isNotEmpty)
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 50),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          onPressed: () {
-                            if (state.donationCurrentPage > 0) {
-                              context.read<JeevanaadiBloc>().add(
-                                FetchJeevanaadiDonationEvent(
-                                  userId ?? jeevanadiId ?? '',
-                                  (state.donationCurrentPage) - 1,
-                                ),
-                              );
-                            }
-                          },
-                          icon: Icon(Icons.skip_previous_outlined),
-                        ),
-                        Text(
-                          "${(state.donationCurrentPage) + 1}/${state.totalDonationpages}",
-                        ),
-                        IconButton(
-                          onPressed: () {
-                            if (state.donationCurrentPage <
-                                state.totalDonationpages - 1) {
-                              print(
-                                "Fetching next page: ${(state.donationCurrentPage) + 1}",
-                              );
-                              context.read<JeevanaadiBloc>().add(
-                                FetchJeevanaadiDonationEvent(
-                                  userId ?? jeevanadiId ?? '',
-                                  (state.donationCurrentPage) + 1,
-                                ),
-                              );
-                            }
-                          },
-                          icon: Icon(Icons.skip_next_outlined),
-                        ),
-                        SizedBox(height: 16),
-                      ],
-                    ),
-                  ),
-                // if (state.isFromRequest && state.requestStatus == 'PENDING')
-                //  // _buildApprovalButtons(context, state),
-              ],
+    return BlocListener<JeevanaadiBloc, JeevanaadiState>(
+      listener: (context, state) {
+        // Handle reject success
+        if (state.rejectSuccessMsg != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.rejectSuccessMsg!),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
             ),
           );
-        },
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.pop(context);
+          });
+        }
+
+        // Handle reject error
+        if (state.rejectErrorMsg != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.rejectErrorMsg!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+
+        // Handle approve success
+        if (state.approveSuccessMsg != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.approveSuccessMsg!),
+              backgroundColor: Colors.green,
+              duration: const Duration(seconds: 2),
+            ),
+          );
+          Future.delayed(const Duration(milliseconds: 500), () {
+            Navigator.pop(context);
+          });
+        }
+
+        // Handle approve error
+        if (state.approveErrorMsg != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.approveErrorMsg!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Layout(
+        child: BlocBuilder<JeevanaadiBloc, JeevanaadiState>(
+          buildWhen: (previous, current) {
+            return previous.jeevanaadiProfileFull !=
+                    current.jeevanaadiProfileFull ||
+                previous.profileLoading != current.profileLoading ||
+                previous.profileErrorMsg != current.profileErrorMsg ||
+                previous.isFromRequest != current.isFromRequest ||
+                previous.requestStatus != current.requestStatus ||
+                previous.allDonations != current.allDonations ||
+                previous.donationCurrentPage != current.donationCurrentPage ||
+                previous.totalDonationpages != current.totalDonationpages;
+          },
+          builder: (context, state) {
+            if (state.profileLoading == true) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(50.0),
+                  child: CircularProgressIndicator(),
+                ),
+              );
+            }
+
+            if (state.profileErrorMsg != null) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(50.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 60,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Error loading profile',
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        state.profileErrorMsg!,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.grey),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          context.read<JeevanaadiBloc>().add(
+                            FetchJeevanaadiProfileFullEvent(userId ?? ''),
+                          );
+                        },
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final profileFull = state.jeevanaadiProfileFull;
+
+            if (profileFull == null) {
+              return const SizedBox.shrink();
+            }
+
+            return SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ---------- HEADER ROW ----------
+                  // _buildHeaderRow(context, profileFull),
+                  if (isFromRequest)
+                    _buildRequestHeaderRow(context, profileFull, state)
+                  else
+                    _buildNormalHeaderRow(context, profileFull),
+
+                  const SizedBox(height: 20),
+
+                  // ---------- JEEVANADI & CONTACT CONTAINER ----------
+                  _buildJeevanadiContactContainer(profileFull),
+
+                  const SizedBox(height: 20),
+
+                  // ---------- PERSONAL DETAILS CONTAINER ----------
+                  _buildPersonalDetailsContainer(profileFull),
+
+                  const SizedBox(height: 20),
+
+                  // ---------- RELATIONSHIPS TABLE ----------
+                  _buildRelationshipsTable(profileFull.relationDetails),
+
+                  const SizedBox(height: 20),
+
+                  // ---------- SPECIAL OCCASIONS TABLE ----------
+                  // _buildOccasionsTable(
+                  //   profileFull.occupationDetails != null
+                  //       ? [profileFull.occupationDetails!]
+                  //       : [],
+                  // ),
+                  _buildOccasionsTable(
+                    profileFull.occasionsDetails
+                        .where((occ) => occ != null)
+                        .map((occ) => occ as OccasionsDetails)
+                        .toList(),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  const Text(
+                    "Donations ",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.brown,
+                    ),
+                  ),
+
+                  CommonList(
+                    users: state.allDonations,
+                    currentPage: state.donationCurrentPage,
+                    onUserTap: (user) {},
+                    onDelete: (user) {},
+                    onUpdate: (user) {},
+                    screenType: "DONATION",
+                  ),
+                  if (state.allDonations.isNotEmpty)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 50),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              if (state.donationCurrentPage > 0) {
+                                context.read<JeevanaadiBloc>().add(
+                                  FetchJeevanaadiDonationEvent(
+                                    userId ?? jeevanadiId ?? '',
+                                    (state.donationCurrentPage) - 1,
+                                  ),
+                                );
+                              }
+                            },
+                            icon: Icon(Icons.skip_previous_outlined),
+                          ),
+                          Text(
+                            "${(state.donationCurrentPage) + 1}/${state.totalDonationpages}",
+                          ),
+                          IconButton(
+                            onPressed: () {
+                              if (state.donationCurrentPage <
+                                  state.totalDonationpages - 1) {
+                                print(
+                                  "Fetching next page: ${(state.donationCurrentPage) + 1}",
+                                );
+                                context.read<JeevanaadiBloc>().add(
+                                  FetchJeevanaadiDonationEvent(
+                                    userId ?? jeevanadiId ?? '',
+                                    (state.donationCurrentPage) + 1,
+                                  ),
+                                );
+                              }
+                            },
+                            icon: Icon(Icons.skip_next_outlined),
+                          ),
+                          SizedBox(height: 16),
+                        ],
+                      ),
+                    ),
+                  // if (state.isFromRequest && state.requestStatus == 'PENDING')
+                  //  // _buildApprovalButtons(context, state),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }
@@ -1095,37 +1146,39 @@ class ViewJeevanadiScreen extends StatelessWidget {
               ),
             ),
 
-          //const SizedBox(width: 12),
+          const SizedBox(width: 12),
 
-          // Reject button
-          // if (state.isFromRequest &&
-          //     state.requestStatus == 'PENDING' &&
-          //     !state.isProcessingRequest)
-          //   MouseRegion(
-          //     cursor: SystemMouseCursors.click,
-          //     child: GestureDetector(
-          //       onTap: () =>
-          //           _showApprovalDialog(context, state, isApprove: false),
-          //       child: Container(
-          //         padding: const EdgeInsets.symmetric(
-          //           horizontal: 16,
-          //           vertical: 8,
-          //         ),
-          //         decoration: BoxDecoration(
-          //           color: Colors.red,
-          //           borderRadius: BorderRadius.circular(8),
-          //         ),
-          //         child: const Text(
-          //           'Reject',
-          //           style: TextStyle(
-          //             fontSize: 14,
-          //             fontWeight: FontWeight.w600,
-          //             color: Colors.white,
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
+          //Reject button
+         // Reject button
+if (state.isFromRequest &&
+    state.requestStatus == 'PENDING' &&
+    !state.isRejecting &&
+    Vikasdb().getString("USER_TYPE") == "OFFICE_STAFF")
+  MouseRegion(
+    cursor: SystemMouseCursors.click,
+    child: GestureDetector(
+      onTap: () =>
+          _showApprovalDialog(context, state, isApprove: false),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 8,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: const Text(
+          'Reject',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.white,
+          ),
+        ),
+      ),
+    ),
+  ),
           const SizedBox(width: 12),
           if (state.isFromRequest &&
               state.requestStatus == 'PENDING' &&
@@ -1200,58 +1253,164 @@ class ViewJeevanadiScreen extends StatelessWidget {
     }
   }
 
-  void _showApprovalDialog(
-    BuildContext context,
-    JeevanaadiState state, {
-    required bool isApprove,
-  }) {
-    final TextEditingController remarksController = TextEditingController();
+//   void _showApprovalDialog(
+//     BuildContext context,
+//     JeevanaadiState state, {
+//     required bool isApprove,
+//   }) {
+//     final TextEditingController remarksController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(isApprove ? 'Approve Request' : 'Reject Request'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Are you sure you want to ${isApprove ? 'approve' : 'reject'} this request?',
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: remarksController,
-              decoration: const InputDecoration(
-                labelText: 'Remarks (Optional)',
-                border: OutlineInputBorder(),
-              ),
-              maxLines: 3,
-            ),
-          ],
+//     showDialog(
+//       context: context,
+//       builder: (context) => AlertDialog(
+//         title: Text(isApprove ? 'Approve Request' : 'Reject Request'),
+//         content: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Text(
+//               'Are you sure you want to ${isApprove ? 'approve' : 'reject'} this request?',
+//             ),
+//             const SizedBox(height: 16),
+//             TextField(
+//               controller: remarksController,
+//               decoration: const InputDecoration(
+//                 labelText: 'Remarks (Optional)',
+//                 border: OutlineInputBorder(),
+//               ),
+//               maxLines: 3,
+//             ),
+//           ],
+//         ),
+//         actions: [
+//           TextButton(
+//             onPressed: () => Navigator.pop(context),
+//             child: const Text('CANCEL'),
+//           ),
+//           ElevatedButton(
+//             onPressed: () {
+//               Navigator.pop(context);
+//               // TODO: Add ApproveRejectRequestEvent to your bloc
+//               // context.read<JeevanaadiBloc>().add(
+//               //   ApproveRejectRequestEvent(
+//               //     jeevanadiId: jeevanadiId!,
+//               //     isApprove: isApprove,
+//               //     remarks: remarksController.text,
+//               //   ),
+//               // );
+//             },
+//             style: ElevatedButton.styleFrom(
+//               backgroundColor: isApprove ? Colors.green : Colors.red,
+//             ),
+//             child: Text(isApprove ? 'APPROVE' : 'REJECT'),
+//           ),
+//         ],
+//       ),
+//     );
+//   }
+
+void _showApprovalDialog(
+  BuildContext context,
+  JeevanaadiState state, {
+  required bool isApprove,
+}) {
+  final TextEditingController remarksController = TextEditingController();
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => AlertDialog(
+      title: Text(
+        isApprove ? 'Approve Request' : 'Reject Request',
+        style: TextStyle(
+          color: isApprove ? Colors.green : Colors.red,
+          fontWeight: FontWeight.bold,
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('CANCEL'),
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            'Are you sure you want to ${isApprove ? 'approve' : 'reject'} this request?',
+            style: const TextStyle(fontSize: 14),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(context);
-              // TODO: Add ApproveRejectRequestEvent to your bloc
-              // context.read<JeevanaadiBloc>().add(
-              //   ApproveRejectRequestEvent(
-              //     jeevanadiId: jeevanadiId!,
-              //     isApprove: isApprove,
-              //     remarks: remarksController.text,
-              //   ),
-              // );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: isApprove ? Colors.green : Colors.red,
+          const SizedBox(height: 16),
+          TextField(
+            controller: remarksController,
+            enabled: !state.isRejecting && !state.isApproving,
+            decoration: InputDecoration(
+              labelText: isApprove
+                  ? 'Remarks (Optional)'
+                  : 'Reject Reason *',
+              hintText: isApprove
+                  ? 'Add any remarks...'
+                  : 'Please provide the reason for rejection',
+              border: const OutlineInputBorder(),
+              errorBorder: const OutlineInputBorder(
+                borderSide: BorderSide(color: Colors.red),
+              ),
             ),
-            child: Text(isApprove ? 'APPROVE' : 'REJECT'),
+            maxLines: 4,
           ),
         ],
       ),
-    );
-  }
+      actions: [
+        TextButton(
+          onPressed: (state.isRejecting || state.isApproving)
+              ? null
+              : () => Navigator.pop(context),
+          child: const Text('CANCEL'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            // Validation for reject - reason is required
+            if (isApprove == false &&
+                remarksController.text.trim().isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Please provide a reject reason'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+              return;
+            }
+
+            Navigator.pop(context);
+
+            // Approve - existing logic unchanged
+            if (isApprove) {
+              context.read<JeevanaadiBloc>().add(
+                ApproveJeevanaadiEvent(jeevanadiId!),
+              );
+            } 
+            // Reject - new logic with reason
+            else {
+              context.read<JeevanaadiBloc>().add(
+                RejectJeevanaadiEvent(
+                  jeevanadiId: jeevanadiId!,
+                  rejectReason: remarksController.text.trim(),
+                ),
+              );
+            }
+          },
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isApprove ? Colors.green : Colors.red,
+            disabledBackgroundColor: Colors.grey,
+          ),
+          child: (state.isApproving || state.isRejecting)
+              ? SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      Colors.white.withOpacity(0.7),
+                    ),
+                  ),
+                )
+              : Text(isApprove ? 'APPROVE' : 'REJECT'),
+        ),
+      ],
+    ),
+  );
 }
+ }

@@ -5,6 +5,7 @@ import 'package:vikas_app/api_services/network_service.dart';
 import 'package:vikas_app/screeens/models/request/donations_all_metrics.dart';
 import 'package:vikas_app/screeens/models/request/user_metrics_response.dart';
 import 'package:vikas_app/screeens/models/response/donationMetrics.dart';
+import 'package:vikas_app/screeens/models/response/monthly_donations.dart';
 
 class DashboardRepo {
   final _api = NetworkService.instance;
@@ -82,6 +83,28 @@ class DashboardRepo {
     DonationsAllMetrics data = DonationsAllMetrics.fromJson(result.data);
     print("📦 [DashboardRepo] Metrics: ${result.data}");
     return ApiResult.success(data);
+  } catch (e) {
+    print("❌ [DashboardRepo] Parse error: $e");
+    return ApiResult.failure(
+      ApiError(message: "Data parsing error: $e"),
+    );
+  }
+}
+
+ Future<ApiResult<MonthlyDonationsResponse>> getMonthlyDonations({required int year}) async {
+  final result = await _api.get("${ApiConstants.DONATIONS_MONTHLY}?year=$year");
+
+  if (!result.isSuccess) {
+    print("❌ [DashboardRepo] Failed to fetch monthly donations - Error: ${result.error?.message}");
+    return ApiResult.failure(result.error);
+  }
+
+  try {
+    print("✅ [DashboardRepo] Monthly donations for year $year fetched successfully");
+    final List<dynamic> data = result.data is List ? result.data : [];
+    MonthlyDonationsResponse response = MonthlyDonationsResponse.fromJson(data);
+    print("📦 [DashboardRepo] Monthly donations count: ${response.donations.length}");
+    return ApiResult.success(response);
   } catch (e) {
     print("❌ [DashboardRepo] Parse error: $e");
     return ApiResult.failure(

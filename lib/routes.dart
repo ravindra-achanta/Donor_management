@@ -13,6 +13,8 @@ import 'package:vikas_app/screeens/dasboard/ActivityScorePage.dart';
 import 'package:vikas_app/screeens/dasboard/DonationsReportScreen.dart';
 import 'package:vikas_app/screeens/dasboard/dashboard.dart';
 import 'package:vikas_app/screeens/dasboard/profile_analytics_screen.dart';
+import 'package:vikas_app/screeens/departments/department_list_screen.dart';
+import 'package:vikas_app/screeens/departments/edit_department_page.dart';
 import 'package:vikas_app/screeens/dharmasetu/AddDharmasetu.dart';
 import 'package:vikas_app/screeens/dharmasetu/dharmaset.dart';
 import 'package:vikas_app/screeens/dharmasetu/ViewDharmasetu.dart';
@@ -23,6 +25,7 @@ import 'package:vikas_app/screeens/karyakartha/KaryakarthaViewPage.dart';
 import 'package:vikas_app/screeens/karyakartha/karyakarthas_list_page.dart';
 import 'package:vikas_app/screeens/logout/LogoutScreen.dart';
 import 'package:vikas_app/screeens/models/enum/RegistrationType.dart';
+import 'package:vikas_app/screeens/models/response/DepartmentResponse.dart';
 import 'package:vikas_app/screeens/models/response/notice_response.dart';
 import 'package:vikas_app/screeens/notices/NoticesListScreen.dart';
 import 'package:vikas_app/screeens/notices/notice_detail_screen.dart';
@@ -236,6 +239,18 @@ getPageRoute() {
       page: () => ViewJeevanadiScreen.withArguments(),
       middlewares: [AuthMiddleware()],
     ),
+    GetPage(
+        name: '/departmentlist',
+        page: () => const DepartmentListPage(),
+        middlewares: [AuthMiddleware()],
+      ),
+     GetPage(
+  name: '/edit-department',
+  page: () => EditDepartmentPage(dept: Get.arguments as DepartmentResponse),
+  middlewares: [AuthMiddleware()],
+),
+     
+  
   ];
 
   return routes
