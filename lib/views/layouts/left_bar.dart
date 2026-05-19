@@ -226,6 +226,15 @@ class _LeftBarState extends State<LeftBar>
                       route: '/profile',
                     ),
 
+                    if (Vikasdb().getString("USER_TYPE") == "GURUJI" ||
+                        Vikasdb().getString("USER_TYPE") == "SUPER_ADMIN")
+                     NavigationItem(
+                      iconData: LucideIcons.userCog,
+                      title: "department list",
+                      isCondensed: isCondensed,
+                      route: '/departmentlist',
+                    ),
+
                     // NavigationItem(
                     //   iconData: LucideIcons.logOut,
                     //   title: "Logout",

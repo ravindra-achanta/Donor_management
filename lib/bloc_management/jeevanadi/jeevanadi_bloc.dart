@@ -28,6 +28,7 @@ class JeevanaadiBloc extends Bloc<JeevanaadiEvent, JeevanaadiState> {
     on<RemoveSelectedAssignedMembersEvent>(_onRemoveSelectedAssignedMembers);
     on<ApproveJeevanaadiEvent>(_onApproveJeevanaadi);
     on<SearchJeevanaadiUsersEvent>(_onSearchJeevanaadiUsers);
+    on<RejectJeevanaadiEvent>(_onRejectJeevanaadi);
   }
   final JeevanaadiRepo = JeevanadiRepo();
 
@@ -678,6 +679,43 @@ Future<void> _onApproveJeevanaadi(
       searchLoading: false,
       searchError: 'Error: ${e.toString()}',
       searchResults: const [],
+    ));
+  }
+}
+Future<void> _onRejectJeevanaadi(
+  RejectJeevanaadiEvent event,
+  Emitter<JeevanaadiState> emit,
+) async {
+  emit(state.copyWith(
+    isRejecting: true,
+    rejectSuccessMsg: null,
+    rejectErrorMsg: null,
+  ));
+
+  try {
+    final result = await JeevanaadiRepo.rejectJeevanaadi(
+      event.jeevanadiId,
+      event.rejectReason,
+    );
+
+    if (result.isSuccess) {
+      final message = result.data?['message'] ?? 'Rejected successfully';
+      emit(state.copyWith(
+        isRejecting: false,
+        rejectSuccessMsg: message,
+        requestStatus: 'REJECTED',
+        rejectErrorMsg: null,
+      ));
+    } else {
+      emit(state.copyWith(
+        isRejecting: false,
+        rejectErrorMsg: result.error?.message ?? 'Rejection failed',
+      ));
+    }
+  } catch (e) {
+    emit(state.copyWith(
+      isRejecting: false,
+      rejectErrorMsg: 'Error: ${e.toString()}',
     ));
   }
 }

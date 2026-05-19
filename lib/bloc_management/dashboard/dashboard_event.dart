@@ -18,3 +18,12 @@ class FetchDonationMetricsEvent extends DashboardEvent {
 class PostDashboardActivityEvent extends DashboardEvent {}
 
 class FetchDonationsMetricsAllEvent extends DashboardEvent {}
+
+class FetchMonthlyDonationsEvent extends DashboardEvent {
+  final int year;
+
+  FetchMonthlyDonationsEvent({required this.year});
+
+  @override
+  List<Object?> get props => [year];
+}

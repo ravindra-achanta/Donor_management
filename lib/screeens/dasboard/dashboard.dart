@@ -9,6 +9,7 @@ import 'package:vikas_app/bloc_management/dashboard/dashboard_state.dart';
 import 'package:vikas_app/bloc_management/notices/notice_bloc.dart';
 import 'package:vikas_app/bloc_management/notices/notice_event.dart';
 import 'package:vikas_app/bloc_management/notices/notice_state.dart';
+import 'package:vikas_app/screeens/common/monthly_donations_chart.dart';
 import 'package:vikas_app/screeens/common/stats_grid.dart';
 
 import 'package:vikas_app/screeens/common/notice_dilouge.dart';
@@ -42,7 +43,11 @@ class _DashboardState extends State<Dashboard> {
       context.read<DashboardBloc>().add(FetchDashboardMetricsEvent());
       context.read<DashboardBloc>().add(PostDashboardActivityEvent());
       context.read<DashboardBloc>().add(FetchDonationsMetricsAllEvent());
-
+      if (Vikasdb().getString("USER_TYPE") == "GURUJI") {
+        context.read<DashboardBloc>().add(
+          FetchMonthlyDonationsEvent(year: DateTime.now().year),
+        );
+      }
 
       /// FETCH NOTICES
       // context.read<NoticeBloc>().add(FetchNoticesEvent());
@@ -141,10 +146,66 @@ class _DashboardState extends State<Dashboard> {
 
                 /// STATS
                 _buildStatsGrid(),
+                if (Vikasdb().getString("USER_TYPE") == "GURUJI") ...[
+                  const SizedBox(height: 24),
 
-                const SizedBox(height: 24),
+                  BlocBuilder<DashboardBloc, DashboardState>(
+                    builder: (context, state) {
+                      // ONLY graph loading
+                      if (state.monthlyDonationStatus ==
+                              DashboardApiStatus.loading &&
+                          state.monthlyDonations == null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: Container(
+                            height: 320,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        );
+                      }
 
-                //  const SizedBox(height: 24),
+                      // Graph data
+                      // if (state.monthlyDonations != null &&
+                      //     state.monthlyDonations!.donations.isNotEmpty) {
+                      //   return Padding(
+                      //     padding: const EdgeInsets.all(20),
+                      //     child: MonthlyDonationsChart(
+                      //       monthlyDonations: state.monthlyDonations!,
+                      //     ),
+                      //   );
+                      // }
+                      if (state.monthlyDonations != null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(20),
+                          child: MonthlyDonationsChart(
+                            monthlyDonations: state.monthlyDonations!,
+                          ),
+                        );
+                      }
+
+                      // Error
+                      if (state.monthlyDonationStatus ==
+                          DashboardApiStatus.error) {
+                        return const Padding(
+                          padding: EdgeInsets.all(20),
+                          child: Center(
+                            child: Text("Failed to load donations graph"),
+                          ),
+                        );
+                      }
+
+                      return const SizedBox.shrink();
+                    },
+                  ),
+
+                  //  const SizedBox(height: 24),
+                ],
               ],
             ),
           ),
